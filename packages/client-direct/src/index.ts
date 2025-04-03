@@ -995,16 +995,16 @@ export class DirectClient {
 
     public start(port: number) {
         this.server = this.app.listen(port, () => {
-            elizaLogger.success(
+            elizaLogger.info(
                 `REST API bound to 0.0.0.0:${port}. If running locally, access it at http://localhost:${port}.`
             );
         });
 
         // Handle graceful shutdown
         const gracefulShutdown = () => {
-            elizaLogger.log("Received shutdown signal, closing server...");
+            elizaLogger.info("Received shutdown signal, closing server...");
             this.server.close(() => {
-                elizaLogger.success("Server closed successfully");
+                elizaLogger.info("Server closed successfully");
                 process.exit(0);
             });
 
