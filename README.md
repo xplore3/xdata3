@@ -1,12 +1,12 @@
-# Eliza 🤖
+# Xdata3 🤖
 
 <div align="center">
-  <img src="./docs/static/img/eliza_banner.jpg" alt="Eliza Banner" width="100%" />
+  <img src="./docs/static/img/xdata3_banner.jpg" alt="Xdata3 Banner" width="100%" />
 </div>
 
 <div align="center">
 
-📑 [Technical Report](https://arxiv.org/pdf/2501.06781) |  📖 [Documentation](https://elizaos.github.io/eliza/) | 🎯 [Examples](https://github.com/thejoven/awesome-eliza)
+📑 [Technical Report](https://arxiv.org/pdf/2501.06781) |  📖 [Documentation](https://xdata3os.github.io/xdata3/) | 🎯 [Examples](https://github.com/thejoven/awesome-xdata3)
 
 </div>
 
@@ -17,7 +17,7 @@
 ## 🚩 Overview
 
 <div align="center">
-  <img src="./docs/static/img/eliza_diagram.png" alt="Eliza Diagram" width="100%" />
+  <img src="./docs/static/img/xdata3_diagram.png" alt="Xdata3 Diagram" width="100%" />
 </div>
 
 ## ✨ Features
@@ -54,21 +54,21 @@
 
 ### Use the Starter (Recommended for Agent Creation)
 
-Full steps and documentation can be found in the [Eliza Starter Repository](https://github.com/elizaOS/eliza-starter).
+Full steps and documentation can be found in the [Xdata3 Starter Repository](https://github.com/xdata3OS/xdata3-starter).
 ```bash
-git clone https://github.com/elizaos/eliza-starter.git
-cd eliza-starter
+git clone https://github.com/xdata3os/xdata3-starter.git
+cd xdata3-starter
 cp .env.example .env
 pnpm i && pnpm build && pnpm start
 ```
 
-### Manually Start Eliza (Only recommended for plugin or platform development)
+### Manually Start Xdata3 (Only recommended for plugin or platform development)
 
 #### Checkout the latest release
 
 ```bash
 # Clone the repository
-git clone https://github.com/elizaos/eliza.git
+git clone https://github.com/xdata3os/xdata3.git
 
 # This project iterates fast, so we recommend checking out the latest release
 git checkout $(git describe --tags --abbrev=0)
@@ -92,7 +92,7 @@ cp .env.example .env
 
 Note: .env is optional. If you're planning to run multiple distinct agents, you can pass secrets through the character JSON
 
-#### Start Eliza
+#### Start Xdata3
 
 ```bash
 pnpm i
@@ -113,13 +113,13 @@ Open another terminal, move to the same directory, run the command below, then f
 pnpm start:client
 ```
 
-Then read the [Documentation](https://elizaos.github.io/eliza/) to learn how to customize your Eliza.
+Then read the [Documentation](https://xdata3os.github.io/xdata3/) to learn how to customize your Xdata3.
 
 ---
 
-### Automatically Start Eliza
+### Automatically Start Xdata3
 
-The start script provides an automated way to set up and run Eliza:
+The start script provides an automated way to set up and run Xdata3:
 
 ```bash
 sh scripts/start.sh
@@ -145,9 +145,9 @@ For detailed instructions on using the start script, including character managem
 
 ### Add more plugins
 
-1. run `npx elizaos plugins list` to get a list of available plugins or visit https://elizaos.github.io/registry/
+1. run `npx xdata3os plugins list` to get a list of available plugins or visit https://xdata3os.github.io/registry/
 
-2. run `npx elizaos plugins add @elizaos-plugins/plugin-NAME` to install the plugin into your instance
+2. run `npx xdata3os plugins add @xdata3os-plugins/plugin-NAME` to install the plugin into your instance
 
 #### Additional Requirements
 
@@ -160,7 +160,7 @@ pnpm install --include=optional sharp
 ---
 
 ## Using Your Custom Plugins
-Plugins that are not in the official registry for ElizaOS can be used as well. Here's how:
+Plugins that are not in the official registry for Xdata3OS can be used as well. Here's how:
 
 ### Installation
 
@@ -186,7 +186,7 @@ packages/
 ```json
 {
   "dependencies": {
-    "@elizaos/plugin-example": "workspace:*"
+    "@xdata3os/plugin-example": "workspace:*"
   }
 }
 ```
@@ -195,41 +195,41 @@ packages/
 
 ```json
   "plugins": [
-    "@elizaos/plugin-example",
+    "@xdata3os/plugin-example",
   ],
 ```
 
 ---
 
-### Start Eliza with Gitpod
+### Start Xdata3 with Gitpod
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/elizaos/eliza/tree/main)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/xdata3os/xdata3/tree/main)
 
 ---
 
-### Deploy Eliza in one click
+### Deploy Xdata3 in one click
 
-Use [Fleek](https://fleek.xyz/eliza/) to deploy Eliza in one click. This opens Eliza to non-developers and provides the following options to build your agent:
+Use [Fleek](https://fleek.xyz/xdata3/) to deploy Xdata3 in one click. This opens Xdata3 to non-developers and provides the following options to build your agent:
 1. Start with a template
 2. Build characterfile from scratch
 3. Upload pre-made characterfile
 
-Click [here](https://fleek.xyz/eliza/) to get started!
+Click [here](https://fleek.xyz/xdata3/) to get started!
 
 ---
 
 ### Community & contact
 
-- [GitHub Issues](https://github.com/elizaos/eliza/issues). Best for: bugs you encounter using Eliza, and feature proposals.
-- [elizaOS Discord](https://discord.gg/elizaos). Best for: hanging out with the elizaOS technical community
+- [GitHub Issues](https://github.com/xdata3os/xdata3/issues). Best for: bugs you encounter using Xdata3, and feature proposals.
+- [xdata3OS Discord](https://discord.gg/xdata3os). Best for: hanging out with the xdata3OS technical community
 - [DAO Discord](https://discord.gg/ai16z). Best for: hanging out with the larger non-technical community
 
 ## Citation
 
-We now have a [paper](https://arxiv.org/pdf/2501.06781) you can cite for the Eliza OS:
+We now have a [paper](https://arxiv.org/pdf/2501.06781) you can cite for the Xdata3 OS:
 ```bibtex
-@article{walters2025eliza,
-  title={Eliza: A Web3 friendly AI Agent Operating System},
+@article{walters2025xdata3,
+  title={Xdata3: A Web3 friendly AI Agent Operating System},
   author={Walters, Shaw and Gao, Sam and Nerd, Shakker and Da, Feng and Williams, Warren and Meng, Ting-Chien and Han, Hunter and He, Frank and Zhang, Allen and Wu, Ming and others},
   journal={arXiv preprint arXiv:2501.06781},
   year={2025}
@@ -238,14 +238,14 @@ We now have a [paper](https://arxiv.org/pdf/2501.06781) you can cite for the Eli
 
 ## Contributors
 
-<a href="https://github.com/elizaos/eliza/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=elizaos/eliza" alt="Eliza project contributors" />
+<a href="https://github.com/xdata3os/xdata3/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=xdata3os/xdata3" alt="Xdata3 project contributors" />
 </a>
 
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=elizaos/eliza&type=Date)](https://star-history.com/#elizaos/eliza&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=xdata3os/xdata3&type=Date)](https://star-history.com/#xdata3os/xdata3&Date)
 
 ## 🛠️ System Requirements
 
@@ -268,9 +268,9 @@ We now have a [paper](https://arxiv.org/pdf/2501.06781) you can cite for the Eli
 
 ## 📁 Project Structure
 ```
-eliza/
+xdata3/
 ├── packages/
-│   ├── core/           # Core Eliza functionality
+│   ├── core/           # Core Xdata3 functionality
 │   ├── clients/        # Client implementations
 │   └── actions/        # Custom actions
 ├── docs/              # Documentation
