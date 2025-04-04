@@ -1,6 +1,6 @@
-import { composeContext } from "@elizaos/core";
-import { generateTrueOrFalse } from "@elizaos/core";
-import { booleanFooter } from "@elizaos/core";
+import { composeContext } from "@xdata3os/core";
+import { generateTrueOrFalse } from "@xdata3os/core";
+import { booleanFooter } from "@xdata3os/core";
 import {
     type Action,
     type ActionExample,
@@ -8,7 +8,7 @@ import {
     type Memory,
     ModelClass,
     type State,
-} from "@elizaos/core";
+} from "@xdata3os/core";
 
 export const shouldUnmuteTemplate =
     `Based on the conversation so far:

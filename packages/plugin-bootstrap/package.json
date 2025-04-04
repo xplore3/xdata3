@@ -1,5 +1,5 @@
 {
-    "name": "@elizaos/plugin-bootstrap",
+    "name": "@xdata3os/plugin-bootstrap",
     "version": "0.25.9",
     "type": "module",
     "main": "dist/index.js",
@@ -9,7 +9,7 @@
         "./package.json": "./package.json",
         ".": {
             "import": {
-                "@elizaos/source": "./src/index.ts",
+                "@xdata3os/source": "./src/index.ts",
                 "types": "./dist/index.d.ts",
                 "default": "./dist/index.js"
             }
@@ -19,7 +19,7 @@
         "dist"
     ],
     "dependencies": {
-        "@elizaos/core": "workspace:*"
+        "@xdata3os/core": "workspace:*"
     },
     "devDependencies": {
         "@types/node": "^22.10.5",

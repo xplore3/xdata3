@@ -10,8 +10,8 @@ const { version } = require('./package.json')
 
 const pluginPkgPath = (pluginRepo) => {
   const parts = pluginRepo.split('/')
-  const elizaOSroot = pathUtil.resolve(__dirname, '../..')
-  const pkgPath = elizaOSroot + '/packages/' + parts[1]
+  const xdata3OSroot = pathUtil.resolve(__dirname, '../..')
+  const pkgPath = xdata3OSroot + '/packages/' + parts[1]
   return pkgPath
 }
 
@@ -22,16 +22,16 @@ const isPluginInstalled = (pluginRepo) => {
 }
 
 program
-  .name('elizaos')
-  .description('elizaOS CLI - Manage your plugins')
+  .name('xdata3os')
+  .description('xdata3OS CLI - Manage your plugins')
   .version(version);
 
 const pluginsCmd = new Command()
   .name('plugins')
-  .description('manage elizaOS plugins')
+  .description('manage xdata3OS plugins')
 
 async function getPlugins() {
-  const resp = await fetch('https://raw.githubusercontent.com/elizaos-plugins/registry/refs/heads/main/index.json')
+  const resp = await fetch('https://raw.githubusercontent.com/xdata3os-plugins/registry/refs/heads/main/index.json')
   return await resp.json();
 }
 
@@ -78,13 +78,13 @@ pluginsCmd
     const plugins = await getPlugins()
 
     // ensure prefix
-    const pluginName = '@elizaos-plugins/' + plugin.replace(/^@elizaos-plugins\//, '')
-    const namePart = pluginName.replace(/^@elizaos-plugins\//, '')
-    const elizaOSroot = pathUtil.resolve(__dirname, '../..')
+    const pluginName = '@xdata3os-plugins/' + plugin.replace(/^@xdata3os-plugins\//, '')
+    const namePart = pluginName.replace(/^@xdata3os-plugins\//, '')
+    const xdata3OSroot = pathUtil.resolve(__dirname, '../..')
 
     let repo = ''
     if (namePart === 'plugin-trustdb') {
-      repo = 'elizaos-plugins/plugin-trustdb'
+      repo = 'xdata3os-plugins/plugin-trustdb'
     } else {
       const repoData = plugins[pluginName]?.split(':')
       if (!repoData) {
@@ -98,7 +98,7 @@ pluginsCmd
       }
       repo = repoData[1]
     }
-    const pkgPath = elizaOSroot + '/packages/' + namePart
+    const pkgPath = xdata3OSroot + '/packages/' + namePart
 
     // add to packages
     if (!fs.existsSync(pkgPath + '/package.json')) {
@@ -117,12 +117,12 @@ pluginsCmd
     const updateDependencies = (deps) => {
       if (!deps) return false
       let changed = false
-      const okPackages = ['@elizaos/client-direct', '@elizaos/core', '@elizaos/plugin-bootstrap']
+      const okPackages = ['@xdata3os/client-direct', '@xdata3os/core', '@xdata3os/plugin-bootstrap']
       for (const dep in deps) {
         if (okPackages.indexOf(dep) !== -1) continue // skip these, they're fine
         // do we want/need to perserve local packages like core?
-        if (dep.startsWith("@elizaos/")) {
-          const newDep = dep.replace("@elizaos/", "@elizaos-plugins/")
+        if (dep.startsWith("@xdata3os/")) {
+          const newDep = dep.replace("@xdata3os/", "@xdata3os-plugins/")
           deps[newDep] = deps[dep]
           delete deps[dep]
           changed = true
@@ -131,7 +131,7 @@ pluginsCmd
       return changed
     }
 
-    // normalize @elizaos => @elizaos-plugins
+    // normalize @xdata3os => @xdata3os-plugins
     if (updateDependencies(packageJson.dependencies)) {
       console.log('updating plugin\'s package.json to not use @elizos/ for dependencies')
       fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + "\n")
@@ -139,11 +139,11 @@ pluginsCmd
     }
     //console.log('packageJson', packageJson.dependencies)
     for(const d in packageJson.dependencies) {
-      if (d.match(/@elizaos-plugins/)) {
+      if (d.match(/@xdata3os-plugins/)) {
         // do we have this plugin?
         console.log('attempting installation of dependency', d)
         try {
-          const pluginAddDepOutput = execSync('npx elizaos plugins add ' + d, { cwd: elizaOSroot, stdio: 'pipe' }).toString().trim();
+          const pluginAddDepOutput = execSync('npx xdata3os plugins add ' + d, { cwd: xdata3OSroot, stdio: 'pipe' }).toString().trim();
           //console.log('pluginAddDepOutput', pluginAddDepOutput)
         } catch (e) {
           console.error('pluginAddDepOutput error', e)
@@ -152,15 +152,15 @@ pluginsCmd
     }
 
     // add core to plugin
-    // # pnpm add @elizaos/core@workspace:* --filter ./packages/client-twitter
+    // # pnpm add @xdata3os/core@workspace:* --filter ./packages/client-twitter
 
     // ok this can be an issue if it's referencing a plugin it couldn't be
-    console.log('Making sure plugin has access to @elizaos/core')
-    const pluginAddCoreOutput = execSync('pnpm add @elizaos/core@workspace:* --filter ./packages/' + namePart, { cwd: elizaOSroot, stdio: 'pipe' }).toString().trim();
+    console.log('Making sure plugin has access to @xdata3os/core')
+    const pluginAddCoreOutput = execSync('pnpm add @xdata3os/core@workspace:* --filter ./packages/' + namePart, { cwd: xdata3OSroot, stdio: 'pipe' }).toString().trim();
 
-    if (packageJson.name !== '@elizaos-plugins/' + namePart) {
+    if (packageJson.name !== '@xdata3os-plugins/' + namePart) {
       // Update the name field
-      packageJson.name = '@elizaos-plugins/' + namePart
+      packageJson.name = '@xdata3os-plugins/' + namePart
       console.log('Updating plugins package.json name to', packageJson.name)
 
       // Write the updated package.json back to disk
@@ -168,13 +168,13 @@ pluginsCmd
     }
 
     // add to agent
-    const agentPackageJsonPath = elizaOSroot + '/agent/package.json'
+    const agentPackageJsonPath = xdata3OSroot + '/agent/package.json'
     const agentPackageJson = JSON.parse(fs.readFileSync(agentPackageJsonPath, 'utf-8'));
     //console.log('agentPackageJson', agentPackageJson.dependencies[pluginName])
     if (!agentPackageJson.dependencies[pluginName]) {
       console.log('Adding plugin', plugin, 'to agent/package.json')
       try {
-        const pluginAddAgentOutput = execSync('pnpm add ' + pluginName + '@workspace:* --filter ./agent', { cwd: elizaOSroot, stdio: 'pipe' }).toString().trim();
+        const pluginAddAgentOutput = execSync('pnpm add ' + pluginName + '@workspace:* --filter ./agent', { cwd: xdata3OSroot, stdio: 'pipe' }).toString().trim();
         //console.log('pluginAddAgentOutput', pluginAddAgentOutput)
       } catch (e) {
         console.error('error', e)
@@ -195,15 +195,15 @@ pluginsCmd
   .argument("<plugin>", "plugin name")
   .action(async (plugin, opts) => {
     // ensure prefix
-    const pluginName = '@elizaos-plugins/' + plugin.replace(/^@elizaos-plugins\//, '')
-    const namePart = pluginName.replace(/^@elizaos-plugins\//, '')
-    const elizaOSroot = pathUtil.resolve(__dirname, '../..')
-    const pkgPath = elizaOSroot + '/packages/' + namePart
+    const pluginName = '@xdata3os-plugins/' + plugin.replace(/^@xdata3os-plugins\//, '')
+    const namePart = pluginName.replace(/^@xdata3os-plugins\//, '')
+    const xdata3OSroot = pathUtil.resolve(__dirname, '../..')
+    const pkgPath = xdata3OSroot + '/packages/' + namePart
     const plugins = await getPlugins()
 
     let repo = ''
     if (namePart === 'plugin-trustdb') {
-      repo = 'elizaos-plugins/plugin-trustdb'
+      repo = 'xdata3os-plugins/plugin-trustdb'
     } else {
       //console.log('loaded', plugins.length, plugins)
       const repoData = plugins[pluginName]?.split(':')
@@ -218,7 +218,7 @@ pluginsCmd
     // remove from agent: pnpm remove some-plugin --filter ./agent
     try {
       console.log('Removing', pluginName, 'from agent')
-      const pluginRemoveAgentOutput = execSync('pnpm remove ' + pluginName + ' --filter ./agent', { cwd: elizaOSroot, stdio: 'pipe' }).toString().trim();
+      const pluginRemoveAgentOutput = execSync('pnpm remove ' + pluginName + ' --filter ./agent', { cwd: xdata3OSroot, stdio: 'pipe' }).toString().trim();
     } catch (e) {
       console.error('removal from agent, error', e)
     }

@@ -3,11 +3,11 @@ import type { Router } from 'express';
 import bodyParser from "body-parser";
 import cors from "cors";
 
-import { type AgentRuntime, elizaLogger, ServiceType }  from "@elizaos/core";
+import { type AgentRuntime, xdata3Logger, ServiceType }  from "@xdata3os/core";
 import type {
     VerifiableLogService,
     VerifiableLogQuery,
-} from "@elizaos/plugin-tee-verifiable-log";
+} from "@xdata3os/plugin-tee-verifiable-log";
 
 export function createVerifiableLogApiRouter(
     agents: Map<string, IAgentRuntime>
@@ -35,7 +35,7 @@ export function createVerifiableLogApiRouter(
                     data: pageQuery,
                 });
             } catch (error) {
-                elizaLogger.error("Detailed error:", error);
+                xdata3Logger.error("Detailed error:", error);
                 res.status(500).json({
                     error: "failed to get agents registered ",
                     details: error.message,
@@ -67,7 +67,7 @@ export function createVerifiableLogApiRouter(
                     data: pageQuery,
                 });
             } catch (error) {
-                elizaLogger.error("Detailed error:", error);
+                xdata3Logger.error("Detailed error:", error);
                 res.status(500).json({
                     error: "Failed to Get Attestation",
                     details: error.message,
@@ -106,7 +106,7 @@ export function createVerifiableLogApiRouter(
                     data: pageQuery,
                 });
             } catch (error) {
-                elizaLogger.error("Detailed error:", error);
+                xdata3Logger.error("Detailed error:", error);
                 res.status(500).json({
                     error: "Failed to Get Verifiable Logs",
                     details: error.message,

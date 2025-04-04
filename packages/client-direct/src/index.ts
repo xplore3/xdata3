@@ -1,6 +1,6 @@
 import {
     composeContext,
-    elizaLogger,
+    xdata3Logger,
     generateCaption,
     generateImage,
     generateMessageResponse,
@@ -17,7 +17,7 @@ import {
     type Media,
     type Memory,
     type Plugin,
-} from "@elizaos/core";
+} from "@xdata3os/core";
 import bodyParser from "body-parser";
 import cors from "cors";
 import express, { type Request as ExpressRequest } from "express";
@@ -118,7 +118,7 @@ export class DirectClient {
     public jsonToCharacter: Function; // Store jsonToCharacter functor
 
     constructor() {
-        elizaLogger.log("DirectClient constructor");
+        xdata3Logger.log("DirectClient constructor");
         this.app = express();
         this.app.use(cors());
         this.agents = new Map();
@@ -518,7 +518,7 @@ export class DirectClient {
                 try {
                     hfOut = hyperfiOutSchema.parse(response.object);
                 } catch {
-                    elizaLogger.error(
+                    xdata3Logger.error(
                         "cant serialize response",
                         response.object
                     );
@@ -666,13 +666,13 @@ export class DirectClient {
                     });
                     return;
                 }
-                elizaLogger.log("Download directory:", downloadDir);
+                xdata3Logger.log("Download directory:", downloadDir);
 
                 try {
-                    elizaLogger.log("Creating directory...");
+                    xdata3Logger.log("Creating directory...");
                     await fs.promises.mkdir(downloadDir, { recursive: true });
 
-                    elizaLogger.log("Fetching file...");
+                    xdata3Logger.log("Fetching file...");
                     const fileResponse = await fetch(
                         `https://api.bageldb.ai/api/v1/asset/${assetId}/download`,
                         {
@@ -688,7 +688,7 @@ export class DirectClient {
                         );
                     }
 
-                    elizaLogger.log("Response headers:", fileResponse.headers);
+                    xdata3Logger.log("Response headers:", fileResponse.headers);
 
                     const fileName =
                         fileResponse.headers
@@ -696,19 +696,19 @@ export class DirectClient {
                             ?.split("filename=")[1]
                             ?.replace(/"/g, /* " */ "") || "default_name.txt";
 
-                    elizaLogger.log("Saving as:", fileName);
+                    xdata3Logger.log("Saving as:", fileName);
 
                     const arrayBuffer = await fileResponse.arrayBuffer();
                     const buffer = Buffer.from(arrayBuffer);
 
                     const filePath = path.join(downloadDir, fileName);
-                    elizaLogger.log("Full file path:", filePath);
+                    xdata3Logger.log("Full file path:", filePath);
 
                     await fs.promises.writeFile(filePath, new Uint8Array(buffer));
 
                     // Verify file was written
                     const stats = await fs.promises.stat(filePath);
-                    elizaLogger.log(
+                    xdata3Logger.log(
                         "File written successfully. Size:",
                         stats.size,
                         "bytes"
@@ -723,7 +723,7 @@ export class DirectClient {
                         fileSize: stats.size,
                     });
                 } catch (error) {
-                    elizaLogger.error("Detailed error:", error);
+                    xdata3Logger.error("Detailed error:", error);
                     res.status(500).json({
                         error: "Failed to download files from BagelDB",
                         details: error.message,
@@ -897,7 +897,7 @@ export class DirectClient {
 
                 res.send(Buffer.from(audioBuffer));
             } catch (error) {
-                elizaLogger.error(
+                xdata3Logger.error(
                     "Error processing message or generating speech:",
                     error
                 );
@@ -970,7 +970,7 @@ export class DirectClient {
 
                 res.send(Buffer.from(audioBuffer));
             } catch (error) {
-                elizaLogger.error(
+                xdata3Logger.error(
                     "Error processing message or generating speech:",
                     error
                 );
@@ -995,22 +995,22 @@ export class DirectClient {
 
     public start(port: number) {
         this.server = this.app.listen(port, () => {
-            elizaLogger.info(
+            xdata3Logger.info(
                 `REST API bound to 0.0.0.0:${port}. If running locally, access it at http://localhost:${port}.`
             );
         });
 
         // Handle graceful shutdown
         const gracefulShutdown = () => {
-            elizaLogger.info("Received shutdown signal, closing server...");
+            xdata3Logger.info("Received shutdown signal, closing server...");
             this.server.close(() => {
-                elizaLogger.info("Server closed successfully");
+                xdata3Logger.info("Server closed successfully");
                 process.exit(0);
             });
 
             // Force close after 5 seconds if server hasn't closed
             setTimeout(() => {
-                elizaLogger.error(
+                xdata3Logger.error(
                     "Could not close connections in time, forcefully shutting down"
                 );
                 process.exit(1);
@@ -1025,7 +1025,7 @@ export class DirectClient {
     public async stop() {
         if (this.server) {
             this.server.close(() => {
-                elizaLogger.success("Server stopped");
+                xdata3Logger.success("Server stopped");
             });
         }
     }
@@ -1035,7 +1035,7 @@ export const DirectClientInterface: Client = {
     name: 'direct',
     config: {},
     start: async (_runtime: IAgentRuntime) => {
-        elizaLogger.log("DirectClientInterface start");
+        xdata3Logger.log("DirectClientInterface start");
         const client = new DirectClient();
         const serverPort = Number.parseInt(settings.SERVER_PORT || "3000");
         client.start(serverPort);

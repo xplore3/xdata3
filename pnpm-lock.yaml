@@ -43,15 +43,15 @@ importers:
       '@deepgram/sdk':
         specifier: ^3.11.1
         version: 3.11.3(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)
-      '@elizaos-plugins/adapter-sqlite':
-        specifier: workspace:*
-        version: link:packages/adapter-sqlite
       '@injectivelabs/sdk-ts':
         specifier: ^1.14.33
         version: 1.14.51(@types/react@19.1.0)(bufferutil@4.0.9)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(utf-8-validate@5.0.10)
       '@vitest/eslint-plugin':
         specifier: 1.0.1
         version: 1.0.1(@typescript-eslint/utils@8.29.0(eslint@9.23.0(jiti@1.21.7))(typescript@5.6.3))(eslint@9.23.0(jiti@1.21.7))(typescript@5.6.3)(vitest@3.0.5(@types/node@22.14.0)(jiti@1.21.7)(yaml@2.7.1))
+      '@xdata3os-plugins/adapter-sqlite':
+        specifier: workspace:*
+        version: link:packages/adapter-sqlite
       amqplib:
         specifier: 0.10.5
         version: 0.10.5
@@ -140,18 +140,18 @@ importers:
 
   agent:
     dependencies:
-      '@elizaos/client-direct':
-        specifier: workspace:*
-        version: link:../packages/client-direct
-      '@elizaos/core':
-        specifier: workspace:*
-        version: link:../packages/core
-      '@elizaos/plugin-bootstrap':
-        specifier: workspace:*
-        version: link:../packages/plugin-bootstrap
       '@types/node':
         specifier: ^22.13.5
         version: 22.14.0
+      '@xdata3os/client-direct':
+        specifier: workspace:*
+        version: link:../packages/client-direct
+      '@xdata3os/core':
+        specifier: workspace:*
+        version: link:../packages/core
+      '@xdata3os/plugin-bootstrap':
+        specifier: workspace:*
+        version: link:../packages/plugin-bootstrap
       json5:
         specifier: 2.2.3
         version: 2.2.3
@@ -177,9 +177,6 @@ importers:
 
   client:
     dependencies:
-      '@elizaos/core':
-        specifier: workspace:*
-        version: link:../packages/core
       '@radix-ui/react-avatar':
         specifier: ^1.1.2
         version: 1.1.3(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -216,6 +213,9 @@ importers:
       '@uidotdev/usehooks':
         specifier: ^2.4.1
         version: 2.4.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@xdata3os/core':
+        specifier: workspace:*
+        version: link:../packages/core
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -331,12 +331,12 @@ importers:
 
   packages/adapter-sqlite:
     dependencies:
-      '@elizaos/core':
-        specifier: workspace:*
-        version: link:../core
       '@types/better-sqlite3':
         specifier: 7.6.12
         version: 7.6.12
+      '@xdata3os/core':
+        specifier: workspace:*
+        version: link:../core
       better-sqlite3:
         specifier: 11.8.1
         version: 11.8.1
@@ -371,15 +371,15 @@ importers:
 
   packages/client-direct:
     dependencies:
-      '@elizaos/core':
-        specifier: workspace:*
-        version: link:../core
       '@types/body-parser':
         specifier: 1.19.5
         version: 1.19.5
       '@types/cors':
         specifier: 2.8.17
         version: 2.8.17
+      '@xdata3os/core':
+        specifier: workspace:*
+        version: link:../core
       body-parser:
         specifier: 1.20.3
         version: 1.20.3
@@ -522,7 +522,7 @@ importers:
 
   packages/plugin-bootstrap:
     dependencies:
-      '@elizaos/core':
+      '@xdata3os/core':
         specifier: workspace:*
         version: link:../core
       whatwg-url:

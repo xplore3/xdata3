@@ -3,7 +3,7 @@ import type {
     IAgentRuntime,
     Memory,
     Action,
-} from "@elizaos/core";
+} from "@xdata3os/core";
 
 export const noneAction: Action = {
     name: "NONE",

@@ -1,6 +1,6 @@
 // See https://aka.ms/vscode-remote/devcontainer.json for format details.
 {
-    "name": "elizaos-dev",
+    "name": "xdata3os-dev",
     "dockerFile": "Dockerfile",
     "build": {
         "args": {

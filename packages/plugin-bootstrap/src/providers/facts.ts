@@ -3,8 +3,8 @@ import {
     MemoryManager,
     formatMessages,
     type AgentRuntime as IAgentRuntime,
-} from "@elizaos/core";
-import type { Memory, Provider, State } from "@elizaos/core";
+} from "@xdata3os/core";
+import type { Memory, Provider, State } from "@xdata3os/core";
 import { formatFacts } from "../evaluators/fact.ts";
 
 const factsProvider: Provider = {
