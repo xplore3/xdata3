@@ -17,8 +17,10 @@ import {
     type Media,
     type Memory,
     type Plugin,
+    generateText,
 } from "@xdata3os/core";
 import bodyParser from "body-parser";
+import axios from 'axios';
 import cors from "cors";
 import express, { type Request as ExpressRequest } from "express";
 import * as fs from "fs";
@@ -288,7 +290,7 @@ export class DirectClient {
                     template: messageHandlerTemplate,
                 });
 
-                const response = await generateMessageResponse({
+                const response = await generateMessageResponse({ // here is the entry point.
                     runtime: runtime,
                     context,
                     modelClass: ModelClass.LARGE,
@@ -349,6 +351,102 @@ export class DirectClient {
                         res.json([]);
                     }
                 }
+            }
+        );
+
+        this.app.post(
+            "/:agentId/xdata3",
+            upload.single("file"),
+            async (req: express.Request, res: express.Response) => {
+                const agentId = req.params.agentId;
+                const roomId = stringToUuid(
+                    req.body.roomId ?? "default-room-" + agentId
+                );
+                const userId = stringToUuid(req.body.userId ?? "user");
+
+                let runtime = this.agents.get(agentId);
+                let res2 = null;
+
+                // if runtime is null, look for runtime with the same name
+                if (!runtime) {
+                    runtime = Array.from(this.agents.values()).find(
+                        (a) =>
+                            a.character.name.toLowerCase() ===
+                            agentId.toLowerCase()
+                    );
+                }
+
+                if (!runtime) {
+                    res.status(404).send("Agent not found");
+                    return;
+                }
+
+                await runtime.ensureConnection(
+                    userId,
+                    roomId,
+                    req.body.userName,
+                    req.body.name,
+                    "direct"
+                );
+
+                const text = req.body.text;
+                // if empty text, directly return
+                if (!text) {
+                    res.json([]);
+                    return;
+                }
+
+                const response = await generateText({
+                    runtime,
+                    context: "下面这个问题是否需要联网查询:\n" + text + "请你返回一个布尔值，true 或 false。",
+                    modelClass:  ModelClass.SMALL,
+                });
+                let apiDescription = "";
+                if (response.includes("true")) {
+                     apiDescription = `{"type":"HTTP API",
+                    "description":"Query stock prices,价格单位是美元",
+                    "example": "const response = await axios.get('https://www.alphavantage.co/query', {params: {'function': 'TIME_SERIES_INTRADAY','symbol': 'IBM',  'interval': '5min','apikey': 'J4BH2KZ4ZL47289R'}});"
+                }`;
+
+                const response = await generateText({
+                    runtime,
+                    context: `请你使用分析下面这个接口的描述。 ${apiDescription} , 参数从用户的问题中提取,${text} 。请你返回一个JSON对象，包含以下字段:{"baseurl": "string", "method": "post", "params": "object", "headers": "object", "body": "object"}, 请你直接返回这个JSON对象，不需要任何解释，也不需要任何注释，也不要包含任何其他内容，也不需要markdown语法修饰。`,
+                    modelClass:  ModelClass.SMALL,
+                });
+                console.log("yykai response: ", response);
+
+                const Obj = JSON.parse(response);
+                let res=null;
+                if(Obj.method == "post"){
+                    res = await axios.post(Obj.baseurl, Obj.body, {params: Obj.params, headers: Obj.headers});
+                } else {
+                    res = await axios.get(Obj.baseurl, {params: Obj.params, headers: Obj.headers});
+                }
+                console.log("yykai res1: ", res.data);
+                res2 = await generateText({
+                    runtime,
+                    context:  `这是这个接口${apiDescription}的返回值 ${JSON.stringify(res.data)}。 根据返回值回答用户的问题 ${text},请你回答用户的问题的时候简单直接、不要解释，直接回答用户的问题即可。` ,
+                    modelClass:  ModelClass.SMALL,
+                });
+                console.log("yykai res2: ", res2);
+                }else {
+                    const response = await generateText({
+                        runtime,
+                        context:  text,
+                        modelClass:  ModelClass.SMALL,
+                    });
+                }
+
+                res.json(    {  "res": res2  }   );
+
+                // if (!res2) {
+                //     res.status(500).send(
+                //         "No response from generateMessageResponse"
+                //     );
+                //     return;
+                // }
+                // console.log("yykai response: ", res2);
+                // res.json({"res": res2});
             }
         );
 
