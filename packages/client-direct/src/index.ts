@@ -400,12 +400,12 @@ export class DirectClient {
                     "XData_Collection"
                 );
                 const promt1 =
-                    "下面这个问题是否需要联网查询:\n" +
+                    "Do the following questions need to be queried online:\n" +
                     text +
-                    `\n同时你可以阅读这个HTTP API 列表 ${JSON.stringify(
+                    `\n At the same time, you can read this list of HTTP APIs ${JSON.stringify(
                         apiXDataSourceArray
-                    )}.\n 请你返回一个布尔值，true 或 false 来表示这个问题是否需要联网查询。如果需要联网查询，请你遍历这个HTTP API 列表，如果有合适的API 使用，请返回API的id。如果没有合适的请返回-1。id从0开始编号。\n
-                请你使用 JSON 返回结果，不要包含任何其他内容，也不需要markdown语法修饰。JSON格式为： {"need_network": "true","api_id": "1"}\n`;
+                    )}.\n Please return a Boolean value, true or false, to indicate whether this issue needs to be queried online. If you need to query online, please traverse this HTTP API list. If there are suitable APIs to use, please return the API ID. If there are no suitable options, please return to -1. ID is numbered from 0.\n
+                Please use JSON to return the result, without including any other content or requiring markdown syntax modification. The JSON format is: {"need_network": "true","api_id": "1"}\n`;
                 console.log("yykai promt1: ", promt1);
                 const response1 = await generateText({
                     runtime,
@@ -420,7 +420,7 @@ export class DirectClient {
                 if (obj?.need_network.includes("true") && obj?.api_id != -1) {
                     const httpAPI = apiXDataSourceArray[obj?.api_id];
                     xdata3Logger.log("httpAPI: ", httpAPI);
-                    const promt2 = `请你使用分析下面这个接口的描述。 ${JSON.stringify(httpAPI)} , 问题的参数从用户的问题中提取,${text}，其他参数中接口描述中获取 。请你返回一个JSON对象，包含以下字段:{"baseurl": "string", "method": "{post or get}", "params": "object", "headers": "object", "body": "object"}, 请你直接返回这个JSON对象，不需要任何解释，也不需要任何注释，也不要包含任何其他内容，也不需要markdown语法修饰。`;
+                    const promt2 = `Please analyze the description of the interface below. ${JSON.stringify(httpAPI)} , Extracting the parameters of the problem from the user's question,${text}，Retrieve from the interface description in other parameters. Please return a JSON object containing the following fields: {"baseurl": "string", "method": "{post or get}", "params": "object", "headers": "object", "body": "object"}, Please return this JSON object directly without any explanation, comments, other content, or markdown syntax modification.`;
                     console.log("yykai promt2: ", promt2);
                     const response2 = await generateText({
                         runtime,
@@ -445,15 +445,15 @@ export class DirectClient {
                     } catch (e) {
                         console.log("yykai error: ", e);
                         apires =
-                            "网络请求失败，请检查网络连接或者API的参数是否正确. e: " +
+                            "Network request failed, please check if the network connection or API parameters are correct. e: " +
                             e.toString().slice(0, 1000);
                         res.json({ res: apires });
                         return;
                     }
                     console.log("yykai res1: ", JSON.stringify(apires.data).slice(0, 1000));
-                    const promt3 = `这是这个接口${httpAPI}的返回值 ${JSON.stringify(
+                    const promt3 = `This HTTP API ${httpAPI} responce ${JSON.stringify(
                         apires.data
-                    )}。 根据返回值回答用户的问题 ${text},请你回答用户的问题的时候简单直接、不要解释，直接回答用户的问题即可。`;
+                    )} . Answer the user's question based on the return value ${text}, Please answer the user's question simply and directly without explanation. Simply answer the user's question.`;
                     console.log("yykai promt3: ", promt3);
                     finalres2 = await generateText({
                         runtime,
@@ -486,7 +486,6 @@ export class DirectClient {
                 const userId = stringToUuid(req.body.userId ?? "user");
 
                 let runtime = this.agents.get(agentId);
-                let res2 = null;
 
                 // if runtime is null, look for runtime with the same name
                 if (!runtime) {
@@ -512,7 +511,7 @@ export class DirectClient {
 
                 const newXDataSourceArray = req.body.XData_Collection;
                 // // if empty text, directly return
-                if (!newXDataSourceArray) {
+                if (!newXDataSourceArray || newXDataSourceArray.length === 0) {
                     res.json({ res: "empty" });
                     return;
                 }
@@ -523,7 +522,7 @@ export class DirectClient {
                 xdata3Logger.log("oldXData: ", oldXDataSourceArray);
                 // xdata3Logger.log("oldXData id1: " , oldXDataSourceArray[1]);
 
-                if (newXDataSourceArray) {
+                if (newXDataSourceArray.length > 0) {
                     await runtime.cacheManager.set(
                         "XData_Collection",
                         newXDataSourceArray
