@@ -365,7 +365,7 @@ export class DirectClient {
                 const userId = stringToUuid(req.body.userId ?? "user");
 
                 let runtime = this.agents.get(agentId);
-                let res2 = null;
+                let finalres2 = null;
 
                 // if runtime is null, look for runtime with the same name
                 if (!runtime) {
@@ -396,60 +396,186 @@ export class DirectClient {
                     return;
                 }
 
-                const response = await generateText({
+                const apiXDataSourceArray = await runtime.cacheManager.get(
+                    "XData_Collection"
+                );
+                const promt1 =
+                    "下面这个问题是否需要联网查询:\n" +
+                    text +
+                    `\n同时你可以阅读这个HTTP API 列表 ${JSON.stringify(
+                        apiXDataSourceArray
+                    )}.\n 请你返回一个布尔值，true 或 false 来表示这个问题是否需要联网查询。如果需要联网查询，请你遍历这个HTTP API 列表，如果有合适的API 使用，请返回API的id。如果没有合适的请返回-1。id从0开始编号。\n
+                请你使用 JSON 返回结果，不要包含任何其他内容，也不需要markdown语法修饰。JSON格式为： {"need_network": "true","api_id": "1"}\n`;
+                console.log("yykai promt1: ", promt1);
+                const response1 = await generateText({
                     runtime,
-                    context: "下面这个问题是否需要联网查询:\n" + text + "请你返回一个布尔值，true 或 false。",
-                    modelClass:  ModelClass.SMALL,
+                    context: promt1,
+                    modelClass: ModelClass.LARGE,
                 });
-                let apiDescription = "";
-                if (response.includes("true")) {
-                     apiDescription = `{"type":"HTTP API",
-                    "description":"Query stock prices,价格单位是美元",
-                    "example": "const response = await axios.get('https://www.alphavantage.co/query', {params: {'function': 'TIME_SERIES_INTRADAY','symbol': 'IBM',  'interval': '5min','apikey': 'J4BH2KZ4ZL47289R'}});"
-                }`;
+                console.log("yykai response1: ", response1);
 
-                const response = await generateText({
-                    runtime,
-                    context: `请你使用分析下面这个接口的描述。 ${apiDescription} , 参数从用户的问题中提取,${text} 。请你返回一个JSON对象，包含以下字段:{"baseurl": "string", "method": "post", "params": "object", "headers": "object", "body": "object"}, 请你直接返回这个JSON对象，不需要任何解释，也不需要任何注释，也不要包含任何其他内容，也不需要markdown语法修饰。`,
-                    modelClass:  ModelClass.SMALL,
-                });
-                console.log("yykai response: ", response);
-
-                const Obj = JSON.parse(response);
-                let res=null;
-                if(Obj.method == "post"){
-                    res = await axios.post(Obj.baseurl, Obj.body, {params: Obj.params, headers: Obj.headers});
+                // xdata3Logger.log("oldXData: " , oldXDataSourceArray);
+                // let apiDescription = "";
+                const obj = JSON.parse(response1);
+                if (obj?.need_network.includes("true") && obj?.api_id != -1) {
+                    const httpAPI = apiXDataSourceArray[obj?.api_id];
+                    xdata3Logger.log("httpAPI: ", httpAPI);
+                    const promt2 = `请你使用分析下面这个接口的描述。 ${JSON.stringify(httpAPI)} , 问题的参数从用户的问题中提取,${text}，其他参数中接口描述中获取 。请你返回一个JSON对象，包含以下字段:{"baseurl": "string", "method": "{post or get}", "params": "object", "headers": "object", "body": "object"}, 请你直接返回这个JSON对象，不需要任何解释，也不需要任何注释，也不要包含任何其他内容，也不需要markdown语法修饰。`;
+                    console.log("yykai promt2: ", promt2);
+                    const response2 = await generateText({
+                        runtime,
+                        context: promt2,
+                        modelClass: ModelClass.LARGE,
+                    });
+                    console.log("yykai response: ", response2);
+                    const Obj = JSON.parse(response2);
+                    let apires = null;
+                    try {
+                        if (Obj.method == "post") {
+                            apires = await axios.post(Obj.baseurl, Obj.body, {
+                                params: Obj.params,
+                                headers: Obj.headers,
+                            });
+                        } else {
+                            apires = await axios.get(Obj.baseurl, {
+                                params: Obj.params,
+                                headers: Obj.headers,
+                            });
+                        }
+                    } catch (e) {
+                        console.log("yykai error: ", e);
+                        apires =
+                            "网络请求失败，请检查网络连接或者API的参数是否正确. e: " +
+                            e.toString().slice(0, 1000);
+                        res.json({ res: apires });
+                        return;
+                    }
+                    console.log("yykai res1: ", JSON.stringify(apires.data).slice(0, 1000));
+                    const promt3 = `这是这个接口${httpAPI}的返回值 ${JSON.stringify(
+                        apires.data
+                    )}。 根据返回值回答用户的问题 ${text},请你回答用户的问题的时候简单直接、不要解释，直接回答用户的问题即可。`;
+                    console.log("yykai promt3: ", promt3);
+                    finalres2 = await generateText({
+                        runtime,
+                        context: promt3,
+                        modelClass: ModelClass.LARGE,
+                    });
+                    console.log("yykai responce: ", finalres2);
+                    res.json({ res: finalres2 });
+                    return;
                 } else {
-                    res = await axios.get(Obj.baseurl, {params: Obj.params, headers: Obj.headers});
-                }
-                console.log("yykai res1: ", res.data);
-                res2 = await generateText({
-                    runtime,
-                    context:  `这是这个接口${apiDescription}的返回值 ${JSON.stringify(res.data)}。 根据返回值回答用户的问题 ${text},请你回答用户的问题的时候简单直接、不要解释，直接回答用户的问题即可。` ,
-                    modelClass:  ModelClass.SMALL,
-                });
-                console.log("yykai res2: ", res2);
-                }else {
                     const response = await generateText({
                         runtime,
-                        context:  text,
-                        modelClass:  ModelClass.SMALL,
+                        context: text,
+                        modelClass: ModelClass.SMALL,
                     });
+                    res.json({ res: response });
+                    return;
                 }
-
-                res.json(    {  "res": res2  }   );
-
-                // if (!res2) {
-                //     res.status(500).send(
-                //         "No response from generateMessageResponse"
-                //     );
-                //     return;
-                // }
-                // console.log("yykai response: ", res2);
-                // res.json({"res": res2});
             }
         );
 
+        this.app.post(
+            "/:agentId/xdata3_update",
+            upload.single("file"),
+            async (req: express.Request, res: express.Response) => {
+                const agentId = req.params.agentId;
+                const roomId = stringToUuid(
+                    req.body.roomId ?? "default-room-" + agentId
+                );
+                const userId = stringToUuid(req.body.userId ?? "user");
+
+                let runtime = this.agents.get(agentId);
+                let res2 = null;
+
+                // if runtime is null, look for runtime with the same name
+                if (!runtime) {
+                    runtime = Array.from(this.agents.values()).find(
+                        (a) =>
+                            a.character.name.toLowerCase() ===
+                            agentId.toLowerCase()
+                    );
+                }
+
+                if (!runtime) {
+                    res.status(404).send("Agent not found");
+                    return;
+                }
+
+                await runtime.ensureConnection(
+                    userId,
+                    roomId,
+                    req.body.userName,
+                    req.body.name,
+                    "direct"
+                );
+
+                const newXDataSourceArray = req.body.XData_Collection;
+                // // if empty text, directly return
+                if (!newXDataSourceArray) {
+                    res.json({ res: "empty" });
+                    return;
+                }
+
+                const oldXDataSourceArray = await runtime.cacheManager.get(
+                    "XData_Collection"
+                );
+                xdata3Logger.log("oldXData: ", oldXDataSourceArray);
+                // xdata3Logger.log("oldXData id1: " , oldXDataSourceArray[1]);
+
+                if (newXDataSourceArray) {
+                    await runtime.cacheManager.set(
+                        "XData_Collection",
+                        newXDataSourceArray
+                    );
+                    res.json({ res: "ok" });
+                    return;
+                }
+            }
+        );
+
+        this.app.post(
+            "/:agentId/xdata3_get",
+            upload.single("file"),
+            async (req: express.Request, res: express.Response) => {
+                const agentId = req.params.agentId;
+                const roomId = stringToUuid(
+                    req.body.roomId ?? "default-room-" + agentId
+                );
+                const userId = stringToUuid(req.body.userId ?? "user");
+                let runtime = this.agents.get(agentId);
+
+                // if runtime is null, look for runtime with the same name
+                if (!runtime) {
+                    runtime = Array.from(this.agents.values()).find(
+                        (a) =>
+                            a.character.name.toLowerCase() ===
+                            agentId.toLowerCase()
+                    );
+                }
+
+                if (!runtime) {
+                    res.status(404).send("Agent not found");
+                    return;
+                }
+
+                await runtime.ensureConnection(
+                    userId,
+                    roomId,
+                    req.body.userName,
+                    req.body.name,
+                    "direct"
+                );
+
+                const oldXDataSourceArray = await runtime.cacheManager.get(
+                    "XData_Collection"
+                );
+                xdata3Logger.log("oldXData: ", oldXDataSourceArray);
+                // xdata3Logger.log("oldXData id1: " , oldXDataSourceArray[1]);
+                res.json({ XData_Collection: oldXDataSourceArray });
+                return;
+            }
+        );
         this.app.post(
             "/agents/:agentIdOrName/hyperfi/v1",
             async (req: express.Request, res: express.Response) => {

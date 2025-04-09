@@ -1,7 +1,0 @@
-[
-    {
-    "type":"API",
-    "description":"Query stock prices",
-    "example": "const response = await axios.get('https://www.alphavantage.co/query', {params: {'function': 'TIME_SERIES_INTRADAY','symbol': 'IBM',  'interval': '5min','apikey': 'J4BH2KZ4ZL47289R'}});"
-    }
-]
