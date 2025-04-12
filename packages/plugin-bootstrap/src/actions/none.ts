@@ -3,7 +3,7 @@ import type {
     IAgentRuntime,
     Memory,
     Action,
-} from "@xdata3os/core";
+} from "@xdata3os/agentcontext";
 
 export const noneAction: Action = {
     name: "NONE",

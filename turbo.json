@@ -12,7 +12,7 @@
         },
         "build": {
             "outputs": ["dist/**"],
-            "dependsOn": ["^@xdata3os/core#build"]
+            "dependsOn": ["^@xdata3os/agentcontext#build"]
         },
         "@xdata3os/client-direct#build": {
             "outputs": ["dist/**"],

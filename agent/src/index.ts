@@ -18,7 +18,7 @@ import {
     settings,
     stringToUuid,
     validateCharacterConfig,
-} from "@xdata3os/core";
+} from "@xdata3os/agentcontext";
 import { defaultCharacter } from "./defaultCharacter.ts";
 
 import { bootstrapPlugin } from "@xdata3os/plugin-bootstrap";

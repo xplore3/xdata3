@@ -1,5 +1,5 @@
 {
-    "extends": "../core/tsconfig.json",
+    "extends": "../AgentContext/tsconfig.json",
     "compilerOptions": {
         "outDir": "dist",
         "rootDir": "src"

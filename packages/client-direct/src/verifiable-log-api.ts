@@ -3,7 +3,7 @@ import type { Router } from 'express';
 import bodyParser from "body-parser";
 import cors from "cors";
 
-import { type AgentRuntime, xdata3Logger, ServiceType }  from "@xdata3os/core";
+import { type AgentRuntime, xdata3Logger, ServiceType }  from "@xdata3os/agentcontext";
 import type {
     VerifiableLogService,
     VerifiableLogQuery,

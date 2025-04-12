@@ -1,4 +1,4 @@
-import { type Character, ModelProviderName } from "@xdata3os/core";
+import { type Character, ModelProviderName } from "@xdata3os/agentcontext";
 
 export const defaultCharacter: Character = {
     name: "Xdata3",

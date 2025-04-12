@@ -19,7 +19,7 @@
         "dist"
     ],
     "dependencies": {
-        "@xdata3os/core": "workspace:*",
+        "@xdata3os/agentcontext": "workspace:*",
         "@types/body-parser": "1.19.5",
         "@types/cors": "2.8.17",
         "body-parser": "1.20.3",

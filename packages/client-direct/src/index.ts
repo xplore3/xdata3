@@ -18,7 +18,7 @@ import {
     type Memory,
     type Plugin,
     generateText,
-} from "@xdata3os/core";
+} from "@xdata3os/agentcontext";
 import bodyParser from "body-parser";
 import axios from 'axios';
 import cors from "cors";

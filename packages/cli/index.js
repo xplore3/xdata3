@@ -117,7 +117,7 @@ pluginsCmd
     const updateDependencies = (deps) => {
       if (!deps) return false
       let changed = false
-      const okPackages = ['@xdata3os/client-direct', '@xdata3os/core', '@xdata3os/plugin-bootstrap']
+      const okPackages = ['@xdata3os/client-direct', '@xdata3os/agentcontext', '@xdata3os/plugin-bootstrap']
       for (const dep in deps) {
         if (okPackages.indexOf(dep) !== -1) continue // skip these, they're fine
         // do we want/need to perserve local packages like core?
@@ -152,11 +152,11 @@ pluginsCmd
     }
 
     // add core to plugin
-    // # pnpm add @xdata3os/core@workspace:* --filter ./packages/client-twitter
+    // # pnpm add @xdata3os/agentcontext@workspace:* --filter ./packages/client-twitter
 
     // ok this can be an issue if it's referencing a plugin it couldn't be
-    console.log('Making sure plugin has access to @xdata3os/core')
-    const pluginAddCoreOutput = execSync('pnpm add @xdata3os/core@workspace:* --filter ./packages/' + namePart, { cwd: xdata3OSroot, stdio: 'pipe' }).toString().trim();
+    console.log('Making sure plugin has access to @xdata3os/agentcontext')
+    const pluginAddCoreOutput = execSync('pnpm add @xdata3os/agentcontext@workspace:* --filter ./packages/' + namePart, { cwd: xdata3OSroot, stdio: 'pipe' }).toString().trim();
 
     if (packageJson.name !== '@xdata3os-plugins/' + namePart) {
       // Update the name field

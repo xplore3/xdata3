@@ -13,12 +13,12 @@ import {
     validateCharacterConfig,
     ServiceType,
     type Character,
-} from "@xdata3os/core";
+} from "@xdata3os/agentcontext";
 
 // import type { TeeLogQuery, TeeLogService } from "@xdata3os/plugin-tee-log";
 // import { REST, Routes } from "discord.js";
 import type { DirectClient } from ".";
-import { validateUuid } from "@xdata3os/core";
+import { validateUuid } from "@xdata3os/agentcontext";
 
 interface UUIDParams {
     agentId: UUID;

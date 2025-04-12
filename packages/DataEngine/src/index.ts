@@ -8,7 +8,7 @@ import {
     DatabaseAdapter,
     xdata3Logger,
     type IDatabaseCacheAdapter,
-} from "@xdata3os/core";
+} from "@xdata3os/agentcontext";
 import type {
     Account,
     Actor,
@@ -23,7 +23,7 @@ import type {
     Adapter,
     IAgentRuntime,
     Plugin,
-} from "@xdata3os/core";
+} from "@xdata3os/agentcontext";
 import type { Database as BetterSqlite3Database } from "better-sqlite3";
 import { v4 } from "uuid";
 import { load } from "./sqlite_vec.ts";

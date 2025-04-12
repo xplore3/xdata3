@@ -19,7 +19,7 @@
     },
     "dependencies": {
         "@xdata3os/client-direct": "workspace:*",
-        "@xdata3os/core": "workspace:*",
+        "@xdata3os/agentcontext": "workspace:*",
         "@xdata3os/plugin-bootstrap": "workspace:*",
         "@types/node": "^22.13.5",
         "json5": "2.2.3",

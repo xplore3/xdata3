@@ -1,4 +1,4 @@
-import type { IAgentRuntime, Memory, Provider, State } from "@xdata3os/core";
+import type { IAgentRuntime, Memory, Provider, State } from "@xdata3os/agentcontext";
 
 const boredomLevels = [
     {

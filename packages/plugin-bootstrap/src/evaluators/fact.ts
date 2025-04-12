@@ -1,13 +1,13 @@
-import { composeContext } from "@xdata3os/core";
-import { generateObjectArray } from "@xdata3os/core";
-import { MemoryManager } from "@xdata3os/core";
+import { composeContext } from "@xdata3os/agentcontext";
+import { generateObjectArray } from "@xdata3os/agentcontext";
+import { MemoryManager } from "@xdata3os/agentcontext";
 import {
     type ActionExample,
     type IAgentRuntime,
     type Memory,
     ModelClass,
     type Evaluator,
-} from "@xdata3os/core";
+} from "@xdata3os/agentcontext";
 
 export const formatFacts = (facts: Memory[]) => {
     const messageStrings = facts

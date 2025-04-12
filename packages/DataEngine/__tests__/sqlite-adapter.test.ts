@@ -1,12 +1,12 @@
-import type { UUID } from '@xdata3os/core';
+import type { UUID } from '@xdata3os/agentcontext';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SqliteDatabaseAdapter } from '../src';
 import { load } from '../src/sqlite_vec';
 import type { Database } from 'better-sqlite3';
 
 // Mock the xdata3Logger
-vi.mock('@xdata3os/core', async () => {
-    const actual = await vi.importActual('@xdata3os/core');
+vi.mock('@xdata3os/agentcontext', async () => {
+    const actual = await vi.importActual('@xdata3os/agentcontext');
     return {
         ...actual as any,
         xdata3Logger: {

@@ -1,4 +1,4 @@
-import type { Client, IAgentRuntime } from "@xdata3os/core";
+import type { Client, IAgentRuntime } from "@xdata3os/agentcontext";
 import { describe, it, expect } from "@jest/globals";
 
 // Helper function to identify client types

@@ -1,7 +1,7 @@
-import { composeContext } from "@xdata3os/core";
-import { generateText } from "@xdata3os/core";
-import { getGoals } from "@xdata3os/core";
-import { parseJsonArrayFromText } from "@xdata3os/core";
+import { composeContext } from "@xdata3os/agentcontext";
+import { generateText } from "@xdata3os/agentcontext";
+import { getGoals } from "@xdata3os/agentcontext";
+import { parseJsonArrayFromText } from "@xdata3os/agentcontext";
 import {
     type IAgentRuntime,
     type Memory,
@@ -10,7 +10,7 @@ import {
     type Goal,
     type State,
     type Evaluator,
-} from "@xdata3os/core";
+} from "@xdata3os/agentcontext";
 
 const goalsTemplate = `TASK: Update Goal
 Analyze the conversation and update the status of the goals based on the new information provided.

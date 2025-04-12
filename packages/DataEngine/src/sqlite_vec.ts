@@ -1,6 +1,6 @@
 import * as sqliteVec from "sqlite-vec";
 import type { Database } from "better-sqlite3";
-import { xdata3Logger } from "@xdata3os/core";
+import { xdata3Logger } from "@xdata3os/agentcontext";
 
 // Loads the sqlite-vec extensions into the provided SQLite database
 export function loadVecExtensions(db: Database): void {

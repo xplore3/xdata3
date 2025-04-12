@@ -1,6 +1,6 @@
-import { composeContext, xdata3Logger } from "@xdata3os/core";
-import { generateMessageResponse, generateTrueOrFalse } from "@xdata3os/core";
-import { booleanFooter, messageCompletionFooter } from "@xdata3os/core";
+import { composeContext, xdata3Logger } from "@xdata3os/agentcontext";
+import { generateMessageResponse, generateTrueOrFalse } from "@xdata3os/agentcontext";
+import { booleanFooter, messageCompletionFooter } from "@xdata3os/agentcontext";
 import {
     type Action,
     type ActionExample,
@@ -10,7 +10,7 @@ import {
     type Memory,
     ModelClass,
     type State,
-} from "@xdata3os/core";
+} from "@xdata3os/agentcontext";
 
 const maxContinuesInARow = 3;
 
