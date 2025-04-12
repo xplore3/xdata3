@@ -1,0 +1,5 @@
+{
+    "name": "xdata3-protocols",
+    "type": "module",
+    "main": "src/index.ts"
+}

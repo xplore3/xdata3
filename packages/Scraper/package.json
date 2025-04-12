@@ -1,0 +1,5 @@
+{
+    "name": "xdata3-scraper",
+    "type": "module",
+    "main": "src/index.ts"
+}
