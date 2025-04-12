@@ -1,5 +1,5 @@
 {
-    "name": "@xdata3os-plugins/adapter-sqlite",
+    "name": "@xdata3os/data-engine",
     "version": "0.25.9",
     "type": "module",
     "main": "dist/index.js",

@@ -14,7 +14,7 @@
             "outputs": ["dist/**"],
             "dependsOn": ["^@xdata3os/agentcontext#build"]
         },
-        "@xdata3os/client-direct#build": {
+        "@xdata3os/xdata3-router#build": {
             "outputs": ["dist/**"],
             "dependsOn": []
         },

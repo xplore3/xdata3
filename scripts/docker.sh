@@ -35,7 +35,7 @@ case "$1" in
             "adapter-sqljs"
             "adapter-supabase"
             "client-auto"
-            "client-direct"
+            "xdata3-router"
             "client-discord"
             "client-farcaster"
             "client-telegram"

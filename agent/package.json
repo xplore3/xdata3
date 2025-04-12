@@ -18,7 +18,7 @@
         "exec": "node --enable-source-maps --loader ts-node/esm src/index.ts"
     },
     "dependencies": {
-        "@xdata3os/client-direct": "workspace:*",
+        "@xdata3os/xdata3-router": "workspace:*",
         "@xdata3os/agentcontext": "workspace:*",
         "@xdata3os/plugin-bootstrap": "workspace:*",
         "@types/node": "^22.13.5",

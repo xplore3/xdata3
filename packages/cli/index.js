@@ -117,7 +117,7 @@ pluginsCmd
     const updateDependencies = (deps) => {
       if (!deps) return false
       let changed = false
-      const okPackages = ['@xdata3os/client-direct', '@xdata3os/agentcontext', '@xdata3os/plugin-bootstrap']
+      const okPackages = ['@xdata3os/xdata3-router', '@xdata3os/agentcontext', '@xdata3os/plugin-bootstrap']
       for (const dep in deps) {
         if (okPackages.indexOf(dep) !== -1) continue // skip these, they're fine
         // do we want/need to perserve local packages like core?

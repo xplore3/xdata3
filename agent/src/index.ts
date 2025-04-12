@@ -1,4 +1,4 @@
-import { DirectClient } from "@xdata3os/client-direct";
+import { DirectClient } from "@xdata3os/xdata3-router";
 import {
     type Adapter,
     AgentRuntime,
@@ -713,7 +713,7 @@ async function findDatabaseAdapter(runtime: AgentRuntime) {
   let adapter: Adapter | undefined;
   // if not found, default to sqlite
   if (adapters.length === 0) {
-    const sqliteAdapterPlugin = await import('@xdata3os-plugins/adapter-sqlite');
+    const sqliteAdapterPlugin = await import('@xdata3os/data-engine');
     const sqliteAdapterPluginDefault = sqliteAdapterPlugin.default;
     adapter = sqliteAdapterPluginDefault.adapters[0];
     if (!adapter) {
@@ -857,7 +857,7 @@ const startAgents = async () => {
     }
 
     // upload some agent functionality into directClient
-    // This is used in client-direct/api.ts at "/agents/:agentId/set" route to restart an agent
+    // This is used in xdata3-router/api.ts at "/agents/:agentId/set" route to restart an agent
     directClient.startAgent = async (character) => {
         // Handle plugins
         character.plugins = await handlePluginImporting(character.plugins);
