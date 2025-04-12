@@ -1,4 +1,4 @@
 packages:
     - "packages/*"
-    - "client"
-    - "agent"
+    - "Input-UI"
+    - "xdata3-agent"

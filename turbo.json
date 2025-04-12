@@ -4,7 +4,7 @@
         "check-types": {
             "dependsOn": ["build"]
         },
-        "@xdata3os/agent#check-types": {
+        "@xdata3os/xdata3-agent#check-types": {
             "dependsOn": [
                 "@xdata3os/plugin-solana#build",
                 "@xdata3os/plugin-direct#build"

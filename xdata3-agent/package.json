@@ -1,5 +1,5 @@
 {
-    "name": "@xdata3os/agent",
+    "name": "@xdata3os/xdata3-agent",
     "version": "0.25.9",
     "main": "src/index.ts",
     "type": "module",

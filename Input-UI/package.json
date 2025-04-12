@@ -1,5 +1,5 @@
 {
-	"name": "client",
+	"name": "Input-UI",
 	"private": true,
 	"sideEffects": false,
 	"type": "module",
