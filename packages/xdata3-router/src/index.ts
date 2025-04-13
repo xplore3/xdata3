@@ -19,6 +19,12 @@ import {
     type Plugin,
     generateText,
 } from "@xdata3os/agentcontext";
+
+import {
+    getProtocolArray,
+    updateProtocolArray,
+} from "xdata3-protocols";
+
 import bodyParser from "body-parser";
 import axios from 'axios';
 import cors from "cors";
@@ -355,7 +361,7 @@ export class DirectClient {
         );
 
         this.app.post(
-            "/:agentId/xdata3",
+            "/:agentId/xdata3", // todo: move the protocol to xdata3-protocols
             upload.single("file"),
             async (req: express.Request, res: express.Response) => {
                 const agentId = req.params.agentId;
@@ -516,20 +522,9 @@ export class DirectClient {
                     return;
                 }
 
-                const oldXDataSourceArray = await runtime.cacheManager.get(
-                    "XData_Collection"
-                );
-                xdata3Logger.log("oldXData: ", oldXDataSourceArray);
-                // xdata3Logger.log("oldXData id1: " , oldXDataSourceArray[1]);
-
-                if (newXDataSourceArray.length > 0) {
-                    await runtime.cacheManager.set(
-                        "XData_Collection",
-                        newXDataSourceArray
-                    );
-                    res.json({ res: "ok" });
-                    return;
-                }
+                updateProtocolArray(runtime, newXDataSourceArray);
+                res.json({ res: "ok" });
+                return;
             }
         );
 
@@ -565,11 +560,12 @@ export class DirectClient {
                     req.body.name,
                     "direct"
                 );
+                const oldXDataSourceArray = await getProtocolArray(runtime);
 
-                const oldXDataSourceArray = await runtime.cacheManager.get(
-                    "XData_Collection"
-                );
-                xdata3Logger.log("oldXData: ", oldXDataSourceArray);
+                // const oldXDataSourceArray = await runtime.cacheManager.get(
+                //     "XData_Collection"
+                // );
+                // xdata3Logger.log("oldXData: ", oldXDataSourceArray);
                 // xdata3Logger.log("oldXData id1: " , oldXDataSourceArray[1]);
                 res.json({ XData_Collection: oldXDataSourceArray });
                 return;

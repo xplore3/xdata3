@@ -520,6 +520,9 @@ importers:
       whatwg-url:
         specifier: 7.1.0
         version: 7.1.0
+      xdata3-protocols:
+        specifier: workspace:*
+        version: link:../Protocols
       zod:
         specifier: ^3.24.2
         version: 3.24.2

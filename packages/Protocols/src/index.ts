@@ -10,5 +10,24 @@ export const getProtocols = async (specifier: string) => {
 };
 
 export const registerProtocols = (specifier: string, module: any) => {
-  registrations.set(specifier, module);
+    registrations.set(specifier, module);
+};
+
+export const getProtocolArray = async (runtime: any) => {
+    const oldXDataSourceArray = await runtime.cacheManager.get(
+        "XData_Collection"
+    );
+    console.log("protocol oldXData: ", oldXDataSourceArray);
+    return oldXDataSourceArray ?? [];
+};
+
+export const updateProtocolArray = async (runtime: any, newXDataSourceArray) => {
+    const oldXDataSourceArray = await runtime.cacheManager.get(
+        "XData_Collection"
+    );
+    console.log("protocol oldXData: ", oldXDataSourceArray);
+
+    if (newXDataSourceArray.length > 0) {
+        await runtime.cacheManager.set("XData_Collection", newXDataSourceArray);
+    }
 };
