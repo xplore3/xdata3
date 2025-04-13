@@ -440,6 +440,9 @@ importers:
       whatwg-url:
         specifier: 7.1.0
         version: 7.1.0
+      xdata3-scraper:
+        specifier: workspace:*
+        version: link:../Scraper
     devDependencies:
       '@types/express':
         specifier: 4.17.21

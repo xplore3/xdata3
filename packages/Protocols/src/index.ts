@@ -3,6 +3,11 @@ generateText,
 ModelClass,
 } from "@xdata3os/agentcontext";
 
+import {
+  xdata3Fetch,
+  } from "xdata3-scraper";
+  
+
 import axios from "axios";
 
 const registrations = new Map<string, any>();
@@ -41,6 +46,16 @@ export const updateProtocolArray = async (runtime: any, newXDataSourceArray) => 
 
 
 export const handleProtocols = async (runtime: any, text) => {
+
+
+  /** test
+   * 
+   */
+  const res0 = await xdata3Fetch("https://example.com/");
+  console.log("yykai res0: ", res0);
+
+
+  //
   let resStr = "";
   let finalres2 = null;
 
