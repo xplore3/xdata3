@@ -431,6 +431,12 @@ importers:
 
   packages/Protocols:
     dependencies:
+      '@xdata3os/agentcontext':
+        specifier: workspace:*
+        version: link:../AgentContext
+      axios:
+        specifier: ^1.8.4
+        version: 1.8.4
       whatwg-url:
         specifier: 7.1.0
         version: 7.1.0
