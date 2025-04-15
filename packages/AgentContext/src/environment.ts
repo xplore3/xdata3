@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { ModelProviderName } from "./types";
-import xdata3Logger from "./logger";
+import data3Logger from "./logger";
 
 // TODO: TO COMPLETE
 export const envSchema = z.object({
@@ -175,7 +175,7 @@ export function validateCharacterConfig(json: unknown): CharacterConfig {
             );
 
             Object.entries(groupedErrors).forEach(([field, messages]) => {
-                xdata3Logger.error(
+                data3Logger.error(
                     `Validation errors in ${field}: ${messages.join(" - ")}`
                 );
             });

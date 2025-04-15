@@ -1,6 +1,6 @@
 import {
     composeContext,
-    xdata3Logger,
+    data3Logger,
     generateCaption,
     generateImage,
     generateMessageResponse,
@@ -18,13 +18,13 @@ import {
     type Memory,
     type Plugin,
     generateText,
-} from "@xdata3os/agentcontext";
+} from "@data3os/agentcontext";
 
 import {
     getProtocolArray,
     handleProtocols,
     updateProtocolArray,
-} from "xdata3-protocols";
+} from "data3-protocols";
 
 import bodyParser from "body-parser";
 import axios from 'axios';
@@ -127,7 +127,7 @@ export class DirectClient {
     public jsonToCharacter: Function; // Store jsonToCharacter functor
 
     constructor() {
-        xdata3Logger.log("DirectClient constructor");
+        data3Logger.log("DirectClient constructor");
         this.app = express();
         this.app.use(cors());
         this.agents = new Map();
@@ -362,7 +362,7 @@ export class DirectClient {
         );
 
         this.app.post(
-            "/:agentId/xdata3", // todo: move the protocol to xdata3-protocols
+            "/:agentId/data3", // todo: move the protocol to data3-protocols
             upload.single("file"),
             async (req: express.Request, res: express.Response) => {
                 const agentId = req.params.agentId;
@@ -409,7 +409,7 @@ export class DirectClient {
         );
 
         this.app.post(
-            "/:agentId/xdata3_update",
+            "/:agentId/data3_update",
             upload.single("file"),
             async (req: express.Request, res: express.Response) => {
                 const agentId = req.params.agentId;
@@ -456,7 +456,7 @@ export class DirectClient {
         );
 
         this.app.post(
-            "/:agentId/xdata3_get",
+            "/:agentId/data3_get",
             upload.single("file"),
             async (req: express.Request, res: express.Response) => {
                 const agentId = req.params.agentId;
@@ -492,8 +492,8 @@ export class DirectClient {
                 // const oldXDataSourceArray = await runtime.cacheManager.get(
                 //     "XData_Collection"
                 // );
-                // xdata3Logger.log("oldXData: ", oldXDataSourceArray);
-                // xdata3Logger.log("oldXData id1: " , oldXDataSourceArray[1]);
+                // data3Logger.log("oldXData: ", oldXDataSourceArray);
+                // data3Logger.log("oldXData id1: " , oldXDataSourceArray[1]);
                 res.json({ XData_Collection: oldXDataSourceArray });
                 return;
             }
@@ -664,7 +664,7 @@ export class DirectClient {
                 try {
                     hfOut = hyperfiOutSchema.parse(response.object);
                 } catch {
-                    xdata3Logger.error(
+                    data3Logger.error(
                         "cant serialize response",
                         response.object
                     );
@@ -812,13 +812,13 @@ export class DirectClient {
                     });
                     return;
                 }
-                xdata3Logger.log("Download directory:", downloadDir);
+                data3Logger.log("Download directory:", downloadDir);
 
                 try {
-                    xdata3Logger.log("Creating directory...");
+                    data3Logger.log("Creating directory...");
                     await fs.promises.mkdir(downloadDir, { recursive: true });
 
-                    xdata3Logger.log("Fetching file...");
+                    data3Logger.log("Fetching file...");
                     const fileResponse = await fetch(
                         `https://api.bageldb.ai/api/v1/asset/${assetId}/download`,
                         {
@@ -834,7 +834,7 @@ export class DirectClient {
                         );
                     }
 
-                    xdata3Logger.log("Response headers:", fileResponse.headers);
+                    data3Logger.log("Response headers:", fileResponse.headers);
 
                     const fileName =
                         fileResponse.headers
@@ -842,19 +842,19 @@ export class DirectClient {
                             ?.split("filename=")[1]
                             ?.replace(/"/g, /* " */ "") || "default_name.txt";
 
-                    xdata3Logger.log("Saving as:", fileName);
+                    data3Logger.log("Saving as:", fileName);
 
                     const arrayBuffer = await fileResponse.arrayBuffer();
                     const buffer = Buffer.from(arrayBuffer);
 
                     const filePath = path.join(downloadDir, fileName);
-                    xdata3Logger.log("Full file path:", filePath);
+                    data3Logger.log("Full file path:", filePath);
 
                     await fs.promises.writeFile(filePath, new Uint8Array(buffer));
 
                     // Verify file was written
                     const stats = await fs.promises.stat(filePath);
-                    xdata3Logger.log(
+                    data3Logger.log(
                         "File written successfully. Size:",
                         stats.size,
                         "bytes"
@@ -869,7 +869,7 @@ export class DirectClient {
                         fileSize: stats.size,
                     });
                 } catch (error) {
-                    xdata3Logger.error("Detailed error:", error);
+                    data3Logger.error("Detailed error:", error);
                     res.status(500).json({
                         error: "Failed to download files from BagelDB",
                         details: error.message,
@@ -1043,7 +1043,7 @@ export class DirectClient {
 
                 res.send(Buffer.from(audioBuffer));
             } catch (error) {
-                xdata3Logger.error(
+                data3Logger.error(
                     "Error processing message or generating speech:",
                     error
                 );
@@ -1116,7 +1116,7 @@ export class DirectClient {
 
                 res.send(Buffer.from(audioBuffer));
             } catch (error) {
-                xdata3Logger.error(
+                data3Logger.error(
                     "Error processing message or generating speech:",
                     error
                 );
@@ -1141,22 +1141,22 @@ export class DirectClient {
 
     public start(port: number) {
         this.server = this.app.listen(port, () => {
-            xdata3Logger.info(
+            data3Logger.info(
                 `REST API bound to 0.0.0.0:${port}. If running locally, access it at http://localhost:${port}.`
             );
         });
 
         // Handle graceful shutdown
         const gracefulShutdown = () => {
-            xdata3Logger.info("Received shutdown signal, closing server...");
+            data3Logger.info("Received shutdown signal, closing server...");
             this.server.close(() => {
-                xdata3Logger.info("Server closed successfully");
+                data3Logger.info("Server closed successfully");
                 process.exit(0);
             });
 
             // Force close after 5 seconds if server hasn't closed
             setTimeout(() => {
-                xdata3Logger.error(
+                data3Logger.error(
                     "Could not close connections in time, forcefully shutting down"
                 );
                 process.exit(1);
@@ -1171,7 +1171,7 @@ export class DirectClient {
     public async stop() {
         if (this.server) {
             this.server.close(() => {
-                xdata3Logger.success("Server stopped");
+                data3Logger.success("Server stopped");
             });
         }
     }
@@ -1181,7 +1181,7 @@ export const DirectClientInterface: Client = {
     name: 'direct',
     config: {},
     start: async (_runtime: IAgentRuntime) => {
-        xdata3Logger.log("DirectClientInterface start");
+        data3Logger.log("DirectClientInterface start");
         const client = new DirectClient();
         const serverPort = Number.parseInt(settings.SERVER_PORT || "3000");
         client.start(serverPort);

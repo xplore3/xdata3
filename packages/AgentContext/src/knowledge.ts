@@ -3,7 +3,7 @@ import { embed, getEmbeddingZeroVector } from "./embedding.ts";
 import type { KnowledgeItem, UUID, Memory } from "./types.ts";
 import { stringToUuid } from "./uuid.ts";
 import { splitChunks } from "./generation.ts";
-import xdata3Logger from "./logger.ts";
+import data3Logger from "./logger.ts";
 
 async function get(
     runtime: AgentRuntime,
@@ -11,7 +11,7 @@ async function get(
 ): Promise<KnowledgeItem[]> {
     // Add validation for message
     if (!message?.content?.text) {
-        xdata3Logger.warn("Invalid message for knowledge query:", {
+        data3Logger.warn("Invalid message for knowledge query:", {
             message,
             content: message?.content,
             text: message?.content?.text,
@@ -20,7 +20,7 @@ async function get(
     }
 
     const processed = preprocess(message.content.text);
-    xdata3Logger.debug("Knowledge query:", {
+    data3Logger.debug("Knowledge query:", {
         original: message.content.text,
         processed,
         length: processed?.length,
@@ -28,7 +28,7 @@ async function get(
 
     // Validate processed text
     if (!processed || processed.trim().length === 0) {
-        xdata3Logger.warn("Empty processed text for knowledge query");
+        data3Logger.warn("Empty processed text for knowledge query");
         return [];
     }
 
@@ -45,7 +45,7 @@ async function get(
     const uniqueSources = [
         ...new Set(
             fragments.map((memory) => {
-                xdata3Logger.log(
+                data3Logger.log(
                     `Matched fragment: ${memory.content.text} with similarity: ${memory.similarity}`
                 );
                 return memory.content.source;
@@ -122,13 +122,13 @@ async function set(
 }
 
 export function preprocess(content: string): string {
-    xdata3Logger.debug("Preprocessing text:", {
+    data3Logger.debug("Preprocessing text:", {
         input: content,
         length: content?.length,
     });
 
     if (!content || typeof content !== "string") {
-        xdata3Logger.warn("Invalid input for preprocessing");
+        data3Logger.warn("Invalid input for preprocessing");
         return "";
     }
 

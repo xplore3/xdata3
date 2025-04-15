@@ -1,10 +1,10 @@
 import {
     SqliteDatabaseAdapter,
     loadVecExtensions,
-} from "@xdata3os/adapter-sqlite";
-import { SqlJsDatabaseAdapter } from "@xdata3os/adapter-sqljs";
-import { SupabaseDatabaseAdapter } from "@xdata3os/adapter-supabase";
-import { PGLiteDatabaseAdapter } from "@xdata3os/adapter-pglite";
+} from "@data3os/adapter-sqlite";
+import { SqlJsDatabaseAdapter } from "@data3os/adapter-sqljs";
+import { SupabaseDatabaseAdapter } from "@data3os/adapter-supabase";
+import { PGLiteDatabaseAdapter } from "@data3os/adapter-pglite";
 import type { DatabaseAdapter } from "../database.ts";
 import { getEndpoint } from "../models.ts";
 import { AgentRuntime } from "../runtime.ts";

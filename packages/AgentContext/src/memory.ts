@@ -1,5 +1,5 @@
 import { embed, getEmbeddingZeroVector } from "./embedding.ts";
-import xdata3Logger from "./logger.ts";
+import data3Logger from "./logger.ts";
 import type {
     IAgentRuntime,
     IMemoryManager,
@@ -68,7 +68,7 @@ export class MemoryManager implements IMemoryManager {
             // Generate embedding from text content
             memory.embedding = await embed(this.runtime, memoryText);
         } catch (error) {
-            xdata3Logger.error("Failed to generate embedding:", error);
+            data3Logger.error("Failed to generate embedding:", error);
             // Fallback to zero vector if embedding fails
             memory.embedding = getEmbeddingZeroVector().slice();
         }
@@ -176,11 +176,11 @@ export class MemoryManager implements IMemoryManager {
             await this.runtime.databaseAdapter.getMemoryById(memory.id);
 
         if (existingMessage) {
-            xdata3Logger.debug("Memory already exists, skipping");
+            data3Logger.debug("Memory already exists, skipping");
             return;
         }
 
-        xdata3Logger.log("Creating Memory", memory.id, memory.content.text);
+        data3Logger.log("Creating Memory", memory.id, memory.content.text);
 
         await this.runtime.databaseAdapter.createMemory(
             memory,

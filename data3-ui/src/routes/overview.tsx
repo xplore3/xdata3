@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api";
 import Overview from "@/components/overview";
 import { useParams } from "react-router";
-import type { UUID } from "@xdata3os/agentcontext";
+import type { UUID } from "@data3os/agentcontext";
 
 export default function AgentRoute() {
     const { agentId } = useParams<{ agentId: UUID }>();

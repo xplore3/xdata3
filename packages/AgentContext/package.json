@@ -1,5 +1,5 @@
 {
-    "name": "@xdata3os/agentcontext",
+    "name": "@data3os/agentcontext",
     "version": "0.25.9",
     "description": "",
     "type": "module",
@@ -10,7 +10,7 @@
         "./package.json": "./package.json",
         ".": {
             "import": {
-                "@xdata3os/source": "./src/index.ts",
+                "@data3os/source": "./src/index.ts",
                 "types": "./dist/index.d.ts",
                 "default": "./dist/index.js"
             }

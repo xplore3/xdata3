@@ -1,4 +1,4 @@
-import type { Character } from "@xdata3os/agentcontext";
+import type { Character } from "@data3os/agentcontext";
 import ArrayInput from "@/components/array-input";
 import InputCopy from "@/components/input-copy";
 import PageTitle from "./page-title";

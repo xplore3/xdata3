@@ -1,5 +1,5 @@
 {
-    "name": "xdata3-protocols",
+    "name": "data3-protocols",
     "version": "0.25.9",
     "main": "dist/index.js",
     "module": "dist/index.js",
@@ -9,7 +9,7 @@
         "./package.json": "./package.json",
         ".": {
             "import": {
-                "@xdata3os/source": "./src/index.ts",
+                "@data3os/source": "./src/index.ts",
                 "types": "./dist/index.d.ts",
                 "default": "./dist/index.js"
             }
@@ -19,8 +19,8 @@
         "dist"
     ],
     "dependencies": {
-        "@xdata3os/agentcontext": "workspace:*",
-        "xdata3-scraper": "workspace:*",
+        "@data3os/agentcontext": "workspace:*",
+        "data3-scraper": "workspace:*",
         "axios": "^1.8.4"
     },
     "devDependencies": {

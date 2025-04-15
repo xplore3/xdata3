@@ -1,6 +1,6 @@
-import { composeContext, xdata3Logger } from "@xdata3os/agentcontext";
-import { generateMessageResponse, generateTrueOrFalse } from "@xdata3os/agentcontext";
-import { booleanFooter, messageCompletionFooter } from "@xdata3os/agentcontext";
+import { composeContext, data3Logger } from "@data3os/agentcontext";
+import { generateMessageResponse, generateTrueOrFalse } from "@data3os/agentcontext";
+import { booleanFooter, messageCompletionFooter } from "@data3os/agentcontext";
 import {
     type Action,
     type ActionExample,
@@ -10,7 +10,7 @@ import {
     type Memory,
     ModelClass,
     type State,
-} from "@xdata3os/agentcontext";
+} from "@data3os/agentcontext";
 
 const maxContinuesInARow = 3;
 
@@ -118,14 +118,14 @@ export const continueAction: Action = {
                 .filter((m: Memory) => m.content?.action === "CONTINUE").length;
 
             if (continueCount >= maxContinuesInARow) {
-                xdata3Logger.log(
+                data3Logger.log(
                     `[CONTINUE] Max continues (${maxContinuesInARow}) reached for this message chain`
                 );
                 return;
             }
 
             if (lastAgentMessage.content?.action !== "CONTINUE") {
-                xdata3Logger.log(
+                data3Logger.log(
                     `[CONTINUE] Last message wasn't a CONTINUE, preventing double response`
                 );
                 return;
@@ -141,7 +141,7 @@ export const continueAction: Action = {
             message.content.text.endsWith("?") ||
             message.content.text.endsWith("!")
         ) {
-            xdata3Logger.log(
+            data3Logger.log(
                 `[CONTINUE] Last message had question/exclamation. Not proceeding.`
             );
             return;
@@ -177,7 +177,7 @@ export const continueAction: Action = {
         // Use AI to determine if we should continue
         const shouldContinue = await _shouldContinue(state);
         if (!shouldContinue) {
-            xdata3Logger.log("[CONTINUE] Not elaborating, returning");
+            data3Logger.log("[CONTINUE] Not elaborating, returning");
             return;
         }
 

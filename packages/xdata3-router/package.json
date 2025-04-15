@@ -1,5 +1,5 @@
 {
-    "name": "@xdata3os/xdata3-router",
+    "name": "@data3os/data3-router",
     "version": "0.25.9",
     "main": "dist/index.js",
     "module": "dist/index.js",
@@ -9,7 +9,7 @@
         "./package.json": "./package.json",
         ".": {
             "import": {
-                "@xdata3os/source": "./src/index.ts",
+                "@data3os/source": "./src/index.ts",
                 "types": "./dist/index.d.ts",
                 "default": "./dist/index.js"
             }
@@ -19,8 +19,8 @@
         "dist"
     ],
     "dependencies": {
-        "@xdata3os/agentcontext": "workspace:*",
-        "xdata3-protocols":"workspace:*",
+        "@data3os/agentcontext": "workspace:*",
+        "data3-protocols":"workspace:*",
         "@types/body-parser": "1.19.5",
         "@types/cors": "2.8.17",
         "body-parser": "1.20.3",

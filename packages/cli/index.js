@@ -10,8 +10,8 @@ const { version } = require('./package.json')
 
 const pluginPkgPath = (pluginRepo) => {
   const parts = pluginRepo.split('/')
-  const xdata3OSroot = pathUtil.resolve(__dirname, '../..')
-  const pkgPath = xdata3OSroot + '/packages/' + parts[1]
+  const data3OSroot = pathUtil.resolve(__dirname, '../..')
+  const pkgPath = data3OSroot + '/packages/' + parts[1]
   return pkgPath
 }
 
@@ -22,16 +22,16 @@ const isPluginInstalled = (pluginRepo) => {
 }
 
 program
-  .name('xdata3os')
-  .description('xdata3OS CLI - Manage your plugins')
+  .name('data3os')
+  .description('data3OS CLI - Manage your plugins')
   .version(version);
 
 const pluginsCmd = new Command()
   .name('plugins')
-  .description('manage xdata3OS plugins')
+  .description('manage data3OS plugins')
 
 async function getPlugins() {
-  const resp = await fetch('https://raw.githubusercontent.com/xdata3os-plugins/registry/refs/heads/main/index.json')
+  const resp = await fetch('https://raw.githubusercontent.com/data3os-plugins/registry/refs/heads/main/index.json')
   return await resp.json();
 }
 
@@ -78,13 +78,13 @@ pluginsCmd
     const plugins = await getPlugins()
 
     // ensure prefix
-    const pluginName = '@xdata3os-plugins/' + plugin.replace(/^@xdata3os-plugins\//, '')
-    const namePart = pluginName.replace(/^@xdata3os-plugins\//, '')
-    const xdata3OSroot = pathUtil.resolve(__dirname, '../..')
+    const pluginName = '@data3os-plugins/' + plugin.replace(/^@data3os-plugins\//, '')
+    const namePart = pluginName.replace(/^@data3os-plugins\//, '')
+    const data3OSroot = pathUtil.resolve(__dirname, '../..')
 
     let repo = ''
     if (namePart === 'plugin-trustdb') {
-      repo = 'xdata3os-plugins/plugin-trustdb'
+      repo = 'data3os-plugins/plugin-trustdb'
     } else {
       const repoData = plugins[pluginName]?.split(':')
       if (!repoData) {
@@ -98,7 +98,7 @@ pluginsCmd
       }
       repo = repoData[1]
     }
-    const pkgPath = xdata3OSroot + '/packages/' + namePart
+    const pkgPath = data3OSroot + '/packages/' + namePart
 
     // add to packages
     if (!fs.existsSync(pkgPath + '/package.json')) {
@@ -117,12 +117,12 @@ pluginsCmd
     const updateDependencies = (deps) => {
       if (!deps) return false
       let changed = false
-      const okPackages = ['@xdata3os/xdata3-router', '@xdata3os/agentcontext', '@xdata3os/plugin-bootstrap']
+      const okPackages = ['@data3os/data3-router', '@data3os/agentcontext', '@data3os/plugin-bootstrap']
       for (const dep in deps) {
         if (okPackages.indexOf(dep) !== -1) continue // skip these, they're fine
         // do we want/need to perserve local packages like core?
-        if (dep.startsWith("@xdata3os/")) {
-          const newDep = dep.replace("@xdata3os/", "@xdata3os-plugins/")
+        if (dep.startsWith("@data3os/")) {
+          const newDep = dep.replace("@data3os/", "@data3os-plugins/")
           deps[newDep] = deps[dep]
           delete deps[dep]
           changed = true
@@ -131,7 +131,7 @@ pluginsCmd
       return changed
     }
 
-    // normalize @xdata3os => @xdata3os-plugins
+    // normalize @data3os => @data3os-plugins
     if (updateDependencies(packageJson.dependencies)) {
       console.log('updating plugin\'s package.json to not use @elizos/ for dependencies')
       fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + "\n")
@@ -139,11 +139,11 @@ pluginsCmd
     }
     //console.log('packageJson', packageJson.dependencies)
     for(const d in packageJson.dependencies) {
-      if (d.match(/@xdata3os-plugins/)) {
+      if (d.match(/@data3os-plugins/)) {
         // do we have this plugin?
         console.log('attempting installation of dependency', d)
         try {
-          const pluginAddDepOutput = execSync('npx xdata3os plugins add ' + d, { cwd: xdata3OSroot, stdio: 'pipe' }).toString().trim();
+          const pluginAddDepOutput = execSync('npx data3os plugins add ' + d, { cwd: data3OSroot, stdio: 'pipe' }).toString().trim();
           //console.log('pluginAddDepOutput', pluginAddDepOutput)
         } catch (e) {
           console.error('pluginAddDepOutput error', e)
@@ -152,15 +152,15 @@ pluginsCmd
     }
 
     // add core to plugin
-    // # pnpm add @xdata3os/agentcontext@workspace:* --filter ./packages/client-twitter
+    // # pnpm add @data3os/agentcontext@workspace:* --filter ./packages/client-twitter
 
     // ok this can be an issue if it's referencing a plugin it couldn't be
-    console.log('Making sure plugin has access to @xdata3os/agentcontext')
-    const pluginAddCoreOutput = execSync('pnpm add @xdata3os/agentcontext@workspace:* --filter ./packages/' + namePart, { cwd: xdata3OSroot, stdio: 'pipe' }).toString().trim();
+    console.log('Making sure plugin has access to @data3os/agentcontext')
+    const pluginAddCoreOutput = execSync('pnpm add @data3os/agentcontext@workspace:* --filter ./packages/' + namePart, { cwd: data3OSroot, stdio: 'pipe' }).toString().trim();
 
-    if (packageJson.name !== '@xdata3os-plugins/' + namePart) {
+    if (packageJson.name !== '@data3os-plugins/' + namePart) {
       // Update the name field
-      packageJson.name = '@xdata3os-plugins/' + namePart
+      packageJson.name = '@data3os-plugins/' + namePart
       console.log('Updating plugins package.json name to', packageJson.name)
 
       // Write the updated package.json back to disk
@@ -168,13 +168,13 @@ pluginsCmd
     }
 
     // add to agent
-    const agentPackageJsonPath = xdata3OSroot + '/agent/package.json'
+    const agentPackageJsonPath = data3OSroot + '/agent/package.json'
     const agentPackageJson = JSON.parse(fs.readFileSync(agentPackageJsonPath, 'utf-8'));
     //console.log('agentPackageJson', agentPackageJson.dependencies[pluginName])
     if (!agentPackageJson.dependencies[pluginName]) {
       console.log('Adding plugin', plugin, 'to agent/package.json')
       try {
-        const pluginAddAgentOutput = execSync('pnpm add ' + pluginName + '@workspace:* --filter ./agent', { cwd: xdata3OSroot, stdio: 'pipe' }).toString().trim();
+        const pluginAddAgentOutput = execSync('pnpm add ' + pluginName + '@workspace:* --filter ./agent', { cwd: data3OSroot, stdio: 'pipe' }).toString().trim();
         //console.log('pluginAddAgentOutput', pluginAddAgentOutput)
       } catch (e) {
         console.error('error', e)
@@ -195,15 +195,15 @@ pluginsCmd
   .argument("<plugin>", "plugin name")
   .action(async (plugin, opts) => {
     // ensure prefix
-    const pluginName = '@xdata3os-plugins/' + plugin.replace(/^@xdata3os-plugins\//, '')
-    const namePart = pluginName.replace(/^@xdata3os-plugins\//, '')
-    const xdata3OSroot = pathUtil.resolve(__dirname, '../..')
-    const pkgPath = xdata3OSroot + '/packages/' + namePart
+    const pluginName = '@data3os-plugins/' + plugin.replace(/^@data3os-plugins\//, '')
+    const namePart = pluginName.replace(/^@data3os-plugins\//, '')
+    const data3OSroot = pathUtil.resolve(__dirname, '../..')
+    const pkgPath = data3OSroot + '/packages/' + namePart
     const plugins = await getPlugins()
 
     let repo = ''
     if (namePart === 'plugin-trustdb') {
-      repo = 'xdata3os-plugins/plugin-trustdb'
+      repo = 'data3os-plugins/plugin-trustdb'
     } else {
       //console.log('loaded', plugins.length, plugins)
       const repoData = plugins[pluginName]?.split(':')
@@ -218,7 +218,7 @@ pluginsCmd
     // remove from agent: pnpm remove some-plugin --filter ./agent
     try {
       console.log('Removing', pluginName, 'from agent')
-      const pluginRemoveAgentOutput = execSync('pnpm remove ' + pluginName + ' --filter ./agent', { cwd: xdata3OSroot, stdio: 'pipe' }).toString().trim();
+      const pluginRemoveAgentOutput = execSync('pnpm remove ' + pluginName + ' --filter ./agent', { cwd: data3OSroot, stdio: 'pipe' }).toString().trim();
     } catch (e) {
       console.error('removal from agent, error', e)
     }

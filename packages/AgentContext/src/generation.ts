@@ -18,7 +18,7 @@ import { encodingForModel, type TiktokenModel } from "js-tiktoken";
 // import { AutoTokenizer } from "@huggingface/transformers";
 import Together from "together-ai";
 import type { ZodSchema } from "zod";
-import { xdata3Logger } from "./index.ts";
+import { data3Logger } from "./index.ts";
 import {
     models,
     getModelSettings,
@@ -127,7 +127,7 @@ export async function trimTokens(
         );
     }
 
-    xdata3Logger.warn(`Unsupported tokenizer type: ${tokenizerType}`);
+    data3Logger.warn(`Unsupported tokenizer type: ${tokenizerType}`);
     return truncateTiktoken("gpt-4o", context, maxTokens);
 }
 
@@ -151,7 +151,7 @@ export async function trimTokens(
 //         // Decode back to text - js-tiktoken decode() returns a string directly
 //         return tokenizer.decode(truncatedTokens);
 //     } catch (error) {
-//         xdata3Logger.error("Error in trimTokens:", error);
+//         data3Logger.error("Error in trimTokens:", error);
 //         // Return truncated string if tokenization fails
 //         return context.slice(-maxTokens * 4); // Rough estimate of 4 chars per token
 //     }
@@ -179,7 +179,7 @@ async function truncateTiktoken(
         // Decode back to text - js-tiktoken decode() returns a string directly
         return encoding.decode(truncatedTokens);
     } catch (error) {
-        xdata3Logger.error("Error in trimTokens:", error);
+        data3Logger.error("Error in trimTokens:", error);
         // Return truncated string if tokenization fails
         return context.slice(-maxTokens * 4); // Rough estimate of 4 chars per token
     }
@@ -231,17 +231,17 @@ async function getOnChainEternalAISystemPrompt(
                 args: [new BigNumber(agentId)],
             });
             if (result) {
-                xdata3Logger.info("on-chain system-prompt response", result[0]);
+                data3Logger.info("on-chain system-prompt response", result[0]);
                 const value = result[0].toString().replace("0x", "");
                 const content = Buffer.from(value, "hex").toString("utf-8");
-                xdata3Logger.info("on-chain system-prompt", content);
+                data3Logger.info("on-chain system-prompt", content);
                 return await fetchEternalAISystemPrompt(runtime, content);
             } else {
                 return undefined;
             }
         } catch (error) {
-            xdata3Logger.error(error);
-            xdata3Logger.error("err", error);
+            data3Logger.error(error);
+            data3Logger.error("err", error);
         }
     }
     return undefined;
@@ -262,11 +262,11 @@ async function fetchEternalAISystemPrompt(
             IPFS,
             "https://gateway.lighthouse.storage/ipfs/"
         );
-        xdata3Logger.info("fetch lightHouse", lightHouse);
+        data3Logger.info("fetch lightHouse", lightHouse);
         const responseLH = await fetch(lightHouse, {
             method: "GET",
         });
-        xdata3Logger.info("fetch lightHouse resp", responseLH);
+        data3Logger.info("fetch lightHouse resp", responseLH);
         if (responseLH.ok) {
             const data = await responseLH.text();
             return data;
@@ -275,11 +275,11 @@ async function fetchEternalAISystemPrompt(
                 IPFS,
                 "https://cdn.eternalai.org/upload/"
             );
-            xdata3Logger.info("fetch gcs", gcs);
+            data3Logger.info("fetch gcs", gcs);
             const responseGCS = await fetch(gcs, {
                 method: "GET",
             });
-            xdata3Logger.info("fetch lightHouse gcs", responseGCS);
+            data3Logger.info("fetch lightHouse gcs", responseGCS);
             if (responseGCS.ok) {
                 const data = await responseGCS.text();
                 return data;
@@ -307,7 +307,7 @@ function getCloudflareGatewayBaseURL(
     const cloudflareAccountId = runtime.getSetting("CLOUDFLARE_AI_ACCOUNT_ID");
     const cloudflareGatewayId = runtime.getSetting("CLOUDFLARE_AI_GATEWAY_ID");
 
-    xdata3Logger.debug("Cloudflare Gateway Configuration:", {
+    data3Logger.debug("Cloudflare Gateway Configuration:", {
         isEnabled: isCloudflareEnabled,
         hasAccountId: !!cloudflareAccountId,
         hasGatewayId: !!cloudflareGatewayId,
@@ -315,26 +315,26 @@ function getCloudflareGatewayBaseURL(
     });
 
     if (!isCloudflareEnabled) {
-        xdata3Logger.debug("Cloudflare Gateway is not enabled");
+        data3Logger.debug("Cloudflare Gateway is not enabled");
         return undefined;
     }
 
     if (!cloudflareAccountId) {
-        xdata3Logger.warn(
+        data3Logger.warn(
             "Cloudflare Gateway is enabled but CLOUDFLARE_AI_ACCOUNT_ID is not set"
         );
         return undefined;
     }
 
     if (!cloudflareGatewayId) {
-        xdata3Logger.warn(
+        data3Logger.warn(
             "Cloudflare Gateway is enabled but CLOUDFLARE_AI_GATEWAY_ID is not set"
         );
         return undefined;
     }
 
     const baseURL = `https://gateway.ai.cloudflare.com/v1/${cloudflareAccountId}/${cloudflareGatewayId}/${provider.toLowerCase()}`;
-    xdata3Logger.info("Using Cloudflare Gateway:", {
+    data3Logger.info("Using Cloudflare Gateway:", {
         provider,
         baseURL,
         accountId: cloudflareAccountId,
@@ -386,17 +386,17 @@ export async function generateText({
         return "";
     }
 
-    xdata3Logger.log("Generating text...");
+    data3Logger.log("Generating text...");
 
-    xdata3Logger.info("Generating text with options:", {
+    data3Logger.info("Generating text with options:", {
         modelProvider: runtime.modelProvider,
         model: modelClass,
         // verifiableInference,
     });
-    xdata3Logger.log("Using provider:", runtime.modelProvider);
+    data3Logger.log("Using provider:", runtime.modelProvider);
     // If verifiable inference is requested and adapter is provided, use it
     // if (verifiableInference && runtime.verifiableInferenceAdapter) {
-    //     xdata3Logger.log(
+    //     data3Logger.log(
     //         "Using verifiable inference adapter:",
     //         runtime.verifiableInferenceAdapter
     //     );
@@ -407,7 +407,7 @@ export async function generateText({
     //                 modelClass,
     //                 verifiableInferenceOptions
     //             );
-    //         xdata3Logger.log("Verifiable inference result:", result);
+    //         data3Logger.log("Verifiable inference result:", result);
     //         // Verify the proof
     //         const isValid =
     //             await runtime.verifiableInferenceAdapter.verifyProof(result);
@@ -417,13 +417,13 @@ export async function generateText({
 
     //         return result.text;
     //     } catch (error) {
-    //         xdata3Logger.error("Error in verifiable inference:", error);
+    //         data3Logger.error("Error in verifiable inference:", error);
     //         throw error;
     //     }
     // }
 
     const provider = runtime.modelProvider;
-    xdata3Logger.debug("Provider settings:", {
+    data3Logger.debug("Provider settings:", {
         provider,
         hasRuntime: !!runtime,
         runtimeSettings: {
@@ -508,7 +508,7 @@ export async function generateText({
             break;
     }
 
-    xdata3Logger.info("Selected model:", model);
+    data3Logger.info("Selected model:", model);
 
     const modelConfiguration = runtime.character?.settings?.modelConfig;
     const temperature =
@@ -529,7 +529,7 @@ export async function generateText({
     const apiKey = runtime.token;
 
     try {
-        xdata3Logger.debug(
+        data3Logger.debug(
             `Trimming context to max length of ${max_context_length} tokens.`
         );
 
@@ -538,7 +538,7 @@ export async function generateText({
         let response: string;
 
         const _stop = stop || modelSettings.stop;
-        xdata3Logger.debug(
+        data3Logger.debug(
             `Using provider: ${provider}, model: ${model}, temperature: ${temperature}, max response length: ${max_response_length}`
         );
 
@@ -555,13 +555,13 @@ export async function generateText({
             case ModelProviderName.AKASH_CHAT_API:
             case ModelProviderName.LMSTUDIO:
             case ModelProviderName.NEARAI: {
-                xdata3Logger.debug(
+                data3Logger.debug(
                     "Initializing OpenAI model with Cloudflare check"
                 );
                 const baseURL =
                     getCloudflareGatewayBaseURL(runtime, "openai") || endpoint;
 
-                //xdata3Logger.debug("OpenAI baseURL result:", { baseURL });
+                //data3Logger.debug("OpenAI baseURL result:", { baseURL });
                 const openai = createOpenAI({
                     apiKey,
                     baseURL,
@@ -591,7 +591,7 @@ export async function generateText({
             }
 
             case ModelProviderName.ETERNALAI: {
-                xdata3Logger.debug("Initializing EternalAI model.");
+                data3Logger.debug("Initializing EternalAI model.");
                 const openai = createOpenAI({
                     apiKey,
                     baseURL: endpoint,
@@ -620,20 +620,20 @@ export async function generateText({
                                 runtime.getSetting("ETERNALAI_LOG")
                             )
                         ) {
-                            xdata3Logger.info(
+                            data3Logger.info(
                                 "Request data: ",
                                 JSON.stringify(options, null, 2)
                             );
                             const clonedResponse = fetching.clone();
                             try {
                                 clonedResponse.json().then((data) => {
-                                    xdata3Logger.info(
+                                    data3Logger.info(
                                         "Response data: ",
                                         JSON.stringify(data, null, 2)
                                     );
                                 });
                             } catch (e) {
-                                xdata3Logger.debug(e);
+                                data3Logger.debug(e);
                             }
                         }
                         return fetching;
@@ -648,18 +648,18 @@ export async function generateText({
                     const on_chain_system_prompt =
                         await getOnChainEternalAISystemPrompt(runtime);
                     if (!on_chain_system_prompt) {
-                        xdata3Logger.error(
+                        data3Logger.error(
                             new Error("invalid on_chain_system_prompt")
                         );
                     } else {
                         system_prompt = on_chain_system_prompt;
-                        xdata3Logger.info(
+                        data3Logger.info(
                             "new on-chain system prompt",
                             system_prompt
                         );
                     }
                 } catch (e) {
-                    xdata3Logger.error(e);
+                    data3Logger.error(e);
                 }
 
                 const { text: openaiResponse } = await aiGenerateText({
@@ -673,7 +673,7 @@ export async function generateText({
                 });
 
                 response = openaiResponse;
-                xdata3Logger.debug("Received response from EternalAI model.");
+                data3Logger.debug("Received response from EternalAI model.");
                 break;
             }
 
@@ -701,7 +701,7 @@ export async function generateText({
                 });
 
                 response = googleResponse;
-                xdata3Logger.debug("Received response from Google model.");
+                data3Logger.debug("Received response from Google model.");
                 break;
             }
 
@@ -722,18 +722,18 @@ export async function generateText({
                 });
 
                 response = mistralResponse;
-                xdata3Logger.debug("Received response from Mistral model.");
+                data3Logger.debug("Received response from Mistral model.");
                 break;
             }
 
             case ModelProviderName.ANTHROPIC: {
-                xdata3Logger.debug(
+                data3Logger.debug(
                     "Initializing Anthropic model with Cloudflare check"
                 );
                 const baseURL =
                     getCloudflareGatewayBaseURL(runtime, "anthropic") ||
                     "https://api.anthropic.com/v1";
-                xdata3Logger.debug("Anthropic baseURL result:", { baseURL });
+                data3Logger.debug("Anthropic baseURL result:", { baseURL });
 
                 const anthropic = createAnthropic({
                     apiKey,
@@ -758,12 +758,12 @@ export async function generateText({
                 });
 
                 response = anthropicResponse;
-                xdata3Logger.debug("Received response from Anthropic model.");
+                data3Logger.debug("Received response from Anthropic model.");
                 break;
             }
 
             case ModelProviderName.CLAUDE_VERTEX: {
-                xdata3Logger.debug("Initializing Claude Vertex model.");
+                data3Logger.debug("Initializing Claude Vertex model.");
 
                 const anthropic = createAnthropic({
                     apiKey,
@@ -788,14 +788,14 @@ export async function generateText({
                 });
 
                 response = anthropicResponse;
-                xdata3Logger.debug(
+                data3Logger.debug(
                     "Received response from Claude Vertex model."
                 );
                 break;
             }
 
             case ModelProviderName.GROK: {
-                xdata3Logger.debug("Initializing Grok model.");
+                data3Logger.debug("Initializing Grok model.");
                 const grok = createOpenAI({
                     apiKey,
                     baseURL: endpoint,
@@ -822,16 +822,16 @@ export async function generateText({
                 });
 
                 response = grokResponse;
-                xdata3Logger.debug("Received response from Grok model.");
+                data3Logger.debug("Received response from Grok model.");
                 break;
             }
 
             case ModelProviderName.GROQ: {
-                xdata3Logger.debug(
+                data3Logger.debug(
                     "Initializing Groq model with Cloudflare check"
                 );
                 const baseURL = getCloudflareGatewayBaseURL(runtime, "groq");
-                xdata3Logger.debug("Groq baseURL result:", { baseURL });
+                data3Logger.debug("Groq baseURL result:", { baseURL });
                 const groq = createGroq({
                     apiKey,
                     fetch: runtime.fetch,
@@ -856,12 +856,12 @@ export async function generateText({
                 });
 
                 response = groqResponse;
-                xdata3Logger.debug("Received response from Groq model.");
+                data3Logger.debug("Received response from Groq model.");
                 break;
             }
 
             case ModelProviderName.LLAMALOCAL: {
-                xdata3Logger.debug(
+                data3Logger.debug(
                     "Using local Llama model for text completion."
                 );
                 const textGenerationService =
@@ -881,12 +881,12 @@ export async function generateText({
                     presence_penalty,
                     max_response_length
                 );
-                xdata3Logger.debug("Received response from local Llama model.");
+                data3Logger.debug("Received response from local Llama model.");
                 break;
             }
 
             case ModelProviderName.REDPILL: {
-                xdata3Logger.debug("Initializing RedPill model.");
+                data3Logger.debug("Initializing RedPill model.");
                 const serverUrl = getEndpoint(provider);
                 const openai = createOpenAI({
                     apiKey,
@@ -912,12 +912,12 @@ export async function generateText({
                 });
 
                 response = redpillResponse;
-                xdata3Logger.debug("Received response from redpill model.");
+                data3Logger.debug("Received response from redpill model.");
                 break;
             }
 
             case ModelProviderName.OPENROUTER: {
-                xdata3Logger.debug("Initializing OpenRouter model.");
+                data3Logger.debug("Initializing OpenRouter model.");
                 const serverUrl = getEndpoint(provider);
                 const openrouter = createOpenAI({
                     apiKey,
@@ -943,13 +943,13 @@ export async function generateText({
                 });
 
                 response = openrouterResponse;
-                xdata3Logger.debug("Received response from OpenRouter model.");
+                data3Logger.debug("Received response from OpenRouter model.");
                 break;
             }
 
             case ModelProviderName.OLLAMA:
                 {
-                    xdata3Logger.debug("Initializing Ollama model.");
+                    data3Logger.debug("Initializing Ollama model.");
 
                     const ollamaProvider = createOllama({
                         baseURL: getEndpoint(provider) + "/api",
@@ -957,7 +957,7 @@ export async function generateText({
                     });
                     const ollama = ollamaProvider(model);
 
-                    xdata3Logger.debug("****** MODEL\n", model);
+                    data3Logger.debug("****** MODEL\n", model);
 
                     const { text: ollamaResponse } = await aiGenerateText({
                         model: ollama,
@@ -977,11 +977,11 @@ export async function generateText({
                         ""
                     );
                 }
-                xdata3Logger.debug("Received response from Ollama model.");
+                data3Logger.debug("Received response from Ollama model.");
                 break;
 
             case ModelProviderName.HEURIST: {
-                xdata3Logger.debug("Initializing Heurist model.");
+                data3Logger.debug("Initializing Heurist model.");
                 const heurist = createOpenAI({
                     apiKey: apiKey,
                     baseURL: endpoint,
@@ -1007,11 +1007,11 @@ export async function generateText({
                 });
 
                 response = heuristResponse;
-                xdata3Logger.debug("Received response from Heurist model.");
+                data3Logger.debug("Received response from Heurist model.");
                 break;
             }
             case ModelProviderName.GAIANET: {
-                xdata3Logger.debug("Initializing GAIANET model.");
+                data3Logger.debug("Initializing GAIANET model.");
 
                 var baseURL = getEndpoint(provider);
                 if (!baseURL) {
@@ -1034,7 +1034,7 @@ export async function generateText({
                     }
                 }
 
-                xdata3Logger.debug("Using GAIANET model with baseURL:", baseURL);
+                data3Logger.debug("Using GAIANET model with baseURL:", baseURL);
 
                 const openai = createOpenAI({
                     apiKey,
@@ -1060,12 +1060,12 @@ export async function generateText({
                 });
 
                 response = openaiResponse;
-                xdata3Logger.debug("Received response from GAIANET model.");
+                data3Logger.debug("Received response from GAIANET model.");
                 break;
             }
 
             case ModelProviderName.ATOMA: {
-                xdata3Logger.debug("Initializing Atoma model.");
+                data3Logger.debug("Initializing Atoma model.");
                 const atoma = createOpenAI({
                     apiKey,
                     baseURL: endpoint,
@@ -1090,12 +1090,12 @@ export async function generateText({
                 });
 
                 response = atomaResponse;
-                xdata3Logger.debug("Received response from Atoma model.");
+                data3Logger.debug("Received response from Atoma model.");
                 break;
             }
 
             case ModelProviderName.GALADRIEL: {
-                xdata3Logger.debug("Initializing Galadriel model.");
+                data3Logger.debug("Initializing Galadriel model.");
                 const headers = {};
                 const fineTuneApiKey = runtime.getSetting(
                     "GALADRIEL_FINE_TUNE_API_KEY"
@@ -1128,12 +1128,12 @@ export async function generateText({
                 });
 
                 response = galadrielResponse;
-                xdata3Logger.debug("Received response from Galadriel model.");
+                data3Logger.debug("Received response from Galadriel model.");
                 break;
             }
 
             case ModelProviderName.INFERA: {
-                xdata3Logger.debug("Initializing Infera model.");
+                data3Logger.debug("Initializing Infera model.");
 
                 const apiKey = settings.INFERA_API_KEY || runtime.token;
 
@@ -1159,12 +1159,12 @@ export async function generateText({
                     presencePenalty: presence_penalty,
                 });
                 response = inferaResponse;
-                xdata3Logger.debug("Received response from Infera model.");
+                data3Logger.debug("Received response from Infera model.");
                 break;
             }
 
             case ModelProviderName.VENICE: {
-                xdata3Logger.debug("Initializing Venice model.");
+                data3Logger.debug("Initializing Venice model.");
                 const venice = createOpenAI({
                     apiKey: apiKey,
                     baseURL: endpoint,
@@ -1194,12 +1194,12 @@ export async function generateText({
                 // console.warn(response)
 
                 // response = veniceResponse;
-                xdata3Logger.debug("Received response from Venice model.");
+                data3Logger.debug("Received response from Venice model.");
                 break;
             }
 
             case ModelProviderName.NVIDIA: {
-                xdata3Logger.debug("Initializing NVIDIA model.");
+                data3Logger.debug("Initializing NVIDIA model.");
                 const nvidia = createOpenAI({
                     apiKey: apiKey,
                     baseURL: endpoint,
@@ -1220,12 +1220,12 @@ export async function generateText({
                 });
 
                 response = nvidiaResponse;
-                xdata3Logger.debug("Received response from NVIDIA model.");
+                data3Logger.debug("Received response from NVIDIA model.");
                 break;
             }
 
             case ModelProviderName.DEEPSEEK: {
-                xdata3Logger.debug("Initializing Deepseek model.");
+                data3Logger.debug("Initializing Deepseek model.");
                 const serverUrl = models[provider].endpoint;
                 const deepseek = createOpenAI({
                     apiKey,
@@ -1251,12 +1251,12 @@ export async function generateText({
                 });
 
                 response = deepseekResponse;
-                xdata3Logger.debug("Received response from Deepseek model.");
+                data3Logger.debug("Received response from Deepseek model.");
                 break;
             }
 
             case ModelProviderName.LIVEPEER: {
-                xdata3Logger.debug("Initializing Livepeer model.");
+                data3Logger.debug("Initializing Livepeer model.");
 
                 if (!endpoint) {
                     throw new Error("Livepeer Gateway URL is not defined");
@@ -1286,7 +1286,7 @@ export async function generateText({
                     headers: {
                         accept: "text/event-stream",
                         "Content-Type": "application/json",
-                        Authorization: "Bearer xdata3-app-llm",
+                        Authorization: "Bearer data3-app-llm",
                     },
                     body: JSON.stringify(requestBody),
                 });
@@ -1308,7 +1308,7 @@ export async function generateText({
                     /<\|start_header_id\|>assistant<\|end_header_id\|>\n\n/,
                     ""
                 );
-                xdata3Logger.debug(
+                data3Logger.debug(
                     "Successfully received response from Livepeer model"
                 );
                 break;
@@ -1316,7 +1316,7 @@ export async function generateText({
 
             case ModelProviderName.SECRETAI:
                 {
-                    xdata3Logger.debug("Initializing SecretAI model.");
+                    data3Logger.debug("Initializing SecretAI model.");
 
                     const secretAiProvider = createOllama({
                         baseURL: getEndpoint(provider) + "/api",
@@ -1343,7 +1343,7 @@ export async function generateText({
                 break;
 
             case ModelProviderName.BEDROCK: {
-                xdata3Logger.debug("Initializing Bedrock model.");
+                data3Logger.debug("Initializing Bedrock model.");
 
                 const { text: bedrockResponse } = await aiGenerateText({
                     model: bedrock(model),
@@ -1357,20 +1357,20 @@ export async function generateText({
                 });
 
                 response = bedrockResponse;
-                xdata3Logger.debug("Received response from Bedrock model.");
+                data3Logger.debug("Received response from Bedrock model.");
                 break;
             }
 
             default: {
                 const errorMessage = `Unsupported provider: ${provider}`;
-                xdata3Logger.error(errorMessage);
+                data3Logger.error(errorMessage);
                 throw new Error(errorMessage);
             }
         }
 
         return response;
     } catch (error) {
-        xdata3Logger.error("Error in generateText:", error);
+        data3Logger.error("Error in generateText:", error);
         throw error;
     }
 }
@@ -1401,7 +1401,7 @@ export async function generateShouldRespond({
     let retryDelay = 1000;
     while (true) {
         try {
-            xdata3Logger.debug(
+            data3Logger.debug(
                 "Attempting to generate text with context:",
                 context
             );
@@ -1411,27 +1411,27 @@ export async function generateShouldRespond({
                 modelClass,
             });
 
-            xdata3Logger.debug("Received response from generateText:", response);
+            data3Logger.debug("Received response from generateText:", response);
             const parsedResponse = parseShouldRespondFromText(response.trim());
             if (parsedResponse) {
-                xdata3Logger.debug("Parsed response:", parsedResponse);
+                data3Logger.debug("Parsed response:", parsedResponse);
                 return parsedResponse;
             } else {
-                xdata3Logger.debug("generateShouldRespond no response");
+                data3Logger.debug("generateShouldRespond no response");
             }
         } catch (error) {
-            xdata3Logger.error("Error in generateShouldRespond:", error);
+            data3Logger.error("Error in generateShouldRespond:", error);
             if (
                 error instanceof TypeError &&
                 error.message.includes("queueTextCompletion")
             ) {
-                xdata3Logger.error(
+                data3Logger.error(
                     "TypeError: Cannot read properties of null (reading 'queueTextCompletion')"
                 );
             }
         }
 
-        xdata3Logger.log(`Retrying in ${retryDelay}ms...`);
+        data3Logger.log(`Retrying in ${retryDelay}ms...`);
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
         retryDelay *= 2;
     }
@@ -1449,31 +1449,31 @@ export async function splitChunks(
     chunkSize = 1500,
     bleed = 100
 ): Promise<string[]> {
-    xdata3Logger.debug(`[splitChunks] Starting text split`);
+    data3Logger.debug(`[splitChunks] Starting text split`);
 
     // Validate parameters
     if (chunkSize <= 0) {
-        xdata3Logger.warn(
+        data3Logger.warn(
             `Invalid chunkSize (${chunkSize}), using default 1500`
         );
         chunkSize = 1500;
     }
 
     if (bleed >= chunkSize) {
-        xdata3Logger.warn(
+        data3Logger.warn(
             `Bleed (${bleed}) >= chunkSize (${chunkSize}), adjusting bleed to 1/4 of chunkSize`
         );
         bleed = Math.floor(chunkSize / 4);
     }
 
     if (bleed < 0) {
-        xdata3Logger.warn(`Invalid bleed (${bleed}), using default 100`);
+        data3Logger.warn(`Invalid bleed (${bleed}), using default 100`);
         bleed = 100;
     }
 
     const chunks = splitText(content, chunkSize, bleed);
 
-    xdata3Logger.debug(`[splitChunks] Split complete:`, {
+    data3Logger.debug(`[splitChunks] Split complete:`, {
         numberOfChunks: chunks.length,
         averageChunkSize:
             chunks.reduce((acc, chunk) => acc + chunk.length, 0) /
@@ -1548,7 +1548,7 @@ export async function generateTrueOrFalse({
                 return parsedResponse;
             }
         } catch (error) {
-            xdata3Logger.error("Error in generateTrueOrFalse:", error);
+            data3Logger.error("Error in generateTrueOrFalse:", error);
         }
 
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
@@ -1581,7 +1581,7 @@ export async function generateTextArray({
     modelClass: ModelClass;
 }): Promise<string[]> {
     if (!context) {
-        xdata3Logger.error("generateTextArray context is empty");
+        data3Logger.error("generateTextArray context is empty");
         return [];
     }
     let retryDelay = 1000;
@@ -1599,7 +1599,7 @@ export async function generateTextArray({
                 return parsedResponse;
             }
         } catch (error) {
-            xdata3Logger.error("Error in generateTextArray:", error);
+            data3Logger.error("Error in generateTextArray:", error);
         }
 
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
@@ -1617,7 +1617,7 @@ export async function generateObjectDeprecated({
     modelClass: ModelClass;
 }): Promise<any> {
     if (!context) {
-        xdata3Logger.error("generateObjectDeprecated context is empty");
+        data3Logger.error("generateObjectDeprecated context is empty");
         return null;
     }
     let retryDelay = 1000;
@@ -1635,7 +1635,7 @@ export async function generateObjectDeprecated({
                 return parsedResponse;
             }
         } catch (error) {
-            xdata3Logger.error("Error in generateObject:", error);
+            data3Logger.error("Error in generateObject:", error);
         }
 
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
@@ -1653,7 +1653,7 @@ export async function generateObjectArray({
     modelClass: ModelClass;
 }): Promise<any[]> {
     if (!context) {
-        xdata3Logger.error("generateObjectArray context is empty");
+        data3Logger.error("generateObjectArray context is empty");
         return [];
     }
     let retryDelay = 1000;
@@ -1671,7 +1671,7 @@ export async function generateObjectArray({
                 return parsedResponse;
             }
         } catch (error) {
-            xdata3Logger.error("Error in generateTextArray:", error);
+            data3Logger.error("Error in generateTextArray:", error);
         }
 
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
@@ -1704,11 +1704,11 @@ export async function generateMessageResponse({
     const max_context_length = modelSettings.maxInputTokens;
 
     context = await trimTokens(context, max_context_length, runtime);
-    xdata3Logger.debug("Context:", context);
+    data3Logger.debug("Context:", context);
     let retryLength = 1000; // exponential backoff
     while (true) {
         try {
-            xdata3Logger.log("Generating message response..");
+            data3Logger.log("Generating message response..");
 
             const response = await generateText({
                 runtime,
@@ -1719,17 +1719,17 @@ export async function generateMessageResponse({
             // try parsing the response as JSON, if null then try again
             const parsedContent = parseJSONObjectFromText(response) as Content;
             if (!parsedContent) {
-                xdata3Logger.debug("parsedContent is null, retrying");
+                data3Logger.debug("parsedContent is null, retrying");
                 continue;
             }
 
             return parsedContent;
         } catch (error) {
-            xdata3Logger.error("ERROR:", error);
+            data3Logger.error("ERROR:", error);
             // wait for 2 seconds
             retryLength *= 2;
             await new Promise((resolve) => setTimeout(resolve, retryLength));
-            xdata3Logger.debug("Retrying...");
+            data3Logger.debug("Retrying...");
         }
     }
 }
@@ -1759,13 +1759,13 @@ export const generateImage = async (
 }> => {
     const modelSettings = getImageModelSettings(runtime.imageModelProvider);
     if (!modelSettings) {
-        xdata3Logger.warn(
+        data3Logger.warn(
             "No model settings found for the image model provider."
         );
         return { success: false, error: "No model settings available" };
     }
     const model = modelSettings.name;
-    xdata3Logger.info("Generating image with options:", {
+    data3Logger.info("Generating image with options:", {
         imageModelProvider: model,
     });
 
@@ -1803,7 +1803,7 @@ export const generateImage = async (
                               );
                               return JSON.stringify(config?.auth);
                           } catch (e) {
-                              xdata3Logger.warn(
+                              data3Logger.warn(
                                   `Error loading NEAR AI config. The environment variable NEARAI_API_KEY will be used. ${e}`
                               );
                           }
@@ -1889,7 +1889,7 @@ export const generateImage = async (
             const base64s = await Promise.all(
                 togetherResponse.data.map(async (image) => {
                     if (!image.url) {
-                        xdata3Logger.error("Missing URL in image data:", image);
+                        data3Logger.error("Missing URL in image data:", image);
                         throw new Error("Missing URL in Together AI response");
                     }
 
@@ -1915,7 +1915,7 @@ export const generateImage = async (
                 throw new Error("No images generated by Together AI");
             }
 
-            xdata3Logger.debug(`Generated ${base64s.length} images`);
+            data3Logger.debug(`Generated ${base64s.length} images`);
             return { success: true, data: base64s };
         } else if (runtime.imageModelProvider === ModelProviderName.FAL) {
             fal.config({
@@ -1955,7 +1955,7 @@ export const generateImage = async (
                 logs: true,
                 onQueueUpdate: (update) => {
                     if (update.status === "IN_PROGRESS") {
-                        xdata3Logger.info(update.logs.map((log) => log.message));
+                        data3Logger.info(update.logs.map((log) => log.message));
                     }
                 },
             });
@@ -2066,7 +2066,7 @@ export const generateImage = async (
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
-                            Authorization: "Bearer xdata3-app-img",
+                            Authorization: "Bearer data3-app-img",
                         },
                         body: JSON.stringify({
                             model_id:
@@ -2338,7 +2338,7 @@ export async function handleProvider(
             return await handleBedrock(options);
         default: {
             const errorMessage = `Unsupported provider: ${provider}`;
-            xdata3Logger.error(errorMessage);
+            data3Logger.error(errorMessage);
             throw new Error(errorMessage);
         }
     }
@@ -2393,13 +2393,13 @@ async function handleAnthropic({
     modelOptions,
     runtime,
 }: ProviderOptions): Promise<GenerationResult> {
-    xdata3Logger.debug("Handling Anthropic request with Cloudflare check");
+    data3Logger.debug("Handling Anthropic request with Cloudflare check");
     if (mode === "json") {
-        xdata3Logger.warn("Anthropic mode is set to json, changing to auto");
+        data3Logger.warn("Anthropic mode is set to json, changing to auto");
         mode = "auto";
     }
     const baseURL = getCloudflareGatewayBaseURL(runtime, "anthropic");
-    xdata3Logger.debug("Anthropic handleAnthropic baseURL:", { baseURL });
+    data3Logger.debug("Anthropic handleAnthropic baseURL:", { baseURL });
 
     const anthropic = createAnthropic({ 
         apiKey, 
@@ -2463,9 +2463,9 @@ async function handleGroq({
     modelOptions,
     runtime,
 }: ProviderOptions): Promise<GenerationResult> {
-    xdata3Logger.debug("Handling Groq request with Cloudflare check");
+    data3Logger.debug("Handling Groq request with Cloudflare check");
     const baseURL = getCloudflareGatewayBaseURL(runtime, "groq");
-    xdata3Logger.debug("Groq handleGroq baseURL:", { baseURL });
+    data3Logger.debug("Groq handleGroq baseURL:", { baseURL });
 
     const groq = createGroq({ 
         apiKey, 
@@ -2816,29 +2816,29 @@ export async function generateTweetActions({
                 context,
                 modelClass,
             });
-            xdata3Logger.debug(
+            data3Logger.debug(
                 "Received response from generateText for tweet actions:",
                 response
             );
             const { actions } = parseActionResponseFromText(response.trim());
             if (actions) {
-                xdata3Logger.debug("Parsed tweet actions:", actions);
+                data3Logger.debug("Parsed tweet actions:", actions);
                 return actions;
             } else {
-                xdata3Logger.debug("generateTweetActions no valid response");
+                data3Logger.debug("generateTweetActions no valid response");
             }
         } catch (error) {
-            xdata3Logger.error("Error in generateTweetActions:", error);
+            data3Logger.error("Error in generateTweetActions:", error);
             if (
                 error instanceof TypeError &&
                 error.message.includes("queueTextCompletion")
             ) {
-                xdata3Logger.error(
+                data3Logger.error(
                     "TypeError: Cannot read properties of null (reading 'queueTextCompletion')"
                 );
             }
         }
-        xdata3Logger.log(`Retrying in ${retryDelay}ms...`);
+        data3Logger.log(`Retrying in ${retryDelay}ms...`);
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
         retryDelay *= 2;
     }

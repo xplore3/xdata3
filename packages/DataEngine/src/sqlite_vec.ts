@@ -1,15 +1,15 @@
 import * as sqliteVec from "sqlite-vec";
 import type { Database } from "better-sqlite3";
-import { xdata3Logger } from "@xdata3os/agentcontext";
+import { data3Logger } from "@data3os/agentcontext";
 
 // Loads the sqlite-vec extensions into the provided SQLite database
 export function loadVecExtensions(db: Database): void {
     try {
         // Load sqlite-vec extensions
         sqliteVec.load(db);
-        xdata3Logger.log("sqlite-vec extensions loaded successfully.");
+        data3Logger.log("sqlite-vec extensions loaded successfully.");
     } catch (error) {
-        xdata3Logger.error("Failed to load sqlite-vec extensions:", error);
+        data3Logger.error("Failed to load sqlite-vec extensions:", error);
         throw error;
     }
 }

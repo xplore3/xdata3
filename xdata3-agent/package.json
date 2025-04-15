@@ -1,5 +1,5 @@
 {
-    "name": "@xdata3os/xdata3-agent",
+    "name": "@data3os/data3-agent",
     "version": "0.25.9",
     "main": "src/index.ts",
     "type": "module",
@@ -18,9 +18,9 @@
         "exec": "node --enable-source-maps --loader ts-node/esm src/index.ts"
     },
     "dependencies": {
-        "@xdata3os/xdata3-router": "workspace:*",
-        "@xdata3os/agentcontext": "workspace:*",
-        "@xdata3os/plugin-bootstrap": "workspace:*",
+        "@data3os/data3-router": "workspace:*",
+        "@data3os/agentcontext": "workspace:*",
+        "@data3os/plugin-bootstrap": "workspace:*",
         "@types/node": "^22.13.5",
         "json5": "2.2.3",
         "ts-node": "^10.9.2",

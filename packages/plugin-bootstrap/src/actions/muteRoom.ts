@@ -1,6 +1,6 @@
-import { composeContext } from "@xdata3os/agentcontext";
-import { generateTrueOrFalse } from "@xdata3os/agentcontext";
-import { booleanFooter } from "@xdata3os/agentcontext";
+import { composeContext } from "@data3os/agentcontext";
+import { generateTrueOrFalse } from "@data3os/agentcontext";
+import { booleanFooter } from "@data3os/agentcontext";
 import {
     type Action,
     type ActionExample,
@@ -8,7 +8,7 @@ import {
     type Memory,
     ModelClass,
     type State,
-} from "@xdata3os/agentcontext";
+} from "@data3os/agentcontext";
 
 export const shouldMuteTemplate =
     `Based on the conversation so far:

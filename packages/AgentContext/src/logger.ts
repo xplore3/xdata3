@@ -67,6 +67,6 @@ const options = {
     },
 };
 
-export const xdata3Logger = pino(options, createStream());
+export const data3Logger = pino(options, createStream());
 
-export default xdata3Logger;
+export default data3Logger;

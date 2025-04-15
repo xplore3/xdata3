@@ -9,7 +9,7 @@ import { Ellipsis, Mic, Send, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import type { UUID } from "@xdata3os/agentcontext";
+import type { UUID } from "@data3os/agentcontext";
 import { apiClient } from "@/lib/api";
 
 type Props = {

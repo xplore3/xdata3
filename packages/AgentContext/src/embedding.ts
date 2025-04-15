@@ -1,7 +1,7 @@
 import { getEmbeddingModelSettings, getEndpoint } from "./models.ts";
 import { type IAgentRuntime, ModelProviderName } from "./types.ts";
 import settings from "./settings.ts";
-import xdata3Logger from "./logger.ts";
+import data3Logger from "./logger.ts";
 import LocalEmbeddingModelManager from "./localembeddingManager.ts";
 
 interface EmbeddingOptions {
@@ -102,7 +102,7 @@ async function getRemoteEmbedding(
         const response = await fetch(fullUrl, requestOptions);
 
         if (!response.ok) {
-            xdata3Logger.error("API Response:", await response.text()); // Debug log
+            data3Logger.error("API Response:", await response.text()); // Debug log
             throw new Error(
                 `Embedding API Error: ${response.status} ${response.statusText}`
             );
@@ -115,7 +115,7 @@ async function getRemoteEmbedding(
         const data: EmbeddingResponse = await response.json();
         return data?.data?.[0].embedding;
     } catch (e) {
-        xdata3Logger.error("Full error details:", e);
+        data3Logger.error("Full error details:", e);
         throw e;
     }
 }
@@ -180,7 +180,7 @@ export function getEmbeddingZeroVector(): number[] {
  */
 
 export async function embed(runtime: IAgentRuntime, input: string) {
-    xdata3Logger.debug("Embedding request:", {
+    data3Logger.debug("Embedding request:", {
         modelProvider: runtime.character.modelProvider,
         useOpenAI: process.env.USE_OPENAI_EMBEDDING,
         input: input?.slice(0, 50) + "...",
@@ -192,7 +192,7 @@ export async function embed(runtime: IAgentRuntime, input: string) {
 
     // Validate input
     if (!input || typeof input !== "string" || input.trim().length === 0) {
-        xdata3Logger.warn("Invalid embedding input:", {
+        data3Logger.warn("Invalid embedding input:", {
             input,
             type: typeof input,
             length: input?.length,
@@ -256,7 +256,7 @@ export async function embed(runtime: IAgentRuntime, input: string) {
         try {
             return await getLocalEmbedding(input);
         } catch (error) {
-            xdata3Logger.warn(
+            data3Logger.warn(
                 "Local embedding failed, falling back to remote",
                 error
             );
@@ -274,13 +274,13 @@ export async function embed(runtime: IAgentRuntime, input: string) {
     });
 
     async function getLocalEmbedding(input: string): Promise<number[]> {
-        xdata3Logger.debug("DEBUG - Inside getLocalEmbedding function");
+        data3Logger.debug("DEBUG - Inside getLocalEmbedding function");
 
         try {
             const embeddingManager = LocalEmbeddingModelManager.getInstance();
             return await embeddingManager.generateEmbedding(input);
         } catch (error) {
-            xdata3Logger.error("Local embedding failed:", error);
+            data3Logger.error("Local embedding failed:", error);
             throw error;
         }
     }
@@ -290,7 +290,7 @@ export async function embed(runtime: IAgentRuntime, input: string) {
         input: string
     ) {
         if (!input) {
-            xdata3Logger.log("No input to retrieve cached embedding for");
+            data3Logger.log("No input to retrieve cached embedding for");
             return null;
         }
 

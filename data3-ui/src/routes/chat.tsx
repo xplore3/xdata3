@@ -1,6 +1,6 @@
 import { useParams } from "react-router";
 import Chat from "@/components/chat";
-import type { UUID } from "@xdata3os/agentcontext";
+import type { UUID } from "@data3os/agentcontext";
 
 export default function AgentRoute() {
     const { agentId } = useParams<{ agentId: UUID }>();

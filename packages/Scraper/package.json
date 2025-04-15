@@ -1,5 +1,5 @@
 {
-    "name": "xdata3-scraper",
+    "name": "data3-scraper",
     "version": "0.25.9",
     "main": "dist/index.js",
     "module": "dist/index.js",
@@ -9,7 +9,7 @@
         "./package.json": "./package.json",
         ".": {
             "import": {
-                "@xdata3os/source": "./src/index.ts",
+                "@data3os/source": "./src/index.ts",
                 "types": "./dist/index.d.ts",
                 "default": "./dist/index.js"
             }

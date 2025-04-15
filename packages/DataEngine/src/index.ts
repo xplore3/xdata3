@@ -6,9 +6,9 @@ export * from "./sqlite_vec.ts";
 
 import {
     DatabaseAdapter,
-    xdata3Logger,
+    data3Logger,
     type IDatabaseCacheAdapter,
-} from "@xdata3os/agentcontext";
+} from "@data3os/agentcontext";
 import type {
     Account,
     Actor,
@@ -23,7 +23,7 @@ import type {
     Adapter,
     IAgentRuntime,
     Plugin,
-} from "@xdata3os/agentcontext";
+} from "@data3os/agentcontext";
 import type { Database as BetterSqlite3Database } from "better-sqlite3";
 import { v4 } from "uuid";
 import { load } from "./sqlite_vec.ts";
@@ -912,7 +912,7 @@ export class SqliteDatabaseAdapter
 
             return results;
         } catch (error) {
-            xdata3Logger.error("Error in searchKnowledge:", error);
+            data3Logger.error("Error in searchKnowledge:", error);
             throw error;
         }
     }
@@ -952,7 +952,7 @@ export class SqliteDatabaseAdapter
                 error?.code === "SQLITE_CONSTRAINT_PRIMARYKEY";
 
             if (isShared && isPrimaryKeyError) {
-                xdata3Logger.info(
+                data3Logger.info(
                     `Shared knowledge ${knowledge.id} already exists, skipping`
                 );
                 return;
@@ -960,7 +960,7 @@ export class SqliteDatabaseAdapter
                 !isShared &&
                 !error.message?.includes("SQLITE_CONSTRAINT_PRIMARYKEY")
             ) {
-                xdata3Logger.error(`Error creating knowledge ${knowledge.id}:`, {
+                data3Logger.error(`Error creating knowledge ${knowledge.id}:`, {
                     error,
                     embeddingLength: knowledge.embedding?.length,
                     content: knowledge.content,
@@ -968,7 +968,7 @@ export class SqliteDatabaseAdapter
                 throw error;
             }
 
-            xdata3Logger.debug(
+            data3Logger.debug(
                 `Knowledge ${knowledge.id} already exists, skipping`
             );
         }
@@ -985,12 +985,12 @@ export class SqliteDatabaseAdapter
                 if (id.includes("*")) {
                     const pattern = id.replace("*", "%");
                     const sql = "DELETE FROM knowledge WHERE id LIKE ?";
-                    xdata3Logger.debug(
+                    data3Logger.debug(
                         `[Knowledge Remove] Executing SQL: ${sql} with pattern: ${pattern}`
                     );
                     const stmt = this.db.prepare(sql);
                     const result = stmt.run(pattern);
-                    xdata3Logger.debug(
+                    data3Logger.debug(
                         `[Knowledge Remove] Pattern deletion affected ${result.changes} rows`
                     );
                     return result.changes; // Return changes for logging
@@ -999,7 +999,7 @@ export class SqliteDatabaseAdapter
                     const selectSql = "SELECT id FROM knowledge WHERE id = ?";
                     const chunkSql =
                         "SELECT id FROM knowledge WHERE json_extract(content, '$.metadata.originalId') = ?";
-                    xdata3Logger.debug(`[Knowledge Remove] Checking existence with:
+                    data3Logger.debug(`[Knowledge Remove] Checking existence with:
                         Main: ${selectSql} [${id}]
                         Chunks: ${chunkSql} [${id}]`);
 
@@ -1010,7 +1010,7 @@ export class SqliteDatabaseAdapter
                         .prepare(chunkSql)
                         .all(id) as ChunkRow[];
 
-                    xdata3Logger.debug(`[Knowledge Remove] Found:`, {
+                    data3Logger.debug(`[Knowledge Remove] Found:`, {
                         mainEntryExists: !!mainEntry?.id,
                         chunkCount: chunks.length,
                         chunkIds: chunks.map((c) => c.id),
@@ -1019,34 +1019,34 @@ export class SqliteDatabaseAdapter
                     // Execute and log chunk deletion
                     const chunkDeleteSql =
                         "DELETE FROM knowledge WHERE json_extract(content, '$.metadata.originalId') = ?";
-                    xdata3Logger.debug(
+                    data3Logger.debug(
                         `[Knowledge Remove] Executing chunk deletion: ${chunkDeleteSql} [${id}]`
                     );
                     const chunkResult = this.db.prepare(chunkDeleteSql).run(id);
-                    xdata3Logger.debug(
+                    data3Logger.debug(
                         `[Knowledge Remove] Chunk deletion affected ${chunkResult.changes} rows`
                     );
 
                     // Execute and log main entry deletion
                     const mainDeleteSql = "DELETE FROM knowledge WHERE id = ?";
-                    xdata3Logger.debug(
+                    data3Logger.debug(
                         `[Knowledge Remove] Executing main deletion: ${mainDeleteSql} [${id}]`
                     );
                     const mainResult = this.db.prepare(mainDeleteSql).run(id);
-                    xdata3Logger.debug(
+                    data3Logger.debug(
                         `[Knowledge Remove] Main deletion affected ${mainResult.changes} rows`
                     );
 
                     const totalChanges =
                         chunkResult.changes + mainResult.changes;
-                    xdata3Logger.debug(
+                    data3Logger.debug(
                         `[Knowledge Remove] Total rows affected: ${totalChanges}`
                     );
 
                     // Verify deletion
                     const verifyMain = this.db.prepare(selectSql).get(id);
                     const verifyChunks = this.db.prepare(chunkSql).all(id);
-                    xdata3Logger.debug(
+                    data3Logger.debug(
                         `[Knowledge Remove] Post-deletion check:`,
                         {
                             mainStillExists: !!verifyMain,
@@ -1058,11 +1058,11 @@ export class SqliteDatabaseAdapter
                 }
             })(); // Important: Call the transaction function
 
-            xdata3Logger.debug(
+            data3Logger.debug(
                 `[Knowledge Remove] Transaction completed for id: ${id}`
             );
         } catch (error) {
-            xdata3Logger.error("[Knowledge Remove] Error:", {
+            data3Logger.error("[Knowledge Remove] Error:", {
                 id,
                 error:
                     error instanceof Error
@@ -1084,7 +1084,7 @@ export class SqliteDatabaseAdapter
         try {
             this.db.prepare(sql).run(agentId);
         } catch (error) {
-            xdata3Logger.error(
+            data3Logger.error(
                 `Error clearing knowledge for agent ${agentId}:`,
                 error
             );
@@ -1102,18 +1102,18 @@ const sqliteDatabaseAdapter: Adapter = {
         }
 
         const filePath = runtime.getSetting("SQLITE_FILE") ?? path.resolve(dataDir, "db.sqlite");
-        xdata3Logger.info(`Initializing SQLite database at ${filePath}...`);
+        data3Logger.info(`Initializing SQLite database at ${filePath}...`);
         const db = new SqliteDatabaseAdapter(new Database(filePath));
 
         // Test the connection
         db.init()
             .then(() => {
-                xdata3Logger.success(
+                data3Logger.success(
                     "Successfully connected to SQLite database"
                 );
             })
             .catch((error) => {
-                xdata3Logger.error("Failed to connect to SQLite:", error);
+                data3Logger.error("Failed to connect to SQLite:", error);
             });
 
         return db;

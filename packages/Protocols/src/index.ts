@@ -1,11 +1,11 @@
 import {
     generateText,
 ModelClass,
-} from "@xdata3os/agentcontext";
+} from "@data3os/agentcontext";
 
 import {
-  xdata3Fetch,
-  } from "xdata3-scraper";
+  data3Fetch,
+  } from "data3-scraper";
   
 
 import axios from "axios";
@@ -51,7 +51,7 @@ export const handleProtocols = async (runtime: any, text) => {
   /** test
    * 
    */
-  const res0 = await xdata3Fetch("https://example.com/");
+  const res0 = await data3Fetch("https://example.com/");
   console.log("yykai res0: ", res0);
 
 
@@ -77,7 +77,7 @@ Please use JSON to return the result, without including any other content or req
     });
     console.log("yykai response1: ", response1);
 
-    // xdata3Logger.log("oldXData: " , oldXDataSourceArray);
+    // data3Logger.log("oldXData: " , oldXDataSourceArray);
     // let apiDescription = "";
     const obj = JSON.parse(response1);
     if (obj?.need_network.includes("true") && obj?.api_id != -1) {

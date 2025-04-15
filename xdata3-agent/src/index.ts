@@ -1,4 +1,4 @@
-import { DirectClient } from "@xdata3os/xdata3-router";
+import { DirectClient } from "@data3os/data3-router";
 import {
     type Adapter,
     AgentRuntime,
@@ -8,7 +8,7 @@ import {
     type Character,
     type ClientInstance,
     DbCacheAdapter,
-    xdata3Logger,
+    data3Logger,
     FsCacheAdapter,
     type IAgentRuntime,
     type IDatabaseAdapter,
@@ -18,10 +18,10 @@ import {
     settings,
     stringToUuid,
     validateCharacterConfig,
-} from "@xdata3os/agentcontext";
+} from "@data3os/agentcontext";
 import { defaultCharacter } from "./defaultCharacter.ts";
 
-import { bootstrapPlugin } from "@xdata3os/plugin-bootstrap";
+import { bootstrapPlugin } from "@data3os/plugin-bootstrap";
 import JSON5 from 'json5';
 
 import fs from "fs";
@@ -41,9 +41,9 @@ export const wait = (minTime = 1000, maxTime = 3000) => {
 };
 
 const logFetch = async (url: string, options: any) => {
-    xdata3Logger.debug(`Fetching ${url}`);
+    data3Logger.debug(`Fetching ${url}`);
     // Disabled to avoid disclosure of sensitive information such as API keys
-    // xdata3Logger.debug(JSON.stringify(options, null, 2));
+    // data3Logger.debug(JSON.stringify(options, null, 2));
     return fetch(url, options);
 };
 
@@ -145,7 +145,7 @@ export async function loadCharacterFromOnchain(): Promise<Character[]> {
 
         // Handle plugins
         if (isAllStrings(character.plugins)) {
-            xdata3Logger.info("Plugins are: ", character.plugins);
+            data3Logger.info("Plugins are: ", character.plugins);
             const importedPlugins = await Promise.all(
                 character.plugins.map(async (plugin) => {
                     const importedPlugin = await import(plugin);
@@ -156,12 +156,12 @@ export async function loadCharacterFromOnchain(): Promise<Character[]> {
         }
 
         loadedCharacters.push(character);
-        xdata3Logger.info(
+        data3Logger.info(
             `Successfully loaded character from: ${process.env.IQ_WALLET_ADDRESS}`
         );
         return loadedCharacters;
     } catch (e) {
-        xdata3Logger.error(
+        data3Logger.error(
             `Error parsing character from ${process.env.IQ_WALLET_ADDRESS}: ${e}`
         );
         process.exit(1);
@@ -215,17 +215,17 @@ async function jsonToCharacter(
     }
     // Handle plugins
     character.plugins = await handlePluginImporting(character.plugins);
-    xdata3Logger.info(character.name, 'loaded plugins:', "[\n    " + character.plugins.map(p => `"${p.npmName}"`).join(", \n    ") + "\n]");
+    data3Logger.info(character.name, 'loaded plugins:', "[\n    " + character.plugins.map(p => `"${p.npmName}"`).join(", \n    ") + "\n]");
 
     // Handle Post Processors plugins
     if (character.postProcessors?.length > 0) {
-        xdata3Logger.info(character.name, 'loading postProcessors', character.postProcessors);
+        data3Logger.info(character.name, 'loading postProcessors', character.postProcessors);
         character.postProcessors = await handlePluginImporting(character.postProcessors);
     }
 
     // Handle extends
     if (character.extends) {
-        xdata3Logger.info(
+        data3Logger.info(
             `Merging  ${character.name} character with parent characters`
         );
         for (const extendPath of character.extends) {
@@ -233,7 +233,7 @@ async function jsonToCharacter(
                 path.resolve(path.dirname(filePath), extendPath)
             );
             character = mergeCharacters(baseCharacter, character);
-            xdata3Logger.info(
+            data3Logger.info(
                 `Merged ${character.name} with ${baseCharacter.name}`
             );
         }
@@ -269,7 +269,7 @@ async function loadCharacterTryPath(characterPath: string): Promise<Character> {
         ), // relative to project root characters dir
     ];
 
-    xdata3Logger.debug(
+    data3Logger.debug(
         "Trying paths:",
         pathsToTry.map((p) => ({
             path: p,
@@ -286,18 +286,18 @@ async function loadCharacterTryPath(characterPath: string): Promise<Character> {
     }
 
     if (content === null) {
-        xdata3Logger.error(
+        data3Logger.error(
             `Error loading character from ${characterPath}: File not found in any of the expected locations`
         );
-        xdata3Logger.error("Tried the following paths:");
-        pathsToTry.forEach((p) => xdata3Logger.error(` - ${p}`));
+        data3Logger.error("Tried the following paths:");
+        pathsToTry.forEach((p) => data3Logger.error(` - ${p}`));
         throw new Error(
             `Error loading character from ${characterPath}: File not found in any of the expected locations`
         );
     }
     try {
         const character: Character = await loadCharacter(resolvedPath);
-        xdata3Logger.success(`Successfully loaded character from: ${resolvedPath}`);
+        data3Logger.success(`Successfully loaded character from: ${resolvedPath}`);
         return character;
     } catch (e) {
         console.error(`Error parsing character from ${resolvedPath}: `, e);
@@ -320,7 +320,7 @@ async function readCharactersFromStorage(
             characterPaths.push(path.join(uploadDir, fileName));
         });
     } catch (err) {
-        xdata3Logger.error(`Error reading directory: ${err.message}`);
+        data3Logger.error(`Error reading directory: ${err.message}`);
     }
 
     return characterPaths;
@@ -351,7 +351,7 @@ export async function loadCharacters(
     }
 
     if (hasValidRemoteUrls()) {
-        xdata3Logger.info("Loading characters from remote URLs");
+        data3Logger.info("Loading characters from remote URLs");
         const characterUrls = commaSeparatedStringToArray(
             process.env.REMOTE_CHARACTER_URLS
         );
@@ -362,7 +362,7 @@ export async function loadCharacters(
     }
 
     if (loadedCharacters.length === 0) {
-        xdata3Logger.info("No characters found, using default character");
+        data3Logger.info("No characters found, using default character");
         loadedCharacters.push(defaultCharacter);
     }
 
@@ -372,19 +372,19 @@ export async function loadCharacters(
 async function handlePluginImporting(plugins: string[]) {
     if (plugins.length > 0) {
         // this logging should happen before calling, so we can include important context
-        //xdata3Logger.info("Plugins are: ", plugins);
+        //data3Logger.info("Plugins are: ", plugins);
         const importedPlugins = await Promise.all(
             plugins.map(async (plugin) => {
                 try {
                     const importedPlugin:Plugin = await import(plugin);
                     const functionName =
                         plugin
-                            .replace("@xdata3os/plugin-", "")
-                            .replace("@xdata3os-plugins/plugin-", "")
+                            .replace("@data3os/plugin-", "")
+                            .replace("@data3os-plugins/plugin-", "")
                             .replace(/-./g, (x) => x[1].toUpperCase()) +
                         "Plugin"; // Assumes plugin function is camelCased with Plugin suffix
                     if (!importedPlugin[functionName] && !importedPlugin.default) {
-                      xdata3Logger.warn(plugin, 'does not have an default export or', functionName)
+                      data3Logger.warn(plugin, 'does not have an default export or', functionName)
                     }
                     return {...(
                         importedPlugin.default || importedPlugin[functionName]
@@ -572,7 +572,7 @@ export function getTokenForProvider(
                 const config = JSON.parse(fs.readFileSync(path.join(os.homedir(), '.nearai/config.json'), 'utf8'));
                 return JSON.stringify(config?.auth);
             } catch (e) {
-                xdata3Logger.warn(`Error loading NEAR AI config: ${e}`);
+                data3Logger.warn(`Error loading NEAR AI config: ${e}`);
             }
             return (
                 character.settings?.secrets?.NEARAI_API_KEY ||
@@ -581,7 +581,7 @@ export function getTokenForProvider(
 
         default:
             const errorMessage = `Failed to get token - unsupported model provider: ${provider}`;
-            xdata3Logger.error(errorMessage);
+            data3Logger.error(errorMessage);
             throw new Error(errorMessage);
     }
 }
@@ -595,14 +595,14 @@ export async function initializeClients(
     // and if we want two we can explicitly support it
     const clients: ClientInstance[] = [];
     // const clientTypes = clients.map((c) => c.name);
-    // xdata3Logger.log("initializeClients", clientTypes, "for", character.name);
+    // data3Logger.log("initializeClients", clientTypes, "for", character.name);
 
     if (character.plugins?.length > 0) {
         for (const plugin of character.plugins) {
             if (plugin.clients) {
                 for (const client of plugin.clients) {
                     const startedClient = await client.start(runtime);
-                    xdata3Logger.debug(
+                    data3Logger.debug(
                         `Initializing client: ${client.name}`
                     );
                     clients.push(startedClient);
@@ -618,7 +618,7 @@ export async function createAgent(
     character: Character,
     token: string
 ): Promise<AgentRuntime> {
-    xdata3Logger.log(`Creating runtime for character ${character.name}`);
+    data3Logger.log(`Creating runtime for character ${character.name}`);
     return new AgentRuntime({
         token,
         modelProvider: character.modelProvider,
@@ -668,7 +668,7 @@ function initializeCache(
     switch (cacheStore) {
         // case CacheStore.REDIS:
         //     if (process.env.REDIS_URL) {
-        //         xdata3Logger.info("Connecting to Redis...");
+        //         data3Logger.info("Connecting to Redis...");
         //         const redisClient = new RedisClient(process.env.REDIS_URL);
         //         if (!character?.id) {
         //             throw new Error(
@@ -684,7 +684,7 @@ function initializeCache(
 
         case CacheStore.DATABASE:
             if (db) {
-                xdata3Logger.info("Using Database Cache...");
+                data3Logger.info("Using Database Cache...");
                 return initializeDbCache(character, db);
             } else {
                 throw new Error(
@@ -693,7 +693,7 @@ function initializeCache(
             }
 
         case CacheStore.FILESYSTEM:
-            xdata3Logger.info("Using File System Cache...");
+            data3Logger.info("Using File System Cache...");
             if (!baseDir) {
                 throw new Error(
                     "baseDir must be provided for CacheStore.FILESYSTEM."
@@ -713,7 +713,7 @@ async function findDatabaseAdapter(runtime: AgentRuntime) {
   let adapter: Adapter | undefined;
   // if not found, default to sqlite
   if (adapters.length === 0) {
-    const sqliteAdapterPlugin = await import('@xdata3os/data-engine');
+    const sqliteAdapterPlugin = await import('@data3os/data-engine');
     const sqliteAdapterPluginDefault = sqliteAdapterPlugin.default;
     adapter = sqliteAdapterPluginDefault.adapters[0];
     if (!adapter) {
@@ -768,15 +768,15 @@ async function startAgent(
         directClient.registerAgent(runtime);
 
         // report to console
-        xdata3Logger.debug(`Started ${character.name} as ${runtime.agentId}`);
+        data3Logger.debug(`Started ${character.name} as ${runtime.agentId}`);
 
         return runtime;
     } catch (error) {
-        xdata3Logger.error(
+        data3Logger.error(
             `Error starting agent for character ${character.name}:`,
             error
         );
-        xdata3Logger.error(error);
+        data3Logger.error(error);
         if (db) {
             await db.close();
         }
@@ -845,27 +845,27 @@ const startAgents = async () => {
             await startAgent(processedCharacter, directClient);
         }
     } catch (error) {
-        xdata3Logger.error("Error starting agents:", error);
+        data3Logger.error("Error starting agents:", error);
     }
 
     // Find available port
     while (!(await checkPortAvailable(serverPort))) {
-        xdata3Logger.warn(
+        data3Logger.warn(
             `Port ${serverPort} is in use, trying ${serverPort + 1}`
         );
         serverPort++;
     }
 
     // upload some agent functionality into directClient
-    // This is used in xdata3-router/api.ts at "/agents/:agentId/set" route to restart an agent
+    // This is used in data3-router/api.ts at "/agents/:agentId/set" route to restart an agent
     directClient.startAgent = async (character) => {
         // Handle plugins
         character.plugins = await handlePluginImporting(character.plugins);
-        xdata3Logger.info(character.name, 'loaded plugins:', '[' + character.plugins.map(p => `"${p.npmName}"`).join(', ') + ']');
+        data3Logger.info(character.name, 'loaded plugins:', '[' + character.plugins.map(p => `"${p.npmName}"`).join(', ') + ']');
 
         // Handle Post Processors plugins
         if (character.postProcessors?.length > 0) {
-            xdata3Logger.info(character.name, 'loading postProcessors', character.postProcessors);
+            data3Logger.info(character.name, 'loading postProcessors', character.postProcessors);
             character.postProcessors = await handlePluginImporting(character.postProcessors);
         }
         // character's post processing
@@ -881,16 +881,16 @@ const startAgents = async () => {
     directClient.start(serverPort);
 
     if (serverPort !== Number.parseInt(settings.SERVER_PORT || "3000")) {
-        xdata3Logger.warn(`Server started on alternate port ${serverPort}`);
+        data3Logger.warn(`Server started on alternate port ${serverPort}`);
     }
 
-    xdata3Logger.info(
+    data3Logger.info(
         "Run `pnpm start:client` to start the client and visit the outputted URL (http://localhost:5173) to chat with your agents. When running multiple agents, use client with different port `SERVER_PORT=3001 pnpm start:client`"
     );
 };
 
 startAgents().catch((error) => {
-    xdata3Logger.error("Unhandled error in startAgents:", error);
+    data3Logger.error("Unhandled error in startAgents:", error);
     process.exit(1);
 });
 

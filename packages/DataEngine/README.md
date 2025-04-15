@@ -16,7 +16,7 @@ A lightweight SQLite adapter for Xdata3OS that provides persistent storage with 
 ## Installation
 
 ```bash
-pnpm add @xdata3os/adapter-sqlite
+pnpm add @data3os/adapter-sqlite
 ```
 
 ## Database Schema
@@ -65,7 +65,7 @@ pnpm add @xdata3os/adapter-sqlite
 ### Basic Setup
 
 ```typescript
-import { SqliteDatabaseAdapter } from '@xdata3os/adapter-sqlite';
+import { SqliteDatabaseAdapter } from '@data3os/adapter-sqlite';
 
 const adapter = new SqliteDatabaseAdapter('path/to/database.db');
 await adapter.init();

@@ -1,4 +1,4 @@
-import type { UUID, Character } from "@xdata3os/agentcontext";
+import type { UUID, Character } from "@data3os/agentcontext";
 
 const BASE_URL =
     import.meta.env.VITE_SERVER_BASE_URL ||

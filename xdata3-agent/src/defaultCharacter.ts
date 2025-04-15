@@ -1,8 +1,8 @@
-import { type Character, ModelProviderName } from "@xdata3os/agentcontext";
+import { type Character, ModelProviderName } from "@data3os/agentcontext";
 
 export const defaultCharacter: Character = {
     name: "Xdata3",
-    username: "xdata3",
+    username: "data3",
     plugins: [],
     modelProvider: ModelProviderName.LLAMALOCAL,
     settings: {

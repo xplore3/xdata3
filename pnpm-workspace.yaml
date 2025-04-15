@@ -1,4 +1,4 @@
 packages:
     - "packages/*"
     - "data3-ui"
-    - "xdata3-agent"
+    - "data3-agent"

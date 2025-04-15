@@ -4,17 +4,17 @@
         "check-types": {
             "dependsOn": ["build"]
         },
-        "@xdata3os/xdata3-agent#check-types": {
+        "@data3os/data3-agent#check-types": {
             "dependsOn": [
-                "@xdata3os/plugin-solana#build",
-                "@xdata3os/plugin-direct#build"
+                "@data3os/plugin-solana#build",
+                "@data3os/plugin-direct#build"
             ]
         },
         "build": {
             "outputs": ["dist/**"],
-            "dependsOn": ["^@xdata3os/agentcontext#build"]
+            "dependsOn": ["^@data3os/agentcontext#build"]
         },
-        "@xdata3os/xdata3-router#build": {
+        "@data3os/data3-router#build": {
             "outputs": ["dist/**"],
             "dependsOn": []
         },

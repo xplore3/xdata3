@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { apiClient } from "@/lib/api";
 import { NavLink } from "react-router";
-import type { UUID } from "@xdata3os/agentcontext";
+import type { UUID } from "@data3os/agentcontext";
 import { formatAgentName } from "@/lib/utils";
 
 export default function Home() {

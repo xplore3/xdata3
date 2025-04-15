@@ -1,5 +1,5 @@
 {
-    "name": "@xdata3os/data-engine",
+    "name": "@data3os/data-engine",
     "version": "0.25.9",
     "type": "module",
     "main": "dist/index.js",
@@ -9,7 +9,7 @@
         "./package.json": "./package.json",
         ".": {
             "import": {
-                "@xdata3os/source": "./src/index.ts",
+                "@data3os/source": "./src/index.ts",
                 "types": "./dist/index.d.ts",
                 "default": "./dist/index.js"
             }
@@ -19,7 +19,7 @@
         "dist"
     ],
     "dependencies": {
-        "@xdata3os/agentcontext": "workspace:*",
+        "@data3os/agentcontext": "workspace:*",
         "@types/better-sqlite3": "7.6.12",
         "better-sqlite3": "11.8.1",
         "sqlite-vec": "0.1.6",

@@ -1,7 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "url";
 import { FlagEmbedding, EmbeddingModel } from "fastembed";
-import xdata3Logger from "./logger";
+import data3Logger from "./logger";
 
 class LocalEmbeddingModelManager {
     private static instance: LocalEmbeddingModelManager | null;
@@ -23,8 +23,8 @@ class LocalEmbeddingModelManager {
         const __filename = fileURLToPath(import.meta.url);
         const __dirname = path.dirname(__filename);
         const rootPath = path.resolve(__dirname, "..");
-        return rootPath.includes("/xdata3/")
-            ? rootPath.split("/xdata3/")[0] + "/xdata3/"
+        return rootPath.includes("/data3/")
+            ? rootPath.split("/data3/")[0] + "/data3/"
             : path.resolve(__dirname, "..");
     }
 
@@ -77,7 +77,7 @@ class LocalEmbeddingModelManager {
                 fs.mkdirSync(cacheDir, { recursive: true });
             }
 
-            xdata3Logger.debug("Initializing BGE embedding model...");
+            data3Logger.debug("Initializing BGE embedding model...");
 
             this.model = await FlagEmbedding.init({
                 cacheDir: cacheDir,
@@ -85,9 +85,9 @@ class LocalEmbeddingModelManager {
                 maxLength: 512,
             });
 
-            xdata3Logger.debug("BGE model initialized successfully");
+            data3Logger.debug("BGE model initialized successfully");
         } catch (error) {
-            xdata3Logger.error("Failed to initialize BGE model:", error);
+            data3Logger.error("Failed to initialize BGE model:", error);
             throw error;
         }
     }
@@ -105,7 +105,7 @@ class LocalEmbeddingModelManager {
             // Let fastembed handle tokenization internally
             const embedding = await this.model.queryEmbed(input);
             // Debug the raw embedding - uncomment if debugging embeddings
-            // xdata3Logger.debug("Raw embedding from BGE:", {
+            // data3Logger.debug("Raw embedding from BGE:", {
             //     type: typeof embedding,
             //     isArray: Array.isArray(embedding),
             //     dimensions: Array.isArray(embedding)
@@ -117,7 +117,7 @@ class LocalEmbeddingModelManager {
             // });
             return this.processEmbedding(embedding);
         } catch (error) {
-            xdata3Logger.error("Embedding generation failed:", error);
+            data3Logger.error("Embedding generation failed:", error);
             throw error;
         }
     }
@@ -151,7 +151,7 @@ class LocalEmbeddingModelManager {
         }
 
         if (finalEmbedding.length !== 384) {
-            xdata3Logger.warn(
+            data3Logger.warn(
                 `Unexpected embedding dimension: ${finalEmbedding.length}`
             );
         }

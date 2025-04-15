@@ -34,7 +34,7 @@ cat << "EOF"
 *     b. Add your plugin's folder name to the WORKING_FOLDERS list   *
 *        (relative to ./packages).                                   *
 *                                                                     *
-*        Example: WORKING_FOLDERS=("xdata3-router" "your-plugin-folder") *
+*        Example: WORKING_FOLDERS=("data3-router" "your-plugin-folder") *
 *                                                                     *
 *  4. Update the 'agent/package.json' file:                          *
 *                                                                     *

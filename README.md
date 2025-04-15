@@ -1,12 +1,12 @@
 # Xdata3 🤖
 
 <div align="center">
-  <img src="./docs/static/img/xdata3_banner.jpg" alt="Xdata3 Banner" width="100%" />
+  <img src="./docs/static/img/data3_banner.jpg" alt="Xdata3 Banner" width="100%" />
 </div>
 
 <div align="center">
 
-📑 [Technical Report](https://arxiv.org/pdf/2501.06781) |  📖 [Documentation](https://xdata3os.github.io/xdata3/) | 🎯 [Examples](https://github.com/thejoven/awesome-xdata3)
+📑 [Technical Report](https://arxiv.org/pdf/2501.06781) |  📖 [Documentation](https://data3os.github.io/data3/) | 🎯 [Examples](https://github.com/thejoven/awesome-data3)
 
 </div>
 
@@ -17,7 +17,7 @@
 ## 🚩 Overview
 
 <div align="center">
-  <img src="./docs/static/img/xdata3_diagram.png" alt="Xdata3 Diagram" width="100%" />
+  <img src="./docs/static/img/data3_diagram.png" alt="Xdata3 Diagram" width="100%" />
 </div>
 
 ## ✨ Features
@@ -54,10 +54,10 @@
 
 ### Use the Starter (Recommended for Agent Creation)
 
-Full steps and documentation can be found in the [Xdata3 Starter Repository](https://github.com/xdata3OS/xdata3-starter).
+Full steps and documentation can be found in the [Xdata3 Starter Repository](https://github.com/data3OS/data3-starter).
 ```bash
-git clone https://github.com/xdata3os/xdata3-starter.git
-cd xdata3-starter
+git clone https://github.com/data3os/data3-starter.git
+cd data3-starter
 cp .env.example .env
 pnpm i && pnpm build && pnpm start
 ```
@@ -68,7 +68,7 @@ pnpm i && pnpm build && pnpm start
 
 ```bash
 # Clone the repository
-git clone https://github.com/xdata3os/xdata3.git
+git clone https://github.com/data3os/data3.git
 
 # This project iterates fast, so we recommend checking out the latest release
 git checkout $(git describe --tags --abbrev=0)
@@ -113,7 +113,7 @@ Open another terminal, move to the same directory, run the command below, then f
 pnpm start:client
 ```
 
-Then read the [Documentation](https://xdata3os.github.io/xdata3/) to learn how to customize your Xdata3.
+Then read the [Documentation](https://data3os.github.io/data3/) to learn how to customize your Xdata3.
 
 ---
 
@@ -145,9 +145,9 @@ For detailed instructions on using the start script, including character managem
 
 ### Add more plugins
 
-1. run `npx xdata3os plugins list` to get a list of available plugins or visit https://xdata3os.github.io/registry/
+1. run `npx data3os plugins list` to get a list of available plugins or visit https://data3os.github.io/registry/
 
-2. run `npx xdata3os plugins add @xdata3os-plugins/plugin-NAME` to install the plugin into your instance
+2. run `npx data3os plugins add @data3os-plugins/plugin-NAME` to install the plugin into your instance
 
 #### Additional Requirements
 
@@ -186,7 +186,7 @@ packages/
 ```json
 {
   "dependencies": {
-    "@xdata3os/plugin-example": "workspace:*"
+    "@data3os/plugin-example": "workspace:*"
   }
 }
 ```
@@ -195,7 +195,7 @@ packages/
 
 ```json
   "plugins": [
-    "@xdata3os/plugin-example",
+    "@data3os/plugin-example",
   ],
 ```
 
@@ -203,32 +203,32 @@ packages/
 
 ### Start Xdata3 with Gitpod
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/xdata3os/xdata3/tree/main)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/data3os/data3/tree/main)
 
 ---
 
 ### Deploy Xdata3 in one click
 
-Use [Fleek](https://fleek.xyz/xdata3/) to deploy Xdata3 in one click. This opens Xdata3 to non-developers and provides the following options to build your agent:
+Use [Fleek](https://fleek.xyz/data3/) to deploy Xdata3 in one click. This opens Xdata3 to non-developers and provides the following options to build your agent:
 1. Start with a template
 2. Build characterfile from scratch
 3. Upload pre-made characterfile
 
-Click [here](https://fleek.xyz/xdata3/) to get started!
+Click [here](https://fleek.xyz/data3/) to get started!
 
 ---
 
 ### Community & contact
 
-- [GitHub Issues](https://github.com/xdata3os/xdata3/issues). Best for: bugs you encounter using Xdata3, and feature proposals.
-- [xdata3OS Discord](https://discord.gg/xdata3os). Best for: hanging out with the xdata3OS technical community
+- [GitHub Issues](https://github.com/data3os/data3/issues). Best for: bugs you encounter using Xdata3, and feature proposals.
+- [data3OS Discord](https://discord.gg/data3os). Best for: hanging out with the data3OS technical community
 - [DAO Discord](https://discord.gg/ai16z). Best for: hanging out with the larger non-technical community
 
 ## Citation
 
 We now have a [paper](https://arxiv.org/pdf/2501.06781) you can cite for the Xdata3 OS:
 ```bibtex
-@article{walters2025xdata3,
+@article{walters2025data3,
   title={Xdata3: A Web3 friendly AI Agent Operating System},
   author={Walters, Shaw and Gao, Sam and Nerd, Shakker and Da, Feng and Williams, Warren and Meng, Ting-Chien and Han, Hunter and He, Frank and Zhang, Allen and Wu, Ming and others},
   journal={arXiv preprint arXiv:2501.06781},
@@ -238,14 +238,14 @@ We now have a [paper](https://arxiv.org/pdf/2501.06781) you can cite for the Xda
 
 ## Contributors
 
-<a href="https://github.com/xdata3os/xdata3/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=xdata3os/xdata3" alt="Xdata3 project contributors" />
+<a href="https://github.com/data3os/data3/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=data3os/data3" alt="Xdata3 project contributors" />
 </a>
 
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=xdata3os/xdata3&type=Date)](https://star-history.com/#xdata3os/xdata3&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=data3os/data3&type=Date)](https://star-history.com/#data3os/data3&Date)
 
 ## 🛠️ System Requirements
 
@@ -268,7 +268,7 @@ We now have a [paper](https://arxiv.org/pdf/2501.06781) you can cite for the Xda
 
 ## 📁 Project Structure
 ```
-xdata3/
+data3/
 ├── packages/
 │   ├── core/           # Core Xdata3 functionality
 │   ├── clients/        # Client implementations

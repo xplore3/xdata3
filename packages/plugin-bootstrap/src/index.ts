@@ -1,4 +1,4 @@
-import type { Plugin } from "@xdata3os/agentcontext";
+import type { Plugin } from "@data3os/agentcontext";
 import { continueAction } from "./actions/continue.ts";
 import { followRoomAction } from "./actions/followRoom.ts";
 import { ignoreAction } from "./actions/ignore.ts";

@@ -1,6 +1,6 @@
 // See https://aka.ms/vscode-remote/devcontainer.json for format details.
 {
-    "name": "xdata3os-dev",
+    "name": "data3os-dev",
     "dockerFile": "Dockerfile",
     "build": {
         "args": {
