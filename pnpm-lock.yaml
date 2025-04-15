@@ -42,7 +42,7 @@ importers:
         version: 0.10.0(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.2)
       '@data3os/data-engine':
         specifier: workspace:*
-        version: link:packages/DataEngine
+        version: link:packages/data-engine
       '@deepgram/sdk':
         specifier: ^3.11.1
         version: 3.12.1(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)
@@ -142,7 +142,7 @@ importers:
     dependencies:
       '@data3os/agentcontext':
         specifier: workspace:*
-        version: link:../packages/AgentContext
+        version: link:../packages/agent-context
       '@data3os/data3-router':
         specifier: workspace:*
         version: link:../packages/data3-router
@@ -179,7 +179,7 @@ importers:
     dependencies:
       '@data3os/agentcontext':
         specifier: workspace:*
-        version: link:../packages/AgentContext
+        version: link:../packages/agent-context
       '@radix-ui/react-avatar':
         specifier: ^1.1.2
         version: 1.1.4(@types/react-dom@19.1.2(@types/react@19.1.2))(@types/react@19.1.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -329,7 +329,7 @@ importers:
         specifier: ^5.1.4
         version: 5.1.4(typescript@5.6.3)(vite@6.2.6(@types/node@22.14.1)(jiti@1.21.7)(yaml@2.7.1))
 
-  packages/AgentContext:
+  packages/agent-context:
     dependencies:
       '@ai-sdk/amazon-bedrock':
         specifier: 1.1.6
@@ -432,11 +432,11 @@ importers:
         specifier: 5.6.3
         version: 5.6.3
 
-  packages/DataEngine:
+  packages/data-engine:
     dependencies:
       '@data3os/agentcontext':
         specifier: workspace:*
-        version: link:../AgentContext
+        version: link:../agent-context
       '@types/better-sqlite3':
         specifier: 7.6.12
         version: 7.6.12
@@ -466,17 +466,17 @@ importers:
         specifier: ^3.0.2
         version: 3.0.5(@types/node@22.14.1)(jiti@1.21.7)(yaml@2.7.1)
 
-  packages/Protocols:
+  packages/protocols:
     dependencies:
       '@data3os/agentcontext':
         specifier: workspace:*
-        version: link:../AgentContext
+        version: link:../agent-context
       axios:
         specifier: ^1.8.4
         version: 1.8.4
       data3-scraper:
         specifier: workspace:*
-        version: link:../Scraper
+        version: link:../scraper
       whatwg-url:
         specifier: 7.1.0
         version: 7.1.0
@@ -491,7 +491,7 @@ importers:
         specifier: 8.3.5
         version: 8.3.5(@swc/core@1.11.21)(jiti@1.21.7)(postcss@8.5.3)(typescript@5.6.3)(yaml@2.7.1)
 
-  packages/Scraper:
+  packages/scraper:
     dependencies:
       whatwg-url:
         specifier: 7.1.0
@@ -517,7 +517,7 @@ importers:
     dependencies:
       '@data3os/agentcontext':
         specifier: workspace:*
-        version: link:../AgentContext
+        version: link:../agent-context
       '@types/body-parser':
         specifier: 1.19.5
         version: 1.19.5
@@ -535,7 +535,7 @@ importers:
         version: 2.8.5
       data3-protocols:
         specifier: workspace:*
-        version: link:../Protocols
+        version: link:../protocols
       express:
         specifier: 4.21.1
         version: 4.21.1
@@ -571,7 +571,7 @@ importers:
     dependencies:
       '@data3os/agentcontext':
         specifier: workspace:*
-        version: link:../AgentContext
+        version: link:../agent-context
       whatwg-url:
         specifier: 7.1.0
         version: 7.1.0

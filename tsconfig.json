@@ -13,7 +13,7 @@
     "files": [],
     "references": [
         {
-            "path": "packages/AgentContext"
+            "path": "packages/agent-context"
         }
     ]
 }

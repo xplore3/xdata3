@@ -1,4 +1,4 @@
-import { Scraper } from "agent-twitter-client";
+import { scraper } from "agent-twitter-client";
 import dotenv from "dotenv";
 import fs from "fs";
 
@@ -8,8 +8,8 @@ const TWEETS_FILE = "tweets.json";
 
 (async () => {
     try {
-        // Create a new instance of the Scraper
-        const scraper = new Scraper();
+        // Create a new instance of the scraper
+        const scraper = new scraper();
 
         // Log in to Twitter using the configured environment variables
         await scraper.login(

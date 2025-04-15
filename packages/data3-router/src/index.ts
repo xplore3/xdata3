@@ -22,7 +22,7 @@ import {
 
 import {
     getProtocolArray,
-    handleProtocols,
+    handleprotocols,
     updateProtocolArray,
 } from "data3-protocols";
 
@@ -402,7 +402,7 @@ export class DirectClient {
                     return;
                 }
 
-                handleProtocols(runtime, text).then((resStr) => {
+                handleprotocols(runtime, text).then((resStr) => {
                     res.json({ res: resStr });
                 });
             }

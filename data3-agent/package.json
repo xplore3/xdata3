@@ -12,7 +12,7 @@
     "nodemonConfig": {
         "watch": [
             "src",
-            "../AgentContext/dist"
+            "../agent-context/dist"
         ],
         "ext": "ts,json",
         "exec": "node --enable-source-maps --loader ts-node/esm src/index.ts"

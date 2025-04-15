@@ -10,8 +10,8 @@ import type {
     Participant,
     IDatabaseAdapter,
 } from "./types.ts";
-import { CircuitBreaker } from "./database/CircuitBreaker";
-import { data3Logger } from "./logger";
+import { CircuitBreaker } from "./database/CircuitBreaker.ts";
+import { data3Logger } from "./logger.ts";
 
 /**
  * An abstract class representing a database adapter for managing various entities

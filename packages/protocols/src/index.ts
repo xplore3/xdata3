@@ -12,7 +12,7 @@ import axios from "axios";
 
 const registrations = new Map<string, any>();
 
-export const getProtocols = async (specifier: string) => {
+export const getprotocols = async (specifier: string) => {
   const module = registrations.get(specifier);
   if (module !== undefined) {
     return module;
@@ -21,7 +21,7 @@ export const getProtocols = async (specifier: string) => {
   }
 };
 
-export const registerProtocols = (specifier: string, module: any) => {
+export const registerprotocols = (specifier: string, module: any) => {
     registrations.set(specifier, module);
 };
 
@@ -45,7 +45,7 @@ export const updateProtocolArray = async (runtime: any, newXDataSourceArray) => 
 };
 
 
-export const handleProtocols = async (runtime: any, text) => {
+export const handleprotocols = async (runtime: any, text) => {
 
 
   /** test
