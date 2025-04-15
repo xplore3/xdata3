@@ -1,5 +1,5 @@
 import {
-generateText,
+    generateText,
 ModelClass,
 } from "@xdata3os/agentcontext";
 
@@ -123,7 +123,7 @@ Please use JSON to return the result, without including any other content or req
         finalres2 = await generateText({
             runtime,
             context: promt3,
-            modelClass: ModelClass.LARGE,
+            modelClass: ModelClass.LARGE
         });
         console.log("yykai responce: ", finalres2);
         //res.json({ res: finalres2 });
@@ -133,7 +133,7 @@ Please use JSON to return the result, without including any other content or req
         const response = await generateText({
             runtime,
             context: text,
-            modelClass: ModelClass.SMALL,
+            modelClass: ModelClass.SMALL
         });
         resStr = response;
         return resStr;

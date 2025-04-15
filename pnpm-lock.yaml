@@ -138,7 +138,7 @@ importers:
         specifier: 3.0.5
         version: 3.0.5(@types/node@22.14.1)(jiti@1.21.7)(yaml@2.7.1)
 
-  Input-UI:
+  data3-ui:
     dependencies:
       '@radix-ui/react-avatar':
         specifier: ^1.1.2
@@ -15300,7 +15300,7 @@ snapshots:
   ora@5.3.0:
     dependencies:
       bl: 4.1.0
-      chalk: 4.1.0
+      chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
       is-interactive: 1.0.0
