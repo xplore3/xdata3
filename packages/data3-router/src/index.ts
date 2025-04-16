@@ -240,124 +240,8 @@ export class DirectClient {
                     return;
                 }
 
-                const messageId = stringToUuid(Date.now().toString());
-
-                const attachments: Media[] = [];
-                if (req.file) {
-                    const filePath = path.join(
-                        process.cwd(),
-                        "data",
-                        "uploads",
-                        req.file.filename
-                    );
-                    attachments.push({
-                        id: Date.now().toString(),
-                        url: filePath,
-                        title: req.file.originalname,
-                        source: "direct",
-                        description: `Uploaded file: ${req.file.originalname}`,
-                        text: "",
-                        contentType: req.file.mimetype,
-                    });
-                }
-
-                const content: Content = {
-                    text,
-                    attachments,
-                    source: "direct",
-                    inReplyTo: undefined,
-                };
-
-                const userMessage = {
-                    content,
-                    userId,
-                    roomId,
-                    agentId: runtime.agentId,
-                };
-
-                const memory: Memory = {
-                    id: stringToUuid(messageId + "-" + userId),
-                    ...userMessage,
-                    agentId: runtime.agentId,
-                    userId,
-                    roomId,
-                    content,
-                    createdAt: Date.now(),
-                };
-
-                await runtime.messageManager.addEmbeddingToMemory(memory);
-                await runtime.messageManager.createMemory(memory);
-
-                let state = await runtime.composeState(userMessage, {
-                    agentName: runtime.character.name,
-                });
-
-                const context = composeContext({
-                    state,
-                    template: messageHandlerTemplate,
-                });
-
-                const response = await generateMessageResponse({ // here is the entry point.
-                    runtime: runtime,
-                    context,
-                    modelClass: ModelClass.LARGE,
-                });
-
-                if (!response) {
-                    res.status(500).send(
-                        "No response from generateMessageResponse"
-                    );
-                    return;
-                }
-
-                // save response to memory
-                const responseMessage: Memory = {
-                    id: stringToUuid(messageId + "-" + runtime.agentId),
-                    ...userMessage,
-                    userId: runtime.agentId,
-                    content: response,
-                    embedding: getEmbeddingZeroVector(),
-                    createdAt: Date.now(),
-                };
-
-                await runtime.messageManager.createMemory(responseMessage);
-
-                state = await runtime.updateRecentMessageState(state);
-
-                let message = null as Content | null;
-
-                await runtime.processActions(
-                    memory,
-                    [responseMessage],
-                    state,
-                    async (newMessages) => {
-                        message = newMessages;
-                        return [memory];
-                    }
-                );
-
-                await runtime.evaluate(memory, state);
-
-                // Check if we should suppress the initial message
-                const action = runtime.actions.find(
-                    (a) => a.name === response.action
-                );
-                const shouldSuppressInitialMessage =
-                    action?.suppressInitialMessage;
-
-                if (!shouldSuppressInitialMessage) {
-                    if (message) {
-                        res.json([response, message]);
-                    } else {
-                        res.json([response]);
-                    }
-                } else {
-                    if (message) {
-                        res.json([message]);
-                    } else {
-                        res.json([]);
-                    }
-                }
+                const textFilledByData3 = await handleprotocols(runtime, text);
+                await this.handleMessage(runtime, req, res, agentId, roomId, userId, textFilledByData3);
             }
         );
 
@@ -1173,6 +1057,127 @@ export class DirectClient {
             this.server.close(() => {
                 data3Logger.success("Server stopped");
             });
+        }
+    }
+
+    private async handleMessage(runtime: IAgentRuntime, req: Express.Request, res: express.Response, agentId: string, roomId: any, userId: any, text: string) {
+        const messageId = stringToUuid(Date.now().toString());
+
+        const attachments: Media[] = [];
+        if ((req as any).file) {
+            const filePath = path.join(
+                process.cwd(),
+                "data",
+                "uploads",
+                (req as any).file.filename
+            );
+            attachments.push({
+                id: Date.now().toString(),
+                url: filePath,
+                title: (req as any).file.originalname,
+                source: "direct",
+                description: `Uploaded file: ${(req as any).file.originalname}`,
+                text: "",
+                contentType: (req as any).file.mimetype,
+            });
+        }
+
+        const content: Content = {
+            text,
+            attachments,
+            source: "direct",
+            inReplyTo: undefined,
+        };
+
+        const userMessage = {
+            content,
+            userId,
+            roomId,
+            agentId: runtime.agentId,
+        };
+
+        const memory: Memory = {
+            id: stringToUuid(messageId + "-" + userId),
+            ...userMessage,
+            agentId: runtime.agentId,
+            userId,
+            roomId,
+            content,
+            createdAt: Date.now(),
+        };
+
+        await runtime.messageManager.addEmbeddingToMemory(memory);
+        await runtime.messageManager.createMemory(memory);
+
+        let state = await runtime.composeState(userMessage, {
+            agentName: runtime.character.name,
+        });
+
+        const context = composeContext({
+            state,
+            template: messageHandlerTemplate,
+        });
+
+        const response = await generateMessageResponse({
+            runtime: runtime,
+            context,
+            modelClass: ModelClass.LARGE,
+        });
+
+        if (!response) {
+            res.status(500).send(
+                "No response from generateMessageResponse"
+            );
+            return;
+        }
+
+        // save response to memory
+        const responseMessage: Memory = {
+            id: stringToUuid(messageId + "-" + runtime.agentId),
+            ...userMessage,
+            userId: runtime.agentId,
+            content: response,
+            embedding: getEmbeddingZeroVector(),
+            createdAt: Date.now(),
+        };
+
+        await runtime.messageManager.createMemory(responseMessage);
+
+        state = await runtime.updateRecentMessageState(state);
+
+        let message = null as Content | null;
+
+        await runtime.processActions(
+            memory,
+            [responseMessage],
+            state,
+            async (newMessages) => {
+                message = newMessages;
+                return [memory];
+            }
+        );
+
+        await runtime.evaluate(memory, state);
+
+        // Check if we should suppress the initial message
+        const action = runtime.actions.find(
+            (a) => a.name === response.action
+        );
+        const shouldSuppressInitialMessage =
+            action?.suppressInitialMessage;
+
+        if (!shouldSuppressInitialMessage) {
+            if (message) {
+                res.json([response, message]);
+            } else {
+                res.json([response]);
+            }
+        } else {
+            if (message) {
+                res.json([message]);
+            } else {
+                res.json([]);
+            }
         }
     }
 }

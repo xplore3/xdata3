@@ -44,18 +44,17 @@ export const updateProtocolArray = async (runtime: any, newXDataSourceArray) => 
     }
 };
 
-
-export const handleprotocols = async (runtime: any, text) => {
-
-
-  /** test
-   * 
+  /**
+   * This is a preprocessing method.
+   * If there is no need to query data, then return the original question text.
+   * If you need to query data, return the result of querying the data text and the original question text, and concatenate the prompt
+   * words before returning.
+   * This part of the logic odes not require processing of memory function.
    */
+export const handleprotocols = async (runtime: any, text) => {
   const res0 = await data3Fetch("https://example.com/");
   console.log("yykai res0: ", res0);
 
-
-  //
   let resStr = "";
   let finalres2 = null;
 
@@ -80,6 +79,9 @@ Please use JSON to return the result, without including any other content or req
     // data3Logger.log("oldXData: " , oldXDataSourceArray);
     // let apiDescription = "";
     const obj = JSON.parse(response1);
+    if (obj?.need_network.includes("false")) {
+        return text;
+    }
     if (obj?.need_network.includes("true") && obj?.api_id != -1) {
         const httpAPI = apiXDataSourceArray[obj?.api_id];
         console.log("httpAPI: ", httpAPI);
@@ -120,22 +122,17 @@ Please use JSON to return the result, without including any other content or req
             apires.data
         )} . Answer the user's question based on the return value ${text}, Please answer the user's question simply and directly without explanation. Simply answer the user's question.`;
         console.log("yykai promt3: ", promt3);
-        finalres2 = await generateText({
-            runtime,
-            context: promt3,
-            modelClass: ModelClass.LARGE
-        });
-        console.log("yykai responce: ", finalres2);
-        //res.json({ res: finalres2 });
-        resStr = finalres2;
-        return resStr;
+        // finalres2 = await generateText({
+        //     runtime,
+        //     context: promt3,
+        //     modelClass: ModelClass.LARGE
+        // });
+        // console.log("yykai responce: ", finalres2);
+        // //res.json({ res: finalres2 });
+        // resStr = finalres2;
+        // return resStr;
+        return promt3;
     } else {
-        const response = await generateText({
-            runtime,
-            context: text,
-            modelClass: ModelClass.SMALL
-        });
-        resStr = response;
-        return resStr;
+        return text;
     }
 };
