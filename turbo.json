@@ -1,26 +1,22 @@
 {
     "$schema": "https://turbo.build/schema.json",
     "tasks": {
-        "check-types": {
-            "dependsOn": ["build"]
-        },
-        "@data3os/data3-agent#check-types": {
-            "dependsOn": [
-                "@data3os/plugin-solana#build",
-                "@data3os/plugin-direct#build"
-            ]
-        },
-        "build": {
-            "outputs": ["dist/**"],
-            "dependsOn": ["^@data3os/agentcontext#build"]
-        },
-        "@data3os/data3-router#build": {
-            "outputs": ["dist/**"],
-            "dependsOn": []
-        },
-        "dev": {
-            "persistent": true,
-            "cache": true
-        }
+      "check-types": {
+        "dependsOn": ["build"]
+      },
+      "@data3os/data3-agent#check-types": {
+        "dependsOn": [
+          "@data3os/plugin-solana#build",
+          "@data3os/plugin-direct#build"
+        ]
+      },
+      "build": {
+        "outputs": ["dist/**"],
+        "dependsOn": ["^build"]
+      },
+      "dev": {
+        "persistent": true,
+        "cache": true
+      }
     }
-}
+  }
