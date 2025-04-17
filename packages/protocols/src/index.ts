@@ -118,7 +118,7 @@ Please use JSON to return the result, without including any other content or req
             return resStr;
         }
         console.log("yykai res1: ", JSON.stringify(apires.data).slice(0, 1000));
-        const promt3 = `This HTTP API ${httpAPI} responce ${JSON.stringify(
+        const promt3 = `This HTTP API ${JSON.stringify(httpAPI)} responce ${JSON.stringify(
             apires.data
         )} . Answer the user's question based on the return value ${text}, Please answer the user's question simply and directly without explanation. Simply answer the user's question.`;
         console.log("yykai promt3: ", promt3);

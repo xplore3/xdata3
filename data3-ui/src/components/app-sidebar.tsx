@@ -46,7 +46,7 @@ export function AppSidebar() {
 
                                 <div className="flex flex-col gap-0.5 leading-none">
                                     <span className="font-semibold">
-                                        ElizaOS
+                                        Data3
                                     </span>
                                     <span className="">v{info?.version}</span>
                                 </div>
