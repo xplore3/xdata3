@@ -22,7 +22,7 @@ import {
 
 import {
     getProtocolArray,
-    handleprotocols,
+    handleProtocols,
     updateProtocolArray,
 } from "data3-protocols";
 
@@ -240,13 +240,13 @@ export class DirectClient {
                     return;
                 }
 
-                const textFilledByData3 = await handleprotocols(runtime, text);
+                const textFilledByData3 = await handleProtocols(runtime, text);
                 await this.handleMessage(runtime, req, res, agentId, roomId, userId, textFilledByData3);
             }
         );
 
         this.app.post(
-            "/:agentId/data3", // todo: move the protocol to data3-protocols
+            "/:agentId/data3", // This is a debug API for Data3 Protocols.
             upload.single("file"),
             async (req: express.Request, res: express.Response) => {
                 const agentId = req.params.agentId;
@@ -286,7 +286,7 @@ export class DirectClient {
                     return;
                 }
 
-                handleprotocols(runtime, text).then((resStr) => {
+                handleProtocols(runtime, text).then((resStr) => {
                     res.json({ res: resStr });
                 });
             }
@@ -294,7 +294,7 @@ export class DirectClient {
 
         this.app.post(
             "/:agentId/data3_update",
-            upload.single("file"),
+            // upload.single("file"),
             async (req: express.Request, res: express.Response) => {
                 const agentId = req.params.agentId;
                 const roomId = stringToUuid(
@@ -341,7 +341,7 @@ export class DirectClient {
 
         this.app.post(
             "/:agentId/data3_get",
-            upload.single("file"),
+            // upload.single("file"),
             async (req: express.Request, res: express.Response) => {
                 const agentId = req.params.agentId;
                 const roomId = stringToUuid(
