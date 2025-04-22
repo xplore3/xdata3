@@ -80,9 +80,13 @@ Please use JSON to return the result, without including any other content or req
     if (obj?.need_network.includes("true") && obj?.api_id != -1) {
         const httpAPI = apiXDataSourceArray[obj?.api_id];
         console.log("httpAPI: ", httpAPI);
-        const promt2 = `Please analyze the description of the interface below. ${JSON.stringify(
-            httpAPI
-        )} , Extracting the parameters of the problem from the user's question,${text}, Retrieve from the interface description in other parameters. Please return a JSON object containing the following fields: {"baseurl": "string", "method": "{post or get}", "params": "object", "headers": "object", "body": "object"}, Please return this JSON object directly without any explanation, comments, other content, or markdown syntax modification.`;
+        const promt2 = `You are a data analysis engineer, and you need to call multiple data request interfaces to answer user questions. The following answer should be as tight and brief as possible.
+        Please analyze the description of the interface below. ${JSON.stringify(httpAPI)} , 
+        Extracting the parameters of the problem from the user's question,${text}, 
+        Retrieve from the interface description in other parameters. 
+        Please return a JSON object containing the following fields: [{"baseurl": "string", "method": "{post or get}", "params": "object", "headers": "object", "body": "object"}],
+        Note that this is an array. For example, if you want to know information about multiple users, you need to query multiple times. In this case, you need to return an array.
+        Please return this JSON object directly without any explanation, comments, other content, or markdown syntax modification.`;
         console.log("handleProtocols promt2: ", promt2);
         const response2 = await generateText({
             runtime,
@@ -90,42 +94,43 @@ Please use JSON to return the result, without including any other content or req
             modelClass: ModelClass.LARGE,
         });
         console.log("handleProtocols response2: ", response2);
-        const Obj = JSON.parse(response2);
-        let apires = null;
-        try {
-            if (Obj.method == "post") {
-                apires = await axios.post(Obj.baseurl, Obj.body, {
-                    params: Obj.params,
-                    headers: Obj.headers,
-                });
-            } else {
-                apires = await axios.get(Obj.baseurl, {
-                    params: Obj.params,
-                    headers: Obj.headers,
-                });
+        const ObjArray = JSON.parse(response2);
+        let apiresArray = [];
+
+        for (const Obj of ObjArray) {
+            let apires = null;
+            try {
+                if (Obj.method == "post") {
+                    apires = await axios.post(Obj.baseurl, Obj.body, {
+                        params: Obj.params,
+                        headers: Obj.headers,
+                    });
+                } else {
+                    apires = await axios.get(Obj.baseurl, {
+                        params: Obj.params,
+                        headers: Obj.headers,
+                    });
+                }
+            } catch (e) {
+                console.log("handleProtocols error: ", e);
+                const errorStr =
+                    "Network request failed, please check if the network connection or API parameters are correct. e: " +
+                    e.toString().slice(0, 1000);
+                // return errorStr;
+                apiresArray.push(errorStr);
             }
-        } catch (e) {
-            console.log("handleProtocols error: ", e);
-            apires =
-                "Network request failed, please check if the network connection or API parameters are correct. e: " +
-                e.toString().slice(0, 1000);
-            resStr = apires;
-            return resStr;
+            console.log(
+                "handleProtocols http res: ",
+                JSON.stringify(apires.data).slice(0, 1000)
+            );
+            apiresArray.push(apires.data);
         }
-        console.log("handleProtocols http res: ", JSON.stringify(apires.data).slice(0, 1000));
-        const promt3 = `This HTTP API ${JSON.stringify(httpAPI)} responce ${JSON.stringify(
-            apires.data
-        )} . Answer the user's question based on the return value ${text}, Please answer the user's question simply and directly without explanation. Simply answer the user's question.`;
+        const promt3 = `The user's question is this [ ${text}],
+        This HTTP API [${JSON.stringify(httpAPI)}] responce [${JSON.stringify(apiresArray)}].
+        please answer the user's question based on the data above.
+        Please answer the user's question simply and directly without explanation. 
+        Simply answer the user's question.`;
         console.log("handleProtocols promt3: ", promt3);
-        // finalres2 = await generateText({
-        //     runtime,
-        //     context: promt3,
-        //     modelClass: ModelClass.LARGE
-        // });
-        // console.log("yykai responce: ", finalres2);
-        // //res.json({ res: finalres2 });
-        // resStr = finalres2;
-        // return resStr;
         return promt3;
     } else {
         console.log("handleProtocols, no need the query online, just return original question text");
