@@ -56,36 +56,56 @@ export const handleProtocols = async (runtime: any, text) => {
     const apiXDataSourceArray = await runtime.cacheManager.get(
         "XData_Collection"
     );
-    const promt1 =
-        "Do the following questions need to be queried online:\n" +
-        text +
-        `\n At the same time, you can read this list of HTTP APIs ${JSON.stringify(
-            apiXDataSourceArray
-        )}.\n Please return a Boolean value, true or false, to indicate whether this issue needs to be queried online. If you need to query online, please traverse this HTTP API list. If there are suitable APIs to use, please return the API ID. If there are no suitable options, please return to -1. ID is numbered from 0.\n
-Please use JSON to return the result, without including any other content or requiring markdown syntax modification. The JSON format is: {"need_network": "true","api_id": "1"}\n`;
+    const promt1 = `Do the following questions need to be queried online?\n
+        [Question: ${text}] \n At the same time, you can read this list of HTTP APIs [APIs: ${JSON.stringify(
+        apiXDataSourceArray
+    )}.\n
+        Please return a Boolean value, true or false, to indicate whether this issue needs to be queried online.
+        Please use JSON to return the result, without including any other content or requiring markdown syntax modification.
+        The JSON format is: {"need_network": "true"}\n`;
     console.log("handleprotocols promt1: ", promt1);
     const response1 = await generateText({
         runtime,
         context: promt1,
-        modelClass: ModelClass.LARGE,
+        modelClass: ModelClass.SMALL,
     });
     console.log("handleProtocols response1: ", response1);
 
     // data3Logger.log("oldXData: " , oldXDataSourceArray);
     // let apiDescription = "";
-    const obj = JSON.parse(response1);
-    if (obj?.need_network.includes("false")) {
-        return text;
-    }
-    if (obj?.need_network.includes("true") && obj?.api_id != -1) {
-        const httpAPI = apiXDataSourceArray[obj?.api_id];
-        console.log("httpAPI: ", httpAPI);
+    let obj = JSON.parse(response1);
+    let chatContextAccmulatingStr = "";
+    chatContextAccmulatingStr += `You are a data analysis engineer, The user question is: ${text}\n`;
+    let step = 0;
+
+    do {
+        ++step;
+        if(step > 5) {
+            break;
+        }
+        // 1 token ≈ 4 char.
+        const charLengthLimit = 128000 * 4;
+        if(chatContextAccmulatingStr.length > charLengthLimit) {
+            chatContextAccmulatingStr = chatContextAccmulatingStr.slice(charLengthLimit);
+            break; // context length limit 128k for GPT-4.
+        }
+
+        chatContextAccmulatingStr += `Current step: ${step}.\n`;
+        if (!obj?.need_network.includes("true")) {
+            break;
+        }
         const promt2 = `You are a data analysis engineer, and you need to call multiple data request interfaces to answer user questions. The following answer should be as tight and brief as possible.
-        Please analyze the description of the interface below. ${JSON.stringify(httpAPI)} , 
+        Please analyze the description of the interface below. ${JSON.stringify(
+            apiXDataSourceArray
+        )} , 
         Extracting the parameters of the problem from the user's question,${text}, 
         Retrieve from the interface description in other parameters. 
-        Please return a JSON object containing the following fields: [{"baseurl": "string", "method": "{post or get}", "params": "object", "headers": "object", "body": "object"}],
+        Please return a JSON object containing the following fields:
+        [{"baseurl": "url_1", "method": "{post or get}", "params": "object_1", "headers": "object_1", "body": "object_1"},
+        [{"baseurl": "url_2", "method": "{post or get}", "params": "object_2", "headers": "object_2", "body": "object_2"}],
         Note that this is an array. For example, if you want to know information about multiple users, you need to query multiple times. In this case, you need to return an array.
+        There is another situation where there is a dependency relationship, and this time you only need to return the interface of the current data.
+        I will add the return result of this data query in the next loop. Based on the new return result, you can continue to select the API for network calls and complete the dependency calls.
         Please return this JSON object directly without any explanation, comments, other content, or markdown syntax modification.`;
         console.log("handleProtocols promt2: ", promt2);
         const response2 = await generateText({
@@ -119,21 +139,33 @@ Please use JSON to return the result, without including any other content or req
                 // return errorStr;
                 apiresArray.push(errorStr);
             }
+            chatContextAccmulatingStr += `Current API [${JSON.stringify(
+                Obj
+            )}] responce [${JSON.stringify(apires.data)}].\n`;
             console.log(
                 "handleProtocols http res: ",
                 JSON.stringify(apires.data).slice(0, 1000)
             );
             apiresArray.push(apires.data);
         }
-        const promt3 = `The user's question is this [ ${text}],
-        This HTTP API [${JSON.stringify(httpAPI)}] responce [${JSON.stringify(apiresArray)}].
-        please answer the user's question based on the data above.
-        Please answer the user's question simply and directly without explanation. 
-        Simply answer the user's question.`;
-        console.log("handleProtocols promt3: ", promt3);
-        return promt3;
-    } else {
-        console.log("handleProtocols, no need the query online, just return original question text");
-        return text;
-    }
+        console.log(
+            `handleProtocols chatContextAccmulatingStr: ${chatContextAccmulatingStr}`
+        );
+        const promt3 = `${chatContextAccmulatingStr}
+        Please check if the data above is sufficient to answer the user's question?\n
+        You can read this list of HTTP APIs [APIs: ${JSON.stringify(
+            apiXDataSourceArray
+        )}.\n
+        Please return a Boolean value, true or false, to indicate whether this issue needs to be queried online.\n
+        Please use JSON to return the result, without including any other content or requiring markdown syntax modification, The JSON format is: {"need_network": "true"}\n`;
+        console.log(`handleProtocols promt3: ${promt3}`);
+        const response3 = await generateText({
+            runtime,
+            context: promt3,
+            modelClass: ModelClass.LARGE,
+        });
+        console.log(`handleProtocols response3: ${response3}`);
+        obj = JSON.parse(response3);
+    } while (obj);
+    return chatContextAccmulatingStr;
 };
