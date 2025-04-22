@@ -105,7 +105,18 @@ export const handleProtocols = async (runtime: any, text) => {
         [{"baseurl": "url_2", "method": "{post or get}", "params": "object_2", "headers": "object_2", "body": "object_2"}],
         Note that this is an array. For example, if you want to know information about multiple users, you need to query multiple times. In this case, you need to return an array.
         There is another situation where there is a dependency relationship, and this time you only need to return the interface of the current data.
-        I will add the return result of this data query in the next loop. Based on the new return result, you can continue to select the API for network calls and complete the dependency calls.
+        I will add the return result of this data query and origin question text in the next loop. Based on the new return result, you can continue to select the API for network calls and complete the dependency calls.
+        The complete calling process is similar to the following:
+        [Question: user origin question text]
+        [Step1]:
+        HTTP query Url1, Url2, Url3, Url4,
+        HTTP responce ans1, ans2, ans3, ans4,
+        [Step2]:
+        HTTP query Url1, Url2,
+        HTTP responce ans1, ans2,
+        [Step3]:
+        HTTP query Url1, Url2, Url3
+        HTTP responce ans1, ans2, ans3
         Please return this JSON object directly without any explanation, comments, other content, or markdown syntax modification.`;
         console.log("handleProtocols promt2: ", promt2);
         const response2 = await generateText({
