@@ -75,7 +75,7 @@ export const handleProtocols = async (runtime: any, text) => {
     // let apiDescription = "";
     let obj = JSON.parse(response1);
     let chatContextAccmulatingStr = "";
-    chatContextAccmulatingStr += `You are a data analysis engineer, The user question is: ${text}\n`;
+    chatContextAccmulatingStr += `You are a data analysis engineer, The user question is:[Question: ${text}]\n`;
     let step = 0;
 
     do {
@@ -126,7 +126,6 @@ export const handleProtocols = async (runtime: any, text) => {
         });
         console.log("handleProtocols response2: ", response2);
         const ObjArray = JSON.parse(response2);
-        let apiresArray = [];
 
         for (const Obj of ObjArray) {
             let apires = null;
@@ -142,22 +141,34 @@ export const handleProtocols = async (runtime: any, text) => {
                         headers: Obj.headers,
                     });
                 }
+                let currentApiStr = `The current API [API: ${JSON.stringify(Obj)}] The responce [Responce: ${JSON.stringify(apires.data)}].\n`;
+                if(currentApiStr.length > charLengthLimit / 10) {
+                    let apiNeedShortenStr = `The current API [API: ${JSON.stringify(Obj)}] The response str is too long, Based on the user's question, please remove irrelevant text, remove duplicate text and compress responce [Responce: ${JSON.stringify(apires.data)}].\n`;
+                    // The response str is too long, Use AI to remove irrelevant text and compress it.
+                    if(chatContextAccmulatingStr.length + apiNeedShortenStr.length > charLengthLimit ) {
+                        apiNeedShortenStr = apiNeedShortenStr.slice(charLengthLimit - chatContextAccmulatingStr.length);
+                    }
+                    const promtShorten = chatContextAccmulatingStr + apiNeedShortenStr;
+                    currentApiStr = await generateText({ // Compress redundant and irrelevant text
+                        runtime,
+                        context: promtShorten,
+                        modelClass: ModelClass.LARGE,
+                    });
+                    console.log("handleProtocols promtShorten: ", promtShorten);
+                    console.log("handleProtocols currentApiStr: ", currentApiStr);
+                }
+                chatContextAccmulatingStr += currentApiStr;
             } catch (e) {
                 console.log("handleProtocols error: ", e);
                 const errorStr =
-                    "Network request failed, please check if the network connection or API parameters are correct. e: " +
-                    e.toString().slice(0, 1000);
-                // return errorStr;
-                apiresArray.push(errorStr);
+                    `Current API [${JSON.stringify(Obj)}]  request failed, please check if the network connection or API parameters are correct.`;
+                chatContextAccmulatingStr += errorStr;
             }
-            chatContextAccmulatingStr += `Current API [${JSON.stringify(
-                Obj
-            )}] responce [${JSON.stringify(apires.data)}].\n`;
+
             console.log(
                 "handleProtocols http res: ",
                 JSON.stringify(apires.data).slice(0, 1000)
             );
-            apiresArray.push(apires.data);
         }
         console.log(
             `handleProtocols chatContextAccmulatingStr: ${chatContextAccmulatingStr}`
