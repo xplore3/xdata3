@@ -90,11 +90,10 @@ export const handleProtocols = async (runtime: any, text) => {
             break; // context length limit 128k for GPT-4.
         }
 
-        chatContextAccmulatingStr += `Current step: ${step}.\n`;
         if (!obj?.need_network.includes("true")) {
             break;
         }
-        const promt2 = `You are a data analysis engineer, and you need to call multiple data request interfaces to answer user questions. The following answer should be as tight and brief as possible.
+        const promt2 = chatContextAccmulatingStr + `. And you need to call multiple data request interfaces to answer user questions. The following answer should be as tight and brief as possible.
         Please analyze the description of the interface below. ${JSON.stringify(
             apiXDataSourceArray
         )} , 
@@ -119,6 +118,9 @@ export const handleProtocols = async (runtime: any, text) => {
         HTTP responce ans1, ans2, ans3
         Please return this JSON object directly without any explanation, comments, other content, or markdown syntax modification.`;
         console.log("handleProtocols promt2: ", promt2);
+        if(promt2.length > charLengthLimit) {
+            return chatContextAccmulatingStr;
+        }
         const response2 = await generateText({
             runtime,
             context: promt2,
@@ -126,6 +128,8 @@ export const handleProtocols = async (runtime: any, text) => {
         });
         console.log("handleProtocols response2: ", response2);
         const ObjArray = JSON.parse(response2);
+
+        chatContextAccmulatingStr += `\n[Current step: ${step}]\n`;
 
         for (const Obj of ObjArray) {
             let apires = null;
@@ -148,7 +152,7 @@ export const handleProtocols = async (runtime: any, text) => {
                     if(chatContextAccmulatingStr.length + apiNeedShortenStr.length > charLengthLimit ) {
                         apiNeedShortenStr = apiNeedShortenStr.slice(charLengthLimit - chatContextAccmulatingStr.length);
                     }
-                    const promtShorten = chatContextAccmulatingStr + apiNeedShortenStr;
+                    const promtShorten = chatContextAccmulatingStr + "" + apiNeedShortenStr;
                     currentApiStr = await generateText({ // Compress redundant and irrelevant text
                         runtime,
                         context: promtShorten,
@@ -157,7 +161,7 @@ export const handleProtocols = async (runtime: any, text) => {
                     console.log("handleProtocols promtShorten: ", promtShorten);
                     console.log("handleProtocols currentApiStr: ", currentApiStr);
                 }
-                chatContextAccmulatingStr += currentApiStr;
+                chatContextAccmulatingStr += ("\nCurrently known information: " + currentApiStr);
             } catch (e) {
                 console.log("handleProtocols error: ", e);
                 const errorStr =
