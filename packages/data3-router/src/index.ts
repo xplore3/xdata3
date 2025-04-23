@@ -241,7 +241,15 @@ export class DirectClient {
                 }
 
                 const textFilledByData3 = await handleProtocols(runtime, text);
-                await this.handleMessage(runtime, req, res, agentId, roomId, userId, textFilledByData3);
+                /** Not using the memory */
+                res.json([{
+                    user: "Data3",
+                    text: textFilledByData3,
+                    action: "NONE",
+                }])
+                /** Using memory
+                 * await this.handleMessage(runtime, req, res, agentId, roomId, userId, textFilledByData3);
+                 */
             }
         );
 

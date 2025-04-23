@@ -51,11 +51,18 @@ export const handleProtocols = async (runtime: any, text) => {
     // This a example of how to use the Scraper module.
     // const res0 = await data3Fetch("https://example.com/");
     // console.log("handleProtocols res0: ", res0);
-
+    // 1 token 约等于 4 char.
+    const charLengthLimit = 128000 * 3;
     let resStr = "";
     const apiXDataSourceArray = await runtime.cacheManager.get(
         "XData_Collection"
     );
+    function shortenStr(str) {
+        if (str.length > charLengthLimit) {
+            return str.slice(0, charLengthLimit);
+        }
+        return str;
+    }
     const promt1 = `Do the following questions need to be queried online?\n
         [Question: ${text}] \n At the same time, you can read this list of HTTP APIs [APIs: ${JSON.stringify(
         apiXDataSourceArray
@@ -66,7 +73,7 @@ export const handleProtocols = async (runtime: any, text) => {
     console.log("handleprotocols promt1: ", promt1);
     const response1 = await generateText({
         runtime,
-        context: promt1,
+        context: shortenStr(promt1),
         modelClass: ModelClass.SMALL,
     });
     console.log("handleProtocols response1: ", response1);
@@ -83,8 +90,7 @@ export const handleProtocols = async (runtime: any, text) => {
         if(step > 5) {
             break;
         }
-        // 1 token ≈ 4 char.
-        const charLengthLimit = 128000 * 4;
+
         if(chatContextAccmulatingStr.length > charLengthLimit) {
             chatContextAccmulatingStr = chatContextAccmulatingStr.slice(charLengthLimit);
             break; // context length limit 128k for GPT-4.
@@ -123,7 +129,7 @@ export const handleProtocols = async (runtime: any, text) => {
         }
         const response2 = await generateText({
             runtime,
-            context: promt2,
+            context: shortenStr(promt2),
             modelClass: ModelClass.LARGE,
         });
         console.log("handleProtocols response2: ", response2);
@@ -155,7 +161,7 @@ export const handleProtocols = async (runtime: any, text) => {
                     const promtShorten = chatContextAccmulatingStr + "" + apiNeedShortenStr;
                     currentApiStr = await generateText({ // Compress redundant and irrelevant text
                         runtime,
-                        context: promtShorten,
+                        context: shortenStr(promtShorten),
                         modelClass: ModelClass.LARGE,
                     });
                     console.log("handleProtocols promtShorten: ", promtShorten);
@@ -171,7 +177,7 @@ export const handleProtocols = async (runtime: any, text) => {
 
             console.log(
                 "handleProtocols http res: ",
-                JSON.stringify(apires.data).slice(0, 1000)
+                JSON.stringify(apires?.data)?.slice(0, 1000)
             );
         }
         console.log(
@@ -187,11 +193,16 @@ export const handleProtocols = async (runtime: any, text) => {
         console.log(`handleProtocols promt3: ${promt3}`);
         const response3 = await generateText({
             runtime,
-            context: promt3,
+            context: shortenStr(promt3),
             modelClass: ModelClass.LARGE,
         });
         console.log(`handleProtocols response3: ${response3}`);
         obj = JSON.parse(response3);
     } while (obj);
-    return chatContextAccmulatingStr;
+    const responseFinal = await generateText({
+        runtime,
+        context: shortenStr(chatContextAccmulatingStr),
+        modelClass: ModelClass.LARGE,
+    });
+    return responseFinal;
 };
