@@ -110,6 +110,7 @@ export const handleProtocols = async (runtime: any, text) => {
         [{"baseurl": "url_2", "method": "{post or get}", "params": "object_2", "headers": "object_2", "body": "object_2"}],
         Note that this is an array. For example, if you want to know information about multiple users, you need to query multiple times. In this case, you need to return an array.
         There is another situation where there is a dependency relationship, and this time you only need to return the interface of the current data.
+        When you use an API to search for multiple keywords, you can split them up, such as: Query A, Query B, Query C. Instead of just Query A B C, it is easy to get no results if you query many groups of keywords at the same time.
         I will add the return result of this data query and origin question text in the next loop. Based on the new return result, you can continue to select the API for network calls and complete the dependency calls.
         The complete calling process is similar to the following:
         [Question: user origin question text]
