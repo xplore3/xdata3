@@ -37,6 +37,7 @@ import * as path from "path";
 import { z } from "zod";
 import { createApiRouter } from "./api.ts";
 import { createVerifiableLogApiRouter } from "./verifiable-log-api.ts";
+import { WechatHandler } from "./wechat.ts";
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -120,7 +121,7 @@ Response format should be formatted in a JSON block like this:
 
 export class DirectClient {
     public app: express.Application;
-    private agents: Map<string, IAgentRuntime>; // container management
+    public agents: Map<string, IAgentRuntime>; // container management
     private server: any; // Store server instance
     public startAgent: Function; // Store startAgent functor
     public loadCharacterTryPath: Function; // Store loadCharacterTryPath functor
@@ -390,6 +391,15 @@ export class DirectClient {
                 return;
             }
         );
+
+        const wechatHandler = new WechatHandler(this);
+        this.app.get(
+            "/:agentId/wechat_listen",
+            async (req: express.Request, res: express.Response) => {
+                await wechatHandler.handleWechatInputMessage(req, res);
+            }
+        );
+
         this.app.post(
             "/agents/:agentIdOrName/hyperfi/v1",
             async (req: express.Request, res: express.Response) => {
