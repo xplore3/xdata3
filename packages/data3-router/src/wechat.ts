@@ -40,6 +40,7 @@ export class WechatHandler {
 
     async sendMessage(external_userid: string, content: string) {
         try {
+            console.log("sendMessage " + content);
             const token = await this.getAccessToken();
             const msg = {
                 chat_type: 'single',
@@ -57,7 +58,8 @@ export class WechatHandler {
                 text: { content },
                 safe: 0
             };*/
-            const resp = await axios.post(`https://qyapi.weixin.qq.com/cgi-bin/kf/send_msg?access_token=${token}`, msg)
+            const resp = await axios.post(`https://qyapi.weixin.qq.com/cgi-bin/kf/send_msg?access_token=${token}`, msg);
+            console.log(resp);
             return resp.data;
         }
         catch (err) {
@@ -66,6 +68,8 @@ export class WechatHandler {
     }
 
     async handleWechatInputMessage(req: express.Request, res: express.Response) {
+        console.log("handleWechatInputMessage");
+        console.log(req);
         const userId = req.query.userId
         const runtime = this.getAgentId(req, res);
         if (runtime) {
