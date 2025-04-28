@@ -51,7 +51,7 @@ export const handleProtocols = async (runtime: any, text) => {
     // This a example of how to use the Scraper module.
     // const res0 = await data3Fetch("https://example.com/");
     // console.log("handleProtocols res0: ", res0);
-    // 1 token 约等于 4 char.
+    // 1 token is about 4 chars.
     const charLengthLimit = 128000 * 3;
     let resStr = "";
     const apiXDataSourceArray = await runtime.cacheManager.get(
@@ -77,17 +77,19 @@ export const handleProtocols = async (runtime: any, text) => {
         modelClass: ModelClass.SMALL,
     });
     console.log("handleProtocols response1: ", response1);
+    const response1Str = response1.replace(/```json/g, "").replace(/```/g, "");
+    console.log("handleProtocols response1Str: ", response1Str);
 
     // data3Logger.log("oldXData: " , oldXDataSourceArray);
     // let apiDescription = "";
-    let obj = JSON.parse(response1);
-    let chatContextAccmulatingStr = "";
-    chatContextAccmulatingStr += `You are a data analysis engineer, The user question is:[Question: ${text}]\n`;
+    let obj = JSON.parse(response1Str);
+    let chatContextAccmulatingStr = `You are a data analysis engineer, The user question is:[Question: ${text}]\n`;
     let step = 0;
 
     do {
         ++step;
-        if(step > 5) {
+        if(step > 30) {
+            console.log(`handleProtocols step: ${step} is too much, break.`);
             break;
         }
 
@@ -99,6 +101,7 @@ export const handleProtocols = async (runtime: any, text) => {
         if (!obj?.need_network.includes("true")) {
             break;
         }
+        // STEP: Data source selection
         const promt2 = chatContextAccmulatingStr + `. And you need to call multiple data request interfaces to answer user questions. The following answer should be as tight and brief as possible.
         Please analyze the description of the interface below. ${JSON.stringify(
             apiXDataSourceArray
@@ -134,7 +137,9 @@ export const handleProtocols = async (runtime: any, text) => {
             modelClass: ModelClass.LARGE,
         });
         console.log("handleProtocols response2: ", response2);
-        const ObjArray = JSON.parse(response2);
+        const response2Str = response2.replace(/```json/g, "").replace(/```/g, "");
+        console.log("handleProtocols response2Str: ", response2Str);
+        const ObjArray = JSON.parse(response2Str);
 
         chatContextAccmulatingStr += `\n[Current step: ${step}]\n`;
 
@@ -184,7 +189,7 @@ export const handleProtocols = async (runtime: any, text) => {
         console.log(
             `handleProtocols chatContextAccmulatingStr: ${chatContextAccmulatingStr}`
         );
-        const promt3 = `${chatContextAccmulatingStr}
+        const promt3 = `${chatContextAccmulatingStr} // Check if the goal is completed
         Please check if the data above is sufficient to answer the user's question?\n
         You can read this list of HTTP APIs [APIs: ${JSON.stringify(
             apiXDataSourceArray
@@ -198,7 +203,16 @@ export const handleProtocols = async (runtime: any, text) => {
             modelClass: ModelClass.LARGE,
         });
         console.log(`handleProtocols response3: ${response3}`);
-        obj = JSON.parse(response3);
+        const response3Str = response3.replace(/```json/g, "").replace(/```/g, "");
+        console.log(`handleProtocols response3Str: ${response3Str}`);
+        obj = JSON.parse(response3Str);
+        // STEP: Reflection
+        chatContextAccmulatingStr = await generateText({
+            runtime,
+            context: shortenStr("Summarize and reflect on the following results: [User-Question: xxx][Plan: 1.xxx. 2.xxx. 3.xxx.][Step: 1.xxx. 2.xxx. 3.xxx.][Results has collected: xxxx]" + chatContextAccmulatingStr),
+            modelClass: ModelClass.LARGE,
+        });
+
     } while (obj);
     const responseFinal = await generateText({
         runtime,
