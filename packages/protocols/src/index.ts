@@ -41,6 +41,15 @@ export const updateProtocolArray = async (
 };
 
 /**
+ * 1. Prioritize reasoning accuracy:
+ * choose o1-preview (complex tasks) or o1-mini (fast requirements).
+ * 2. Multimodality and real-time:
+ * choose GPT-4o, suitable for scenarios such as creativity and customer service.
+ * 3. Daily low-cost needs:
+ * choose GPT-4o-mini, which takes into account both speed and budget
+ */
+
+/**
  * This is a preprocessing method.
  * If there is no need to query data, then return the original question text.
  * If you need to query data, return the result of querying the data text and the original question text, and concatenate the prompt
@@ -124,15 +133,18 @@ let promptPartThree = `
 
         if(chatContextAccmulatingStr.length > charLengthLimit) {
             console.log(`handleProtocols step: ${step} chatContextAccmulatingStr is too much, break.`);
+            console.log(`handleProtocols step: ${step} end   -------------------------------------`);
             break; // context length limit 128k for GPT-4.
         }
 
         if (!obj?.need_network.includes("true")) {
             // STEP: No need to query network data.
+            console.log(`handleProtocols step: ${step} end   -------------------------------------`);
             break;
         }
 
         // STEP: Data Query API selection
+        // TODO: This is divided into two parts, first obtaining the category, and then obtaining the specific API.
         promptPartThree = `\n[Area3]\nYou need to call multiple data request interfaces to answer user questions. The following answer should be as tight and brief as possible.
         Please analyze the description of the API below. ${JSON.stringify(
             apiXDataSourceArray
@@ -158,7 +170,13 @@ let promptPartThree = `
         });
         console.log("handleProtocols response2: ", response2);
         const response2Str = response2.replace(/```json/g, "").replace(/```/g, "");
-        const Obj = JSON.parse(response2Str);
+        let Obj = null;
+        try {
+            Obj = JSON.parse(response2Str);
+        } catch (e) {
+            console.log("handleProtocols response2Str parse error: ", e);
+            continue;
+        }
 
         let apires = null;
         let currentApiStr = "";
@@ -201,6 +219,7 @@ let promptPartThree = `
             currentApiStr = `The current API [API: ${JSON.stringify(
                 Obj
             )}] request failed, The responce [Responce: ${e.toString().slice(100)}].\n`;
+            continue;
         }
         // currentAPIResStr += currentApiStr;
 
@@ -239,7 +258,12 @@ let promptPartThree = `
         });
         console.log(`handleProtocols response3: ${response3}`);
         const response3Str = response3.replace(/```json/g, "").replace(/```/g, "");
-        obj = JSON.parse(response3Str);
+        try {
+            obj = JSON.parse(response3Str);
+        } catch (e) {
+            console.log("handleProtocols response3Str parse error: ", e);
+            continue;
+        }
         // STEP: Reflection
         // chatContextAccmulatingStr = await generateText({
         //     runtime,
@@ -252,7 +276,7 @@ let promptPartThree = `
 
 
     } while (obj);
-    promptPartThree = "\n[Area3]\nBased on the above results, answer user questions briefly and directly. If there is not enough data to answer some questions first, you also need to answer some questions first."
+    promptPartThree = `\n[Area3]\nBased on the above results, answer user questions briefly and directly. The data here may not be sufficient, but first answer the user's question. For example, if the user asked to find 100 KOLs, but now there are only 10, answer the user's question first.`;
     const responseFinal = await generateText({
         runtime,
         context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
