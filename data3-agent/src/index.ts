@@ -22,8 +22,9 @@ import {
 import { defaultCharacter } from "./defaultCharacter.ts";
 
 import { bootstrapPlugin } from "@data3os/plugin-bootstrap";
-import JSON5 from 'json5';
+import { TelegramClientInterface } from "@data3os/client-telegram";
 
+import JSON5 from 'json5';
 import fs from "fs";
 import net from "net";
 import os from "os";
@@ -609,6 +610,11 @@ export async function initializeClients(
                 }
             }
         }
+    }
+    
+    const telegramClient = await TelegramClientInterface.start(runtime);
+    if (telegramClient) {
+        clients.push(telegramClient);
     }
 
     return clients;
