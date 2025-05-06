@@ -49,7 +49,7 @@ export class TelegramClient {
 
         const botInfo = await this.bot.telegram.getMe();
         this.bot.botInfo = botInfo;
-        console.success(`Bot username: @${botInfo.username}`);
+        console.log(`Bot username: @${botInfo.username}`);
 
         this.messageManager.bot = this.bot;
     }

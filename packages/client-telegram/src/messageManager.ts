@@ -230,6 +230,7 @@ export class MessageManager {
                             telegramAutoPostTemplate,
                     });
 
+                    console.log(context);
                     const responseContent = await this._generateResponse(
                         memory,
                         state,
@@ -366,6 +367,7 @@ export class MessageManager {
                     telegramPinnedMessageTemplate,
             });
 
+            console.log(context);
             const responseContent = await this._generateResponse(
                 memory,
                 state,
@@ -887,6 +889,9 @@ export class MessageManager {
         content: Content,
         replyToMessageId?: number
     ): Promise<Message.TextMessage[]> {
+        console.log('sendMessageInChunks');
+        console.log(content);
+        console.log(replyToMessageId);
         if (content.attachments && content.attachments.length > 0) {
             content.attachments.map(async (attachment: Media) => {
                 const typeMap: { [key: string]: MediaType } = {
@@ -1374,6 +1379,7 @@ export class MessageManager {
                         telegramMessageHandlerTemplate,
                 });
 
+                console.log(context);
                 const responseContent = await this._generateResponse(
                     memory,
                     state,
