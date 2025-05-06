@@ -79,11 +79,18 @@ export const handleProtocols = async (runtime: any, originText: any) => {
         Please use JSON to return the result, without including any other content or requiring markdown syntax modification.
         The JSON format is: {"need_network": "true"}\n`;
     console.log("handleprotocols promt1: ", promt1);
-    const response1 = await generateText({
-        runtime,
-        context: shortenStr(promt1),
-        modelClass: ModelClass.LARGE,
-    });
+    let response1 = "";
+    try {
+        response1 = await generateText({
+            runtime,
+            context: shortenStr(promt1),
+            modelClass: ModelClass.LARGE,
+        });
+    } catch (error) {
+        console.error("handleProtocols error: ", error);
+        return "system error 1001";
+    }
+
     console.log("handleProtocols response1: ", response1);
     const response1Str = response1.replace(/```json/g, "").replace(/```/g, "");
 
@@ -163,11 +170,18 @@ let promptPartThree = `
             console.log(`handleProtocols step: ${step} promt2 is too much, break.`);
             return chatContextAccmulatingStr;
         }
-        const response2 = await generateText({
+        let response2 = "";
+        try {
+        response2 = await generateText({
             runtime,
             context: shortenStr(chatContextAccmulatingStr),
             modelClass: ModelClass.LARGE,
         });
+        } catch (error) {
+            console.error("handleProtocols error: ", error);
+            return "system error 1001";
+        }
+
         console.log("handleProtocols response2: ", response2);
         const response2Str = response2.replace(/```json/g, "").replace(/```/g, "");
         let Obj = null;
@@ -201,12 +215,19 @@ let promptPartThree = `
             )}].\n`;
             // The response str is too long, Use AI to remove irrelevant text and compress it.
             // const promtShorten = apiNeedShortenStr;
-            const shortenapires = await generateText({
-                // Compress redundant and irrelevant text
-                runtime,
-                context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
-                modelClass: ModelClass.LARGE,
-            });
+            let shortenapires = "";
+            try {
+                shortenapires = await generateText({
+                    // Compress redundant and irrelevant text
+                    runtime,
+                    context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
+                    modelClass: ModelClass.LARGE,
+                });
+            } catch (e) {
+                console.log("handleProtocols error: ", e);
+                return "system error 1001";
+            }
+
             currentApiStr = `The current API [API: ${JSON.stringify(
                 Obj
             )}] The responce [Responce: ${shortenapires}].\n`;
@@ -231,12 +252,16 @@ let promptPartThree = `
         promptPartTwo += `[Block 5: ${currentApiStr}]\n`;
         promptPartThree = `\n[Area3]\nPlease summarize the AI PART 5 to AI PART 3, and then Return Second Area(AI Area)`;
 
-
-        promptPartTwo = await generateText({
-            runtime,
-            context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
-            modelClass: ModelClass.LARGE,
-        });
+        try {
+            promptPartTwo = await generateText({
+                runtime,
+                context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
+                modelClass: ModelClass.LARGE,
+            });            
+        } catch (e) {
+            console.log("handleProtocols error: ", e);
+            return "system error 1001";
+        }
 
         console.log(
             `handleProtocols chatContextAccmulatingStr: ${chatContextAccmulatingStr}`
@@ -251,11 +276,18 @@ let promptPartThree = `
         If the collected data is not enough, you need to continue searching online.You need to continue collecting data until the problem is finally solved. For example, if a user needs to find 100 KOLs, but you only find 10, this is not enough.
         Please return a Boolean value, true or false, to indicate whether this issue needs to be queried online.\n
         Please use JSON to return the result, without including any other content or requiring markdown syntax modification, The JSON format is: {"need_network": "true"}\n`;
-        const response3 = await generateText({
-            runtime,
-            context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
-            modelClass: ModelClass.LARGE,
-        });
+        let response3 = "";
+        try {
+            response3 = await generateText({
+                runtime,
+                context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
+                modelClass: ModelClass.LARGE,
+            });            
+        } catch (e) {
+            console.log("handleProtocols error: ", e);
+            return "system error 1001";
+        }
+
         console.log(`handleProtocols response3: ${response3}`);
         const response3Str = response3.replace(/```json/g, "").replace(/```/g, "");
         try {
@@ -277,10 +309,17 @@ let promptPartThree = `
 
     } while (obj);
     promptPartThree = `\n[Area3]\nBased on the above results, answer user questions briefly and directly. The data here may not be sufficient, but first answer the user's question. For example, if the user asked to find 100 KOLs, but now there are only 10, answer the user's question first.`;
-    const responseFinal = await generateText({
-        runtime,
-        context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
-        modelClass: ModelClass.LARGE,
-    });
+    let responseFinal = "";
+    try {
+        responseFinal = await generateText({
+            runtime,
+            context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
+            modelClass: ModelClass.LARGE,
+        });        
+    } catch (e) {
+        console.log("handleProtocols error: ", e);
+        return "system error 1001";
+    }
+
     return responseFinal;
 };
