@@ -19,7 +19,7 @@
 		"dist"
 	],
 	"dependencies": {
-		"@data3os/core": "workspace:*",
+		"@data3os/agentcontext": "workspace:*",
 		"@telegraf/types": "7.1.0",
 		"telegraf": "4.16.3",
 		"zod": "3.23.8"

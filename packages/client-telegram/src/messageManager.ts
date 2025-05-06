@@ -2,11 +2,10 @@ import type { Message } from "@telegraf/types";
 import type { Context, Telegraf } from "telegraf";
 import {
     composeContext,
-    elizaLogger,
     ServiceType,
     composeRandomUser,
-} from "@data3os/core";
-import { getEmbeddingZeroVector } from "@data3os/core";
+} from "@data3os/agentcontext";
+import { getEmbeddingZeroVector } from "@data3os/agentcontext";
 import {
     type Content,
     type HandlerCallback,
@@ -17,9 +16,9 @@ import {
     type State,
     type UUID,
     type Media,
-} from "@data3os/core";
-import { stringToUuid } from "@data3os/core";
-import { generateMessageResponse, generateShouldRespond } from "@data3os/core";
+} from "@data3os/agentcontext";
+import { stringToUuid } from "@data3os/agentcontext";
+import { generateMessageResponse, generateShouldRespond } from "@data3os/agentcontext";
 import {
     telegramMessageHandlerTemplate,
     telegramShouldRespondTemplate,
@@ -86,7 +85,7 @@ export class MessageManager {
         this.runtime = runtime;
 
         this._initializeTeamMemberUsernames().catch((error) =>
-            elizaLogger.error(
+            console.error(
                 "Error initializing team member usernames:",
                 error
             )
@@ -130,12 +129,12 @@ export class MessageManager {
                 const chat = await this.bot.telegram.getChat(id);
                 if ("username" in chat && chat.username) {
                     this.teamMemberUsernames.set(id, chat.username);
-                    elizaLogger.info(
+                    console.info(
                         `Cached username for team member ${id}: ${chat.username}`
                     );
                 }
             } catch (error) {
-                elizaLogger.error(
+                console.error(
                     `Error getting username for team member ${id}:`,
                     error
                 );
@@ -146,16 +145,16 @@ export class MessageManager {
     private _startAutoPostMonitoring(): void {
         // Wait for bot to be ready
         if (this.bot.botInfo) {
-            elizaLogger.info(
+            console.info(
                 "[AutoPost Telegram] Bot ready, starting monitoring"
             );
             this._initializeAutoPost();
         } else {
-            elizaLogger.info(
+            console.info(
                 "[AutoPost Telegram] Bot not ready, waiting for ready event"
             );
             this.bot.telegram.getMe().then(() => {
-                elizaLogger.info(
+                console.info(
                     "[AutoPost Telegram] Bot ready, starting monitoring"
                 );
                 this._initializeAutoPost();
@@ -277,15 +276,15 @@ export class MessageManager {
                     state = await this.runtime.updateRecentMessageState(state);
                     await this.runtime.evaluate(memory, state, true);
                 } catch (error) {
-                    elizaLogger.warn("[AutoPost Telegram] Error:", error);
+                    console.warn("[AutoPost Telegram] Error:", error);
                 }
             } else {
-                elizaLogger.warn(
+                console.warn(
                     "[AutoPost Telegram] Activity within threshold. Not posting."
                 );
             }
         } catch (error) {
-            elizaLogger.warn(
+            console.warn(
                 "[AutoPost Telegram] Error checking channel activity:",
                 error
             );
@@ -294,7 +293,7 @@ export class MessageManager {
 
     private async _monitorPinnedMessages(ctx: Context): Promise<void> {
         if (!this.autoPostConfig.pinnedMessagesGroups.length) {
-            elizaLogger.warn(
+            console.warn(
                 "[AutoPost Telegram] Auto post config no pinned message groups"
             );
             return;
@@ -318,7 +317,7 @@ export class MessageManager {
         if (!mainChannel) return;
 
         try {
-            elizaLogger.info(
+            console.info(
                 `[AutoPost Telegram] Processing pinned message in group ${ctx.chat.id}`
             );
 
@@ -401,7 +400,7 @@ export class MessageManager {
             state = await this.runtime.updateRecentMessageState(state);
             await this.runtime.evaluate(memory, state, true);
         } catch (error) {
-            elizaLogger.warn(
+            console.warn(
                 `[AutoPost Telegram] Error processing pinned message:`,
                 error
             );
@@ -639,7 +638,7 @@ export class MessageManager {
         try {
             let imageUrl: string | null = null;
 
-            elizaLogger.info(`Telegram Message: ${message}`);
+            console.info(`Telegram Message: ${message}`);
 
             if ("photo" in message && message.photo?.length > 0) {
                 const photo = message.photo[message.photo.length - 1];
@@ -690,7 +689,7 @@ export class MessageManager {
             "text" in message &&
             message.text?.includes(`@${this.bot.botInfo?.username}`)
         ) {
-            elizaLogger.info(`Bot mentioned`);
+            console.info(`Bot mentioned`);
             return true;
         }
 
@@ -993,16 +992,16 @@ export class MessageManager {
                 }
             }
 
-            elizaLogger.info(
+            console.info(
                 `${
                     type.charAt(0).toUpperCase() + type.slice(1)
                 } sent successfully: ${mediaPath}`
             );
         } catch (error) {
-            elizaLogger.error(
+            console.error(
                 `Failed to send ${type}. Path: ${mediaPath}. Error: ${error.message}`
             );
-            elizaLogger.debug(error.stack);
+            console.debug(error.stack);
             throw error;
         }
     }
@@ -1400,8 +1399,8 @@ export class MessageManager {
 
             await this.runtime.evaluate(memory, state, shouldRespond, callback);
         } catch (error) {
-            elizaLogger.error("❌ Error handling message:", error);
-            elizaLogger.error("Error sending message:", error);
+            console.error("❌ Error handling message:", error);
+            console.error("Error sending message:", error);
         }
     }
 }

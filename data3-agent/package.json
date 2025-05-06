@@ -21,6 +21,7 @@
         "@data3os/data3-router": "workspace:*",
         "@data3os/agentcontext": "workspace:*",
         "@data3os/plugin-bootstrap": "workspace:*",
+        "@data3os/client-telegram": "workspace:*",
         "@types/node": "^22.13.5",
         "json5": "2.2.3",
         "ts-node": "^10.9.2",

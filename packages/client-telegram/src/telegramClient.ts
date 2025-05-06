@@ -1,6 +1,6 @@
 import { type Context, Telegraf } from "telegraf";
 import { message } from "telegraf/filters";
-import { type IAgentRuntime } from "@data3os/core";
+import { type IAgentRuntime } from "@data3os/agentcontext";
 import { MessageManager } from "./messageManager.ts";
 import { getOrCreateRecommenderInBe } from "./getOrCreateRecommenderInBe.ts";
 

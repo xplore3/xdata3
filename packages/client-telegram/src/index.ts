@@ -1,8 +1,9 @@
-import type { Client, IAgentRuntime } from "@data3os/core";
+import type { Client, IAgentRuntime } from "@data3os/agentcontext";
 import { TelegramClient } from "./telegramClient.ts";
 import { validateTelegramConfig } from "./environment.ts";
 
 export const TelegramClientInterface: Client = {
+    name: 'telegram',
     start: async (runtime: IAgentRuntime) => {
         await validateTelegramConfig(runtime);
 
@@ -17,9 +18,6 @@ export const TelegramClientInterface: Client = {
             `✅ Telegram client successfully started for character ${runtime.character.name}`
         );
         return tg;
-    },
-    stop: async (_runtime: IAgentRuntime) => {
-        console.warn("Telegram client does not support stopping yet");
     },
 };
 

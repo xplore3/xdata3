@@ -1,4 +1,4 @@
-import type { IAgentRuntime } from "@data3os/core";
+import type { IAgentRuntime } from "@data3os/agentcontext";
 import { z } from "zod";
 
 export const telegramEnvSchema = z.object({
