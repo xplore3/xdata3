@@ -32,6 +32,9 @@ import {
     RESPONSE_CHANCES,
     TEAM_COORDINATION,
 } from "./constants";
+import {
+    handleProtocols,
+} from "data3-protocols";
 
 import fs from "fs";
 
@@ -113,7 +116,7 @@ export class MessageManager {
         };
 
         if (this.autoPostConfig.enabled) {
-            this._startAutoPostMonitoring();
+            //this._startAutoPostMonitoring();
         }
     }
 
@@ -230,7 +233,6 @@ export class MessageManager {
                             telegramAutoPostTemplate,
                     });
 
-                    console.log(context);
                     const responseContent = await this._generateResponse(
                         memory,
                         state,
@@ -367,7 +369,6 @@ export class MessageManager {
                     telegramPinnedMessageTemplate,
             });
 
-            console.log(context);
             const responseContent = await this._generateResponse(
                 memory,
                 state,
@@ -1068,7 +1069,7 @@ export class MessageManager {
         this.lastChannelActivity[ctx.chat.id.toString()] = Date.now();
 
         // Check for pinned message and route to monitor function
-        if (
+        /*if (
             this.autoPostConfig.enabled &&
             ctx.message &&
             "pinned_message" in ctx.message
@@ -1076,7 +1077,7 @@ export class MessageManager {
             // We know this is a message update context now
             await this._monitorPinnedMessages(ctx);
             return;
-        }
+        }*/
 
         if (
             this.runtime.character.clientConfig?.telegram
@@ -1379,14 +1380,10 @@ export class MessageManager {
                         telegramMessageHandlerTemplate,
                 });
 
-                console.log(context);
-                const responseContent = await this._generateResponse(
-                    memory,
-                    state,
-                    context
-                );
+                //console.log(context);
+                const responseContent = await handleProtocols(this.runtime, messageText) as Content;
 
-                if (!responseContent || !responseContent.text) return;
+                if (!responseContent) return;
 
                 // Execute callback to send messages and log memories
                 const responseMessages = await callback(responseContent);
