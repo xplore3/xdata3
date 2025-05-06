@@ -1381,7 +1381,10 @@ export class MessageManager {
                 });
 
                 //console.log(context);
-                const responseContent = await handleProtocols(this.runtime, messageText) as Content;
+                const responseProtocol = await handleProtocols(this.runtime, messageText);
+                const responseContent: Content = {
+                    text: responseProtocol
+                };
 
                 if (!responseContent) return;
 
