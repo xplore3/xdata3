@@ -274,6 +274,7 @@ let promptPartThree = `
             apiXDataSourceArray
         )}.\n
         If the collected data is not enough, you need to continue searching online.You need to continue collecting data until the problem is finally solved. For example, if a user needs to find 100 KOLs, but you only find 10, this is not enough.
+        There is another situation where you should end the API request. This is when there is insufficient data but there is no suitable API to obtain new data. No new data can be requested by requesting the API again. At this time, it is time to end the request.
         Please return a Boolean value, true or false, to indicate whether this issue needs to be queried online.\n
         Please use JSON to return the result, without including any other content or requiring markdown syntax modification, The JSON format is: {"need_network": "true"}\n`;
         let response3 = "";
