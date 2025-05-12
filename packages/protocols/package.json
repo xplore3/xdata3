@@ -20,6 +20,7 @@
     ],
     "dependencies": {
         "@data3os/agentcontext": "workspace:*",
+        "openai": "^4.92.1",
         "data3-scraper": "workspace:*",
         "axios": "^1.8.4"
     },

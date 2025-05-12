@@ -1,5 +1,5 @@
 import { generateText, ModelClass } from "@data3os/agentcontext";
-
+import { generateTextWithFile } from './aichatwithfiles';
 import { data3Fetch } from "data3-scraper";
 
 import axios from "axios";
@@ -317,6 +317,10 @@ let promptPartThree = `
             context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
             modelClass: ModelClass.LARGE,
         });        
+        // chat with the data txt file.
+        generateTextWithFile("data.txt", "Please summarize the main contents of this document")
+            .then(result => console.log(result))
+            .catch(error => console.error(error));
     } catch (e) {
         console.log("handleProtocols error: ", e);
         return "system error 1001";
