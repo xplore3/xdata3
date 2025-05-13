@@ -278,7 +278,8 @@ export class DirectClient {
                     };
                 }
 
-                if (taskMemoryObj?.promptModifyNum < 1) {
+                console.log("before append, taskMemoryObj: " + JSON.stringify(taskMemoryObj));
+                if (taskMemoryObj?.promptModifyNum < 2) {
                     // {need_more: true; additional1: question1; additional2: question1; }
                     taskMemoryObj.memoryText =
                         taskMemoryObj.memoryText +
@@ -328,6 +329,16 @@ export class DirectClient {
                     runtime,
                     taskMemoryObj.memoryText,
                     taskId
+                );
+
+                taskMemoryObj = await runtime.cacheManager.get(
+                    "XData_task_memory_" + taskId
+                );
+                taskMemoryObj.promptModifyNum = 0;
+                await runtime.cacheManager.set(
+                        // Set the new taskMemoryObj to cache.
+                        "XData_task_memory_" + taskId,
+                        taskMemoryObj
                 );
 
                 // const secondaryProcessing = await handleProtocolsOutput(

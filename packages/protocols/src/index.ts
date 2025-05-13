@@ -169,6 +169,7 @@ You Context is divided into three areas, and each area has some blocks.
 [The third area] is the statement that you and I interact with at the current step and current state.
 
 [Area1] :
+[Block 0: User's question history, \n Question1: xxx \n Question2: xxx \n ... \n QuestionN: xxx (The latest question)\n]
 [Block 1: Plan Block: 1.xxx. 2.xxx. (Clarify the core points of the question (e.g., the definition and scope of xxx).)]
 [Block 2: Steps Logs Block: 1.xxx. 2.xxx. (You can record the simple situation and feedback in each step here. The feedback may be positive or negative to help you formulate the next step plan.)]
 [Block 3: Data Collected Block: data1, data2, ... (This is a step-by-step result. Your each network request is processed, refined, and collected here. As you collect more and more data, when you have enough data, you can answer the user's question.)]
@@ -177,6 +178,7 @@ You Context is divided into three areas, and each area has some blocks.
 For example, the return value next_cursor is used as the cursor parameter to complete the page query when turning pages.]
 \n`;
 let promptPartTwo = `[Area2]:
+[Block 0: ...]
 [Block 1: ...]
 [Block 2: ...]
 [Block 3: ]
@@ -185,7 +187,7 @@ let promptPartTwo = `[Area2]:
 
 let promptPartThree = `
 \n[Area3]:
-`; // [The third area] 
+`; // [The third area] interact Block.
 
 
 
@@ -322,7 +324,7 @@ let promptPartThree = `
         );
         // }
         promptPartTwo += `[Block 5: ${currentApiStr}]\n`;
-        promptPartThree = `\n[Area3]\nPlease summarize the AI PART 5 to AI PART 3, and then Return Second Area(AI Area)`;
+        promptPartThree = `\n[Area3]\nPlease summarize the AI Block 5 to AI Block 3, and then Return Second Area(AI Area). Copy the user's question to the history question Area2-Block 0.`;
 
         try {
             promptPartTwo = await generateText({
