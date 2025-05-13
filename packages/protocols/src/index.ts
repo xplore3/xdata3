@@ -75,7 +75,9 @@ export const handleProtocolsForPrompt = async (runtime: any, originText: any, ta
     Before solving the task, please help the user optimize the description of the task, and add the background, details, constraints, etc.
     If no additional information is required, please reply with a JSON structure {need_more: false; } , 
     If you need to continue to optimize the task's description reply:{need_more: true; additional1: question1; additional2: question2; },
-    You can use interrogative sentences to further refine the user's original question and clarify the user's intent by returning`;
+    You can use interrogative sentences to further refine the user's original question and clarify the user's intent by returning
+    Only JSON data needs to be returned. Data other than JSON does not need to be returned or interpreted.
+    `;
     console.log("handleprotocols promt1: ", promt1);
     let response1 = "";
     try {
