@@ -1,23 +1,14 @@
 import { generateText, ModelClass } from "@data3os/agentcontext";
 import { generateTextWithFile } from './aichatwithfiles';
+import fs from 'fs';
+import path from 'path';
 import { data3Fetch } from "data3-scraper";
 
 import axios from "axios";
+import { appendToChatCache } from "./filehelper";
 
-// const registrations = new Map<string, any>();
-
-// export const getprotocols = async (specifier: string) => {
-//     const module = registrations.get(specifier);
-//     if (module !== undefined) {
-//         return module;
-//     } else {
-//         return await import(specifier);
-//     }
-// };
-
-// export const registerprotocols = (specifier: string, module: any) => {
-//     registrations.set(specifier, module);
-// };
+// 1 token is about 4 chars.
+const charLengthLimit = 128000 * 3;
 
 export const getProtocolArray = async (runtime: any) => {
     const oldXDataSourceArray = await runtime.cacheManager.get(
@@ -41,6 +32,14 @@ export const updateProtocolArray = async (
 };
 
 /**
+ * It is divided into 3 parts:
+ *  1. Optimize prompt words: add background and refine the problem, func handleProtocolsForPrompt(...).
+ *  2. Collect data and analyze the problem, func handleProtocolsProcessing(...).
+ *  3. Output the results and prompt secondary processing, func handleProtocolsOutput(...).
+ */
+
+/**
+ * Features of ChatGPT models:
  * 1. Prioritize reasoning accuracy:
  * choose o1-preview (complex tasks) or o1-mini (fast requirements).
  * 2. Multimodality and real-time:
@@ -49,6 +48,20 @@ export const updateProtocolArray = async (
  * choose GPT-4o-mini, which takes into account both speed and budget
  */
 
+function shortenStr(str) {
+    if (str.length > charLengthLimit) {
+        return str.slice(0, charLengthLimit);
+    }
+    return str;
+}
+
+/**
+ * This is a preprocessing method.
+ */
+export const handleProtocols = async (runtime: any, originText: any) => {
+    handleProtocolsForPrompt(runtime, originText, "xxx");
+}
+
 /**
  * This is a preprocessing method.
  * If there is no need to query data, then return the original question text.
@@ -56,12 +69,61 @@ export const updateProtocolArray = async (
  * words before returning.
  * This part of the logic not require processing of context memory.
  */
-export const handleProtocols = async (runtime: any, originText: any) => {
-    // This a example of how to use the Scraper module.
-    // const res0 = await data3Fetch("https://example.com/");
-    // console.log("handleProtocols res0: ", res0);
-    // 1 token is about 4 chars.
-    const charLengthLimit = 128000 * 3;
+export const handleProtocolsForPrompt = async (runtime: any, originText: any, taskId: any) => {
+    const promt1 = `You are an interactive AI agent that can have multiple interactions when solving problems.
+    You need to help the user solve the following task [Question: ${originText}],
+    Before solving the task, please help the user optimize the description of the task, and add the background, details, constraints, etc.
+    If no additional information is required, please reply with a JSON structure {need_more: false; } , 
+    If you need to continue to optimize the task's description reply:{need_more: true; additional1: question1; additional2: question2; },
+    You can use interrogative sentences to further refine the user's original question and clarify the user's intent by returning`;
+    console.log("handleprotocols promt1: ", promt1);
+    let response1 = "";
+    try {
+        response1 = await generateText({
+            runtime,
+            context: shortenStr(promt1),
+            modelClass: ModelClass.LARGE,
+        });
+    } catch (error) {
+        console.error("handleProtocols error: ", error);
+        return "system error 1001";
+    }
+
+    console.log("handleProtocols response1: ", response1);
+    const response1Str = response1.replace(/```json/g, "").replace(/```/g, "");
+
+    /**
+     * {
+     *  need_more: true;
+     *  additional1: question1;
+     *  additional2: question2;
+     *  additional3: "For other information, you can type";
+     *  taskId: taskId;
+     * }
+    */ 
+    let obj = null;
+    try {
+        obj = JSON.parse(response1Str);
+        obj.additional3 = "For other information, you can type";
+        obj.taskId = taskId;
+    } catch (e) {
+        console.error("JSON parse error:", e, "\nResponse content:", response1Str);
+        obj = { 
+            need_more: false,
+            error: "Invalid JSON format"
+        };
+    }
+    return obj;
+};
+
+/**
+ * This is a preprocessing method.
+ * If there is no need to query data, then return the original question text.
+ * If you need to query data, return the result of querying the data text and the original question text, and concatenate the prompt
+ * words before returning.
+ * This part of the logic not require processing of context memory.
+ */
+export const handleProtocolsProcessing = async (runtime: any, originText: any, taskId: any) => {
     const apiXDataSourceArray = await runtime.cacheManager.get(
         "XData_Collection"
     );
@@ -206,13 +268,22 @@ let promptPartThree = `
                     headers: Obj.headers,
                 });
             }
+            // This is what you want to add
+            const content = `\n
+            [Question: ${originText}]
+            [API: ${JSON.stringify(Obj)}]
+            [Responce: ${JSON.stringify(apires.data)}].
+            \n`;
+            
+            appendToChatCache(content, taskId, (err) => {
+                console.error("Custom error handling:", err);
+            });
+
             promptPartThree = `\n[Area3]\nThe user origin quesiton[Question: ${originText}], The current API [API: ${JSON.stringify(
                 Obj
             )}] The response str is too long, Based on the user's question, please remove irrelevant text, remove duplicate text and compress responce. For example, if the user's question is not related to the timestamp, the timestamp field can be removed. 
             Some fields are not related to the question and cannot be removed, such as next_cursor used for paging query, which needs to be used as the value of cursor as a parameter in the next query to complete the paging query.
-            [Responce: ${JSON.stringify(
-                apires.data
-            )}].\n`;
+            [Responce: ${JSON.stringify(apires.data)}].\n`;
             // The response str is too long, Use AI to remove irrelevant text and compress it.
             // const promtShorten = apiNeedShortenStr;
             let shortenapires = "";
@@ -312,19 +383,24 @@ let promptPartThree = `
     promptPartThree = `\n[Area3]\nBased on the above results, answer user questions briefly and directly. The data here may not be sufficient, but first answer the user's question. For example, if the user asked to find 100 KOLs, but now there are only 10, answer the user's question first.`;
     let responseFinal = "";
     try {
-        responseFinal = await generateText({
-            runtime,
-            context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
-            modelClass: ModelClass.LARGE,
-        });        
+        // responseFinal = await generateText({
+        //     runtime,
+        //     context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
+        //     modelClass: ModelClass.LARGE,
+        // });        
         // chat with the data txt file.
-        generateTextWithFile("data.txt", "Please summarize the main contents of this document")
-            .then(result => console.log(result))
-            .catch(error => console.error(error));
+        responseFinal = await generateTextWithFile(taskId, shortenStr(promptPartOne + promptPartTwo + promptPartThree));
     } catch (e) {
         console.log("handleProtocols error: ", e);
         return "system error 1001";
     }
+    return responseFinal;
+};
 
+/**
+ * Restart a task.
+ */
+export const handleProtocolsOutput = async (runtime: any, originText: any) => {
+    const responseFinal = `Restart a task.`;
     return responseFinal;
 };

@@ -22,8 +22,10 @@ import {
 
 import {
     getProtocolArray,
-    handleProtocols,
     updateProtocolArray,
+    handleProtocolsForPrompt,
+    handleProtocolsProcessing,
+    handleProtocolsOutput,
 } from "data3-protocols";
 
 import bodyParser from "body-parser";
@@ -234,23 +236,112 @@ export class DirectClient {
                     "direct"
                 );
 
-                const text = req.body.text;
+                const originQuestingText = req.body.text;
                 // if empty text, directly return
-                if (!text) {
+                if (!originQuestingText) {
                     res.json([]);
                     return;
                 }
 
-                const textFilledByData3 = await handleProtocols(runtime, text);
-                /** Not using the memory */
-                res.json([{
-                    user: "Data3",
-                    text: textFilledByData3,
-                    action: "NONE",
-                }])
-                /** Using memory
-                 * await this.handleMessage(runtime, req, res, agentId, roomId, userId, textFilledByData3);
+                // TODO 1: Assign task ID based on load balancing.
+                // TODO 2: Verify the task ID.
+                let taskId = req.body.taskId;
+                function generateTaskId() {
+                    const timestamp = Date.now().toString(36);
+                    const seq = Math.floor(Math.random() * 1000)
+                        .toString(36)
+                        .padStart(4, "0");
+                    return `TASK-${timestamp}-${seq}`;
+                }
+                if (!taskId) {
+                    taskId = generateTaskId();
+                }
+                let taskMemoryObj = null;
+                /**
+                 * MemoryObj{
+                 *    memoryText: string,
+                 *    promptModifyNum: number,
+                 *    taskId: string,
+                 * }
+                 * key in cache: XData_task_memory_{taskId}
                  */
+
+                // Get lastest memory // refresh taskMemoryObj
+                taskMemoryObj = await runtime.cacheManager.get(
+                    "XData_task_memory_" + taskId
+                );
+                if (!taskMemoryObj) {
+                    taskMemoryObj = {
+                        memoryText: originQuestingText,
+                        promptModifyNum: 0,
+                        taskId: taskId,
+                    };
+                }
+
+                if (taskMemoryObj?.promptModifyNum < 3) {
+                    // {need_more: true; additional1: question1; additional2: question1; }
+                    taskMemoryObj.memoryText =
+                        taskMemoryObj.memoryText +
+                        "\n User-supplemented information: " +
+                        originQuestingText;
+                    taskMemoryObj.promptModifyNum += 1;
+                    await runtime.cacheManager.set(
+                        // Set the new taskMemoryObj to cache.
+                        "XData_task_memory_" + taskId,
+                        taskMemoryObj
+                    );
+
+                    const obj = await handleProtocolsForPrompt(
+                        runtime,
+                        taskMemoryObj.memoryText,
+                        taskId
+                    );
+
+                    if (obj.need_more) {
+                        res.json([
+                            {
+                                user: "Data3",
+                                text: JSON.stringify(obj),
+                                action: "NONE",
+                            },
+                        ]);
+                        return;
+                    }
+                }
+
+                // refresh taskMemoryObj
+                // taskMemoryObj = await runtime.cacheManager.get("XData_task_memory_" + taskId);
+
+                taskMemoryObj = await runtime.cacheManager.get(
+                    "XData_task_memory_" + taskId
+                );
+                /**
+                 * MemoryObj{
+                 *    memoryText: string,
+                 *    promptModifyNum: number,
+                 *    taskId: string,
+                 * }
+                 * key in cache: XData_task_memory_{taskId}
+                 */
+
+                const finalAnswerStr = await handleProtocolsProcessing(
+                    runtime,
+                    taskMemoryObj.memoryText,
+                    taskId
+                );
+
+                // const secondaryProcessing = await handleProtocolsOutput(
+                //     runtime,
+                //     finalAnswerStr
+                //  );
+                const secondaryProcessing = "If further processing is needed on this topic, please let me know.";
+                res.json([
+                    {
+                        user: "Data3",
+                        text: finalAnswerStr + "\n" + secondaryProcessing,
+                        action: "NONE",
+                    },
+                ]);
             }
         );
 
@@ -295,7 +386,7 @@ export class DirectClient {
                     return;
                 }
 
-                handleProtocols(runtime, text).then((resStr) => {
+                handleProtocolsProcessing(runtime, text, "xxx"/** taskID */).then((resStr) => {
                     res.json({ res: resStr });
                 });
             }

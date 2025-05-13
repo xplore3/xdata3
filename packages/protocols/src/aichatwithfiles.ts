@@ -1,16 +1,19 @@
 import OpenAI from 'openai';
 import fs from 'fs';
 import { settings } from '@data3os/agentcontext';
+import { fileURLToPath } from 'url';
 
 const client = new OpenAI({
     apiKey: settings.MOONSHOT_API_KEY,
     baseURL: settings.MOONSHOT_API_URL,
 });
+// "chat-cache-file.txt"
 
-export async function generateTextWithFile(filePath: string, userQuestion: string): Promise<string> {
+export async function generateTextWithFile(taskId: string, userQuestion: string): Promise<string> {
     try {
+        
         const file_object = await client.files.create({
-            file: fs.createReadStream(filePath),
+            file: fs.createReadStream("chat-cache-file_" + taskId + ".txt"),
             purpose: "file-extract"
         });
 
@@ -29,7 +32,7 @@ export async function generateTextWithFile(filePath: string, userQuestion: strin
         ];
 
         const completion = await client.chat.completions.create({
-            model: "moonshot-v1-128k",
+            model: settings.LARGE_MOONSHOT_MODEL,
             messages: messages,
             temperature: 0.3
         });
