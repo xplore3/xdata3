@@ -258,21 +258,21 @@ export class DirectClient {
                 }
                 let taskMemoryObj = null;
                 /**
-                 * MemoryObj{
-                 *    memoryText: string,
+                 * QuestionObj{
+                 *    questionText: string,
                  *    promptModifyNum: number,
                  *    taskId: string,
                  * }
-                 * key in cache: XData_task_memory_{taskId}
+                 * key in cache: XData_task_question_{taskId}
                  */
 
                 // Get lastest memory // refresh taskMemoryObj
                 taskMemoryObj = await runtime.cacheManager.get(
-                    "XData_task_memory_" + taskId
+                    "XData_task_question_" + taskId
                 );
                 if (!taskMemoryObj) {
                     taskMemoryObj = {
-                        memoryText: originQuestingText,
+                        questionText: "",
                         promptModifyNum: 0,
                         taskId: taskId,
                     };
@@ -281,20 +281,29 @@ export class DirectClient {
                 console.log("before append, taskMemoryObj: " + JSON.stringify(taskMemoryObj));
                 if (taskMemoryObj?.promptModifyNum < 2) {
                     // {need_more: true; additional1: question1; additional2: question1; }
-                    taskMemoryObj.memoryText =
-                        taskMemoryObj.memoryText +
-                        "\n User-supplemented information: " +
-                        originQuestingText;
+                    if (!taskMemoryObj?.questionText) {
+                        taskMemoryObj.questionText = originQuestingText;
+                    } else {
+                        taskMemoryObj.questionText =
+                            taskMemoryObj.questionText +
+                            "\n User-supplemented information: " +
+                            originQuestingText;
+                    }
                     taskMemoryObj.promptModifyNum += 1;
                     await runtime.cacheManager.set(
                         // Set the new taskMemoryObj to cache.
-                        "XData_task_memory_" + taskId,
+                        "XData_task_question_" + taskId,
                         taskMemoryObj
                     );
 
+                    let promptQuestion = `Current questions that need to be answered: ` + taskMemoryObj.questionText;
+                    if (taskMemoryObj.prevQuestionText) {
+                        promptQuestion +=  (`. You don't need to answer the previous questions, they are just provided to provide you with context: ` + taskMemoryObj.prevQuestionText);                        
+                    }
+
                     const obj = await handleProtocolsForPrompt(
                         runtime,
-                        taskMemoryObj.memoryText,
+                        promptQuestion,
                         taskId
                     );
 
@@ -311,33 +320,35 @@ export class DirectClient {
                 }
 
                 // refresh taskMemoryObj
-                // taskMemoryObj = await runtime.cacheManager.get("XData_task_memory_" + taskId);
+                // taskMemoryObj = await runtime.cacheManager.get("XData_task_question_" + taskId);
 
                 taskMemoryObj = await runtime.cacheManager.get(
-                    "XData_task_memory_" + taskId
+                    "XData_task_question_" + taskId
                 );
                 /**
                  * MemoryObj{
-                 *    memoryText: string,
+                 *    questionText: string,
                  *    promptModifyNum: number,
                  *    taskId: string,
                  * }
-                 * key in cache: XData_task_memory_{taskId}
+                 * key in cache: XData_task_question_{taskId}
                  */
 
                 const finalAnswerStr = await handleProtocolsProcessing(
                     runtime,
-                    taskMemoryObj.memoryText,
+                    taskMemoryObj.questionText,
                     taskId
                 );
 
                 taskMemoryObj = await runtime.cacheManager.get(
-                    "XData_task_memory_" + taskId
+                    "XData_task_question_" + taskId
                 );
                 taskMemoryObj.promptModifyNum = 0;
+                taskMemoryObj.prevQuestionText += ("\n" + taskMemoryObj.questionText);
+                taskMemoryObj.questionText ="";
                 await runtime.cacheManager.set(
                         // Set the new taskMemoryObj to cache.
-                        "XData_task_memory_" + taskId,
+                        "XData_task_question_" + taskId,
                         taskMemoryObj
                 );
 
