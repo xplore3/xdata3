@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import fs from 'fs';
 import { settings } from '@data3os/agentcontext';
 import { fileURLToPath } from 'url';
+import path from 'path';
 
 const client = new OpenAI({
     apiKey: settings.MOONSHOT_API_KEY,
@@ -9,15 +10,19 @@ const client = new OpenAI({
 });
 // "chat-cache-file.txt"
 
-export async function generateTextWithFile(taskId: string, userQuestion: string): Promise<string> {
+export async function generateTextWithFile(filename: string, userQuestion: string): Promise<string> {
     try {
-        
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        const filePath = path.join(__dirname, filename);
         const file_object = await client.files.create({
-            file: fs.createReadStream("chat-cache-file_" + taskId + ".txt"),
+            file: fs.createReadStream(filePath),
             purpose: "file-extract"
         });
+        console.log("generateTextWithFile filename: " + filename);
 
         const file_content = await (await client.files.content(file_object.id)).text();
+                console.log("generateTextWithFile file_content: " + file_content);
 
         const messages = [
             {
@@ -26,7 +31,7 @@ export async function generateTextWithFile(taskId: string, userQuestion: string)
             },
             {
                 "role": "system",
-                "content": file_content,
+                "content": `Combine this file ${filename} and answer the following user's question. The following is a bit long and includes the reasoning process` + file_content,
             },
             {"role": "user", "content": userQuestion},
         ];

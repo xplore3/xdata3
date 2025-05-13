@@ -278,7 +278,7 @@ export class DirectClient {
                     };
                 }
 
-                if (taskMemoryObj?.promptModifyNum < 3) {
+                if (taskMemoryObj?.promptModifyNum < 1) {
                     // {need_more: true; additional1: question1; additional2: question1; }
                     taskMemoryObj.memoryText =
                         taskMemoryObj.memoryText +

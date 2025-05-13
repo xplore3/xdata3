@@ -275,7 +275,8 @@ let promptPartThree = `
             [Responce: ${JSON.stringify(apires.data)}].
             \n`;
             
-            appendToChatCache(content, taskId, (err) => {
+            const filename = "chat-cache-file_" + taskId + ".txt";
+            appendToChatCache(content, filename, (err) => {
                 console.error("Custom error handling:", err);
             });
 
@@ -389,10 +390,11 @@ let promptPartThree = `
         //     modelClass: ModelClass.LARGE,
         // });        
         // chat with the data txt file.
-        responseFinal = await generateTextWithFile(taskId, shortenStr(promptPartOne + promptPartTwo + promptPartThree));
+        const filePath = "chat-cache-file_" + taskId + ".txt";
+        responseFinal = await generateTextWithFile(filePath, shortenStr(promptPartOne + promptPartTwo + promptPartThree));
     } catch (e) {
         console.log("handleProtocols error: ", e);
-        return "system error 1001";
+        return "system error 1003";
     }
     return responseFinal;
 };
