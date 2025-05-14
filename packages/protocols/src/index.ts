@@ -72,7 +72,7 @@ export const handleProtocols = async (runtime: any, originText: any) => {
 export const handleProtocolsForPrompt = async (runtime: any, originText: any, taskId: any) => {
     const promt1 = `You are an interactive AI agent that can have multiple interactions when solving problems.
     You need to help the user solve the following task [Question: ${originText}],
-    Before solving the task, please help the user optimize the description of the task, and add the background, details, constraints, etc.
+    Before solving the task, in order to solve the problem better and more accurately, please help the user refine and specify the problem description. You are an interactive AI, and at this stage you only need to refine and specify the problem.
     For simple questions, you can ask less or no questions. For a complex question, you need to ask multiple questions. To facilitate user interaction, please ask multiple-choice questions for interaction, such as the following example: What platform is the report you want to analyze based on? 1. Base Twitter; 2. Base Ticktok; 3. Base Faceboock;
     When optimizing a question's prompt, the main focus should be on refining and specifying the question, and avoid diverging.
     If no additional information is required, please reply with a JSON structure {need_more: false; } , 
@@ -86,7 +86,7 @@ export const handleProtocolsForPrompt = async (runtime: any, originText: any, ta
         response1 = await generateText({
             runtime,
             context: shortenStr(promt1),
-            modelClass: ModelClass.LARGE,
+            modelClass: ModelClass.MEDIUM,
         });
     } catch (error) {
         console.error("handleProtocols error: ", error);
