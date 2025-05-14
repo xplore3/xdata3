@@ -123,7 +123,7 @@ export class WechatHandler {
                 console.log(decryptedXml.xml);
                 const msg = await this.syncMessage(decryptedXml.xml.Token, decryptedXml.xml.OpenKfId);
                 console.log(msg);
-                if (msg.errcode == 0 && msg.msg_list) {
+                if (msg.errcode == 0 && msg.msg_list && msg.msg_list.length > 0) {
                     const index = msg.msg_list.length - 1;
                     const firstMsg = msg.msg_list[index];
                     if (firstMsg.msgtype == 'text') {
@@ -135,7 +135,7 @@ export class WechatHandler {
                                 modelClass: ModelClass.MEDIUM,
                             });
                             await this.sendMessage(firstMsg.external_userid,
-                                decryptedXml.xml.OpenKfId, firstMsg.text.content);
+                                decryptedXml.xml.OpenKfId, questionAfter);
                         }
                         catch (err) {
                             console.log(err);
@@ -182,7 +182,7 @@ export class WechatHandler {
             catch (err) {
                 console.log(err);
             }
-            console.log(runtime)
+            //console.log(runtime)
             if (runtime) {
                 return runtime;
             }
