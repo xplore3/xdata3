@@ -77,10 +77,11 @@ export class WechatHandler {
                 cursor: this.cursor,
                 token: msg_token,
                 limit: 1,
-                voice_format: 0
+                voice_format: 0,
+                open_kfid: "1747209421426833195456994"
             };
             const resp = await axios.post(`https://qyapi.weixin.qq.com/cgi-bin/kf/sync_msg?access_token=${token}`, msg);
-            console.log(resp);
+            //console.log(resp);
             if (resp.data.next_cursor) {
                 this.cursor = resp.data.next_cursor
             }
@@ -116,6 +117,7 @@ export class WechatHandler {
                 const decrypted = decrypt(process.env.WECHAT_ENCODING_AESKEY, encryptMsg)
                 const decryptedXml = await xml2js.parseStringPromise(decrypted.message, { explicitArray: false })
                 //const msg = decryptedXml.xml
+                console.log(decryptedXml.xml);
                 const msg = await this.syncMessage(decryptedXml.xml.Token);
                 console.log(msg);
                 if (msg.msg_list) {
