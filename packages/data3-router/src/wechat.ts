@@ -5,7 +5,10 @@ import axios from 'axios';
 import crypto from "wechat-crypto";
 import xml2js from "xml2js";
 import { decrypt, encrypt, getJsApiSignature, getSignature } from "@wecom/crypto";
-
+import {
+    ModelClass,
+    generateText,
+} from "@data3os/agentcontext";
 import {
     handleProtocols,
 } from "data3-protocols";
@@ -124,13 +127,24 @@ export class WechatHandler {
                     const index = msg.msg_list.length - 1;
                     const firstMsg = msg.msg_list[index];
                     if (firstMsg.msgtype == 'text') {
-                        //await this.sendMessage(firstMsg.external_userid,
-                        //    decryptedXml.xml.OpenKfId, firstMsg.text.content);
-                        await handleProtocols(runtime, firstMsg.text.content).then(async (resStr) => {
+                        console.log(firstMsg.text.content);
+                        try {
+                            const questionAfter = await generateText({
+                                runtime,
+                                context: firstMsg.text.content,
+                                modelClass: ModelClass.MEDIUM,
+                            });
+                            await this.sendMessage(firstMsg.external_userid,
+                                decryptedXml.xml.OpenKfId, firstMsg.text.content);
+                        }
+                        catch (err) {
+                            console.log(err);
+                        }
+                        /*await handleProtocols(runtime, firstMsg.text.content).then(async (resStr) => {
                             console.log(resStr);
                             await this.sendMessage(firstMsg.external_userid,
                             decryptedXml.xml.OpenKfId, resStr);
-                        });
+                        });*/
                     }
                 }
 
