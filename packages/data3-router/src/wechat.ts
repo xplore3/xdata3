@@ -61,7 +61,7 @@ export class WechatHandler {
                 safe: 0
             };*/
             const resp = await axios.post(`https://qyapi.weixin.qq.com/cgi-bin/kf/send_msg?access_token=${token}`, msg);
-            console.log(resp);
+            //console.log(resp);
             return resp.data;
         }
         catch (err) {
@@ -96,8 +96,8 @@ export class WechatHandler {
         console.log("handleWechatInputMessage");
         console.log(req.query);
         const userId = req.query.userId
-        //const runtime = this.getAgentId(req, res);
-        //if (runtime) {
+        const runtime = this.getAgentId(req, res);
+        if (runtime) {
             try {
                 const { msg_signature, timestamp, nonce, echostr } = req.query;
                 if (echostr) {
@@ -124,8 +124,13 @@ export class WechatHandler {
                     const index = msg.msg_list.length - 1;
                     const firstMsg = msg.msg_list[index];
                     if (firstMsg.msgtype == 'text') {
-                        await this.sendMessage(firstMsg.external_userid,
-                            decryptedXml.xml.OpenKfId, firstMsg.text.content);
+                        //await this.sendMessage(firstMsg.external_userid,
+                        //    decryptedXml.xml.OpenKfId, firstMsg.text.content);
+                        await handleProtocols(runtime, firstMsg.text.content).then(async (resStr) => {
+                            console.log(resStr);
+                            await this.sendMessage(firstMsg.external_userid,
+                            decryptedXml.xml.OpenKfId, resStr);
+                        });
                     }
                 }
 
@@ -149,7 +154,19 @@ export class WechatHandler {
     private getAgentId(req: express.Request, res: express.Response) {
         const agentId = req.params.agentId;
         if (agentId) {
-            const runtime = this.client.agents.get(agentId);
+            let runtime = this.client.agents.get(agentId);
+            try {
+                if (!runtime) {
+                    runtime = Array.from(this.client.agents.values()).find(
+                        (a) =>
+                            a.character.name.toLowerCase() ===
+                            agentId.toLowerCase()
+                    );
+                }
+            }
+            catch (err) {
+                console.log(err);
+            }
             if (runtime) {
                 return runtime;
             }
