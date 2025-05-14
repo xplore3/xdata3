@@ -73,9 +73,11 @@ export const handleProtocolsForPrompt = async (runtime: any, originText: any, ta
     const promt1 = `You are an interactive AI agent that can have multiple interactions when solving problems.
     You need to help the user solve the following task [Question: ${originText}],
     Before solving the task, please help the user optimize the description of the task, and add the background, details, constraints, etc.
+    For simple questions, you can ask less or no questions. For a complex question, you need to ask multiple questions. To facilitate user interaction, please ask multiple-choice questions for interaction, such as the following example: What platform is the report you want to analyze based on? 1. Base Twitter; 2. Base Ticktok; 3. Base Faceboock;
+    When optimizing a question's prompt, the main focus should be on refining and specifying the question, and avoid diverging.
     If no additional information is required, please reply with a JSON structure {need_more: false; } , 
-    If you need to continue to optimize the task's description reply:{need_more: true; additional1: question1; additional2: question2; },
-    You can use interrogative sentences to further refine the user's original question and clarify the user's intent by returning
+    If you need to continue to optimize the task's description reply:{need_more: true;  question: xxxxxxx; additional1: xxxx; additional2: xxxxx; },
+    You can use interrogative sentences to further refine the user's original question and clarify the user's intent by returning.
     Only JSON data needs to be returned. Data other than JSON does not need to be returned or interpreted.
     `;
     console.log("handleprotocols promt1: ", promt1);
