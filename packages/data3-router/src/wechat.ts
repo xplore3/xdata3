@@ -69,7 +69,7 @@ export class WechatHandler {
         }
     }
 
-    async syncMessage(msg_token: string) {
+    async syncMessage(msg_token: string, kfid: string) {
         try {
             console.log("syncMessage " + msg_token);
             const token = await this.getAccessToken();
@@ -78,7 +78,7 @@ export class WechatHandler {
                 token: msg_token,
                 limit: 1,
                 voice_format: 0,
-                open_kfid: "1747209421426833195456994"
+                open_kfid: kfid
             };
             const resp = await axios.post(`https://qyapi.weixin.qq.com/cgi-bin/kf/sync_msg?access_token=${token}`, msg);
             //console.log(resp);
@@ -118,9 +118,9 @@ export class WechatHandler {
                 const decryptedXml = await xml2js.parseStringPromise(decrypted.message, { explicitArray: false })
                 //const msg = decryptedXml.xml
                 console.log(decryptedXml.xml);
-                const msg = await this.syncMessage(decryptedXml.xml.Token);
+                const msg = await this.syncMessage(decryptedXml.xml.Token, decryptedXml.xml.OpenKfId);
                 console.log(msg);
-                if (msg.msg_list) {
+                if (msg.errcode == 0 && msg.msg_list) {
                     const firstMsg = msg.msg_list[0];
                     if (firstMsg.msgtype == 'text') {
                         await this.sendMessage(firstMsg.external_userid, firstMsg.text.content);
