@@ -40,14 +40,14 @@ export class WechatHandler {
         return this.cachedToken;
     }
 
-    async sendMessage(external_userid: string, content: string) {
+    async sendMessage(external_userid: string, kfid: string, content: string) {
         try {
             console.log("sendMessage " + content);
             const token = await this.getAccessToken();
             const msg = {
-                chat_type: 'single',
-                external_userid: [external_userid],
-                sender: process.env.WECHAT_MY_WECOM_ID, // Wecom ID
+                touser: external_userid,
+                open_kfid: kfid,
+                //sender: process.env.WECHAT_MY_WECOM_ID, // Wecom ID
                 text: {
                   content
                 },
@@ -76,7 +76,7 @@ export class WechatHandler {
             const msg = {
                 cursor: this.cursor,
                 token: msg_token,
-                limit: 1,
+                limit: 100,
                 voice_format: 0,
                 open_kfid: kfid
             };
@@ -121,9 +121,11 @@ export class WechatHandler {
                 const msg = await this.syncMessage(decryptedXml.xml.Token, decryptedXml.xml.OpenKfId);
                 console.log(msg);
                 if (msg.errcode == 0 && msg.msg_list) {
-                    const firstMsg = msg.msg_list[0];
+                    const index = msg.msg_list.length - 1;
+                    const firstMsg = msg.msg_list[index];
                     if (firstMsg.msgtype == 'text') {
-                        await this.sendMessage(firstMsg.external_userid, firstMsg.text.content);
+                        await this.sendMessage(firstMsg.external_userid,
+                            decryptedXml.xml.OpenKfId, firstMsg.text.content);
                     }
                 }
 
