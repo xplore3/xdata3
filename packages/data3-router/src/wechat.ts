@@ -70,40 +70,41 @@ export class WechatHandler {
 
     async handleWechatInputMessage(req: express.Request, res: express.Response) {
         console.log("handleWechatInputMessage");
-        console.log(req);
+        console.log(req.query);
         const userId = req.query.userId
         //const runtime = this.getAgentId(req, res);
         //if (runtime) {
             try {
                 const { msg_signature, timestamp, nonce, echostr } = req.query;
-                const signature = getSignature(process.env.WECHAT_TOKEN,
-                    timestamp, nonce, echostr);
-
-                //expect(signature).toEqual(query.signature);
-                const { random, msg_len, msg, CorpID } = decrypt(process.env.WECHAT_ENCODING_AESKEY,
-                    echostr);
-                console.log(msg_len);
-                console.log(CorpID);
-                res.send(msg);
-                /*const cryptor = new crypto(process.env.WECHAT_TOKEN,
-                    process.env.WECHAT_ENCODING_AESKEY,
-                    process.env.WECHAT_CORP_ID);
+                if (echostr) {
+                    const { random, message } = decrypt(process.env.WECHAT_ENCODING_AESKEY,
+                        echostr);
+                    console.log(message);
+                    res.send(message);
+                    return;
+                }
+                //const cryptor = new crypto(process.env.WECHAT_TOKEN,
+                //    process.env.WECHAT_ENCODING_AESKEY,
+                //    process.env.WECHAT_CORP_ID);
+                console.log(req.body);
                 const xmlData = req.body
                 const parsedXml = await xml2js.parseStringPromise(xmlData, { explicitArray: false })
                 const encryptMsg = parsedXml.xml.Encrypt
-                const decrypted = cryptor.decrypt(encryptMsg)
+                const decrypted = decrypt(process.env.WECHAT_ENCODING_AESKEY, encryptMsg)
                 const decryptedXml = await xml2js.parseStringPromise(decrypted.message, { explicitArray: false })
                 const msg = decryptedXml.xml
+                console.log(msg);
 
                 // Emit message to custom handler
                 if (msg.MsgType == 'text') {
-                    await handleProtocols(runtime, msg.Content).then(async (resStr) => {
-                        console.log(resStr);
-                        await this.sendMessage(msg.FromUserName, resStr);
-                    });
+                    //await handleProtocols(runtime, msg.Content).then(async (resStr) => {
+                    //    console.log(resStr);
+                    //    await this.sendMessage(msg.FromUserName, resStr);
+                    //});
+                    await this.sendMessage(msg.FromUserName, msg.content);
                 }
         
-                res.send('success')*/
+                res.send('success')
             } catch (err) {
                 console.error('[WecomListener] Error handling callback:', err)
                 res.send('fail')

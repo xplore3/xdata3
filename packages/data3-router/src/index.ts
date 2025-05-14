@@ -141,6 +141,7 @@ export class DirectClient {
                 console.log(
                     `APM time ${new Date(now).toLocaleString()}, ip ${userIP}`
                 );
+                console.log(req.originalUrl);
             }
             next();
         });
