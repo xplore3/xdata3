@@ -133,6 +133,17 @@ export class DirectClient {
         data3Logger.log("DirectClient constructor");
         this.app = express();
         this.app.use(cors());
+        this.app.use((req, res, next) => {
+            // const userIP = req.ip;
+            const userIP = req.headers["x-real-ip"];
+            if (userIP) {
+                const now = Date.now();
+                console.log(
+                    `APM time ${new Date(now).toLocaleString()}, ip ${userIP}`
+                );
+            }
+            next();
+        });
         this.agents = new Map();
 
         this.app.use(bodyParser.json());

@@ -4,6 +4,7 @@ import axios from 'axios';
 
 import crypto from "wechat-crypto";
 import xml2js from "xml2js";
+import { decrypt, encrypt, getJsApiSignature, getSignature } from "@wecom/crypto";
 
 import {
     handleProtocols,
@@ -71,11 +72,20 @@ export class WechatHandler {
         console.log("handleWechatInputMessage");
         console.log(req);
         const userId = req.query.userId
-        const runtime = this.getAgentId(req, res);
-        if (runtime) {
+        //const runtime = this.getAgentId(req, res);
+        //if (runtime) {
             try {
-                const { msg_signature, timestamp, nonce } = req.query;
-                const cryptor = new crypto(process.env.WECHAT_TOKEN,
+                const { msg_signature, timestamp, nonce, echostr } = req.query;
+                const signature = getSignature(process.env.WECHAT_TOKEN,
+                    timestamp, nonce, echostr);
+
+                //expect(signature).toEqual(query.signature);
+                const { random, msg_len, msg, CorpID } = decrypt(process.env.WECHAT_ENCODING_AESKEY,
+                    echostr);
+                console.log(msg_len);
+                console.log(CorpID);
+                res.send(msg);
+                /*const cryptor = new crypto(process.env.WECHAT_TOKEN,
                     process.env.WECHAT_ENCODING_AESKEY,
                     process.env.WECHAT_CORP_ID);
                 const xmlData = req.body
@@ -93,12 +103,12 @@ export class WechatHandler {
                     });
                 }
         
-                res.send('success')
+                res.send('success')*/
             } catch (err) {
                 console.error('[WecomListener] Error handling callback:', err)
                 res.send('fail')
             }
-        }
+        //}
     }
 
     private getAgentId(req: express.Request, res: express.Response) {
