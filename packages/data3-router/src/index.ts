@@ -149,6 +149,7 @@ export class DirectClient {
 
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({ extended: true }));
+        this.app.use(bodyParser.text({ type: 'text/xml' }));
 
         // Serve both uploads and generated images
         this.app.use(
@@ -519,6 +520,12 @@ export class DirectClient {
 
         const wechatHandler = new WechatHandler(this);
         this.app.get(
+            "/:agentId/wechat_listen",
+            async (req: express.Request, res: express.Response) => {
+                await wechatHandler.handleWechatInputMessage(req, res);
+            }
+        );
+        this.app.post(
             "/:agentId/wechat_listen",
             async (req: express.Request, res: express.Response) => {
                 await wechatHandler.handleWechatInputMessage(req, res);

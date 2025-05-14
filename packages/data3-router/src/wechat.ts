@@ -16,6 +16,7 @@ export class WechatHandler {
 
     cachedToken: string = null;
     tokenExpire = 0;
+    cursor: string = null;
 
     async getAccessToken() {
         const now = Date.now();
@@ -68,6 +69,28 @@ export class WechatHandler {
         }
     }
 
+    async syncMessage(msg_token: string) {
+        try {
+            console.log("syncMessage " + msg_token);
+            const token = await this.getAccessToken();
+            const msg = {
+                cursor: this.cursor,
+                token: msg_token,
+                limit: 1,
+                voice_format: 0
+            };
+            const resp = await axios.post(`https://qyapi.weixin.qq.com/cgi-bin/kf/sync_msg?access_token=${token}`, msg);
+            console.log(resp);
+            if (resp.data.next_cursor) {
+                this.cursor = resp.data.next_cursor
+            }
+            return resp.data;
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
     async handleWechatInputMessage(req: express.Request, res: express.Response) {
         console.log("handleWechatInputMessage");
         console.log(req.query);
@@ -92,17 +115,24 @@ export class WechatHandler {
                 const encryptMsg = parsedXml.xml.Encrypt
                 const decrypted = decrypt(process.env.WECHAT_ENCODING_AESKEY, encryptMsg)
                 const decryptedXml = await xml2js.parseStringPromise(decrypted.message, { explicitArray: false })
-                const msg = decryptedXml.xml
+                //const msg = decryptedXml.xml
+                const msg = await this.syncMessage(decryptedXml.xml.Token);
                 console.log(msg);
+                if (msg.msg_list) {
+                    const firstMsg = msg.msg_list[0];
+                    if (firstMsg.msgtype == 'text') {
+                        await this.sendMessage(firstMsg.external_userid, firstMsg.text.content);
+                    }
+                }
 
                 // Emit message to custom handler
-                if (msg.MsgType == 'text') {
+                //if (msg.MsgType == 'text') {
                     //await handleProtocols(runtime, msg.Content).then(async (resStr) => {
                     //    console.log(resStr);
                     //    await this.sendMessage(msg.FromUserName, resStr);
                     //});
-                    await this.sendMessage(msg.FromUserName, msg.content);
-                }
+                    //await this.sendMessage(msg.FromUserName, msg.content);
+                //}
         
                 res.send('success')
             } catch (err) {
