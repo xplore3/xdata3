@@ -148,7 +148,8 @@ export class WechatHandler {
                 console.error('[WecomListener] Error handling callback:', err)
                 res.send('fail')
             }
-        //}
+        }
+        res.send('fail')
     }
 
     private getAgentId(req: express.Request, res: express.Response) {
@@ -167,6 +168,7 @@ export class WechatHandler {
             catch (err) {
                 console.log(err);
             }
+            console.log(runtime)
             if (runtime) {
                 return runtime;
             }
