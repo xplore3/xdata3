@@ -31,7 +31,7 @@ export async function generateTextWithFile(filename: string, userQuestion: strin
             },
             {
                 "role": "system",
-                "content": `Combine this file ${filename} and answer the following user's question. The following is a bit long and includes the reasoning process` + file_content,
+                "content": `Combine this file ${filename} and answer the following user's question. The following is a bit long and includes the reasoning process`,
             },
             {"role": "user", "content": userQuestion},
         ];

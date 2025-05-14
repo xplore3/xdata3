@@ -297,10 +297,22 @@ export class DirectClient {
                     if (!taskMemoryObj?.questionText) {
                         taskMemoryObj.questionText = originQuestingText;
                     } else {
-                        taskMemoryObj.questionText =
+                        const promt1 =
+                            `Please summarize the user's original question and supplementary questions in one sentence.` +
                             taskMemoryObj.questionText +
-                            "\n User-supplemented information: " +
+                            ". User-supplemented information: " +
                             originQuestingText;
+                        try {
+                            const questionAfter = await generateText({
+                                runtime,
+                                context: promt1,
+                                modelClass: ModelClass.MEDIUM,
+                            });
+                            taskMemoryObj.questionText = questionAfter;
+                        } catch (error) {
+                            console.error("handleProtocols error: ", error);
+                            return "system error 1001";
+                        }
                     }
                     taskMemoryObj.promptModifyNum += 1;
                     await runtime.cacheManager.set(
