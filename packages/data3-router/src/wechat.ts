@@ -179,9 +179,9 @@ export class WechatHandler {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: {
+                    body:JSON.stringify({
                         text: input
-                    },
+                    }),
                 });
             console.log(resp);
             if (resp.ok) {
