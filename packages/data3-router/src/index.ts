@@ -149,7 +149,7 @@ export class DirectClient {
 
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({ extended: true }));
-        this.app.use(bodyParser.text({ type: 'text/xml' }));
+        this.app.use(bodyParser.text({ type: "text/xml" }));
 
         // Serve both uploads and generated images
         this.app.use(
@@ -250,145 +250,18 @@ export class DirectClient {
                 );
 
                 const originQuestingText = req.body.text;
-                // if empty text, directly return
-                if (!originQuestingText) {
-                    res.json([]);
-                    return;
-                }
-
-                // TODO 1: Assign task ID based on load balancing.
-                // TODO 2: Verify the task ID.
-                let taskId = req.body.taskId;
-                function generateTaskId() {
-                    const timestamp = Date.now().toString(36);
-                    const seq = Math.floor(Math.random() * 1000)
-                        .toString(36)
-                        .padStart(4, "0");
-                    return `TASK-${timestamp}-${seq}`;
-                }
-                if (!taskId) {
-                    taskId = generateTaskId();
-                }
-                let taskMemoryObj = null;
-                /**
-                 * QuestionObj{
-                 *    questionText: string,
-                 *    promptModifyNum: number,
-                 *    taskId: string,
-                 * }
-                 * key in cache: XData_task_question_{taskId}
-                 */
-
-                // Get lastest memory // refresh taskMemoryObj
-                taskMemoryObj = await runtime.cacheManager.get(
-                    "XData_task_question_" + taskId
-                );
-                if (!taskMemoryObj) {
-                    taskMemoryObj = {
-                        questionText: "",
-                        promptModifyNum: 0,
-                        taskId: taskId,
-                    };
-                }
-
-                console.log("before append, taskMemoryObj: " + JSON.stringify(taskMemoryObj));
-                if (taskMemoryObj?.promptModifyNum < 2) {
-                    // {need_more: true; additional1: question1; additional2: question1; }
-                    if (!taskMemoryObj?.questionText) {
-                        taskMemoryObj.questionText = originQuestingText;
-                    } else {
-                        const promt1 =
-                            `Please summarize the user's original question and additional information in one sentence. A one-sentence summary is sufficient, no explanation is needed. This sentence should not be a summary, but rather a statement from the user's perspective that a question or task has been raised to the AI ​​Agent.` +
-                            "User's original question " + taskMemoryObj.questionText +
-                            ". Additional information: " +
-                            originQuestingText;
-                        try {
-                            const questionAfter = await generateText({
-                                runtime,
-                                context: promt1,
-                                modelClass: ModelClass.MEDIUM,
-                            });
-                            taskMemoryObj.questionText = questionAfter;
-                        } catch (error) {
-                            console.error("handleProtocols error: ", error);
-                            return "system error 1001";
-                        }
-                    }
-                    taskMemoryObj.promptModifyNum += 1;
-                    await runtime.cacheManager.set(
-                        // Set the new taskMemoryObj to cache.
-                        "XData_task_question_" + taskId,
-                        taskMemoryObj
-                    );
-
-                    let promptQuestion = `Current questions that need to be answered: ` + taskMemoryObj.questionText;
-                    if (taskMemoryObj.prevQuestionText) {
-                        promptQuestion +=  (`. You don't need to answer the previous questions, they are just provided to provide you with context: ` + taskMemoryObj.prevQuestionText);                        
-                    }
-
-                    const obj = await handleProtocolsForPrompt(
-                        runtime,
-                        promptQuestion,
-                        taskId
-                    );
-
-                    if (obj.need_more) {
-                        res.json([
-                            {
-                                user: "Data3",
-                                text: JSON.stringify(obj),
-                                action: "NONE",
-                            },
-                        ]);
-                        return;
-                    }
-                }
-
-                // refresh taskMemoryObj
-                // taskMemoryObj = await runtime.cacheManager.get("XData_task_question_" + taskId);
-
-                taskMemoryObj = await runtime.cacheManager.get(
-                    "XData_task_question_" + taskId
-                );
-                /**
-                 * MemoryObj{
-                 *    questionText: string,
-                 *    promptModifyNum: number,
-                 *    taskId: string,
-                 * }
-                 * key in cache: XData_task_question_{taskId}
-                 */
-
-                const finalAnswerStr = await handleProtocolsProcessing(
+                const taskId = req.body.taskId;
+                const responseStr = await this.handleMessageWithAI(
                     runtime,
-                    taskMemoryObj.questionText,
+                    originQuestingText,
                     taskId
                 );
-
-                taskMemoryObj = await runtime.cacheManager.get(
-                    "XData_task_question_" + taskId
-                );
-                taskMemoryObj.promptModifyNum = 0;
-                taskMemoryObj.prevQuestionText += ("\n" + taskMemoryObj.questionText);
-                taskMemoryObj.questionText ="";
-                await runtime.cacheManager.set(
-                        // Set the new taskMemoryObj to cache.
-                        "XData_task_question_" + taskId,
-                        taskMemoryObj
-                );
-
-                // const secondaryProcessing = await handleProtocolsOutput(
-                //     runtime,
-                //     finalAnswerStr
-                //  );
-                const secondaryProcessing = "If further processing is needed on this topic, please let me know.";
-                res.json([
-                    {
-                        user: "Data3",
-                        text: finalAnswerStr + "\n" + secondaryProcessing,
-                        action: "NONE",
-                    },
-                ]);
+                res.json({
+                    user: "Data3",
+                    text: responseStr,
+                    action: "NONE",
+                });
+                return;
             }
         );
 
@@ -433,7 +306,11 @@ export class DirectClient {
                     return;
                 }
 
-                handleProtocolsProcessing(runtime, text, "xxx"/** taskID */).then((resStr) => {
+                handleProtocolsProcessing(
+                    runtime,
+                    text,
+                    "xxx" /** taskID */
+                ).then((resStr) => {
                     res.json({ res: resStr });
                 });
             }
@@ -652,13 +529,13 @@ export class DirectClient {
                                       nearby.map((item) => z.literal(item)) as [
                                           z.ZodLiteral<string>,
                                           z.ZodLiteral<string>,
-                                          ...z.ZodLiteral<string>[],
+                                          ...z.ZodLiteral<string>[]
                                       ]
                                   )
                                   .nullable()
                             : nearby.length === 1
-                              ? z.literal(nearby[0]).nullable()
-                              : z.null(); // Fallback for empty array
+                            ? z.literal(nearby[0]).nullable()
+                            : z.null(); // Fallback for empty array
 
                     const emoteSchema =
                         availableEmotes.length > 1
@@ -669,13 +546,13 @@ export class DirectClient {
                                       ) as [
                                           z.ZodLiteral<string>,
                                           z.ZodLiteral<string>,
-                                          ...z.ZodLiteral<string>[],
+                                          ...z.ZodLiteral<string>[]
                                       ]
                                   )
                                   .nullable()
                             : availableEmotes.length === 1
-                              ? z.literal(availableEmotes[0]).nullable()
-                              : z.null(); // Fallback for empty array
+                            ? z.literal(availableEmotes[0]).nullable()
+                            : z.null(); // Fallback for empty array
 
                     return z.object({
                         lookAt: lookAtSchema,
@@ -876,7 +753,9 @@ export class DirectClient {
 
                     if (!fileResponse.ok) {
                         throw new Error(
-                            `API responded with status ${fileResponse.status}: ${await fileResponse.text()}`
+                            `API responded with status ${
+                                fileResponse.status
+                            }: ${await fileResponse.text()}`
                         );
                     }
 
@@ -896,7 +775,10 @@ export class DirectClient {
                     const filePath = path.join(downloadDir, fileName);
                     data3Logger.log("Full file path:", filePath);
 
-                    await fs.promises.writeFile(filePath, new Uint8Array(buffer));
+                    await fs.promises.writeFile(
+                        filePath,
+                        new Uint8Array(buffer)
+                    );
 
                     // Verify file was written
                     const stats = await fs.promises.stat(filePath);
@@ -1174,6 +1056,141 @@ export class DirectClient {
         });
     }
 
+    public async handleMessageWithAI(
+        runtime: IAgentRuntime,
+        originQuestingText: string,
+        taskId: string
+    ): Promise<string> {
+        if (!originQuestingText) {
+            return null;
+        }
+
+        // TODO 1: Assign task ID based on load balancing.
+        // TODO 2: Verify the task ID.
+        //let taskId = req.body.taskId;
+        function generateTaskId() {
+            const timestamp = Date.now().toString(36);
+            const seq = Math.floor(Math.random() * 1000)
+                .toString(36)
+                .padStart(4, "0");
+            return `TASK-${timestamp}-${seq}`;
+        }
+        if (!taskId) {
+            taskId = generateTaskId();
+        }
+        let taskMemoryObj = null;
+        /**
+         * QuestionObj{
+         *    questionText: string,
+         *    promptModifyNum: number,
+         *    taskId: string,
+         * }
+         * key in cache: XData_task_question_{taskId}
+         */
+
+        // Get lastest memory // refresh taskMemoryObj
+        taskMemoryObj = await runtime.cacheManager.get(
+            "XData_task_question_" + taskId
+        );
+        if (!taskMemoryObj) {
+            taskMemoryObj = {
+                questionText: "",
+                promptModifyNum: 0,
+                taskId: taskId,
+            };
+        }
+
+        console.log(
+            "before append, taskMemoryObj: " + JSON.stringify(taskMemoryObj)
+        );
+        if (taskMemoryObj?.promptModifyNum < 2) {
+            // {need_more: true; additional1: question1; additional2: question1; }
+            if (!taskMemoryObj?.questionText) {
+                taskMemoryObj.questionText = originQuestingText;
+            } else {
+                const promt1 =
+                    `Please summarize the user's original question and additional information in one sentence. A one-sentence summary is sufficient, no explanation is needed. This sentence should not be a summary, but rather a statement from the user's perspective that a question or task has been raised to the AI Agent.` +
+                    "User's original question " +
+                    taskMemoryObj.questionText +
+                    ". Additional information: " +
+                    originQuestingText;
+                try {
+                    const questionAfter = await generateText({
+                        runtime,
+                        context: promt1,
+                        modelClass: ModelClass.MEDIUM,
+                    });
+                    taskMemoryObj.questionText = questionAfter;
+                } catch (error) {
+                    console.error("handleProtocols error: ", error);
+                    return "system error 1001";
+                }
+            }
+            taskMemoryObj.promptModifyNum += 1;
+            await runtime.cacheManager.set(
+                // Set the new taskMemoryObj to cache.
+                "XData_task_question_" + taskId,
+                taskMemoryObj
+            );
+
+            let promptQuestion =
+                `Current questions that need to be answered: ` +
+                taskMemoryObj.questionText;
+            if (taskMemoryObj.prevQuestionText) {
+                promptQuestion +=
+                    `. You don't need to answer the previous questions, they are just provided to provide you with context: ` +
+                    taskMemoryObj.prevQuestionText;
+            }
+
+            const obj = await handleProtocolsForPrompt(
+                runtime,
+                promptQuestion,
+                taskId
+            );
+
+            if (obj.need_more) {
+                return JSON.stringify(obj);
+            }
+        }
+
+        // refresh taskMemoryObj
+        // taskMemoryObj = await runtime.cacheManager.get("XData_task_question_" + taskId);
+        taskMemoryObj = await runtime.cacheManager.get(
+            "XData_task_question_" + taskId
+        );
+        /**
+         * MemoryObj{
+         *    questionText: string,
+         *    promptModifyNum: number,
+         *    taskId: string,
+         * }
+         * key in cache: XData_task_question_{taskId}
+         */
+
+        const finalAnswerStr = await handleProtocolsProcessing(
+            runtime,
+            taskMemoryObj.questionText,
+            taskId
+        );
+
+        taskMemoryObj = await runtime.cacheManager.get(
+            "XData_task_question_" + taskId
+        );
+        taskMemoryObj.promptModifyNum = 0;
+        taskMemoryObj.prevQuestionText += "\n" + taskMemoryObj.questionText;
+        taskMemoryObj.questionText = "";
+        await runtime.cacheManager.set(
+            // Set the new taskMemoryObj to cache.
+            "XData_task_question_" + taskId,
+            taskMemoryObj
+        );
+
+        const secondaryProcessing =
+            "If further processing is needed on this topic, please let me know.";
+        const decorateStr = finalAnswerStr + "\n" + secondaryProcessing;
+        return decorateStr;
+    }
+
     // agent/src/index.ts:startAgent calls this
     public registerAgent(runtime: IAgentRuntime) {
         // register any plugin endpoints?
@@ -1222,7 +1239,15 @@ export class DirectClient {
         }
     }
 
-    private async handleMessage(runtime: IAgentRuntime, req: Express.Request, res: express.Response, agentId: string, roomId: any, userId: any, text: string) {
+    private async handleMessage(
+        runtime: IAgentRuntime,
+        req: Express.Request,
+        res: express.Response,
+        agentId: string,
+        roomId: any,
+        userId: any,
+        text: string
+    ) {
         const messageId = stringToUuid(Date.now().toString());
 
         const attachments: Media[] = [];
@@ -1287,9 +1312,7 @@ export class DirectClient {
         });
 
         if (!response) {
-            res.status(500).send(
-                "No response from generateMessageResponse"
-            );
+            res.status(500).send("No response from generateMessageResponse");
             return;
         }
 
@@ -1322,11 +1345,8 @@ export class DirectClient {
         await runtime.evaluate(memory, state);
 
         // Check if we should suppress the initial message
-        const action = runtime.actions.find(
-            (a) => a.name === response.action
-        );
-        const shouldSuppressInitialMessage =
-            action?.suppressInitialMessage;
+        const action = runtime.actions.find((a) => a.name === response.action);
+        const shouldSuppressInitialMessage = action?.suppressInitialMessage;
 
         if (!shouldSuppressInitialMessage) {
             if (message) {
