@@ -93,7 +93,7 @@ export const handleProtocolsForPrompt = async (runtime: any, originText: any, ta
         return "system error 1001";
     }
 
-    console.log("handleProtocols response1: ", response1);
+    console.log("handleProtocols response need_more: ", response1);
     const response1Str = response1.replace(/```json/g, "").replace(/```/g, "");
 
     /**

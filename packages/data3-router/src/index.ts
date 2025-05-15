@@ -1101,15 +1101,17 @@ export class DirectClient {
         }
 
         console.log(
-            "before append, taskMemoryObj: " + JSON.stringify(taskMemoryObj)
+            "before append, taskMemoryObj: promptModifyNum : " + JSON.stringify(taskMemoryObj)
         );
-        if (taskMemoryObj?.promptModifyNum < 2) {
+
+        if (taskMemoryObj?.promptModifyNum <= 2) {
             // {need_more: true; additional1: question1; additional2: question1; }
-            if (!taskMemoryObj?.questionText) {
+            if (!(taskMemoryObj?.questionText)) {
                 taskMemoryObj.questionText = originQuestingText;
             } else {
                 const promt1 =
-                    `Please summarize the user's original question and additional information in one sentence. A one-sentence summary is sufficient, no explanation is needed. This sentence should not be a summary, but rather a statement from the user's perspective that a question or task has been raised to the AI Agent.` +
+                    `Please summarize the user's original question and additional information in one sentence. A one-sentence summary is sufficient, no explanation is needed.
+                    This sentence should not be a summary, but rather a statement from the user's perspective that a question or task has been raised to the AI Agent.` +
                     "User's original question " +
                     taskMemoryObj.questionText +
                     ". Additional information: " +
@@ -1120,37 +1122,48 @@ export class DirectClient {
                         context: promt1,
                         modelClass: ModelClass.MEDIUM,
                     });
+                    console.log(`[[${taskMemoryObj.questionText} +++++  ${originQuestingText} ====>  ${questionAfter} ]]`);
                     taskMemoryObj.questionText = questionAfter;
+                    await runtime.cacheManager.set(
+                    // Set the new taskMemoryObj to cache.
+                    "XData_task_question_" + taskId,
+                    taskMemoryObj
+                );
                 } catch (error) {
                     console.error("handleProtocols error: ", error);
                     return "system error 1001";
                 }
             }
-            taskMemoryObj.promptModifyNum += 1;
-            await runtime.cacheManager.set(
-                // Set the new taskMemoryObj to cache.
-                "XData_task_question_" + taskId,
-                taskMemoryObj
-            );
 
-            let promptQuestion =
-                `Current questions that need to be answered: ` +
-                taskMemoryObj.questionText;
-            if (taskMemoryObj.prevQuestionText) {
-                promptQuestion +=
-                    `. You don't need to answer the previous questions, they are just provided to provide you with context: ` +
-                    taskMemoryObj.prevQuestionText;
+            if (taskMemoryObj?.promptModifyNum < 2) {
+                let promptQuestion =
+                    `Current questions that need to be answered: ` +
+                    taskMemoryObj.questionText;
+                if (taskMemoryObj.prevQuestionText) {
+                    promptQuestion +=
+                        `. You don't need to answer the previous questions, they are just provided to provide you with context: ` +
+                        taskMemoryObj.prevQuestionText;
+                }
+
+                const obj = await handleProtocolsForPrompt(
+                    runtime,
+                    promptQuestion,
+                    taskId
+                );
+                taskMemoryObj.promptModifyNum += 1;
+                await runtime.cacheManager.set(
+                    // Set the new taskMemoryObj to cache.
+                    "XData_task_question_" + taskId,
+                    taskMemoryObj
+                );
+                if (obj?.need_more) {
+                    return JSON.stringify(obj);
+                }
             }
 
-            const obj = await handleProtocolsForPrompt(
-                runtime,
-                promptQuestion,
-                taskId
-            );
 
-            if (obj.need_more) {
-                return JSON.stringify(obj);
-            }
+
+            // taskMemoryObj.promptModifyNum == 2, there is no need to refine the question further.
         }
 
         // refresh taskMemoryObj
