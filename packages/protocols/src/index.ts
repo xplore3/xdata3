@@ -389,15 +389,20 @@ let promptPartThree = `
     } while (obj);
     promptPartThree = `\n[Area3]\nBased on the above results, answer user questions briefly and directly. The data here may not be sufficient, but first answer the user's question. For example, if the user asked to find 100 KOLs, but now there are only 10, answer the user's question first.`;
     let responseFinal = "";
-    try {
-        // responseFinal = await generateText({
-        //     runtime,
-        //     context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
-        //     modelClass: ModelClass.LARGE,
-        // });        
+    try {     
         // chat with the data txt file.
         const filePath = "chat-cache-file_" + taskId + ".txt";
-        responseFinal = await generateTextWithFile(filePath, shortenStr(promptPartOne + promptPartTwo + promptPartThree));
+        const fileExists = fs.existsSync(filePath);
+        console.log(`Chat cache file ${filePath} exists: ${fileExists}`);
+        if(!fileExists) {
+            responseFinal = await generateText({
+             runtime,
+             context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
+             modelClass: ModelClass.LARGE,
+            });   
+        } else {
+            responseFinal = await generateTextWithFile(filePath, shortenStr(promptPartOne + promptPartTwo + promptPartThree));
+        }
     } catch (e) {
         console.log("handleProtocols error: ", e);
         return "system error 1003";

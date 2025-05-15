@@ -1075,10 +1075,22 @@ export class DirectClient {
                 .padStart(4, "0");
             return `TASK-${timestamp}-${seq}`;
         }
-        if (!taskId) {
-            taskId = generateTaskId();
-        }
         let taskMemoryObj = null;
+
+    if (!taskId) {
+        taskId = generateTaskId();
+        taskMemoryObj = {
+            questionText: '',
+            promptModifyNum: 0,
+            taskId: taskId
+        };
+    } else {
+        // Get lastest memory // refresh taskMemoryObj
+        taskMemoryObj = await runtime.cacheManager.get(
+            'XData_task_question_' + taskId
+        );
+    }
+
         /**
          * QuestionObj{
          *    questionText: string,
@@ -1087,18 +1099,6 @@ export class DirectClient {
          * }
          * key in cache: XData_task_question_{taskId}
          */
-
-        // Get lastest memory // refresh taskMemoryObj
-        taskMemoryObj = await runtime.cacheManager.get(
-            "XData_task_question_" + taskId
-        );
-        if (!taskMemoryObj) {
-            taskMemoryObj = {
-                questionText: "",
-                promptModifyNum: 0,
-                taskId: taskId,
-            };
-        }
 
         console.log(
             "before append, taskMemoryObj: promptModifyNum : " + JSON.stringify(taskMemoryObj)

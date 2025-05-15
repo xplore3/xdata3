@@ -172,21 +172,36 @@ export class WechatHandler {
                 await this.sendMessage(firstMsg.external_userid,
                 decryptedXml.xml.OpenKfId, resStr);
             });*/
-            const tempUrl = "http://localhost:3333/91edd400-9c4a-0eb5-80ce-9d32973f2c49/message";
-            const resp = await fetch(tempUrl,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body:JSON.stringify({
-                        text: input
-                    }),
-                });
-            console.log(resp);
-            if (resp.ok) {
-                return resp.json();
-            }
+            // const tempUrl = "http://localhost:3333/91edd400-9c4a-0eb5-80ce-9d32973f2c49/message";
+            // const resp = await fetch(tempUrl,
+            //     {
+            //         method: 'POST',
+            //         headers: {
+            //             'Content-Type': 'application/json',
+            //         },
+            //         body:JSON.stringify({
+            //             text: input
+            //         }),
+            //     });
+            // console.log(resp);
+            // if (resp.ok) {
+            //     return resp.json();
+            // }
+
+            const config = {
+                url: 'http://localhost:3333/91edd400-9c4a-0eb5-80ce-9d32973f2c49/message',
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                data: {
+                    text: input
+                }
+            };
+
+            const response = await axios(config);
+            // console.log(response.data);
+            return response.data;
         }
         catch (err) {
             console.log(err);
