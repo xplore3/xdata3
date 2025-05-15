@@ -1,4 +1,4 @@
-import { startCollection, waitForCollection, getCollectionData } from './brightApi';
+import { startCollection, waitForCollection, getCollectionData } from './brightapi';
 import { saveToJson } from './utils';
 
 export const data3Fetch = async (targetUrl: string) => {
