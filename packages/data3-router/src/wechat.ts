@@ -309,7 +309,7 @@ export class WechatHandler {
 
         const regexMap = {
             cn: /[\u4e00-\u9fa5]/,
-            en: /^[a-zA-Z\s]+$/,
+            //en: /^[a-zA-Z\s]+$/,
             ja: /[\u3040-\u30ff\u31f0-\u31ff\uFF66-\uFF9F]/,
             ko: /[\uac00-\ud7af\u1100-\u11ff]/,
             fr: /[àâçéèêëîïôûùüÿœæÀÂÇÉÈÊËÎÏÔÛÙÜŸŒÆ]/,
@@ -332,6 +332,9 @@ export class WechatHandler {
             return detected[0][0] as any;
         }
 
+        if (/^[a-zA-Z\s.,!?'"()\-]+$/.test(text)) {
+            return 'en';
+        }
         return 'other';
     }
 
