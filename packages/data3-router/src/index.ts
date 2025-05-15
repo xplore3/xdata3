@@ -298,9 +298,9 @@ export class DirectClient {
                         taskMemoryObj.questionText = originQuestingText;
                     } else {
                         const promt1 =
-                            `Please summarize the user's original question and supplementary questions in one sentence.` +
-                            taskMemoryObj.questionText +
-                            ". User-supplemented information: " +
+                            `Please summarize the user's original question and additional information in one sentence. A one-sentence summary is sufficient, no explanation is needed. This sentence should not be a summary, but rather a statement from the user's perspective that a question or task has been raised to the AI ​​Agent.` +
+                            "User's original question " + taskMemoryObj.questionText +
+                            ". Additional information: " +
                             originQuestingText;
                         try {
                             const questionAfter = await generateText({

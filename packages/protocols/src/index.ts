@@ -73,10 +73,10 @@ export const handleProtocolsForPrompt = async (runtime: any, originText: any, ta
     const promt1 = `You are an interactive AI agent that can have multiple interactions when solving problems.
     You need to help the user solve the following task [Question: ${originText}],
     Before solving the task, in order to solve the problem better and more accurately, please help the user refine and specify the problem description. You are an interactive AI, and at this stage you only need to refine and specify the problem.
-    For simple questions, you can ask less or no questions. For a complex question, you need to ask multiple questions. To facilitate user interaction, please ask multiple-choice questions for interaction, such as the following example: What platform is the report you want to analyze based on? 1. Base Twitter; 2. Base Ticktok; 3. Base Faceboock;
+    For simple questions, you can ask less or no questions. For a complex question, you need to ask multiple questions. To facilitate user interaction, please ask multiple-choice questions for interaction.
     When optimizing a question's prompt, the main focus should be on refining and specifying the question, and avoid diverging.
     If no additional information is required, please reply with a JSON structure {need_more: false; } , 
-    If you need to continue to optimize the task's description reply:{need_more: true;  question: xxxxxxx; additional1: xxxx; additional2: xxxxx; },
+    If you need to continue to optimize the task's description reply:{need_more: true,  question_description: xxxxxx, available_options: [additional1, additional2] } eg: {"need_more": true, "question_description": "What platform is the report you want to analyze based on?", "available_options": ["Base Twitter", "Base Ticktok"]},
     You can use interrogative sentences to further refine the user's original question and clarify the user's intent by returning.
     Only JSON data needs to be returned. Data other than JSON does not need to be returned or interpreted.
     `;
