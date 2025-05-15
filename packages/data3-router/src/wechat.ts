@@ -22,6 +22,39 @@ export class WechatHandler {
     tokenExpire = 0;
     cursor: string = null;
 
+    private async readFromCache<T>(runtime: IAgentRuntime, key: string): Promise<T | null> {
+        const cached = await runtime.cacheManager.get<T>(key);
+        return cached;
+    }
+
+    private async writeToCache<T>(runtime: IAgentRuntime, key: string, data: T): Promise<void> {
+        try {
+            await runtime.cacheManager.set(key,
+                data,
+                {
+                    expires: Date.now() + 60 * 60 * 1000, // a hour
+                }
+            );
+        }
+        catch (err) {
+            console.log(`writeToCache key ${key}`);
+            console.error(err);
+        }
+    }
+
+    private async getCachedData<T>(runtime: IAgentRuntime, key: string): Promise<T | null> {
+        const fileCachedData = await this.readFromCache<T>(runtime, key);
+        if (fileCachedData) {
+            return fileCachedData;
+        }
+
+        return null;
+    }
+
+    private async setCachedData<T>(runtime: IAgentRuntime, cacheKey: string, data: T): Promise<void> {
+        await this.writeToCache(runtime, cacheKey, data);
+    }
+
     async getAccessToken() {
         const now = Date.now();
         if (this.cachedToken && this.tokenExpire > now) {
@@ -136,9 +169,15 @@ export class WechatHandler {
                     const firstMsg = msg.msg_list[index];
                     if (firstMsg.msgtype == 'text') {
                         console.log(firstMsg.text.content);
+                        const firstText = firstMsg.text.content;
+                        const userId = firstMsg.external_userid;
                         try {
+                            const lang = this.detectLanguage(firstText);
+                            const immResp = this.getFirstResponse(lang);
+                            await this.sendMessage(firstMsg.external_userid,
+                                decryptedXml.xml.OpenKfId, immResp);
                             const questionAfter = await this.generateResponseByData3(
-                                runtime, firstMsg.text.content);
+                                runtime, userId, firstText);
                             await this.sendMessage(firstMsg.external_userid,
                                 decryptedXml.xml.OpenKfId, questionAfter);
                         }
@@ -165,7 +204,7 @@ export class WechatHandler {
         }
     }
 
-    async generateResponseByData3(runtime: IAgentRuntime, input: string) {
+    async generateResponseByData3(runtime: IAgentRuntime, userId: string, input: string) {
         try {
             /*await handleProtocols(runtime, firstMsg.text.content).then(async (resStr) => {
                 console.log(resStr);
@@ -188,6 +227,7 @@ export class WechatHandler {
             //     return resp.json();
             // }
 
+            const taskId = await this.getCachedData<string>(runtime, userId);
             const config = {
                 url: 'http://localhost:3333/91edd400-9c4a-0eb5-80ce-9d32973f2c49/message',
                 method: 'post',
@@ -195,14 +235,26 @@ export class WechatHandler {
                     'Content-Type': 'application/json',
                 },
                 data: {
+                    taskId,
                     text: input
                 }
             };
 
             const response = await axios(config);
-            // console.log(response.data);
+            console.log(response.data);
             if (response.status != 200) {
                 return "Error in response " + response.statusText;
+            }
+            const json = JSON.parse(response.data?.text);
+            if (json) {
+                await this.setCachedData(runtime, userId, json.taskId);
+                if (json.need_more) {
+                    let text = `${json.question_description}\n\n${json.available_options.join('\n')}`;
+                    return text;
+                }
+                else {
+                    return json.question_description;
+                }
             }
             return response.data?.text;
         }
@@ -246,5 +298,53 @@ export class WechatHandler {
         }
         res.status(400).json({ error: "Missing agent id" });
         return;
+    }
+
+    private detectLanguage(text: string):
+        'cn' | 'en' | 'ja' | 'ko' | 'fr' | 'es' | 'ru' | 'ar' | 'emoji' | 'other' {
+
+        const regexMap = {
+            cn: /[\u4e00-\u9fa5]/,
+            en: /^[a-zA-Z\s]+$/,
+            ja: /[\u3040-\u30ff\u31f0-\u31ff\uFF66-\uFF9F]/,
+            ko: /[\uac00-\ud7af\u1100-\u11ff]/,
+            fr: /[àâçéèêëîïôûùüÿœæÀÂÇÉÈÊËÎÏÔÛÙÜŸŒÆ]/,
+            es: /[áéíñóúüÁÉÍÑÓÚÜ¡¿]/,
+            ru: /[\u0400-\u04FF]/,
+            ar: /[\u0600-\u06FF]/,
+            emoji: /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}]/u // 常见 emoji 范围
+        };
+        const counts: Record<string, number> = {};
+        for (const [lang, regex] of Object.entries(regexMap)) {
+            const matches = text.match(new RegExp(regex, regex.flags + 'g'));
+            counts[lang] = matches ? matches.length : 0;
+        }
+
+        const detected = Object.entries(counts)
+            .filter(([_, count]) => count > 0)
+            .sort((a, b) => b[1] - a[1]);
+
+        if (detected.length === 1) {
+            return detected[0][0] as any;
+        }
+
+        return 'other';
+    }
+
+    private getFirstResponse(language: string) {
+        const responseMap: Record<string, string> = {
+            zh: "收到，请稍等……",
+            en: "Ok, please wait a moment...",
+            ja: "承知しました。少々お待ちください……",
+            ko: "확인했습니다. 잠시만 기다려주세요……",
+            fr: "Reçu, veuillez patienter un instant…",
+            es: "Recibido, por favor espere un momento…",
+            ru: "Получено, пожалуйста, подождите немного…",
+            ar: "تم الاستلام، يرجى الانتظار قليلاً...",
+            emoji: "✅⌛🙂",
+            other: "Ok, please wait a moment...",
+        };
+
+        return responseMap[language] as string;
     }
 }
