@@ -98,7 +98,7 @@ export class WechatHandler {
                 safe: 0
             };*/
             const resp = await axios.post(`https://qyapi.weixin.qq.com/cgi-bin/kf/send_msg?access_token=${token}`, msg);
-            console.log("sendMessage" + resp.data.errmsg);
+            console.log("sendMessage " + resp.data.errmsg);
             if (resp.data.errcode !== 0) {
                 throw new Error(`sendMessage failed: ${resp.data.errmsg}`);
             }
@@ -122,7 +122,7 @@ export class WechatHandler {
             };
             const resp = await axios.post(`https://qyapi.weixin.qq.com/cgi-bin/kf/sync_msg?access_token=${token}`, msg);
             //console.log(resp);
-            console.log("syncMessage" + resp.data.errmsg);
+            console.log("syncMessage " + resp.data.errmsg);
             if (resp.data.errcode !== 0) {
                 throw new Error(`syncMessage failed: ${resp.data.errmsg}`);
             }
@@ -245,16 +245,20 @@ export class WechatHandler {
             if (response.status != 200) {
                 return "Error in response " + response.statusText;
             }
-            const json = JSON.parse(response.data?.text);
-            if (json) {
-                await this.setCachedData(runtime, userId, json.taskId);
-                if (json.need_more) {
-                    let text = `${json.question_description}\n\n${json.available_options.join('\n')}`;
-                    return text;
+            try {
+                const json = JSON.parse(response.data?.text);
+                if (json) {
+                    await this.setCachedData(runtime, userId, json.taskId);
+                    if (json.need_more) {
+                        let text = `${json.question_description}\n\n${json.available_options.join('\n')}`;
+                        return text;
+                    }
+                    else {
+                        return json.question_description;
+                    }
                 }
-                else {
-                    return json.question_description;
-                }
+            } catch (err) {
+                console.log(err);
             }
             return response.data?.text;
         }
@@ -265,7 +269,7 @@ export class WechatHandler {
             return await generateText({
                 runtime,
                 context: input,
-                modelClass: ModelClass.MEDIUM,
+                modelClass: ModelClass.SMALL,
             });
         }
         catch (err) {
