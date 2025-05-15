@@ -8,6 +8,7 @@ import { decrypt, encrypt, getJsApiSignature, getSignature } from "@wecom/crypto
 import {
     ModelClass,
     generateText,
+    type IAgentRuntime,
 } from "@data3os/agentcontext";
 import {
     handleProtocols,
@@ -26,18 +27,18 @@ export class WechatHandler {
         if (this.cachedToken && this.tokenExpire > now) {
             return this.cachedToken;
         }
-      
+
         const res = await axios.get('https://qyapi.weixin.qq.com/cgi-bin/gettoken', {
           params: {
             corpid: process.env.WECHAT_CORP_ID,
             corpsecret: process.env.WECHAT_CORP_SECRET
           }
         })
-      
+
         if (res.data.errcode !== 0) {
           throw new Error(`Token get failed: ${res.data.errmsg}`);
         }
-      
+
         this.cachedToken = res.data.access_token;
         this.tokenExpire = now + res.data.expires_in * 1000 - 60 * 1000;
         return this.cachedToken;
@@ -64,7 +65,10 @@ export class WechatHandler {
                 safe: 0
             };*/
             const resp = await axios.post(`https://qyapi.weixin.qq.com/cgi-bin/kf/send_msg?access_token=${token}`, msg);
-            //console.log(resp);
+            console.log("sendMessage" + resp.data.errmsg);
+            if (resp.data.errcode !== 0) {
+                throw new Error(`sendMessage failed: ${resp.data.errmsg}`);
+            }
             return resp.data;
         }
         catch (err) {
@@ -85,6 +89,10 @@ export class WechatHandler {
             };
             const resp = await axios.post(`https://qyapi.weixin.qq.com/cgi-bin/kf/sync_msg?access_token=${token}`, msg);
             //console.log(resp);
+            console.log("syncMessage" + resp.data.errmsg);
+            if (resp.data.errcode !== 0) {
+                throw new Error(`syncMessage failed: ${resp.data.errmsg}`);
+            }
             if (resp.data.next_cursor) {
                 this.cursor = resp.data.next_cursor
             }
@@ -129,22 +137,14 @@ export class WechatHandler {
                     if (firstMsg.msgtype == 'text') {
                         console.log(firstMsg.text.content);
                         try {
-                            const questionAfter = await generateText({
-                                runtime,
-                                context: firstMsg.text.content,
-                                modelClass: ModelClass.MEDIUM,
-                            });
+                            const questionAfter = await this.generateResponseByData3(
+                                runtime, firstMsg.text.content);
                             await this.sendMessage(firstMsg.external_userid,
                                 decryptedXml.xml.OpenKfId, questionAfter);
                         }
                         catch (err) {
                             console.log(err);
                         }
-                        /*await handleProtocols(runtime, firstMsg.text.content).then(async (resStr) => {
-                            console.log(resStr);
-                            await this.sendMessage(firstMsg.external_userid,
-                            decryptedXml.xml.OpenKfId, resStr);
-                        });*/
                     }
                 }
 
@@ -163,7 +163,44 @@ export class WechatHandler {
                 res.send('fail')
             }
         }
-        res.send('fail')
+    }
+
+    async generateResponseByData3(runtime: IAgentRuntime, input: string) {
+        try {
+            /*await handleProtocols(runtime, firstMsg.text.content).then(async (resStr) => {
+                console.log(resStr);
+                await this.sendMessage(firstMsg.external_userid,
+                decryptedXml.xml.OpenKfId, resStr);
+            });*/
+            const tempUrl = "http://localhost:3333/91edd400-9c4a-0eb5-80ce-9d32973f2c49/message";
+            const resp = await fetch(tempUrl,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: {
+                        text: input
+                    },
+                });
+            console.log(resp);
+            if (resp.ok) {
+                return resp.json();
+            }
+        }
+        catch (err) {
+            console.log(err);
+        }
+        try {
+            return await generateText({
+                runtime,
+                context: input,
+                modelClass: ModelClass.MEDIUM,
+            });
+        }
+        catch (err) {
+            console.log(err);
+        }
     }
 
     private getAgentId(req: express.Request, res: express.Response) {
