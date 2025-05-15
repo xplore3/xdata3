@@ -201,7 +201,10 @@ export class WechatHandler {
 
             const response = await axios(config);
             // console.log(response.data);
-            return response.data;
+            if (response.status != 200) {
+                return "Error in response " + response.statusText;
+            }
+            return response.data?.text;
         }
         catch (err) {
             console.log(err);
