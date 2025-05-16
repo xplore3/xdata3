@@ -147,11 +147,25 @@ export const handleProtocolsProcessing = async (runtime: any, originText: any, t
     console.log("handleprotocols promt1: ", promt1);
     let response1 = "";
     try {
-        response1 = await generateText({
-            runtime,
-            context: shortenStr(promt1),
-            modelClass: ModelClass.LARGE,
-        });
+        // load memory load and data.
+        // chat with the data txt file.
+        const filePath = "chat-cache-file_" + taskId + ".txt";
+        const fileExists = fs.existsSync(filePath);
+        console.log(`online query Chat cache file ${filePath} exists: ${fileExists}`);
+        if(!fileExists) {
+            response1 = await generateText({
+             runtime,
+             context: shortenStr(promt1),
+             modelClass: ModelClass.LARGE,
+            });   
+        } else {
+            response1 = await generateTextWithFile(filePath, shortenStr(promt1));
+        }
+        // response1 = await generateText({
+        //     runtime,
+        //     context: shortenStr(promt1),
+        //     modelClass: ModelClass.LARGE,
+        // });
     } catch (error) {
         console.error("handleProtocols error: ", error);
         return "system error 1001";
@@ -196,7 +210,7 @@ let promptPartThree = `
 
 
     let step = 0;
-
+    
     do {
         ++step;
         if(step > 30) {
@@ -357,11 +371,25 @@ let promptPartThree = `
         Please use JSON to return the result, without including any other content or requiring markdown syntax modification, The JSON format is: {"need_network": "true"}\n`;
         let response3 = "";
         try {
-            response3 = await generateText({
-                runtime,
-                context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
-                modelClass: ModelClass.LARGE,
-            });            
+            const filePath = "chat-cache-file_" + taskId + ".txt";
+            const fileExists = fs.existsSync(filePath);
+            console.log(
+                `online query Chat cache file ${filePath} exists: ${fileExists}`
+            );
+            if (!fileExists) {
+                response3 = await generateText({
+                    runtime,
+                    context: shortenStr(
+                        promptPartOne + promptPartTwo + promptPartThree
+                    ),
+                    modelClass: ModelClass.LARGE,
+                });
+            } else {
+                response3 = await generateTextWithFile(
+                    filePath,
+                    shortenStr(promptPartOne + promptPartTwo + promptPartThree)
+                );
+            }
         } catch (e) {
             console.log("handleProtocols error: ", e);
             return "system error 1001";
@@ -403,6 +431,12 @@ let promptPartThree = `
         } else {
             responseFinal = await generateTextWithFile(filePath, shortenStr(promptPartOne + promptPartTwo + promptPartThree));
         }
+        const content = `AI Agent Memory:\n ${promptPartTwo}`;
+        const filename = "chat-cache-file_" + taskId + ".txt";
+        appendToChatCache(content, filename, (err) => {
+            console.error("Custom error handling:", err);
+        });
+        console.log("handleProtocols appendToChatCache.");
     } catch (e) {
         console.log("handleProtocols error: ", e);
         return "system error 1003";
