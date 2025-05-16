@@ -1106,16 +1106,32 @@ export class DirectClient {
 
         if (taskMemoryObj?.promptModifyNum <= 2) {
             // {need_more: true; additional1: question1; additional2: question1; }
-            if (!(taskMemoryObj?.questionText)) {
+            if (!(taskMemoryObj?.questionText) && !(taskMemoryObj?.prevQuestionText)) {
                 taskMemoryObj.questionText = originQuestingText;
             } else {
-                const promt1 =
+
+                let promt1 =
                     `Please summarize the user's original question and additional information in one sentence. A one-sentence summary is sufficient, no explanation is needed.
-                    This sentence should not be a summary, but rather a statement from the user's perspective that a question or task has been raised to the AI Agent.` +
-                    "User's original question " +
+                    This sentence should not be a summary, but rather a statement from the user's perspective that a question or task has been raised to the AI Agent.`;
+                     
+                if((taskMemoryObj?.questionText)) {
+                    promt1 +=  ("User's original question " +
                     taskMemoryObj.questionText +
                     ". Additional information: " +
-                    originQuestingText;
+                    originQuestingText);
+                    if(taskMemoryObj?.prevQuestionText) {
+                        promt1 += `.\nUser Previous Question(No need to answer, just provide context) \n` + taskMemoryObj.prevQuestionText;
+                    }
+                }
+                else {
+                    promt1 += ("User's original question " +
+                    originQuestingText);
+                    if(taskMemoryObj?.prevQuestionText) {
+                        promt1 += `.\nUser Previous Question(No need to answer, just provide context)\n` + taskMemoryObj.prevQuestionText;
+                    }
+                }
+                   
+
                 try {
                     const questionAfter = await generateText({
                         runtime,
@@ -1190,7 +1206,11 @@ export class DirectClient {
             "XData_task_question_" + taskId
         );
         taskMemoryObj.promptModifyNum = 0;
-        taskMemoryObj.prevQuestionText += "\n" + taskMemoryObj.questionText;
+        if (!taskMemoryObj.prevQuestionText) {
+            taskMemoryObj.prevQuestionText =  taskMemoryObj.questionText;
+        } else {
+            taskMemoryObj.prevQuestionText += "\n" + taskMemoryObj.questionText;
+        }
         taskMemoryObj.questionText = "";
         await runtime.cacheManager.set(
             // Set the new taskMemoryObj to cache.
