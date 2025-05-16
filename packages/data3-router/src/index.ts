@@ -1075,18 +1075,18 @@ export class DirectClient {
                 .padStart(4, "0");
             return `TASK-${timestamp}-${seq}`;
         }
-        let taskMemoryObj = null;
+        let taskQuestionObj = null;
 
     if (!taskId) {
         taskId = generateTaskId();
-        taskMemoryObj = {
+        taskQuestionObj = {
             questionText: '',
             promptModifyNum: 0,
             taskId: taskId
         };
     } else {
-        // Get lastest memory // refresh taskMemoryObj
-        taskMemoryObj = await runtime.cacheManager.get(
+        // Get lastest memory // refresh taskQuestionObj
+        taskQuestionObj = await runtime.cacheManager.get(
             'XData_task_question_' + taskId
         );
     }
@@ -1101,33 +1101,33 @@ export class DirectClient {
          */
 
         console.log(
-            "before append, taskMemoryObj: promptModifyNum : " + JSON.stringify(taskMemoryObj)
+            "before append, taskQuestionObj: promptModifyNum : " + JSON.stringify(taskQuestionObj)
         );
 
-        if (taskMemoryObj?.promptModifyNum <= 2) {
+        if (taskQuestionObj?.promptModifyNum <= 2) {
             // {need_more: true; additional1: question1; additional2: question1; }
-            if (!(taskMemoryObj?.questionText) && !(taskMemoryObj?.prevQuestionText)) {
-                taskMemoryObj.questionText = originQuestingText;
+            if (!(taskQuestionObj?.questionText) && !(taskQuestionObj?.prevQuestionText)) {
+                taskQuestionObj.questionText = originQuestingText;
             } else {
 
                 let promt1 =
                     `Please summarize the user's original question and additional information in one sentence. A one-sentence summary is sufficient, no explanation is needed.
                     This sentence should not be a summary, but rather a statement from the user's perspective that a question or task has been raised to the AI Agent.`;
                      
-                if((taskMemoryObj?.questionText)) {
+                if((taskQuestionObj?.questionText)) {
                     promt1 +=  ("User's original question " +
-                    taskMemoryObj.questionText +
+                    taskQuestionObj.questionText +
                     ". Additional information: " +
                     originQuestingText);
-                    if(taskMemoryObj?.prevQuestionText) {
-                        promt1 += `.\nUser Previous Question(No need to answer, just provide context) \n` + taskMemoryObj.prevQuestionText;
+                    if(taskQuestionObj?.prevQuestionText) {
+                        promt1 += `.\nUser Previous Question(No need to answer, just provide context) \n` + taskQuestionObj.prevQuestionText;
                     }
                 }
                 else {
                     promt1 += ("User's original question " +
                     originQuestingText);
-                    if(taskMemoryObj?.prevQuestionText) {
-                        promt1 += `.\nUser Previous Question(No need to answer, just provide context)\n` + taskMemoryObj.prevQuestionText;
+                    if(taskQuestionObj?.prevQuestionText) {
+                        promt1 += `.\nUser Previous Question(No need to answer, just provide context)\n` + taskQuestionObj.prevQuestionText;
                     }
                 }
                    
@@ -1138,12 +1138,12 @@ export class DirectClient {
                         context: promt1,
                         modelClass: ModelClass.MEDIUM,
                     });
-                    console.log(`[[${taskMemoryObj.questionText} +++++  ${originQuestingText} ====>  ${questionAfter} ]]`);
-                    taskMemoryObj.questionText = questionAfter;
+                    console.log(`[[${taskQuestionObj.questionText} +++++  ${originQuestingText} ====>  ${questionAfter} ]]`);
+                    taskQuestionObj.questionText = questionAfter;
                     await runtime.cacheManager.set(
-                    // Set the new taskMemoryObj to cache.
+                    // Set the new taskQuestionObj to cache.
                     "XData_task_question_" + taskId,
-                    taskMemoryObj
+                    taskQuestionObj
                 );
                 } catch (error) {
                     console.error("handleProtocols error: ", error);
@@ -1151,14 +1151,14 @@ export class DirectClient {
                 }
             }
 
-            if (taskMemoryObj?.promptModifyNum < 2) {
+            if (taskQuestionObj?.promptModifyNum < 2) {
                 let promptQuestion =
                     `Current questions that need to be answered: ` +
-                    taskMemoryObj.questionText;
-                if (taskMemoryObj.prevQuestionText) {
+                    taskQuestionObj.questionText;
+                if (taskQuestionObj.prevQuestionText) {
                     promptQuestion +=
                         `. You don't need to answer the previous questions, they are just provided to provide you with context: ` +
-                        taskMemoryObj.prevQuestionText;
+                        taskQuestionObj.prevQuestionText;
                 }
 
                 const obj = await handleProtocolsForPrompt(
@@ -1166,11 +1166,11 @@ export class DirectClient {
                     promptQuestion,
                     taskId
                 );
-                taskMemoryObj.promptModifyNum += 1;
+                taskQuestionObj.promptModifyNum += 1;
                 await runtime.cacheManager.set(
-                    // Set the new taskMemoryObj to cache.
+                    // Set the new taskQuestionObj to cache.
                     "XData_task_question_" + taskId,
-                    taskMemoryObj
+                    taskQuestionObj
                 );
                 if (obj?.need_more) {
                     return JSON.stringify(obj);
@@ -1179,12 +1179,12 @@ export class DirectClient {
 
 
 
-            // taskMemoryObj.promptModifyNum == 2, there is no need to refine the question further.
+            // taskQuestionObj.promptModifyNum == 2, there is no need to refine the question further.
         }
 
-        // refresh taskMemoryObj
-        // taskMemoryObj = await runtime.cacheManager.get("XData_task_question_" + taskId);
-        taskMemoryObj = await runtime.cacheManager.get(
+        // refresh taskQuestionObj
+        // taskQuestionObj = await runtime.cacheManager.get("XData_task_question_" + taskId);
+        taskQuestionObj = await runtime.cacheManager.get(
             "XData_task_question_" + taskId
         );
         /**
@@ -1198,24 +1198,24 @@ export class DirectClient {
 
         const finalAnswerStr = await handleProtocolsProcessing(
             runtime,
-            taskMemoryObj.questionText,
+            taskQuestionObj.questionText,
             taskId
         );
 
-        taskMemoryObj = await runtime.cacheManager.get(
+        taskQuestionObj = await runtime.cacheManager.get(
             "XData_task_question_" + taskId
         );
-        taskMemoryObj.promptModifyNum = 0;
-        if (!taskMemoryObj.prevQuestionText) {
-            taskMemoryObj.prevQuestionText =  taskMemoryObj.questionText;
+        taskQuestionObj.promptModifyNum = 0;
+        if (!taskQuestionObj.prevQuestionText) {
+            taskQuestionObj.prevQuestionText =  taskQuestionObj.questionText;
         } else {
-            taskMemoryObj.prevQuestionText += "\n" + taskMemoryObj.questionText;
+            taskQuestionObj.prevQuestionText += "\n" + taskQuestionObj.questionText;
         }
-        taskMemoryObj.questionText = "";
+        taskQuestionObj.questionText = "";
         await runtime.cacheManager.set(
-            // Set the new taskMemoryObj to cache.
+            // Set the new taskQuestionObj to cache.
             "XData_task_question_" + taskId,
-            taskMemoryObj
+            taskQuestionObj
         );
 
         const secondaryProcessing =
