@@ -141,9 +141,11 @@ export const handleProtocolsProcessing = async (runtime: any, originText: any, t
         [Question: ${originText}] \n At the same time, you can read this list of HTTP APIs [APIs: ${JSON.stringify(
         apiXDataSourceArray
     )}.\n
-        Please return a Boolean value, true or false, to indicate whether this issue needs to be queried online.
+        Please return a Boolean(need_network) value, true or false, to indicate whether this issue needs to be queried online.
+        Is there a suitable API in the API list to answer the user's question?
+        Please return a Boolean(api_available) value, true or false, to indicate whether there is a suitable API for user's question.
         Please use JSON to return the result, without including any other content or requiring markdown syntax modification.
-        The JSON format is: {"need_network": "true"}\n`;
+        The JSON format is: {"need_network": "true", "api_available":"false"}\n`;
     console.log("handleprotocols promt1: ", promt1);
     let response1 = "";
     try {
@@ -182,6 +184,7 @@ You are a data AI Agent that answers some user questions by querying network dat
 To make it easier for you to perform long logical inferences, I have mapped out the inference areas in your context.
 This is a dynamic reasoning graph that includes the original question, each network request, and the new data collected at each step, as well as future plans, summaries, and reflections.
 You Context is divided into three areas, and each area has some blocks.
+API request errors also need to be recorded, and they will not be used if the errors occur more than 3 times.
 [The first area] is the thinking template I provide for you.
 [The second area] is your output according first area. With each loop, Before you thinking, I allow you to access network data until have enough data to ultimately answer the user's question.
 [The third area] is the statement that you and I interact with at the current step and current state.
@@ -226,7 +229,7 @@ let promptPartThree = `
             break; // context length limit 128k for GPT-4.
         }
 
-        if (!obj?.need_network.includes("true")) {
+        if (!obj?.need_network.includes("true") || !obj?.api_available.includes("true")) {
             // STEP: No need to query network data.
             console.log(`handleProtocols step: ${step} end   -------------------------------------`);
             break;
@@ -276,6 +279,7 @@ let promptPartThree = `
 
         let apires = null;
         let currentApiStr = "";
+        let apiSuccess = false;
         try {
             if (Obj.method == "post") {
                 apires = await axios.post(Obj.baseurl, Obj.body, {
@@ -326,13 +330,14 @@ let promptPartThree = `
             // console.log("handleProtocols promtShorten: ", promtShorten);
             // console.log("handleProtocols currentApiStr: ", currentApiStr);
             //}
+            apiSuccess = true;
         } catch (e) {
             console.log("handleProtocols error: ", e);
             // chatContextAccmulatingStr += errorStr;
             currentApiStr = `The current API [API: ${JSON.stringify(
                 Obj
-            )}] request failed, The responce [Responce: ${e.toString().slice(100)}].\n`;
-            continue;
+            )}] request failed, The responce [Responce: ${e.toString().slice(200)}].\n`;
+            apiSuccess = false;
         }
         // currentAPIResStr += currentApiStr;
 
@@ -354,6 +359,11 @@ let promptPartThree = `
             console.log("handleProtocols error: ", e);
             return "system error 1001";
         }
+        // if(!apiSuccess) {
+        //     console.log(`handleProtocols step: ${step} api failed, break.`);
+        //     console.log(`handleProtocols step: ${step} end   -------------------------------------`);
+        //     continue;
+        // }
 
         console.log(
             `handleProtocols chatContextAccmulatingStr: ${chatContextAccmulatingStr}`
@@ -368,7 +378,9 @@ let promptPartThree = `
         If the collected data is not enough, you need to continue searching online.You need to continue collecting data until the problem is finally solved. For example, if a user needs to find 100 KOLs, but you only find 10, this is not enough.
         There is another situation where you should end the API request. This is when there is insufficient data but there is no suitable API to obtain new data. No new data can be requested by requesting the API again. At this time, it is time to end the request.
         Please return a Boolean value, true or false, to indicate whether this issue needs to be queried online.\n
-        Please use JSON to return the result, without including any other content or requiring markdown syntax modification, The JSON format is: {"need_network": "true"}\n`;
+        Is there a suitable API in the API list to answer the user's question?
+        Please return a Boolean(api_available) value, true or false, to indicate whether there is a suitable API for user's question(An API that has too many errors will not be allowed to be used again).
+        Please use JSON to return the result, without including any other content or requiring markdown syntax modification, The JSON format is: {"need_network": "true", "api_available":"false"}\n`;
         let response3 = "";
         try {
             const filePath = "chat-cache-file_" + taskId + ".txt";
