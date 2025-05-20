@@ -609,6 +609,12 @@ importers:
 
   packages/scraper:
     dependencies:
+      axios:
+        specifier: ^1.8.4
+        version: 1.9.0
+      express:
+        specifier: 4.21.1
+        version: 4.21.1
       whatwg-url:
         specifier: 7.1.0
         version: 7.1.0
