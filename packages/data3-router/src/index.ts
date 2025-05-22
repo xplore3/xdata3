@@ -26,6 +26,7 @@ import {
     handleProtocolsForPrompt,
     handleProtocolsProcessing,
     handleProtocolsOutput,
+    handleProtocolsForQuickResponce,
 } from "data3-protocols";
 
 import bodyParser from "body-parser";
@@ -251,19 +252,19 @@ export class DirectClient {
 
                 const originQuestingText = req.body.text;
                 const taskId = req.body.taskId;
-                // const responseStr = await this.handleMessageWithAI(
-                //     runtime,
-                //     originQuestingText,
-                //     taskId
-                // );
-                        const finalAnswerStr = await handleProtocolsProcessing(
-            runtime,
-            originQuestingText,
-            taskId
-        );
+                const responseStr = await this.handleMessageWithAI(
+                    runtime,
+                    originQuestingText,
+                    taskId
+                );
+        //                 const finalAnswerStr = await handleProtocolsProcessing(
+        //     runtime,
+        //     originQuestingText,
+        //     taskId
+        // );
                 res.json({
                     user: "Data3",
-                    text: finalAnswerStr,
+                    text: responseStr,
                     action: "NONE",
                 });
                 return;
@@ -1111,19 +1112,23 @@ export class DirectClient {
         }
         let taskQuestionObj = null;
 
-    if (!taskId) {
-        taskId = generateTaskId();
-        taskQuestionObj = {
-            questionText: '',
-            promptModifyNum: 0,
-            taskId: taskId
-        };
-    } else {
-        // Get lastest memory // refresh taskQuestionObj
-        taskQuestionObj = await runtime.cacheManager.get(
-            'XData_task_question_' + taskId
-        );
-    }
+        if (!taskId) {
+            taskId = generateTaskId();
+            taskQuestionObj = {
+                questionText: "",
+                promptModifyNum: 0,
+                taskId: taskId,
+            };
+            await runtime.cacheManager.set(
+                "XData_task_question_" + taskId,
+                taskQuestionObj
+            );
+        } else {
+            // Get lastest memory // refresh taskQuestionObj
+            taskQuestionObj = await runtime.cacheManager.get(
+                "XData_task_question_" + taskId
+            );
+        }
 
         /**
          * QuestionObj{
@@ -1135,8 +1140,18 @@ export class DirectClient {
          */
 
         console.log(
-            "before append, taskQuestionObj: promptModifyNum : " + JSON.stringify(taskQuestionObj)
+            "before append, taskQuestionObj: promptModifyNum : " +
+                JSON.stringify(taskQuestionObj)
         );
+        const quickResponse = await handleProtocolsForQuickResponce(runtime, originQuestingText, taskId);
+        if (quickResponse) { // Priority use quick responce
+            taskQuestionObj.prevQuestionText = originQuestingText;
+            await runtime.cacheManager.set(
+                "XData_task_question_" + taskId,
+                taskQuestionObj
+            );
+            return quickResponse;
+        }
 
         if (taskQuestionObj?.promptModifyNum <= 2) {
             // {need_more: true; additional1: question1; additional2: question1; }

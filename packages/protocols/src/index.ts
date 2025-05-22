@@ -129,11 +129,12 @@ export const handleProtocolsForPrompt = async (runtime: any, originText: any, ta
  */
 export const handleProtocolsProcessing = async (runtime: any, originText: any, taskId: any) => {
     // Try quick Responce first.
-    let responce = await handleProtocolsForQuickResponce(runtime, originText, taskId);
-    console.log("yykai handleProtocolsForQuickResponce responce: ", responce);
-    if(!responce) {
-        responce = await handleProtocolsByLongLogic(runtime, originText, taskId);
-    }
+    // let responce = await handleProtocolsForQuickResponce(runtime, originText, taskId);
+    // console.log("yykai handleProtocolsForQuickResponce responce: ", responce);
+    // if(!responce) {
+    //     responce = await handleProtocolsByLongLogic(runtime, originText, taskId);
+    // }
+    const responce = await handleProtocolsByLongLogic(runtime, originText, taskId);
     return responce;
 }
 
@@ -152,8 +153,8 @@ export const handleProtocolsForQuickResponce = async (
         }
         return str;
     }
-    let promptPartThree = `You are a AI agent, [User Question: ${originText}]. If the user input contains hot posts, hot articles, notes, hot searches, hot words, hot topics, topics, posts, comments, Xiaohongshu, Douyin, etc.; quick response is preferred;
-    Use quick query in most cases. Use inference mode only when the user requires detailed analysis or writing a report.
+    let promptPartThree = `You are a Data AI agent, [User Question: ${originText}].
+    As long as the user's question does not contain keywords such as imitation, summary, analysis, report, etc., it is in quick responce mode.
         You need to call once HTTP API request to answer user questions.
         Please analyze the description of the API below. ${JSON.stringify(
             apiXDataSourceArray
@@ -167,11 +168,12 @@ export const handleProtocolsForQuickResponce = async (
         When you use an API to search for multiple keywords, you can split them up, such as: Query(A), Query(B), Query(C). Instead of just Query(A B C), it is easy to get no results if you query many groups of keywords at the same time.
         Please return this JSON object directly without any explanation, comments, other content, or markdown syntax modification.`;
     let response2 = "";
+    console.log("handleProtocols promptPartThree: ", promptPartThree);
     try {
         response2 = await generateText({
             runtime,
             context: shortenStr(promptPartThree),
-            modelClass: ModelClass.MEDIUM,
+            modelClass: ModelClass.SMALL,
         });
     } catch (error) {
         console.error("handleProtocols error: ", error);
@@ -227,7 +229,7 @@ export const handleProtocolsForQuickResponce = async (
       responseFinal = await generateText({
         runtime,
         context: shortenStr(content),
-        modelClass: ModelClass.MEDIUM,
+        modelClass: ModelClass.SMALL,
     });
     }
     catch (error) {
