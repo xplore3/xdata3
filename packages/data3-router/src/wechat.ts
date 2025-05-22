@@ -231,9 +231,11 @@ export class WechatHandler {
             return response.data.task_status;*/
             if (userId && openKfId) {
                 const taskId = await this.getCachedData<string>(runtime, userId);
-                const status = runtime.cacheManager.get(taskId + "_memory_by_step");
-                console.log(taskId + ", " + status);
-                await this.sendMessage(userId, openKfId, status);
+                if (taskId) {
+                    const status = await runtime.cacheManager.get(taskId + "_memory_by_step");
+                    console.log(taskId + ", " + status);
+                    await this.sendMessage(userId, openKfId, status);
+                }
             }
         }
         catch (err) {
