@@ -354,7 +354,9 @@ let promptPartThree = `
                 runtime,
                 context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
                 modelClass: ModelClass.LARGE,
-            });            
+            });
+            // save memory
+            await runtime.cacheManager.set(taskId + "_memory_by_step", `current_step: ${step}\n` + promptPartOne);
         } catch (e) {
             console.log("handleProtocols error: ", e);
             return "system error 1001";
