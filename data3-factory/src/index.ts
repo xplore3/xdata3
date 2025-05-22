@@ -1,6 +1,7 @@
 import express from "express";
 import axios from "axios";
 import { createHealthRouter } from "./healthrouter";
+import { createApiWrapperRouter } from "./apiwapperrouter";
 
 class Server {
     private app: express.Application;
@@ -21,6 +22,10 @@ class Server {
         /** Health Check */
         const healthRouter = createHealthRouter();
         this.app.use(healthRouter);
+
+        /** apiwrapper */
+        const apiwrapperrouter = createApiWrapperRouter();
+        this.app.use(apiwrapperrouter);
 
         this.app.post("/echo", (req, res) => {
             const { message } = req.body;
