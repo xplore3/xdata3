@@ -2,3 +2,4 @@ packages:
     - "packages/*"
     - "data3-ui"
     - "data3-agent"
+    - "data3-factory"

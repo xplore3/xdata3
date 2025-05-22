@@ -10,6 +10,7 @@
     "cleanstart": "if [ -f agent/data/db.sqlite ]; then rm agent/data/db.sqlite; fi && pnpm --filter \"@data3os/data3-agent\" start --isRoot",
     "cleanstart:debug": "if [ -f agent/data/db.sqlite ]; then rm agent/data/db.sqlite; fi && cross-env NODE_ENV=development VERBOSE=true DEFAULT_LOG_LEVEL=debug DEBUG=data3:* pnpm --filter \"@data3os/data3-agent\" start --isRoot",
     "start": "pnpm --filter \"@data3os/data3-agent\" start --isRoot",
+    "start:factory": "pnpm --filter \"data3-factory\" start --isRoot",
     "start:client": "pnpm --dir data3-ui dev",
     "start:debug": "cross-env NODE_ENV=development VERBOSE=true DEFAULT_LOG_LEVEL=debug DEBUG=data3:* pnpm --filter \"@data3os/data3-agent\" start --isRoot",
     "dev": "bash ./scripts/dev.sh",

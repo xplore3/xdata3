@@ -1,7 +1,6 @@
 import express from "express";
 import axios from "axios";
 
-
 class Server {
     private app: express.Application;
     private server: any;
