@@ -305,10 +305,10 @@ export class WechatHandler {
     }
 
     private detectLanguage(text: string):
-        'cn' | 'en' | 'ja' | 'ko' | 'fr' | 'es' | 'ru' | 'ar' | 'emoji' | 'other' {
+        'zh' | 'en' | 'ja' | 'ko' | 'fr' | 'es' | 'ru' | 'ar' | 'emoji' | 'other' {
 
         const regexMap = {
-            cn: /[\u4e00-\u9fa5]/,
+            zh: /[\u4e00-\u9fa5]/,
             //en: /^[a-zA-Z\s]+$/,
             ja: /[\u3040-\u30ff\u31f0-\u31ff\uFF66-\uFF9F]/,
             ko: /[\uac00-\ud7af\u1100-\u11ff]/,
@@ -349,9 +349,9 @@ export class WechatHandler {
             ru: "Получено, пожалуйста, подождите немного…",
             ar: "تم الاستلام، يرجى الانتظار قليلاً...",
             emoji: "✅⌛🙂",
-            other: "Ok, please wait a moment...",
+            other: "Ok, please wait a few mins...",
         };
 
-        return responseMap[language] as string;
+        return responseMap[language] as string || "......" ;
     }
 }
