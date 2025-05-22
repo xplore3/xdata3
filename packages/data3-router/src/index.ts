@@ -251,14 +251,19 @@ export class DirectClient {
 
                 const originQuestingText = req.body.text;
                 const taskId = req.body.taskId;
-                const responseStr = await this.handleMessageWithAI(
-                    runtime,
-                    originQuestingText,
-                    taskId
-                );
+                // const responseStr = await this.handleMessageWithAI(
+                //     runtime,
+                //     originQuestingText,
+                //     taskId
+                // );
+                        const finalAnswerStr = await handleProtocolsProcessing(
+            runtime,
+            originQuestingText,
+            taskId
+        );
                 res.json({
                     user: "Data3",
-                    text: responseStr,
+                    text: finalAnswerStr,
                     action: "NONE",
                 });
                 return;
