@@ -1153,7 +1153,7 @@ export class DirectClient {
             return quickResponse;
         }
 
-        if (taskQuestionObj?.promptModifyNum <= 2) {
+        if (taskQuestionObj?.promptModifyNum <= 1) {
             // {need_more: true; additional1: question1; additional2: question1; }
             if (!(taskQuestionObj?.questionText) && !(taskQuestionObj?.prevQuestionText)) {
                 taskQuestionObj.questionText = originQuestingText;
@@ -1200,7 +1200,7 @@ export class DirectClient {
                 }
             }
 
-            if (taskQuestionObj?.promptModifyNum < 2) {
+            if (taskQuestionObj?.promptModifyNum < 1) {
                 let promptQuestion =
                     `Current questions that need to be answered: ` +
                     taskQuestionObj.questionText;
