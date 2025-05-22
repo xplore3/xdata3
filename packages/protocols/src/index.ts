@@ -128,6 +128,116 @@ export const handleProtocolsForPrompt = async (runtime: any, originText: any, ta
  * This part of the logic not require processing of context memory.
  */
 export const handleProtocolsProcessing = async (runtime: any, originText: any, taskId: any) => {
+    // Try quick Responce first.
+    let responce = await handleProtocolsForQuickResponce(runtime, originText, taskId);
+    console.log("yykai handleProtocolsForQuickResponce responce: ", responce);
+    if(!responce) {
+        responce = await handleProtocolsByLongLogic(runtime, originText, taskId);
+    }
+    return responce;
+}
+
+export const handleProtocolsForQuickResponce = async (
+    runtime: any,
+    originText: any,
+    taskId: any
+) => {
+    let responseFinal = null;
+    const apiXDataSourceArray = await runtime.cacheManager.get(
+        "XData_Collection"
+    );
+    function shortenStr(str) {
+        if (str.length > charLengthLimit) {
+            return str.slice(0, charLengthLimit);
+        }
+        return str;
+    }
+    let promptPartThree = `You are a AI agent, [User Question: ${originText}]. If the user input contains hot posts, hot articles, notes, hot searches, hot words, hot topics, topics, posts, comments, Xiaohongshu, Douyin, etc.; quick response is preferred;
+    Use quick query in most cases. Use inference mode only when the user requires detailed analysis or writing a report.
+        You need to call once HTTP API request to answer user questions.
+        Please analyze the description of the API below. ${JSON.stringify(
+            apiXDataSourceArray
+        )} , 
+        Extracting the parameters of the problem from the user's question, ${originText}, 
+        Retrieve from the API description in other parameters. 
+        If you decide to use a quick responce mode, please return a JSON object containing the following fields:
+        {"quickMode":"true", "baseurl": "url_1", "method": "{post or get}", "params": "object_1", "headers": "object_1", "body": "object_1"}, 
+        Else if you decide to use inference mode, please return a JSON structure: {"quickMode":"false"};
+        Note: Quick responce mode the field 'quickMode' is true, inference mode the field 'quickMode' is false.
+        When you use an API to search for multiple keywords, you can split them up, such as: Query(A), Query(B), Query(C). Instead of just Query(A B C), it is easy to get no results if you query many groups of keywords at the same time.
+        Please return this JSON object directly without any explanation, comments, other content, or markdown syntax modification.`;
+    let response2 = "";
+    try {
+        response2 = await generateText({
+            runtime,
+            context: shortenStr(promptPartThree),
+            modelClass: ModelClass.MEDIUM,
+        });
+    } catch (error) {
+        console.error("handleProtocols error: ", error);
+        return null;
+    } 
+
+    console.log("handleProtocols response2: ", response2);
+    const response2Str = response2.replace(/```json/g, "").replace(/```/g, "");
+    let Obj = null;
+    try {
+        Obj = JSON.parse(response2Str);
+    } catch (e) {
+        console.log("handleProtocols response2Str parse error: ", e);
+    }
+    if(Obj?.quickMode == "false") {
+        return null; 
+    }
+    
+
+    let apires = null;
+    let currentApiStr = "";
+    let apiSuccess = false;
+    try {
+        if (Obj.method == "post") {
+            apires = await axios.post(Obj.baseurl, Obj.body, {
+                params: Obj.params,
+                headers: Obj.headers,
+            });
+        } else {
+            apires = await axios.get(Obj.baseurl, {
+                params: Obj.params,
+                headers: Obj.headers,
+            });
+        }
+    } catch (e) {
+        console.log("handleProtocols error: ", e);
+        // chatContextAccmulatingStr += errorStr;
+        currentApiStr = `The current API [API: ${JSON.stringify(
+            Obj
+        )}] request failed, The responce [Responce: ${e
+            .toString()
+            .slice(200)}].\n`;
+        apiSuccess = false;
+    }
+    // This is what you want to add
+    const content = `\n The user's question, the API used, and the result of the API request are as follows.
+    You need to answer the user's question based on the result of the API request.
+            [Question: ${originText}]
+            [API: ${JSON.stringify(Obj)}]
+            [Responce: ${JSON.stringify(apires.data)}].
+            \n`;
+    try {
+      responseFinal = await generateText({
+        runtime,
+        context: shortenStr(content),
+        modelClass: ModelClass.MEDIUM,
+    });
+    }
+    catch (error) {
+        console.error("handleProtocols error: ", error);
+        return null;
+    }
+    return responseFinal;
+};
+
+export const handleProtocolsByLongLogic = async (runtime: any, originText: any, taskId: any) => {
     const apiXDataSourceArray = await runtime.cacheManager.get(
         "XData_Collection"
     );
@@ -158,7 +268,7 @@ export const handleProtocolsProcessing = async (runtime: any, originText: any, t
             response1 = await generateText({
              runtime,
              context: shortenStr(promt1),
-             modelClass: ModelClass.LARGE,
+             modelClass: ModelClass.MEDIUM,
             });   
         } else {
             response1 = await generateTextWithFile(filePath, shortenStr(promt1));
@@ -260,7 +370,7 @@ let promptPartThree = `
         response2 = await generateText({
             runtime,
             context: shortenStr(chatContextAccmulatingStr),
-            modelClass: ModelClass.LARGE,
+            modelClass: ModelClass.MEDIUM,
         });
         } catch (error) {
             console.error("handleProtocols error: ", error);
@@ -396,7 +506,7 @@ let promptPartThree = `
                     context: shortenStr(
                         promptPartOne + promptPartTwo + promptPartThree
                     ),
-                    modelClass: ModelClass.LARGE,
+                    modelClass: ModelClass.MEDIUM,
                 });
             } else {
                 response3 = await generateTextWithFile(
