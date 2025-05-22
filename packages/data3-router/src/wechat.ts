@@ -13,6 +13,7 @@ import {
 import {
     handleProtocols,
 } from "data3-protocols";
+import cron from "node-cron";
 
 
 export class WechatHandler {
@@ -21,6 +22,7 @@ export class WechatHandler {
     cachedToken: string = null;
     tokenExpire = 0;
     cursor: string = null;
+    userId: string = null;
 
     private async readFromCache<T>(runtime: IAgentRuntime, key: string): Promise<T | null> {
         const cached = await runtime.cacheManager.get<T>(key);
@@ -139,7 +141,6 @@ export class WechatHandler {
     async handleWechatInputMessage(req: express.Request, res: express.Response) {
         console.log("handleWechatInputMessage");
         console.log(req.query);
-        const userId = req.query.userId
         const runtime = this.getAgentId(req, res);
         if (runtime) {
             try {
@@ -171,19 +172,27 @@ export class WechatHandler {
                         console.log(firstMsg.text.content);
                         const firstText = firstMsg.text.content;
                         const userId = firstMsg.external_userid;
+
+                        // checkResp
+                        const job = cron.schedule("*/1 * * * *", async () => {
+                            console.log(`Wechat check at ${new Date().toISOString()}`);
+                            await this.checkTaskStatus(runtime, userId, decryptedXml.xml.OpenKfId);
+                        });
+
                         try {
                             const lang = this.detectLanguage(firstText);
                             const immResp = this.getFirstResponse(lang);
-                            await this.sendMessage(firstMsg.external_userid,
+                            await this.sendMessage(userId,
                                 decryptedXml.xml.OpenKfId, immResp);
                             const questionAfter = await this.generateResponseByData3(
                                 runtime, userId, firstText);
-                            await this.sendMessage(firstMsg.external_userid,
+                            await this.sendMessage(userId,
                                 decryptedXml.xml.OpenKfId, questionAfter);
                         }
                         catch (err) {
                             console.log(err);
                         }
+                        job.stop();
                     }
                 }
 
@@ -195,12 +204,40 @@ export class WechatHandler {
                     //});
                     //await this.sendMessage(msg.FromUserName, msg.content);
                 //}
-        
+
                 res.send('success')
             } catch (err) {
                 console.error('[WecomListener] Error handling callback:', err)
                 res.send('fail')
             }
+        }
+    }
+
+    async checkTaskStatus(runtime: IAgentRuntime, userId: string, openKfId: string) {
+        try {
+            /*const config = {
+                url: 'http://localhost:3333/91edd400-9c4a-0eb5-80ce-9d32973f2c49/task_status?taskId=' + taskId,
+                method: 'get',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            };
+
+            const response = await axios(config);
+            console.log(response.data);
+            if (response.status != 200) {
+                return "Error in response " + response.statusText;
+            }
+            return response.data.task_status;*/
+            if (userId && openKfId) {
+                const taskId = await this.getCachedData<string>(runtime, userId);
+                const status = runtime.cacheManager.get(taskId + "_memory_by_step");
+                console.log(taskId + ", " + status);
+                await this.sendMessage(userId, openKfId, status);
+            }
+        }
+        catch (err) {
+            console.log(err);
         }
     }
 
