@@ -231,6 +231,7 @@ export const handleProtocolsForQuickResponce = async (
         context: shortenStr(content),
         modelClass: ModelClass.SMALL,
     });
+       console.log("quick responce: \n" + responseFinal)
     }
     catch (error) {
         console.error("handleProtocols error: ", error);
