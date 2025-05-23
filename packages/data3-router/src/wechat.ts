@@ -174,14 +174,24 @@ export class WechatHandler {
                         const userId = firstMsg.external_userid;
 
                         // checkResp
-                        const job = cron.schedule("*/1 * * * *", async () => {
+                        let checkCount = 0;
+                        const job = cron.schedule("*/2 * * * *", async () => {
                             console.log(`Wechat check at ${new Date().toISOString()}`);
+                            if (checkCount++ > 2) {
+                                return;
+                            }
                             await this.checkTaskStatus(runtime, userId, decryptedXml.xml.OpenKfId);
                         });
 
                         try {
-                            const lang = this.detectLanguage(firstText);
-                            const immResp = this.getFirstResponse(lang);
+                            let immResp = "...";
+                            if (firstText.length < 20) {
+                                immResp = await this.generateQuickResponse(runtime, firstText);
+                            }
+                            else {
+                                const lang = this.detectLanguage(firstText);
+                                immResp = this.getFirstResponse(lang);
+                            }
                             await this.sendMessage(userId,
                                 decryptedXml.xml.OpenKfId, immResp);
                             const questionAfter = await this.generateResponseByData3(
@@ -397,5 +407,19 @@ export class WechatHandler {
         };
 
         return responseMap[language] as string || "......" ;
+    }
+
+    private async generateQuickResponse(runtime: IAgentRuntime, text: string) {
+        try {
+            const prompt = `根据用户的输入内容：【${text}】，快速给出一个同种语言的简短回复`;
+            return await generateText({
+                runtime,
+                context: prompt,
+                modelClass: ModelClass.SMALL,
+            });
+        }
+        catch (err) {
+            console.log(err);
+        }
     }
 }
