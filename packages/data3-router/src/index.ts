@@ -445,7 +445,7 @@ export class DirectClient {
                     return;
                 }
                 try {
-                    const status = runtime.cacheManager.get(req.query.taskId + "_memory_by_step");
+                    const status = await runtime.cacheManager.get(req.query.taskId + "_memory_by_step");
                     res.json({ task_status: status });
                     return;
                 }
