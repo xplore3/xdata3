@@ -154,9 +154,53 @@ export const handleProtocolsForQuickResponce = async (
         }
         return str;
     }
+    if (
+        originText.includes("report") ||
+        originText.includes("报告") ||
+        originText.includes("分析") ||
+        originText.includes("仿写") ||
+        originText.includes("研究") ||
+        originText.includes("research") ||
+        originText.includes("评估") ||
+        originText.includes("evaluate") ||
+        originText.includes("策略") ||
+        originText.includes("strategy") ||
+        originText.includes("规划") ||
+        originText.includes("plan") ||
+        originText.includes("方案") ||
+        originText.includes("scheme") ||
+        originText.includes("写作") ||
+        originText.includes("write") ||
+        originText.includes("撰写") ||
+        originText.includes("compose") ||
+        originText.includes("数学") ||
+        originText.includes("math") ||
+        originText.includes("计算") ||
+        originText.includes("calculate") ||
+        originText.includes("解决") ||
+        originText.includes("solve") ||
+        originText.includes("总结") ||
+        originText.includes("summarize") ||
+        originText.includes("开发") ||
+        originText.includes("develop") ||
+        originText.includes("设计") ||
+        originText.includes("design") ||
+        originText.includes("解释") ||
+        originText.includes("explain") ||
+        originText.includes("预测") ||
+        originText.includes("predict") ||
+        originText.includes("编辑") ||
+        originText.includes("edit") ||
+        originText.includes("教学") ||
+        originText.includes("teach") ||
+        originText.includes("提案") ||
+        originText.includes("proposal") ||
+        originText.includes("策划") ||
+        originText.includes("planning")
+    ) {
+        return `{"quickMode":"false"}`;
+    }
     let promptPartThree = `You are a Data AI agent, [User Question: ${originText}].
-    As long as the user's question contains keywords 'report' or '报告', you return a json structure: {"quickMode":"false"}.
-        Otherwise, continue reading.
         You need to call once HTTP API request to answer user questions.
         Please analyze the description of the API below. ${JSON.stringify(
             apiXDataSourceArray
