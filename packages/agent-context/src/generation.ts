@@ -526,7 +526,25 @@ export async function generateText({
         modelConfiguration?.experimental_telemetry ||
         modelSettings.experimental_telemetry;
 
-    const apiKey = runtime.token;
+    let apiKey = runtime.token;
+    // Auto switch alternate API Key for Redpill
+    if (provider == ModelProviderName.REDPILL) {
+        try {
+            let keyList = [apiKey];
+            try {
+                keyList = JSON.parse(process.env.ALTER_REDPILL_KEYS || '[]');
+                keyList.push(apiKey);
+            }
+            catch (error) {
+            }
+            const curSecond = new Date().getSeconds();
+            const interval = 60 / keyList.length;
+            const index = Math.floor(curSecond / interval);
+            console.log("Redpill index: " + index);
+            apiKey = keyList[index];
+        }
+        catch (err) {}
+    }
 
     try {
         data3Logger.debug(
