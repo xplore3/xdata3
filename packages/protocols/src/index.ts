@@ -154,7 +154,8 @@ export const handleProtocolsForQuickResponce = async (
         return str;
     }
     let promptPartThree = `You are a Data AI agent, [User Question: ${originText}].
-    As long as the user's question does not contain keywords such as imitation, summary, analysis, report, etc., it is in quick responce mode.
+    As long as the user's issue contains a report, you return a json structure: {"quickMode":"false"}.
+        Otherwise, continue reading.
         You need to call once HTTP API request to answer user questions.
         Please analyze the description of the API below. ${JSON.stringify(
             apiXDataSourceArray
