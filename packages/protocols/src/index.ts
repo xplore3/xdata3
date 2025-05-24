@@ -6,6 +6,7 @@ import { data3Fetch } from "data3-scraper";
 
 import axios from "axios";
 import { appendToChatCache } from "./filehelper";
+import APIWrapperFactory from "./apiwrapper";
 
 // 1 token is about 4 chars.
 const charLengthLimit = 128000 * 3;
@@ -163,7 +164,7 @@ export const handleProtocolsForQuickResponce = async (
         Extracting the parameters of the problem from the user's question, ${originText}, 
         Retrieve from the API description in other parameters. 
         If you decide to use a quick responce mode, please return a JSON object containing the following fields:
-        {"quickMode":"true", "baseurl": "url_1", "method": "{post or get}", "params": "object_1", "headers": "object_1", "body": "object_1"}, 
+        {"quickMode":"true", "route": "route_str", "params": "{key1: value1, key2: value2}"}, 
         Else if you decide to use inference mode, please return a JSON structure: {"quickMode":"false"};
         Note: Quick responce mode the field 'quickMode' is true, inference mode the field 'quickMode' is false.
         When you use an API to search for multiple keywords, you can split them up, such as: Query(A), Query(B), Query(C). Instead of just Query(A B C), it is easy to get no results if you query many groups of keywords at the same time.
@@ -198,6 +199,7 @@ export const handleProtocolsForQuickResponce = async (
     let currentApiStr = "";
     let apiSuccess = false;
     try {
+        /********* data3 protocol v1 begin *********
         if (Obj.method == "post") {
             apires = await axios.post(Obj.baseurl, Obj.body, {
                 params: Obj.params,
@@ -209,6 +211,12 @@ export const handleProtocolsForQuickResponce = async (
                 headers: Obj.headers,
             });
         }
+        ********* data3 protocol v1 end *********/
+
+        /********* data3 protocol v2 begin *********/
+
+        apires = APIWrapperFactory.executeRequest(Obj.route, Obj.params);
+        /********* data3 protocol v2 end *********/
     } catch (e) {
         console.log("handleProtocols error: ", e);
         // chatContextAccmulatingStr += errorStr;
@@ -358,7 +366,7 @@ let promptPartThree = `
         Extracting the parameters of the problem from the user's question, ${originText}, 
         Retrieve from the API description in other parameters. 
         Please return a JSON object containing the following fields:
-        {"baseurl": "url_1", "method": "{post or get}", "params": "object_1", "headers": "object_1", "body": "object_1"}, 
+        {"route": "route_str", "params": "{key1: value1, key2: value2}"}, 
         When you use an API to search for multiple keywords, you can split them up, such as: Query(A), Query(B), Query(C). Instead of just Query(A B C), it is easy to get no results if you query many groups of keywords at the same time.There is another situation where there is a dependency relationship, and this time you only need to return the interface of the current data. I will add the return result of this data query and origin question text in the next loop. Based on the new return result, you can continue to select the API for network calls and complete the dependency calls.
         At the same time, you also need to retrieve the parameters that may be used in [Area2][Block 5], such as the next_cursor in the previous return value, and pass it in as the cursor parameter for page turning query.
         Only one http request interface is returned at a time, and subsequent data can be requested in subsequent loops.
