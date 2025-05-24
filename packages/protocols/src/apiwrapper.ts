@@ -3,6 +3,8 @@ import axios from "axios";
 
 class APIWrapperFactory {
     private static instance: APIWrapperFactory;
+    private static cursorMap = new Map<string, any>();
+
 
     private constructor() {}
 
@@ -18,7 +20,7 @@ class APIWrapperFactory {
      * Refine the return value of Http request. Remove unnecessary field.
      */
 
-    public static async executeRequest(obj: any): Promise<any | undefined> {
+    public static async executeRequest(obj: any , taskId: string): Promise<any | undefined> {
         // console.log(`executeRequest routeStr: ${routeStr} params: ${paramsStr}`);
         // let params;
         // try {
@@ -28,11 +30,11 @@ class APIWrapperFactory {
         //   params = paramsStr;
         //   console.error("Failed to parse params:", error);
         // }
-        // {"quickMode": true,"route": "notes_search","params": {"key1": "v1","key2": "v2"}}
+        // {"route": "notes_search","params": {"key1": "v1","key2": "v2"}}
 
         console.log(
             `executeRequest routeStr: ${obj.route} params: ${JSON.stringify(
-                obj.params
+                obj?.params?.noteId
             )}`
         );
         let result;
@@ -43,9 +45,57 @@ class APIWrapperFactory {
             // case "hot_topics":
             //   result = this.getInstance().getTopicRank(params.page);
             //   break;
-            // case "notes_comment_by_next_page":
-            //   result = this.getInstance().getCommentNextPage(params.noteId);
-            //   break;
+            case "notes_comment_by_next_page":
+              // result = this.getInstance().getCommentNextPage(params.noteId);
+              // const url = `http://47.120.60.92:8080/api/search?keyword=${obj?.params?.keyword}&page=${obj?.params?.page}&sort=popularity_descending`;
+              const lastCursor = APIWrapperFactory.cursorMap.get(taskId) || "";
+              if(lastCursor === "blank_holder") {
+                console.log(`executeRequest lastCursor is blank_holder`);
+                return;
+              }
+              const urlWithparams = `http://47.120.60.92:8080/api/comment?noteId=${obj?.params?.noteId}&lastCursor=${lastCursor}`;
+              console.log(
+                  `executeRequest urlWithparams: ${urlWithparams}`
+              );
+              const response = await axios.get(urlWithparams);
+              // http://47.120.60.92:8080/api/comment?noteId=682eb2aa0000000021005a6d&lastCursor=
+              console.log(
+                  `executeRequest response: ${
+                      response.data?.data?.cursor
+                  }`);
+              const cursor = response.data?.data?.cursor;
+              if (cursor !== undefined) {
+                try {
+                  obj = JSON.parse(cursor) || {};
+
+                } catch (error) {
+                  if(!cursor) {
+                    obj.cursor = cursor;
+                  }
+                  console.error("Failed to parse cursor:", error);
+                }
+                console.log(`executeRequest obj cursor: ${JSON.stringify(obj.cursor)}`);
+                APIWrapperFactory.cursorMap.set(taskId, obj.cursor);
+              } else {
+                console.log(`executeRequest cursor is undefined`);
+                APIWrapperFactory.cursorMap.set(taskId, "blank_holder");
+              }
+
+                 result = (response.data?.data?.comments || []).map(
+                        (obj) => ({
+                          content: obj?.content || "",
+                          ip_location: obj?.ip_location || "",
+                          time: obj?.time || "",
+                          username: obj?.user?.nickname || "",
+                        })
+                    );
+                    console.log(
+                        `executeRequest result: ${result.length}`
+                    );
+                    
+
+              // const response = await axios.get('http://47.120.60.92:8080/api/comment', {params:{noteId:id,lastCursor:cursor}});
+              break;
             // case "getAllComments":
             //   result = this.getInstance().getAllComments(params.noteId, params.delay);
             //   break;
@@ -468,8 +518,17 @@ async function exampleUsage() {
 
     // //  API error
     // const searchResults = await factory.search('美食', 'popularity_descending', 1);
-    const searchResults = await factory.search('中医调理',1);
-    console.log('Search Results:', searchResults);
+    // const searchResults = await factory.search('中医调理',1);
+    const obj =  {"route": "notes_comment_by_next_page", "noteId": "682df0080000000022004187"};
+    while (true) {
+    const searchResults = await APIWrapperFactory.executeRequest( obj, "ccccc");
+    console.log(" yykai searchResults num: " + searchResults?.length  );
+    if (!searchResults?.length) {
+      break;
+    }
+      
+    }
+    // console.log('Search Results:', searchResults);
   } catch (error) {
     console.error('Error:', error.message);
   }

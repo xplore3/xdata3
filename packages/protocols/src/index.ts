@@ -166,6 +166,7 @@ export const handleProtocolsForQuickResponce = async (
         If you decide to use a quick responce mode, please return a JSON object containing the following fields:
         {"quickMode": true,"route": "notes_search","params": {"key1": "v1","key2": "v2"}}
         When you use an API to search for multiple keywords, you can split them up, such as: Query(A), Query(B), Query(C). Instead of just Query(A B C), it is easy to get no results if you query many groups of keywords at the same time.
+        Please return this JSON object directly without any explanation, comments, other content, or markdown syntax modification.
         `;
     let response2 = "";
     console.log("handleProtocols promptPartThree: ", promptPartThree);
@@ -212,7 +213,7 @@ export const handleProtocolsForQuickResponce = async (
 
         /********* data3 protocol v2 begin *********/
         console.log("1 handleProtocols Obj: ", Obj);
-        apires = await APIWrapperFactory.executeRequest(Obj);
+        apires = await APIWrapperFactory.executeRequest(Obj, taskId);
         console.log("2 handleProtocols Obj: ", JSON.stringify(apires).slice(0, 200));
         /********* data3 protocol v2 end *********/
     } catch (e) {
@@ -413,7 +414,7 @@ let promptPartThree = `
             //     });
             // }
             console.log("3 handleProtocols Obj: ", Obj);
-            apires = await APIWrapperFactory.executeRequest(Obj);
+            apires = await APIWrapperFactory.executeRequest(Obj, taskId);
             console.log("4 handleProtocols Obj: ", JSON.stringify(apires).slice(0, 200));
             // This is what you want to add
             const content = `\n
