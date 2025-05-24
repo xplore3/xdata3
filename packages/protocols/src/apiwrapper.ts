@@ -13,39 +13,6 @@ class APIWrapperFactory {
     return this.instance;
   }
 
-  /**
-   * Simplify parameter input.
-   * Refine the return value of Http request. Remove unnecessary field.
-   */
-
-  public static executeRequest(routeStr: string, params: any) {
-    console.log(`executeRequest routeStr: ${routeStr} params: ${JSON.stringify(params)}`);
-    let result;
-    switch (routeStr) {
-      case "hot_words":
-        result = this.getInstance().getHotWords(params.page);
-        break;
-      case "hot_topics":
-        const p = JSON.parse(params);
-        console.log(`executeRequest pages: ${p.page}`);
-        result = this.getInstance().getTopicRank(p.page);
-        break;
-      case "notes_comment_by_next_page":
-        result = this.getInstance().getCommentNextPage(params.noteId);
-        break;
-      // case "getAllComments":
-      //   result = this.getInstance().getAllComments(params.noteId, params.delay);
-      //   break;
-      case "notes_search":
-        result = this.getInstance().search(params.keyword, params.sortType, params.page);
-        break;
-      default:
-        throw new Error(`Unknown route: ${routeStr}`);
-    }
-    console.log(`executeRequest result: ${JSON.stringify(result)}`);
-    return result;
-  }
-
   async getHotWords(page = 1) {
     return RedNoteHotwordAPI.getHotWords(page);
   }
@@ -398,12 +365,12 @@ async function exampleUsage() {
 
 
     // Verified
-    const topics = await factory.getTopicRank(1);
-    console.log('Hot Topics:', topics.length);
+    // const topics = await factory.getTopicRank(1);
+    // console.log('Hot Topics:', topics.length);
 
     // API error
-    // const firstPageComments = await factory.getCommentNextPage('68134689000000002002b2be');
-    // console.log('First Page Comments:', firstPageComments.comments[0]);
+    const firstPageComments = await factory.getCommentNextPage('68134689000000002002b2be');
+    console.log('First Page Comments:', firstPageComments.comments[0]);
 
     // //  API error
     // const allComments = await factory.getAllComments('68134689000000002002b2be');
@@ -417,4 +384,4 @@ async function exampleUsage() {
   }
 }
 
-// exampleUsage();
+exampleUsage();
