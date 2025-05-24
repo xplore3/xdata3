@@ -188,10 +188,9 @@ export const handleProtocolsForQuickResponce = async (
     } catch (e) {
         console.log("handleProtocols response2Str parse error: ", e);
     }
-    if(Obj?.quickMode == "false") {
+    if(!Obj?.route) {
         return null; 
     }
-    
 
     let apires = null;
     let currentApiStr = "";
@@ -365,9 +364,9 @@ let promptPartThree = `
         Extracting the parameters of the problem from the user's question, ${originText}, 
         Retrieve from the API description in other parameters. 
         Please return a JSON object containing the following fields:
-        {"route": "route_str", "params": "{key1: value1, key2: value2}"}, 
+        {"route": "notes_search","params": {"key1": "v1","key2": "v2"}}
         When you use an API to search for multiple keywords, you can split them up, such as: Query(A), Query(B), Query(C). Instead of just Query(A B C), it is easy to get no results if you query many groups of keywords at the same time.There is another situation where there is a dependency relationship, and this time you only need to return the interface of the current data. I will add the return result of this data query and origin question text in the next loop. Based on the new return result, you can continue to select the API for network calls and complete the dependency calls.
-        At the same time, you also need to retrieve the parameters that may be used in [Area2][Block 5], such as the next_cursor in the previous return value, and pass it in as the cursor parameter for page turning query.
+        At the same time, you also need to retrieve the parameters that may be used in [Area2][Block 5].
         Only one http request interface is returned at a time, and subsequent data can be requested in subsequent loops.
         Please return this JSON object directly without any explanation, comments, other content, or markdown syntax modification.`;
 
@@ -402,17 +401,20 @@ let promptPartThree = `
         let currentApiStr = "";
         let apiSuccess = false;
         try {
-            if (Obj.method == "post") {
-                apires = await axios.post(Obj.baseurl, Obj.body, {
-                    params: Obj.params,
-                    headers: Obj.headers,
-                });
-            } else {
-                apires = await axios.get(Obj.baseurl, {
-                    params: Obj.params,
-                    headers: Obj.headers,
-                });
-            }
+            // if (Obj.method == "post") {
+            //     apires = await axios.post(Obj.baseurl, Obj.body, {
+            //         params: Obj.params,
+            //         headers: Obj.headers,
+            //     });
+            // } else {
+            //     apires = await axios.get(Obj.baseurl, {
+            //         params: Obj.params,
+            //         headers: Obj.headers,
+            //     });
+            // }
+            console.log("3 handleProtocols Obj: ", Obj);
+            apires = await APIWrapperFactory.executeRequest(Obj);
+            console.log("4 handleProtocols Obj: ", JSON.stringify(apires).slice(0, 200));
             // This is what you want to add
             const content = `\n
             [Question: ${originText}]

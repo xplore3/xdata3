@@ -56,9 +56,12 @@ class APIWrapperFactory {
                 //  const keyword = params.keyword;
                 //  console.log(`executeRequest keyword: ${keyword}, page: ${page}, BASE_URL: ${BASE_URL}`);
                 try {
-                    const response = await axios.get(BASE_URL, {
-                        params: obj.params,
-                    });
+                    // const response = await axios.get(BASE_URL, {
+                    //     params: obj.params,
+                    // });
+                    const url = `http://47.120.60.92:8080/api/search?keyword=${obj?.params?.keyword}&page=${obj?.params?.page}&sort=popularity_descending`;
+                    console.log(`executeRequest url by params: ${url}`);
+                    const response = await axios.get(url);
                     console.log(
                         `executeRequest response: ${JSON.stringify(
                             response.data
