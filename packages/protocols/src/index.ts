@@ -155,7 +155,7 @@ export const handleProtocolsForQuickResponce = async (
         return str;
     }
     let promptPartThree = `You are a Data AI agent, [User Question: ${originText}].
-    As long as the user's issue contains a report, you return a json structure: {"quickMode":"false"}.
+    As long as the user's question contains keywords 'report' or '报告', you return a json structure: {"quickMode":"false"}.
         Otherwise, continue reading.
         You need to call once HTTP API request to answer user questions.
         Please analyze the description of the API below. ${JSON.stringify(
@@ -164,11 +164,9 @@ export const handleProtocolsForQuickResponce = async (
         Extracting the parameters of the problem from the user's question, ${originText}, 
         Retrieve from the API description in other parameters. 
         If you decide to use a quick responce mode, please return a JSON object containing the following fields:
-        {"quickMode":"true", "route": "route_str", "params": "{key1: value1, key2: value2}"}, 
-        Else if you decide to use inference mode, please return a JSON structure: {"quickMode":"false"};
-        Note: Quick responce mode the field 'quickMode' is true, inference mode the field 'quickMode' is false.
+        {"quickMode": true,"route": "notes_search","params": {"key1": "v1","key2": "v2"}}
         When you use an API to search for multiple keywords, you can split them up, such as: Query(A), Query(B), Query(C). Instead of just Query(A B C), it is easy to get no results if you query many groups of keywords at the same time.
-        Please return this JSON object directly without any explanation, comments, other content, or markdown syntax modification.`;
+        `;
     let response2 = "";
     console.log("handleProtocols promptPartThree: ", promptPartThree);
     try {
@@ -214,8 +212,9 @@ export const handleProtocolsForQuickResponce = async (
         ********* data3 protocol v1 end *********/
 
         /********* data3 protocol v2 begin *********/
-
-        apires = APIWrapperFactory.executeRequest(Obj.route, Obj.params);
+        console.log("1 handleProtocols Obj: ", Obj);
+        apires = await APIWrapperFactory.executeRequest(Obj);
+        console.log("2 handleProtocols Obj: ", JSON.stringify(apires).slice(0, 200));
         /********* data3 protocol v2 end *********/
     } catch (e) {
         console.log("handleProtocols error: ", e);
@@ -232,7 +231,7 @@ export const handleProtocolsForQuickResponce = async (
     You need to answer the user's question based on the result of the API request.
             [Question: ${originText}]
             [API: ${JSON.stringify(Obj)}]
-            [Responce: ${JSON.stringify(apires.data)}].
+            [Responce: ${JSON.stringify(apires)}].
             \n`;
     try {
       responseFinal = await generateText({
@@ -418,7 +417,7 @@ let promptPartThree = `
             const content = `\n
             [Question: ${originText}]
             [API: ${JSON.stringify(Obj)}]
-            [Responce: ${JSON.stringify(apires.data)}].
+            [Responce: ${JSON.stringify(apires)}].
             \n`;
             
             const filename = "chat-cache-file_" + taskId + ".txt";
@@ -430,7 +429,7 @@ let promptPartThree = `
                 Obj
             )}] The response str is too long, Based on the user's question, please remove irrelevant text, remove duplicate text and compress responce. For example, if the user's question is not related to the timestamp, the timestamp field can be removed. 
             Some fields are not related to the question and cannot be removed, such as next_cursor used for paging query, which needs to be used as the value of cursor as a parameter in the next query to complete the paging query.
-            [Responce: ${JSON.stringify(apires.data)}].\n`;
+            [Responce: ${JSON.stringify(apires)}].\n`;
             // The response str is too long, Use AI to remove irrelevant text and compress it.
             // const promtShorten = apiNeedShortenStr;
             let shortenapires = "";
@@ -465,7 +464,7 @@ let promptPartThree = `
 
         console.log(
             "handleProtocols http res: ",
-            JSON.stringify(apires?.data)?.slice(0, 1000)
+            JSON.stringify(apires)?.slice(0, 1000)
         );
         // }
         promptPartTwo += `[Block 5: ${currentApiStr}]\n`;

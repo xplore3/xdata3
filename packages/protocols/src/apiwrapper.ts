@@ -2,72 +2,125 @@ import axios from "axios";
 
 
 class APIWrapperFactory {
-  private static instance: APIWrapperFactory;
+    private static instance: APIWrapperFactory;
 
-  private constructor() {}
+    private constructor() {}
 
-  public static getInstance(): APIWrapperFactory {
-    if (!this.instance) {
-      this.instance = new APIWrapperFactory();
+    public static getInstance(): APIWrapperFactory {
+        if (!this.instance) {
+            this.instance = new APIWrapperFactory();
+        }
+        return this.instance;
     }
-    return this.instance;
-  }
 
-  /**
-   * Simplify parameter input.
-   * Refine the return value of Http request. Remove unnecessary field.
-   */
+    /**
+     * Simplify parameter input.
+     * Refine the return value of Http request. Remove unnecessary field.
+     */
 
-  public static executeRequest(routeStr: string, params: any) {
-    console.log(`executeRequest routeStr: ${routeStr} params: ${JSON.stringify(params)}`);
-    let result;
-    switch (routeStr) {
-      case "hot_words":
-        result = this.getInstance().getHotWords(params.page);
-        break;
-      case "hot_topics":
-        const p = JSON.parse(params);
-        console.log(`executeRequest pages: ${p.page}`);
-        result = this.getInstance().getTopicRank(p.page);
-        break;
-      case "notes_comment_by_next_page":
-        result = this.getInstance().getCommentNextPage(params.noteId);
-        break;
-      // case "getAllComments":
-      //   result = this.getInstance().getAllComments(params.noteId, params.delay);
-      //   break;
-      case "notes_search":
-        result = this.getInstance().search(params.keyword, params.sortType, params.page);
-        break;
-      default:
-        throw new Error(`Unknown route: ${routeStr}`);
+    public static async executeRequest(obj: any): Promise<any | undefined> {
+        // console.log(`executeRequest routeStr: ${routeStr} params: ${paramsStr}`);
+        // let params;
+        // try {
+        //    params = JSON.parse(paramsStr);
+
+        // } catch (error) {
+        //   params = paramsStr;
+        //   console.error("Failed to parse params:", error);
+        // }
+        // {"quickMode": true,"route": "notes_search","params": {"key1": "v1","key2": "v2"}}
+
+        console.log(
+            `executeRequest routeStr: ${obj.route} params: ${JSON.stringify(
+                obj.params
+            )}`
+        );
+        let result;
+        switch (obj.route) {
+            // case "hot_words":
+            //   result = this.getInstance().getHotWords(params.page);
+            //   break;
+            // case "hot_topics":
+            //   result = this.getInstance().getTopicRank(params.page);
+            //   break;
+            // case "notes_comment_by_next_page":
+            //   result = this.getInstance().getCommentNextPage(params.noteId);
+            //   break;
+            // case "getAllComments":
+            //   result = this.getInstance().getAllComments(params.noteId, params.delay);
+            //   break;
+            case "notes_search":
+                // result = this.getInstance().search(params.keyword, params.page);
+                const BASE_URL = "http://47.120.60.92:8080/api/search";
+                //  const page = params.page || 1;
+                //  const keyword = params.keyword;
+                //  console.log(`executeRequest keyword: ${keyword}, page: ${page}, BASE_URL: ${BASE_URL}`);
+                try {
+                    const response = await axios.get(BASE_URL, {
+                        params: obj.params,
+                    });
+                    console.log(
+                        `executeRequest response: ${JSON.stringify(
+                            response.data
+                        ).slice(0, 300)}`
+                    );
+
+                    console.log(
+                        `executeRequest response.data.data.items: ${
+                            response.data?.data?.items?.length}`);
+
+                    result = (response.data?.data?.items || []).map(
+                        (obj) => ({
+                            author: obj?.note?.user?.nickname || "unknown",
+                            collected_count: obj?.note?.collected_count || 0,
+                            shared_count: obj?.note?.shared_count || 0,
+                            liked_count: obj?.note?.liked_count || 0,
+                            comments_count: obj?.note?.comments_count || 0,
+                            id: obj?.note?.id,
+                            title: obj?.note?.title,
+                            desc: obj?.note?.desc || "",
+                            timestamp: obj?.note?.timestamp || 0,
+                        })
+                    );
+                    console.log(
+                        `executeRequest result: ${result.length}`
+                    );
+                    
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                }
+                break;
+            default:
+              console.error(`Unknown route: ${JSON.stringify(obj)}`);
+                //throw new Error(`Unknown route: ${JSON.stringify(obj)}`);
+        }
+        console.log(`executeRequest result: ${JSON.stringify(result)}`);
+        return result;
     }
-    console.log(`executeRequest result: ${JSON.stringify(result)}`);
-    return result;
-  }
 
-  async getHotWords(page = 1) {
-    return RedNoteHotwordAPI.getHotWords(page);
-  }
+    async getHotWords(page = 1) {
+        return RedNoteHotwordAPI.getHotWords(page);
+    }
 
-  async getTopicRank(page = 1) {
-    return RedNoteTopicAPI.getTopicRank(page);
-  }
+    async getTopicRank(page = 1) {
+        return RedNoteTopicAPI.getTopicRank(page);
+    }
 
-  async getCommentNextPage(noteId: string) {
-    const commentAPI = new RedNoteCommentAPI(noteId);
-    return commentAPI.nextPage();
-  }
+    async getCommentNextPage(noteId: string) {
+        const commentAPI = new RedNoteCommentAPI(noteId);
+        return commentAPI.nextPage();
+    }
 
-  async getAllComments(noteId: string, delay = 500) {
-    const commentAPI = new RedNoteCommentAPI(noteId);
-    return commentAPI.getAllComments(delay);
-  }
+    async getAllComments(noteId: string, delay = 500) {
+        const commentAPI = new RedNoteCommentAPI(noteId);
+        return commentAPI.getAllComments(delay);
+    }
 
-  async search(keyword: string, sortType = 'general', page = 1) {
-    const searchAPI = new RedNoteSearchAPI(keyword, sortType);
-    return searchAPI.search(page);
-  }
+    async search(keyword: string, page = 1) {
+        const sortType = "popularity_descending";
+        const searchAPI = new RedNoteSearchAPI(keyword, sortType);
+        return searchAPI.search(page);
+    }
 }
 
 export default APIWrapperFactory;
@@ -274,7 +327,7 @@ class RedNoteSearchAPI {
   #keyword;
   #sortType = 'general';
 
-  constructor(keyword, sortType = 'general') {
+  constructor(keyword, sortType = 'popularity_descending') {
     if (!keyword || typeof keyword !== 'string') {
       throw new Error('Invalid search keyword');
     }
@@ -299,17 +352,18 @@ class RedNoteSearchAPI {
           sort: this.#sortType
         }
       });
-      return (response.data?.notes || []).map(note => ({
-        author: note.user?.nickname || 'unknown',
-        verified: !!note.user?.red_official_verified,
-        collected: note.collected_count || 0,
-        liked: note.liked_count || 0,
-        comments: note.comments_count || 0,
-        id: note.id,
-        title: note?.title,
-        desc: note.desc || '',
-        abstract: note?.abstract_show,
-        timestamp: note.timestamp || Date.now()
+      // console.log(" yykai search resp: \n" + JSON.stringify(response.data?.data?.items));
+      
+      return (response.data?.data?.items || []).map(obj => ({
+        author: obj?.note?.user?.nickname || 'unknown',
+        collected_count: obj?.note?.collected_count || 0,
+        shared_count: obj?.note?.shared_count || 0,
+        liked_count: obj?.note?.liked_count || 0,
+        comments_count: obj?.note?.comments_count || 0,
+        id: obj?.note?.id,
+        title: obj?.note?.title,
+        desc: obj?.note?.desc || '',
+        timestamp: obj?.note?.timestamp || 0
       }));
     } catch (error) {
       throw this.#handleError(error);
@@ -363,7 +417,7 @@ async function getCommentsExample() {
 
 async function searchExample() {
   try {
-    const searchAPI = new RedNoteSearchAPI('美食', 'popularity_descending');
+    const searchAPI = new RedNoteSearchAPI('中医调理', 'popularity_descending');
     
     // Get first page
     const firstPage = await searchAPI.search(1);
@@ -398,8 +452,8 @@ async function exampleUsage() {
 
 
     // Verified
-    const topics = await factory.getTopicRank(1);
-    console.log('Hot Topics:', topics.length);
+    // const topics = await factory.getTopicRank(1);
+    // console.log('Hot Topics:', topics.length);
 
     // API error
     // const firstPageComments = await factory.getCommentNextPage('68134689000000002002b2be');
@@ -411,7 +465,8 @@ async function exampleUsage() {
 
     // //  API error
     // const searchResults = await factory.search('美食', 'popularity_descending', 1);
-    // console.log('Search Results:', searchResults[0]);
+    const searchResults = await factory.search('中医调理',1);
+    console.log('Search Results:', searchResults);
   } catch (error) {
     console.error('Error:', error.message);
   }
