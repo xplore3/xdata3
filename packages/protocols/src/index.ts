@@ -8,10 +8,10 @@ import axios from "axios";
 import { appendToChatCache } from "./filehelper";
 import APIWrapperFactory from "./apiwrapper";
 import { PdfHelper } from "./pdfhelper";
-import { fileURLToPath } from 'url';
+//import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+//const __filename = fileURLToPath(import.meta.url);
+//const __dirname = path.dirname(__filename);
 
 // 1 token is about 4 chars.
 const charLengthLimit = 128000 * 3;
@@ -296,8 +296,9 @@ export const handleProtocolsForQuickResponce = async (
     }
     // Pdf Test
     /*try {
-        console.log('Pdf gen path:', __dirname);
-        const generator = new PdfHelper(__dirname);
+        const systemRoot = path.parse(process.cwd()).root;
+        console.log('Pdf gen path:', systemRoot);
+        const generator = new PdfHelper(systemRoot);
         const pdfPath = await generator.generateFromString(responseFinal, 'test.pdf');
         console.log('Pdf gen success:', pdfPath);
     } catch (err) {
