@@ -28,7 +28,7 @@ export class PdfHelper {
   }
 
   /**
-   * txt file（input.txt）to PDF file
+   * txt file (input.txt) to PDF file
    * @param {string} txtFileName
    * @returns {Promise<string>} PDF file
    */
@@ -41,7 +41,16 @@ export class PdfHelper {
 
     const content = fs.readFileSync(txtPath, 'utf8');
     const pdfFileName = txtFileName.replace(/\.txt$/i, '.pdf');
-    const pdfPath = path.join(this.baseDir, pdfFileName);
+    return await this.generateFromString(content, pdfFileName);
+  }
+
+  /**
+   * String to PDF file
+   * @param {string} content
+   * @returns {Promise<string>} PDF file
+   */
+  async generateFromString(content: string, fileName: string) {
+    const pdfPath = path.join(this.baseDir, fileName);
 
     const doc = new PDFDocument({ size: 'A4', margin: 50 });
     const writeStream = fs.createWriteStream(pdfPath);

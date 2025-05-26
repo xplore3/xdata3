@@ -7,6 +7,7 @@ import { data3Fetch } from "data3-scraper";
 import axios from "axios";
 import { appendToChatCache } from "./filehelper";
 import APIWrapperFactory from "./apiwrapper";
+import { PdfHelper } from "./pdfhelper";
 
 // 1 token is about 4 chars.
 const charLengthLimit = 128000 * 3;
@@ -289,6 +290,15 @@ export const handleProtocolsForQuickResponce = async (
         console.error("handleProtocols error: ", error);
         return null;
     }
+    // Pdf Test
+    /*try {
+        console.log('Pdf gen path:', __dirname);
+        const generator = new PdfHelper(__dirname);
+        const pdfPath = await generator.generateFromString(responseFinal);
+        console.log('Pdf gen success:', pdfPath);
+    } catch (err) {
+        console.log(err);
+    }*/
     return responseFinal;
 };
 
