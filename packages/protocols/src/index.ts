@@ -296,9 +296,9 @@ export const handleProtocolsForQuickResponce = async (
     }
     // Pdf Test
     /*try {
-        const systemRoot = path.parse(process.cwd()).root;
-        console.log('Pdf gen path:', systemRoot);
-        const generator = new PdfHelper(systemRoot);
+        const projectRoot = process.cwd();
+        console.log('Pdf gen path:', projectRoot);
+        const generator = new PdfHelper(projectRoot);
         const pdfPath = await generator.generateFromString(responseFinal, 'test.pdf');
         console.log('Pdf gen success:', pdfPath);
     } catch (err) {
