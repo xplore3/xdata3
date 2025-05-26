@@ -3,6 +3,17 @@ import fs from 'fs';
 import path from 'path';
 import { PDFDocument } from 'pdfkit';
 
+//Test
+//async function test() {
+//  try {
+//    const generator = new PdfHelper(__dirname);
+//    const pdfPath = await generator.generateFromTxtFileName('input.txt');
+//    console.log('Pdf gen success:', pdfPath);
+//  } catch (err: any) {
+//    console.error('PDF gen failed:', err.message);
+//  }
+//}
+
 export class PdfHelper {
   private baseDir: string;
   private fontPath: string;
