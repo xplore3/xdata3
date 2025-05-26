@@ -1,7 +1,11 @@
 //PdfHelper.ts
 import fs from 'fs';
 import path from 'path';
-import { PDFDocument } from 'pdfkit';
+import PDFDocument from 'pdfkit';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 //Test
 //async function test() {
@@ -20,7 +24,7 @@ export class PdfHelper {
 
   constructor(baseDir:string = __dirname) {
     this.baseDir = path.resolve(baseDir);
-    this.fontPath = path.join(this.baseDir, 'fonts', 'NotoSerifCJKsc-Regular.otf');
+    this.fontPath = path.join(this.baseDir, 'resources', 'fonts', 'NotoSerifCJKsc-Regular.otf');
 
     if (!fs.existsSync(this.fontPath)) {
       throw new Error(`Cant find font file ${this.fontPath}`);
