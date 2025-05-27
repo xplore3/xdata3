@@ -8,6 +8,7 @@ import axios from "axios";
 import { appendToChatCache } from "./filehelper";
 import APIWrapperFactory from "./apiwrapper";
 import { PdfHelper } from "./pdfhelper";
+import { KeyWordGenerator } from "./keywords";
 //import { fileURLToPath } from 'url';
 
 //const __filename = fileURLToPath(import.meta.url);
@@ -308,13 +309,18 @@ export const handleProtocolsForQuickResponce = async (
 
     console.log("handleProtocols response2: ", response2);
     const response2Str = response2.replace(/```json/g, "").replace(/```/g, "");
-    let Obj = null;
+    let searchObj = null;
     try {
-        Obj = JSON.parse(response2Str);
+        searchObj = JSON.parse(response2Str);
+
+        //Test for KeywordGenerator
+        //const subKeywords = await KeyWordGenerator.generateMore(
+        //    runtime, searchObj.params?.keyword);
+        //console.log(subKeywords);
     } catch (e) {
         console.log("handleProtocols response2Str parse error: ", e);
     }
-    if(!Obj?.route) {
+    if(!searchObj?.route) {
         return null; 
     }
 
@@ -337,15 +343,15 @@ export const handleProtocolsForQuickResponce = async (
         ********* data3 protocol v1 end *********/
 
         /********* data3 protocol v2 begin *********/
-        console.log("1 handleProtocols Obj: ", Obj);
-        apires = await APIWrapperFactory.executeRequest(Obj, taskId);
+        console.log("1 handleProtocols Obj: ", searchObj);
+        apires = await APIWrapperFactory.executeRequest(searchObj, taskId);
         console.log("2 handleProtocols Obj: ", JSON.stringify(apires).slice(0, 200));
         /********* data3 protocol v2 end *********/
     } catch (e) {
         console.log("handleProtocols error: ", e);
         // chatContextAccmulatingStr += errorStr;
         currentApiStr = `The current API [API: ${JSON.stringify(
-            Obj
+            searchObj
         )}] request failed, The responce [Responce: ${e
             .toString()
             .slice(200)}].\n`;
@@ -355,7 +361,7 @@ export const handleProtocolsForQuickResponce = async (
     const content = `\n The user's question, the API used, and the result of the API request are as follows.
     You need to answer the user's question based on the result of the API request.
             [Question: ${originText}]
-            [API: ${JSON.stringify(Obj)}]
+            [API: ${JSON.stringify(searchObj)}]
             [Responce: ${JSON.stringify(apires)}].
             \n`;
     try {
