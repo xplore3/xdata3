@@ -178,12 +178,44 @@ class APIWrapperFactory {
                     APIWrapperFactory.cursorMap.set(taskId, "blank_holder");
                 }
 
-                result = (response.data?.data?.comments || []).map((obj) => ({
-                    content: obj?.content || "",
-                    ip_location: obj?.ip_location || "",
-                    time: obj?.time || "",
-                    username: obj?.user?.nickname || "",
-                }));
+                function filterComments(comments) {
+                    return comments.map((comment) => {
+                        const filteredComment = {
+                            content: comment?.content || "",
+                            ip_location: comment?.ip_location || "",
+                            time: comment?.time || "",
+                            username: comment?.user?.nickname || "",
+                        };
+
+                        if (
+                            comment.sub_comments &&
+                            comment.sub_comments.length > 0
+                        ) {
+                            filteredComment.sub_comments =
+                                comment.sub_comments.map((subComment) => ({
+                                    content: subComment?.content || "",
+                                    ip_location: subComment?.ip_location || "",
+                                    time: subComment?.time || "",
+                                    username: subComment?.user?.nickname || "",
+                                }));
+                        }
+
+                        return filteredComment;
+                    });
+                }
+
+                const comments = filterComments(
+                    response.data?.data?.comments || []
+                );
+
+                result = filterComments(comments);
+
+                // result = (response.data?.data?.comments || []).map((obj) => ({
+                //     content: obj?.content || "",
+                //     ip_location: obj?.ip_location || "",
+                //     time: obj?.time || "",
+                //     username: obj?.user?.nickname || "",
+                // }));
                 console.log(`executeRequest result: ${result.length}`);
 
                 // const response = await axios.get('http://47.120.60.92:8080/api/comment', {params:{noteId:id,lastCursor:cursor}});
