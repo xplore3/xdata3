@@ -29,16 +29,17 @@ export class KeyWordGenerator {
         这些新的关键词搜索出来的内容都属于“${keyword}”这个总的范围，
         并且其并集大致同于原关键词的范围，各个关键词之间又没有交集。
         另外，该关键词主要用以在小红书/抖音等上搜索相关帖子/视频等。
+        比如，“中药”关键词，可以分为[“中药 养生”， “中药 养颜”， “中药 调理”， “中药 治疗”， “中药 预防”]等。
         以如下JSON的形式输出结果：
         {
           "dimension": "dimension string",
-          "original_keyword": "keyword",
+          "original_keyword": "${keyword}",
           "sub_keywords": [
-            "sub_key_0",
-            "sub_key_1",
-            "sub_key_2",
-            "sub_key_3",
-            "sub_key_4"
+            "${keyword} sub_key_0",
+            "${keyword} sub_key_1",
+            "${keyword} sub_key_2",
+            "${keyword} sub_key_3",
+            "${keyword} sub_key_4"
           ],
           "note": "description for the output"
         }
