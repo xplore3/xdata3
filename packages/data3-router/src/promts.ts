@@ -49,7 +49,7 @@ export class PromptTemplates {
         if (runtime) {
             try {
                 const prompts = await PromptTemplates.getPromptTemplates();
-                const output: string = prompts.join('\n\n');
+                const output: string = `${prompts.map((line, i) => `${i + 1}. ${line}`).join('\n\n')}`;
                 res.send(output);
             } catch (err) {
                 console.error('[WecomListener] Error handling callback:', err)
