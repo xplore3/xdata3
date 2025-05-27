@@ -159,6 +159,82 @@ export const handleProtocolsForQuickResponce = async (
         }
         return str;
     }
+    function containsKeywords(text) {
+        const keywords = [
+            "爆款",
+            "爆文",
+            "笔记",
+            "热搜",
+            "热词",
+            "热话题",
+            "话题",
+            "帖子",
+            "评论",
+            "小红书",
+            "抖音",
+            "粉丝",
+            "回复",
+            "品牌方",
+            "标题",
+            "浏览量",
+            "点赞量",
+            "收藏",
+            "账号",
+            "封面",
+            "用户ID",
+            "hot",
+            "viral",
+            "trending",
+            "post",
+            "comment",
+            "Redbook",
+            "TikTok",
+            "Douyin",
+            "fans",
+            "reply",
+            "brand",
+            "title",
+            "views",
+            "likes",
+            "collect",
+            "account",
+            "cover",
+            "UserID",
+            "note",
+            "pageviews",
+            "favorites",
+            "hot topic",
+            "hot search",
+        ];
+
+        const lowerText = text.toLowerCase();
+
+        return keywords.some((keyword) =>
+            lowerText.includes(keyword.toLowerCase())
+        );
+    }
+
+    /**
+    * Test cases:
+    * console.log(containsKeywords("Redbook的笔记获得很多likes")); // true
+    console.log(containsKeywords("USERID是必填字段")); // true
+    console.log(containsKeywords("这篇和品牌方无关")); // true
+    console.log(containsKeywords("Hello World")); // false
+    console.log(containsKeywords("Very Good")); // false
+    console.log(containsKeywords("很好，回答的不错")); // false
+    */
+
+    /** quick responce, without query data. */
+    if(!containsKeywords(originText)) {
+        console.log("handleProtocolsForQuickResponce without query data. originText: ", originText);
+        const responce = await generateText({
+            runtime,
+            context: originText,
+            modelClass: ModelClass.SMALL,
+        });
+        return responce;
+    }
+
     if (
         originText.includes("report") ||
         originText.includes("报告") ||
@@ -203,7 +279,7 @@ export const handleProtocolsForQuickResponce = async (
         originText.includes("策划") ||
         originText.includes("planning")
     ) {
-        return `{"quickMode":"false"}`;
+        return null;
     }
     let promptPartThree = `You are a Data AI agent, [User Question: ${originText}].
         You need to call once HTTP API request to answer user questions.

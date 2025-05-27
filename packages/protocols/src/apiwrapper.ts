@@ -155,7 +155,7 @@ class APIWrapperFactory {
                 const response = await axios.get(urlWithparams);
                 // http://47.120.60.92:8080/api/comment?noteId=682eb2aa0000000021005a6d&lastCursor=
                 console.log(
-                    `executeRequest response: ${response.data?.data?.cursor}`
+                    `executeRequest response: ${JSON.stringify(response.data)}`
                 );
                 const cursor = response.data?.data?.cursor;
                 if (cursor !== undefined) {
@@ -605,17 +605,19 @@ async function exampleUsage() {
         // console.log('Hot Topics:', topics.length);
 
         // API error
-        // const firstPageComments = await factory.getCommentNextPage('68134689000000002002b2be');
+        // const firstPageComments = await factory.getCommentNextPage('681b3279000000002100429c');
         // console.log('First Page Comments:', firstPageComments.comments[0]);
 
         // //  API error
-        // const allComments = await factory.getAllComments('68134689000000002002b2be');
+        // const allComments = await factory.getAllComments('681b3279000000002100429c');
         // console.log('All Comments:', allComments.length);
 
         // //  API error
         // const searchResults = await factory.search('美食', 'popularity_descending', 1);
         // const searchResults = await factory.search('中医调理',1);
-        const obj = { route: "hot_topics", params: { page: "2" } };
+        // const obj = { route: "hot_topics", params: { page: "2" } };
+        const obj = { route: "notes_comment_by_next_page", params: { noteId: "681b3279000000002100429c" } };
+
         // while (true) {
         const searchResults = await APIWrapperFactory.executeRequest(
             obj,
