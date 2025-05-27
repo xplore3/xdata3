@@ -234,7 +234,7 @@ export class WechatHandler {
         try {
             if (cmd === '模板' || cmd === '获取模板' || cmd === '所有模板') {
                 const prompts = await PromptTemplates.getPromptTemplates();
-                const output: string = `[\n${prompts.join('\n')}\n]`;
+                const output: string = `${prompts.map((line, i) => `${i + 1}. ${line}`).join('\n\n')}`;;
                 await this.sendMessage(userId, openKfId, output);
                 return true;
             }
