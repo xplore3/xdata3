@@ -26,6 +26,107 @@ class APIWrapperFactory {
         console.log(`executeRequest params: ${JSON.stringify(obj)}`);
         let result;
         switch (obj.route) {
+            case "get_user":
+                console.log(`get_user params: ${JSON.stringify(obj)}`);
+                const userId = obj?.params?.userId;
+                // http://47.120.60.92:8080/api/userInfo?userId=66896ebc000000000303084b
+                try {
+                    const urlUserInfo = `http://47.120.60.92:8080/api/userInfo?userId=${userId}`;
+                    console.log(`urlUserInfo with params: ${urlUserInfo}`);
+                    const response = await axios.get(urlUserInfo);
+                    /**
+                     * User response:
+                     * {
+    "code": 0, 
+    "data": {
+        "bannerImage": "http://sns-avatar-qc.xhscdn.com/user_banner/1040g2k0317g840i40o504ajpnf1570serphodb8?imageView2/2/w/540/format/jpg", 
+        "boards": 0, 
+        "brandAccountInfo": {
+            "bannerImage": ""
+        }, 
+        "collected": 194, 
+        "desc": "去奔跑，去跌倒，去大笑，去哭泣\n努力向上\n一个真诚的我", 
+        "fans": 277, 
+        "follows": 41, 
+        "fstatus": "none", 
+        "gender": 1, 
+        "id": "5b8142534dcc06000187838e", 
+        "image": "https://sns-avatar-qc.xhscdn.com/avatar/1040g2jo30ruhem0sik004ajpnf1570sec7798oo?imageView2/2/w/360/format/webp", 
+        "ip_location": "天津", 
+        "level": {
+            "image_link": "", 
+            "number": 0
+        }, 
+        "liked": 1290, 
+        "location": "", 
+        "nickname": "生活。", 
+        "noteCollectionIsPublic": "", 
+        "notes": 1, 
+        "officialVerified": false, 
+        "officialVerifyIcon": "", 
+        "officialVerifyName": "", 
+        "redOfficialVerifyIconType": 0, 
+        "redOfficialVerifyShowIcon": "", 
+        "redOfficialVerifyType": "", 
+        "red_id": "549596309", 
+        "tags": [
+            {
+                "icon": "http://ci.xiaohongshu.com/icons/user/gender-female-v1.png", 
+                "tag_type": "info"
+            }
+        ], 
+        "verifyContent": ""
+    }, 
+    "message": null, 
+    "recordTime": "2025-05-27T15:13:35.384404632"
+}
+}
+                     */
+                    console.log(JSON.stringify(response.data));
+                    const {
+                        desc,
+                        fans,
+                        follows,
+                        gender,
+                        id,
+                        ip_location,
+                        location,
+                        nickname,
+                        notes,
+                        tags,
+                    } = response.data.data;
+                    /**  gender: 2, 性别未设置或者是机构账号无性别。 gender: 1, 性别女。gender: 0, 性别男*/
+                    let genderStr;
+                    switch (gender) {
+                        case 0:
+                            genderStr = "性别男";
+                            break;
+                        case 1:
+                            genderStr = "性别女";
+                            break;
+                        case 2:
+                            genderStr = "性别未设置或者是机构账号无性别";
+                            break;
+                        default:
+                            genderStr = "未知性别";
+                    }
+                    result = {
+                        desc,
+                        fans,
+                        follows,
+                        genderStr,
+                        id,
+                        ip_location,
+                        location,
+                        nickname,
+                        note_count: notes,
+                        tags,
+                    };
+                } catch (error) {
+                    console.error("Failed to fetch user info:", error);
+                    result = "Feach data error, msg: " + error.msg;
+                }
+                break;
             case "hot_words":
                 try {
                     const page = obj?.params?.page || 1;
@@ -142,8 +243,6 @@ class APIWrapperFactory {
                 }
                 break;
             case "notes_comment_by_next_page":
-                // result = this.getInstance().getCommentNextPage(params.noteId);
-                // const url = `http://47.120.60.92:8080/api/search?keyword=${obj?.params?.keyword}&page=${obj?.params?.page}&sort=popularity_descending`;
                 const lastCursor =
                     APIWrapperFactory.cursorMap.get(taskId) || "";
                 if (lastCursor === "blank_holder") {
@@ -209,30 +308,10 @@ class APIWrapperFactory {
                 );
 
                 result = filterComments(comments);
-
-                // result = (response.data?.data?.comments || []).map((obj) => ({
-                //     content: obj?.content || "",
-                //     ip_location: obj?.ip_location || "",
-                //     time: obj?.time || "",
-                //     username: obj?.user?.nickname || "",
-                // }));
                 console.log(`executeRequest result: ${result.length}`);
-
-                // const response = await axios.get('http://47.120.60.92:8080/api/comment', {params:{noteId:id,lastCursor:cursor}});
                 break;
-            // case "getAllComments":
-            //   result = this.getInstance().getAllComments(params.noteId, params.delay);
-            //   break;
             case "notes_search":
-                // result = this.getInstance().search(params.keyword, params.page);
-                const BASE_URL = "http://47.120.60.92:8080/api/search";
-                //  const page = params.page || 1;
-                //  const keyword = params.keyword;
-                //  console.log(`executeRequest keyword: ${keyword}, page: ${page}, BASE_URL: ${BASE_URL}`);
                 try {
-                    // const response = await axios.get(BASE_URL, {
-                    //     params: obj.params,
-                    // });
                     const url = `http://47.120.60.92:8080/api/search?keyword=${obj?.params?.keyword}&page=${obj?.params?.page}&sort=popularity_descending`;
                     console.log(`executeRequest url by params: ${url}`);
                     const response = await axios.get(url);
@@ -264,7 +343,6 @@ class APIWrapperFactory {
                 break;
             default:
                 console.error(`Unknown route: ${JSON.stringify(obj)}`);
-            //throw new Error(`Unknown route: ${JSON.stringify(obj)}`);
         }
         console.log(`executeRequest result: ${JSON.stringify(result)}`);
         return result;
@@ -648,14 +726,19 @@ async function exampleUsage() {
         // const searchResults = await factory.search('美食', 'popularity_descending', 1);
         // const searchResults = await factory.search('中医调理',1);
         // const obj = { route: "hot_topics", params: { page: "2" } };
-        const obj = { route: "notes_comment_by_next_page", params: { noteId: "681b3279000000002100429c" } };
+        // const obj = { route: "notes_comment_by_next_page", params: { noteId: "681b3279000000002100429c" } };
+        // userId=66896ebc000000000303084b
+        const obj = {
+            route: "get_user",
+            params: { userId: "58e6693382ec392748251566" },
+        };
 
         // while (true) {
         const searchResults = await APIWrapperFactory.executeRequest(
             obj,
             "222"
         );
-        console.log(" yykai searchResults num: " + searchResults?.length);
+        console.log(" yykai searchResults get user res: ", searchResults);
         // if (!searchResults?.length) {
         //   break;
         // }

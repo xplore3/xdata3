@@ -6,6 +6,15 @@
             "APIs": [
                 {
                     "type": "Data3 Wrapper API",
+                    "description": "This is the API for querying user's infomation(profile) on 小红书(RedNote).",
+                    "input": "userId: Target user ID.",
+                    "output": "user's infomation(profile), (desc,fans,follows,gender,id,ip_location,location,nickname,notes,tags)",
+                    "route": "get_user",
+                    "params": "{userId: id}",
+                    "additional": ""
+                },
+                {
+                    "type": "Data3 Wrapper API",
                     "description": "This is the API for searching notes on 小红书(RedNote).",
                     "input": "Parameters: keyword (search term), page (The page number ranges from 1 to 10, and the maximum page number is 10.)",
                     "output": "notes array(note.user.nickname,note.user.red_official_verified,note.collected_count,note.liked_count,note.comments_count,note.id,note?.title,note.desc,note?.abstract_show,note.timestamp)",
