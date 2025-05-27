@@ -406,17 +406,19 @@ export class WechatHandler {
             other: "Ok, please wait a few mins...",
         };
 
-        return responseMap[language] as string || "......" ;
+        let resp = responseMap[language] as string || "......" ;
+        return resp + "\n\n回复‘模板’获取常用提示词模板";
     }
 
     private async generateQuickResponse(runtime: IAgentRuntime, text: string) {
         try {
-            const prompt = `根据用户的输入内容：【${text}】，快速给出一个同种语言的简短回复`;
-            return await generateText({
+            const prompt = `根据用户的输入内容：【${text}】，快速给出一个同种语言的简短回复，只给出结果就可以`;
+            let resp = await generateText({
                 runtime,
                 context: prompt,
                 modelClass: ModelClass.SMALL,
             });
+            return resp + "\n\n回复‘模板’获取常用提示词模板";
         }
         catch (err) {
             console.log(err);
