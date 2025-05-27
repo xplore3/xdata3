@@ -14,6 +14,7 @@ import {
     handleProtocols,
 } from "data3-protocols";
 import cron from "node-cron";
+import { PromptTemplates } from "./promts";
 
 
 export class WechatHandler {
@@ -173,6 +174,12 @@ export class WechatHandler {
                         const firstText = firstMsg.text.content;
                         const userId = firstMsg.external_userid;
 
+                        // Check If Menu
+                        if (await this.checkCommandMenu(firstText, userId, decryptedXml.xml.OpenKfId)) {
+                            res.send('success');
+                            return;
+                        }
+
                         // checkResp
                         let checkCount = 0;
                         const job = cron.schedule("*/2 * * * *", async () => {
@@ -221,6 +228,21 @@ export class WechatHandler {
                 res.send('fail')
             }
         }
+    }
+
+    async checkCommandMenu(cmd: string, userId: string, openKfId: string) {
+        try {
+            if (cmd === '模板' || cmd === '获取模板' || cmd === '所有模板') {
+                const prompts = await PromptTemplates.getPromptTemplates();
+                const output: string = `[\n${prompts.join('\n')}\n]`;
+                await this.sendMessage(userId, openKfId, output);
+                return true;
+            }
+        }
+        catch (err) {
+            console.log(err);
+        }
+        return false;
     }
 
     async checkTaskStatus(runtime: IAgentRuntime, userId: string, openKfId: string) {
@@ -407,7 +429,13 @@ export class WechatHandler {
         };
 
         let resp = responseMap[language] as string || "......" ;
-        return resp + "\n\n回复‘模板’获取常用提示词模板";
+        const now = Date.now();
+        if (now % 3 == 1) {
+            return resp + "\n\n回复‘模板’获取常用提示词模板";
+        }
+        else  {
+            return resp;
+        }
     }
 
     private async generateQuickResponse(runtime: IAgentRuntime, text: string) {
@@ -418,9 +446,15 @@ export class WechatHandler {
                 context: prompt,
                 modelClass: ModelClass.SMALL,
             });
-            return resp + "\n\n回复‘模板’获取常用提示词模板";
-        }
-        catch (err) {
+
+            const now = Date.now();
+            if (now % 3 == 1) {
+                return resp + "\n\n回复‘模板’获取常用提示词模板";
+            }
+            else {
+                return resp;
+            }
+        } catch (err) {
             console.log(err);
         }
     }

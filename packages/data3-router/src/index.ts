@@ -41,6 +41,7 @@ import { z } from "zod";
 import { createApiRouter } from "./api.ts";
 import { createVerifiableLogApiRouter } from "./verifiable-log-api.ts";
 import { WechatHandler } from "./wechat.ts";
+import { PromptTemplates } from "./promts.ts";
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -410,6 +411,14 @@ export class DirectClient {
                 // data3Logger.log("oldXData id1: " , oldXDataSourceArray[1]);
                 res.json({ XData_Collection: oldXDataSourceArray });
                 return;
+            }
+        );
+
+        const templateHandler = new PromptTemplates(this);
+        this.app.get(
+            "/:agentId/prompt_templates",
+            async (req: express.Request, res: express.Response) => {
+                await templateHandler.handlePromptTemplates(req, res);
             }
         );
 
