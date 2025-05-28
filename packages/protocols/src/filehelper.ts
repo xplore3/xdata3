@@ -13,6 +13,21 @@ export function appendToChatCache(content: string, filename: string, onError?: (
             onError?.(err) || console.error("Failed to write file:", err);
             return;
         }
-        console.log("Content successfully appended to file");
+        console.log("Content successfully appended to file: ", filename);
+    });
+}
+
+export function updateCacheText(content: string, filename: string, onError?: (err: Error) => void) {
+        const filePath = path.join(
+        process.cwd(), // /root/xdata3/data3-agent/111111_memory.txt
+        filename
+    );
+    // file: taskId + "_memory.txt"
+    fs.writeFile(filePath, content, (err) => {
+        if (err) {
+            onError?.(err) || console.error("Failed to write file:", err);
+            return;
+        }
+        console.log("Content successfully overwritten to file: ", filename);
     });
 }

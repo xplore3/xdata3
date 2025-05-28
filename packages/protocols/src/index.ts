@@ -5,7 +5,7 @@ import path from 'path';
 import { data3Fetch } from "data3-scraper";
 
 import axios from "axios";
-import { appendToChatCache } from "./filehelper";
+import { appendToChatCache, updateCacheText } from "./filehelper";
 import APIWrapperFactory from "./apiwrapper";
 import { PdfHelper } from "./pdfhelper";
 import { KeyWordGenerator } from "./keywords";
@@ -386,6 +386,10 @@ export const handleProtocolsForQuickResponce = async (
     } catch (err) {
         console.log(err);
     }*/
+    updateCacheText(responseFinal, taskId + "_memory.txt", (err) => {
+        console.error("Failed to write file:", err);
+    });
+
     return responseFinal;
 };
 
@@ -613,15 +617,18 @@ let promptPartThree = `
         // }
         promptPartTwo += `[Block 5: ${currentApiStr}]\n`;
         promptPartThree = `\n[Area3]\nPlease summarize the AI Block 5 to AI Block 3, and then Return Second Area(AI Area). Copy the user's question to the history question Area2-Block 0.`;
-
+        const promptReorganizeThinkGraph = shortenStr(promptPartOne + promptPartTwo + promptPartThree);
         try {
             promptPartTwo = await generateText({
                 runtime,
-                context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
+                context: promptReorganizeThinkGraph,
                 modelClass: ModelClass.LARGE,
             });
             // save memory
-            await runtime.cacheManager.set(taskId + "_memory_by_step", `current_step: ${step}\n` + promptPartOne);
+            await runtime.cacheManager.set(taskId + "_memory_by_step", `current_step: ${step}\n` +   promptReorganizeThinkGraph );
+            updateCacheText(promptReorganizeThinkGraph, taskId + "_memory.txt", (err) => {
+                console.error("Save memory err:", err);
+            });
         } catch (e) {
             console.log("handleProtocols error: ", e);
             return "system error 1001";

@@ -30,7 +30,7 @@ import {
 } from "data3-protocols";
 
 import bodyParser from "body-parser";
-import axios from 'axios';
+import axios from "axios";
 import cors from "cors";
 import express, { type Request as ExpressRequest } from "express";
 import * as fs from "fs";
@@ -42,6 +42,7 @@ import { createApiRouter } from "./api.ts";
 import { createVerifiableLogApiRouter } from "./verifiable-log-api.ts";
 import { WechatHandler } from "./wechat.ts";
 import { PromptTemplates } from "./promts.ts";
+import { fileURLToPath } from "url";
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -258,16 +259,103 @@ export class DirectClient {
                     originQuestingText,
                     taskId
                 );
-        //                 const finalAnswerStr = await handleProtocolsProcessing(
-        //     runtime,
-        //     originQuestingText,
-        //     taskId
-        // );
+                //                 const finalAnswerStr = await handleProtocolsProcessing(
+                //     runtime,
+                //     originQuestingText,
+                //     taskId
+                // );
                 res.json({
                     user: "Data3",
                     text: responseStr,
                     action: "NONE",
                 });
+                return;
+            }
+        );
+
+        this.app.post(
+            "/:agentId/download",
+            // upload.single("file"),
+            async (req: express.Request, res: express.Response) => {
+                console.log("downloading: ", req.body);
+                const agentId = req.params.agentId;
+                const roomId = stringToUuid(
+                    req.body.roomId ?? "default-room-" + agentId
+                );
+                const userId = stringToUuid(req.body.userId ?? "user");
+
+                let runtime = this.agents.get(agentId);
+
+                // if runtime is null, look for runtime with the same name
+                if (!runtime) {
+                    runtime = Array.from(this.agents.values()).find(
+                        (a) =>
+                            a.character.name.toLowerCase() ===
+                            agentId.toLowerCase()
+                    );
+                }
+
+                if (!runtime) {
+                    res.status(404).send("Agent not found");
+                    return;
+                }
+
+                await runtime.ensureConnection(
+                    userId,
+                    roomId,
+                    req.body.userName,
+                    req.body.name,
+                    "direct"
+                );
+
+                const file_type = req.body.file_type;
+                const taskId = req.body.taskId;
+
+                //                 const finalAnswerStr = await handleProtocolsProcessing(
+                //     runtime,
+                //     originQuestingText,
+                //     taskId
+                // );
+                /**
+         * app.get('/persistent-download/:fileId', (req, res) => {
+  const filePath = path.join(TEMP_DIR, `${req.params.fileId}.pdf`); // 匹配PDF扩展名
+
+  if (fs.existsSync(filePath)) {
+    res.setHeader('Content-Type', 'application/pdf'); // 强制指定MIME类型
+    res.download(filePath, 'document.pdf', (err) => { // 指定下载文件名
+      if (!err) fs.unlinkSync(filePath); // 确保只有成功下载才删除
+    });
+  } else {
+    res.status(404).send('File not found');
+  }
+});
+         */
+                if ("data" === file_type) {
+                    //  /root/xdata3/packages/data3-protocols/dist/111111_memory.txt
+                    const filename = taskId + "_memory.txt";
+
+                    const filePath = path.join(
+                        process.cwd(), // /root/xdata3/data3-agent/111111_memory.txt
+                        filename
+                    );
+                    if (fs.existsSync(filePath)) {
+                        res.download(filePath, () => {
+                            // auto delete file( if need)
+                            //   fs.unlinkSync(filePath);
+                        });
+                        console.log("downloading: " + filename);
+                    } else {
+                        console.log("not exist filePath: " + filePath);
+                        res.status(404).send(
+                            "File not found filePath: " + filePath
+                        );
+                    }
+                } else {
+                    res.status(404).send(
+                        "File file_type not support: " + file_type
+                    );
+                }
+
                 return;
             }
         );
@@ -454,11 +542,12 @@ export class DirectClient {
                     return;
                 }
                 try {
-                    const status = await runtime.cacheManager.get(req.query.taskId + "_memory_by_step");
+                    const status = await runtime.cacheManager.get(
+                        req.query.taskId + "_memory_by_step"
+                    );
                     res.json({ task_status: status });
                     return;
-                }
-                catch (err) {
+                } catch (err) {
                     console.error(err);
                     res.status(500).send("Unknown error: " + err.message);
                 }
@@ -1123,11 +1212,6 @@ export class DirectClient {
 
         if (!taskId) {
             taskId = generateTaskId();
-            taskQuestionObj = {
-                questionText: "",
-                promptModifyNum: 0,
-                taskId: taskId,
-            };
             await runtime.cacheManager.set(
                 "XData_task_question_" + taskId,
                 taskQuestionObj
@@ -1137,6 +1221,14 @@ export class DirectClient {
             taskQuestionObj = await runtime.cacheManager.get(
                 "XData_task_question_" + taskId
             );
+        }
+        if (!taskQuestionObj) {
+            taskQuestionObj = {
+                questionText: "",
+                promptModifyNum: 0,
+                taskId: taskId,
+                prevQuestionText: "",
+            };
         }
 
         /**
@@ -1152,8 +1244,13 @@ export class DirectClient {
             "before append, taskQuestionObj: promptModifyNum : " +
                 JSON.stringify(taskQuestionObj)
         );
-        const quickResponse = await handleProtocolsForQuickResponce(runtime, originQuestingText, taskId);
-        if (quickResponse) { // Priority use quick responce
+        const quickResponse = await handleProtocolsForQuickResponce(
+            runtime,
+            originQuestingText,
+            taskId
+        );
+        if (quickResponse) {
+            // Priority use quick responce
             taskQuestionObj.prevQuestionText = originQuestingText;
             await runtime.cacheManager.set(
                 "XData_task_question_" + taskId,
@@ -1164,31 +1261,34 @@ export class DirectClient {
 
         if (taskQuestionObj?.promptModifyNum <= 1) {
             // {need_more: true; additional1: question1; additional2: question1; }
-            if (!(taskQuestionObj?.questionText) && !(taskQuestionObj?.prevQuestionText)) {
+            if (
+                !taskQuestionObj?.questionText &&
+                !taskQuestionObj?.prevQuestionText
+            ) {
                 taskQuestionObj.questionText = originQuestingText;
             } else {
-
-                let promt1 =
-                    `Please summarize the user's original question and additional information in one sentence. A one-sentence summary is sufficient, no explanation is needed.
+                let promt1 = `Please summarize the user's original question and additional information in one sentence. A one-sentence summary is sufficient, no explanation is needed.
                     This sentence should not be a summary, but rather a statement from the user's perspective that a question or task has been raised to the AI Agent.`;
-                     
-                if((taskQuestionObj?.questionText)) {
-                    promt1 +=  ("User's original question " +
-                    taskQuestionObj.questionText +
-                    ". Additional information: " +
-                    originQuestingText);
-                    if(taskQuestionObj?.prevQuestionText) {
-                        promt1 += `.\nUser Previous Question(No need to answer, just provide context) \n` + taskQuestionObj.prevQuestionText;
+
+                if (taskQuestionObj?.questionText) {
+                    promt1 +=
+                        "User's original question " +
+                        taskQuestionObj.questionText +
+                        ". Additional information: " +
+                        originQuestingText;
+                    if (taskQuestionObj?.prevQuestionText) {
+                        promt1 +=
+                            `.\nUser Previous Question(No need to answer, just provide context) \n` +
+                            taskQuestionObj.prevQuestionText;
+                    }
+                } else {
+                    promt1 += "User's original question " + originQuestingText;
+                    if (taskQuestionObj?.prevQuestionText) {
+                        promt1 +=
+                            `.\nUser Previous Question(No need to answer, just provide context)\n` +
+                            taskQuestionObj.prevQuestionText;
                     }
                 }
-                else {
-                    promt1 += ("User's original question " +
-                    originQuestingText);
-                    if(taskQuestionObj?.prevQuestionText) {
-                        promt1 += `.\nUser Previous Question(No need to answer, just provide context)\n` + taskQuestionObj.prevQuestionText;
-                    }
-                }
-                   
 
                 try {
                     const questionAfter = await generateText({
@@ -1196,13 +1296,15 @@ export class DirectClient {
                         context: promt1,
                         modelClass: ModelClass.MEDIUM,
                     });
-                    console.log(`[[${taskQuestionObj.questionText} +++++  ${originQuestingText} ====>  ${questionAfter} ]]`);
+                    console.log(
+                        `[[${taskQuestionObj.questionText} +++++  ${originQuestingText} ====>  ${questionAfter} ]]`
+                    );
                     taskQuestionObj.questionText = questionAfter;
                     await runtime.cacheManager.set(
-                    // Set the new taskQuestionObj to cache.
-                    "XData_task_question_" + taskId,
-                    taskQuestionObj
-                );
+                        // Set the new taskQuestionObj to cache.
+                        "XData_task_question_" + taskId,
+                        taskQuestionObj
+                    );
                 } catch (error) {
                     console.error("handleProtocols error: ", error);
                     return "system error 1001";
@@ -1235,8 +1337,6 @@ export class DirectClient {
                 }
             }
 
-
-
             // taskQuestionObj.promptModifyNum == 2, there is no need to refine the question further.
         }
 
@@ -1265,9 +1365,10 @@ export class DirectClient {
         );
         taskQuestionObj.promptModifyNum = 0;
         if (!taskQuestionObj.prevQuestionText) {
-            taskQuestionObj.prevQuestionText =  taskQuestionObj.questionText;
+            taskQuestionObj.prevQuestionText = taskQuestionObj.questionText;
         } else {
-            taskQuestionObj.prevQuestionText += "\n" + taskQuestionObj.questionText;
+            taskQuestionObj.prevQuestionText +=
+                "\n" + taskQuestionObj.questionText;
         }
         taskQuestionObj.questionText = "";
         await runtime.cacheManager.set(
@@ -1456,7 +1557,7 @@ export class DirectClient {
 }
 
 export const DirectClientInterface: Client = {
-    name: 'direct',
+    name: "direct",
     config: {},
     start: async (_runtime: IAgentRuntime) => {
         data3Logger.log("DirectClientInterface start");
