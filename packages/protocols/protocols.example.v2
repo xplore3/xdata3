@@ -20,7 +20,7 @@
                     "output": "user's notes list, notes field(share_count, title, linkes_count, collected_count, comments_count, nickname, display_title, note_id, desc, create_time)",
                     "route": "get_note_list",
                     "params": "{userId: id}",
-                    "additional": ""
+                    "additional": "This is an automatic page turning API. Each call returns a different content and the last page is empty."
                 },
                 {
                     "type": "Data3 Wrapper API",
@@ -38,7 +38,7 @@
                     "output": "comment array(content,id,note_id,sub_comments,ip_location)",
                     "route": "notes_comment_by_next_page",
                     "params": "{noteId: id}",
-                    "additional": "Smart API, automatic page turning. Call the same API, and each time it returns different content, it will automatically return to the next page."
+                    "additional": "This is an automatic page turning API. Each call returns a different content and the last page is empty."
                 },
                 {
                     "type": "Data3 Wrapper API",

@@ -247,6 +247,7 @@ class APIWrapperFactory {
                     APIWrapperFactory.cursorMap.get(taskId) || "";
                 if (lastCursor === "blank_holder") {
                     console.log(`executeRequest lastCursor is blank_holder`);
+                    APIWrapperFactory.cursorMap.set(taskId, "");
                     return;
                 }
                 const urlWithparams = `http://47.120.60.92:8080/api/comment?noteId=${obj?.params?.noteId}&lastCursor=${lastCursor}`;
@@ -261,7 +262,7 @@ class APIWrapperFactory {
                     try {
                         obj = JSON.parse(cursor) || {};
                     } catch (error) {
-                        if (!cursor) {
+                        if (cursor) {
                             obj.cursor = cursor;
                         }
                         console.error("Failed to parse cursor:", error);
@@ -314,67 +315,76 @@ class APIWrapperFactory {
             case "get_note_list":
                 {
                     const note_curosr_key = "get_note_list_" + taskId;
-                      const lastCursor =
-                    APIWrapperFactory.cursorMap.get(note_curosr_key) || "";
-                if (lastCursor === "blank_holder") {
-                    console.log(`executeRequest lastCursor is blank_holder`);
-                    return null;
-                }
-                const urlWithparams = `http://47.120.60.92:8080/api/noteList?userId=${obj?.params?.userId}&lastCursor=${lastCursor}`;
-                console.log(`executeRequest urlWithparams: ${urlWithparams}`);
-                const response = await axios.get(urlWithparams);
-                // http://47.120.60.92:8080/api/noteList?userId=66896ebc000000000303084b&lastCursor=
-                console.log(
-                    `executeRequest response: ${JSON.stringify(response.data)}`
-                );
-                const cursor = response.data?.data?.cursor;
-                if (cursor !== undefined) {
-                    try {
-                        obj = JSON.parse(cursor) || {};
-                    } catch (error) {
-                        if (!cursor) {
-                            obj.cursor = cursor;
-                        }
-                        console.error("Failed to parse cursor:", error);
+                    const lastCursor =
+                        APIWrapperFactory.cursorMap.get(note_curosr_key) || "";
+                    if (lastCursor === "blank_holder") {
+                        console.log(
+                            `executeRequest lastCursor is blank_holder`
+                        );
+                        APIWrapperFactory.cursorMap.set(note_curosr_key, "");
+                        return null;
                     }
+                    const urlWithparams = `http://47.120.60.92:8080/api/noteList?userId=${obj?.params?.userId}&lastCursor=${lastCursor}`;
                     console.log(
-                        `executeRequest obj cursor: ${JSON.stringify(
-                            obj?.cursor
-                        )}`
+                        `executeRequest urlWithparams: ${urlWithparams}`
                     );
-                    APIWrapperFactory.cursorMap.set(note_curosr_key, obj.cursor);
-                } else {
-                    console.log(`executeRequest cursor is undefined`);
-                    APIWrapperFactory.cursorMap.set(note_curosr_key, "blank_holder");
+                    const response = await axios.get(urlWithparams);
+                    // http://47.120.60.92:8080/api/noteList?userId=66896ebc000000000303084b&lastCursor=
+                    // console.log(
+                    //     `executeRequest response: ${JSON.stringify(response.data)}`
+                    // );
+                    let lastestCursor = null;
+
+                    function filterNotes(notes) {
+                        return notes.map((note) => {
+                            lastestCursor = note?.cursor;
+                            // console.log(`executeRequest note: ${JSON.stringify(note)}`);
+                            const filteredNote = {
+                                share_count: note?.share_count || "",
+                                title: note?.title || "",
+                                linkes_count: note?.likes || "",
+                                collected_count: note?.collected_count || "",
+                                comments_count: note?.comments_count || "",
+                                nickname: note?.user?.nickname || "",
+                                display_title: note?.display_title || "",
+                                note_id: note?.id || "",
+                                desc: note?.desc || "",
+                                create_time: note?.create_time || "",
+                            };
+                            return filteredNote;
+                        });
+                    }
+
+                    result = filterNotes(response.data?.data?.notes || []);
+                    // const cursor = lastestCursor;
+                    if (lastestCursor) {
+                        // try {
+                        //     obj = JSON.parse(cursor) || {};
+                        // } catch (error) {
+                        //     if (cursor) {
+                        //         obj.cursor = cursor;
+                        //     }
+                        //     console.error("Failed to parse cursor:", error);
+                        // }
+                        // console.log(
+                        //     `executeRequest obj cursor: ${JSON.stringify(
+                        //         obj?.cursor
+                        //     )}`
+                        // );
+                        APIWrapperFactory.cursorMap.set(
+                            note_curosr_key,
+                            lastestCursor
+                        );
+                    } else {
+                        console.log(`executeRequest cursor is undefined`);
+                        APIWrapperFactory.cursorMap.set(
+                            note_curosr_key,
+                            "blank_holder"
+                        );
+                    }
+                    // console.log(`executeRequest result 2333333: ${JSON.stringify(result)}`);
                 }
 
-                function filterNotes(notes) {
-                    return notes.map((note) => {
-                        console.log(`executeRequest note: ${JSON.stringify(note)}`);
-                        const filteredNote = {
-                            share_count: note?.share_count || "",
-                            title: note?.title || "",
-                            linkes_count: note?.likes || "",
-                            collected_count: note?.collected_count || "",
-                            comments_count: note?.comments_count || "",
-                            nickname: note?.user?.nickname || "",
-                            display_title: note?.display_title || "",
-                            note_id: note?.id || "",
-                            desc: note?.desc || "",
-                            create_time: note?.create_time || "",
-                        };
-                        return filteredNote;
-                    });
-                }
-
-                result = filterNotes(
-                    response.data?.data?.notes || []
-                );
-
-                // console.log(`executeRequest result 2333333: ${JSON.stringify(result)}`);
-
-                }
-              
                 break;
 
             case "notes_search":
@@ -411,7 +421,7 @@ class APIWrapperFactory {
             default:
                 console.error(`Unknown route: ${JSON.stringify(obj)}`);
         }
-        console.log(`executeRequest result: ${JSON.stringify(result)}`);
+        // console.log(`executeRequest result: ${JSON.stringify(result)}`);
         return result;
     }
 
@@ -801,23 +811,27 @@ async function exampleUsage() {
         // };
         const obj = {
             route: "get_note_list",
-            params: { userId: "58e6693382ec392748251566" },
+            params: { userId: "5d526ee0000000001200e485" },
         };
+        const noteSet = new Set();
 
-        // while (true) {
-        const searchResults = await APIWrapperFactory.executeRequest(
-            obj,
-            "222"
-        );
-        for (const item of searchResults) {
-            console.log("item: ", item);
+        while (true) {
+            const searchResults = await APIWrapperFactory.executeRequest(
+                obj,
+                "22244"
+            );
+            for (const item of searchResults) {
+                noteSet.add(item.note_id);
+                // console.log("item: ", item);
+            }
+            console.log(
+                " yykai searchResults get user res size: ",
+                noteSet.size
+            );
+            if (!searchResults) {
+                break;
+            }
         }
-        // console.log(" yykai searchResults get user res: ", JSON.stringify(searchResults));
-        // if (!searchResults?.length) {
-        //   break;
-        // }
-
-        // }
         // console.log('Search Results:', searchResults);
     } catch (error) {
         console.error("Error:", error.message);
