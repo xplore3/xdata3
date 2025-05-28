@@ -29,6 +29,6 @@ export function updateCacheText(content: string, filename: string, onError?: (er
             onError?.(err) || console.error("Failed to write file:", err);
             return;
         }
-        console.log("Content successfully overwritten to file: ", filename);
+        console.log("Content successfully overwritten to file: ", filePath);
     });
 }

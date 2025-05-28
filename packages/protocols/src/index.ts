@@ -386,10 +386,7 @@ export const handleProtocolsForQuickResponce = async (
     } catch (err) {
         console.log(err);
     }*/
-    updateCacheText(responseFinal, taskId + "_memory.txt", (err) => {
-        console.error("Failed to write file:", err);
-    });
-
+    reportPersist(responseFinal, taskId);
     return responseFinal;
 };
 
@@ -727,6 +724,8 @@ let promptPartThree = `
         console.log("handleProtocols error: ", e);
         return "system error 1003";
     }
+    reportPersist(responseFinal, taskId);
+
     return responseFinal;
 };
 
@@ -737,3 +736,23 @@ export const handleProtocolsOutput = async (runtime: any, originText: any) => {
     const responseFinal = `Restart a task.`;
     return responseFinal;
 };
+
+function reportPersist(responseFinal: string, taskId: any) {
+    let firstUnExistsFilename = "";
+    for (let i = 1; i <= 10; i++) {
+        const filename = taskId + `_report${i}.txt`;
+        // const filename = 'abc.pdf'; // Test: can also download pdf.
+        const filePath = path.join(
+            process.cwd(), // /root/xdata3/data3-agent/data/Task-111111_report1.txt
+            "data",
+            filename
+        );
+        if (!fs.existsSync(filePath)) {
+            firstUnExistsFilename = filename;
+            break;
+        }
+    }
+    updateCacheText(responseFinal, firstUnExistsFilename, (err) => {
+        console.error("Failed to write file:", err);
+    });
+}

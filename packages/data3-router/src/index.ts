@@ -58,7 +58,12 @@ const storage = multer.diskStorage({
         cb(null, `${uniqueSuffix}-${file.originalname}`);
     },
 });
-
+interface TaskQuestionObj {
+    questionText: string;
+    promptModifyNum: number;
+    taskId: string;
+    prevQuestionText: string;
+}
 // some people have more memory than disk.io
 const upload = multer({ storage /*: multer.memoryStorage() */ });
 
@@ -253,7 +258,20 @@ export class DirectClient {
                 );
 
                 const originQuestingText = req.body.text;
-                const taskId = req.body.taskId;
+                let taskId = req.body.taskId;
+                // TODO 1: Assign task ID based on load balancing.
+                // TODO 2: Verify the task ID.
+                function generateTaskId() {
+                    const timestamp = Date.now().toString(36);
+                    const seq = Math.floor(Math.random() * 1000)
+                        .toString(36)
+                        .padStart(4, "0");
+                    return `TASK-${timestamp}-${seq}`;
+                }
+
+                if (!taskId) {
+                    taskId = generateTaskId();
+                }
                 const responseStr = await this.handleMessageWithAI(
                     runtime,
                     originQuestingText,
@@ -267,6 +285,7 @@ export class DirectClient {
                 res.json({
                     user: "Data3",
                     text: responseStr,
+                    taskId,
                     action: "NONE",
                 });
                 return;
@@ -310,44 +329,37 @@ export class DirectClient {
 
                 const file_type = req.body.file_type;
                 const taskId = req.body.taskId;
-
-                //                 const finalAnswerStr = await handleProtocolsProcessing(
-                //     runtime,
-                //     originQuestingText,
-                //     taskId
-                // );
-                /**
-         * app.get('/persistent-download/:fileId', (req, res) => {
-  const filePath = path.join(TEMP_DIR, `${req.params.fileId}.pdf`); // 匹配PDF扩展名
-
-  if (fs.existsSync(filePath)) {
-    res.setHeader('Content-Type', 'application/pdf'); // 强制指定MIME类型
-    res.download(filePath, 'document.pdf', (err) => { // 指定下载文件名
-      if (!err) fs.unlinkSync(filePath); // 确保只有成功下载才删除
-    });
-  } else {
-    res.status(404).send('File not found');
-  }
-});
-         */
+                // download the latest report.
+                let lastestExistsFilepath = "";
                 if ("data" === file_type) {
-                    const filename = taskId + "_memory.txt";
-                    // const filename = 'abc.pdf'; // Test: can also download pdf.
-                    const filePath = path.join(
-                        process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
-                        "data",
-                        filename
-                    );
-                    if (fs.existsSync(filePath)) {
-                        res.download(filePath, () => {
+                    // There may be multiple reports, starting from 1 and growing naturally to 2, 3, 4, 5...,10;
+                    for (let i = 1; i <= 10; i++) {
+                        const filename = taskId + `_report${i}.txt`;
+                        // const filename = 'abc.pdf'; // Test: can also download pdf.
+                        const filePath = path.join(
+                            process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
+                            "data",
+                            filename
+                        );
+                        if (fs.existsSync(filePath)) {
+                            lastestExistsFilepath = filePath;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    if (fs.existsSync(lastestExistsFilepath)) {
+                        res.download(lastestExistsFilepath, () => {
                             // auto delete file( if need)
                             //   fs.unlinkSync(filePath);
                         });
-                        console.log("downloading: " + filename);
+                        console.log("downloading: " + lastestExistsFilepath);
                     } else {
-                        console.log("not exist filePath: " + filePath);
+                        console.log(
+                            "not exist filePath: " + lastestExistsFilepath
+                        );
                         res.status(404).send(
-                            "File not found filePath: " + filePath
+                            "File not found filePath: " + lastestExistsFilepath
                         );
                     }
                 } else {
@@ -1198,30 +1210,10 @@ export class DirectClient {
             return null;
         }
 
-        // TODO 1: Assign task ID based on load balancing.
-        // TODO 2: Verify the task ID.
-        //let taskId = req.body.taskId;
-        function generateTaskId() {
-            const timestamp = Date.now().toString(36);
-            const seq = Math.floor(Math.random() * 1000)
-                .toString(36)
-                .padStart(4, "0");
-            return `TASK-${timestamp}-${seq}`;
-        }
-        let taskQuestionObj = null;
-
-        if (!taskId) {
-            taskId = generateTaskId();
-            await runtime.cacheManager.set(
-                "XData_task_question_" + taskId,
-                taskQuestionObj
-            );
-        } else {
-            // Get lastest memory // refresh taskQuestionObj
-            taskQuestionObj = await runtime.cacheManager.get(
-                "XData_task_question_" + taskId
-            );
-        }
+        // Get lastest memory // refresh taskQuestionObj
+        let taskQuestionObj = await runtime.cacheManager.get(
+            "XData_task_question_" + taskId
+        ) as TaskQuestionObj | undefined;
         if (!taskQuestionObj) {
             taskQuestionObj = {
                 questionText: "",
