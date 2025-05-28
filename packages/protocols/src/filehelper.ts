@@ -19,7 +19,8 @@ export function appendToChatCache(content: string, filename: string, onError?: (
 
 export function updateCacheText(content: string, filename: string, onError?: (err: Error) => void) {
         const filePath = path.join(
-        process.cwd(), // /root/xdata3/data3-agent/111111_memory.txt
+        process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
+        "data",
         filename
     );
     // file: taskId + "_memory.txt"

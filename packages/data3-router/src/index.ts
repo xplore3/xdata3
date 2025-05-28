@@ -331,11 +331,11 @@ export class DirectClient {
 });
          */
                 if ("data" === file_type) {
-                    //  /root/xdata3/packages/data3-protocols/dist/111111_memory.txt
                     const filename = taskId + "_memory.txt";
-
+                    // const filename = 'abc.pdf'; // Test: can also download pdf.
                     const filePath = path.join(
-                        process.cwd(), // /root/xdata3/data3-agent/111111_memory.txt
+                        process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
+                        "data",
                         filename
                     );
                     if (fs.existsSync(filePath)) {
