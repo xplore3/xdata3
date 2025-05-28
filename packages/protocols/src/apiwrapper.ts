@@ -354,12 +354,12 @@ class APIWrapperFactory {
                         const filteredNote = {
                             share_count: note?.share_count || "",
                             title: note?.title || "",
-                            likes: note?.likes || "",
+                            linkes_count: note?.likes || "",
                             collected_count: note?.collected_count || "",
                             comments_count: note?.comments_count || "",
-                            username: note?.user?.nickname || "",
+                            nickname: note?.user?.nickname || "",
                             display_title: note?.display_title || "",
-                            id: note?.id || "",
+                            note_id: note?.id || "",
                             desc: note?.desc || "",
                             create_time: note?.create_time || "",
                         };

@@ -15,6 +15,15 @@
                 },
                 {
                     "type": "Data3 Wrapper API",
+                    "description": "This is the API for querying user's notes(posts) list on 小红书(RedNote).",
+                    "input": "userId: Target user ID.",
+                    "output": "user's notes list, notes field(share_count, title, linkes_count, collected_count, comments_count, nickname, display_title, note_id, desc, create_time)",
+                    "route": "get_note_list",
+                    "params": "{userId: id}",
+                    "additional": ""
+                },
+                {
+                    "type": "Data3 Wrapper API",
                     "description": "This is the API for searching notes on 小红书(RedNote).",
                     "input": "Parameters: keyword (search term), page (The page number ranges from 1 to 10, and the maximum page number is 10.)",
                     "output": "notes array(note.user.nickname,note.user.red_official_verified,note.collected_count,note.liked_count,note.comments_count,note.id,note?.title,note.desc,note?.abstract_show,note.timestamp)",
