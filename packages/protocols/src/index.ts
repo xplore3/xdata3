@@ -5,7 +5,7 @@ import path from 'path';
 import { data3Fetch } from "data3-scraper";
 
 import axios from "axios";
-import { appendToChatCache, updateCacheText } from "./filehelper";
+import { appendToChatCache, readCacheFile, updateCacheText } from "./filehelper";
 import APIWrapperFactory from "./apiwrapper";
 import { PdfHelper } from "./pdfhelper";
 import { KeyWordGenerator } from "./keywords";
@@ -14,8 +14,11 @@ import { KeyWordGenerator } from "./keywords";
 //const __filename = fileURLToPath(import.meta.url);
 //const __dirname = path.dirname(__filename);
 
-// 1 token is about 4 chars.
-const charLengthLimit = 128000 * 3;
+/**
+ * GPT 4.1 mini token limit: 1M Tokens
+ * 1 token is about 4 chars.
+ * */
+const charLengthLimit = 100000 * 3;
 
 export const getProtocolArray = async (runtime: any) => {
     const oldXDataSourceArray = await runtime.cacheManager.get(
@@ -414,18 +417,18 @@ export const handleProtocolsByLongLogic = async (runtime: any, originText: any, 
     try {
         // load memory load and data.
         // chat with the data txt file.
-        const filePath = "chat-cache-file_" + taskId + ".txt";
-        const fileExists = fs.existsSync(filePath);
-        console.log(`online query Chat cache file ${filePath} exists: ${fileExists}`);
-        if(!fileExists) {
+        // const filePath = "chat-cache-file_" + taskId + ".txt";
+        // const fileExists = fs.existsSync(filePath);
+        // console.log(`online query Chat cache file ${filePath} exists: ${fileExists}`);
+        // if(!fileExists) {
             response1 = await generateText({
              runtime,
              context: shortenStr(promt1),
              modelClass: ModelClass.MEDIUM,
             });   
-        } else {
-            response1 = await generateTextWithFile(filePath, shortenStr(promt1));
-        }
+        // } else {
+        //     response1 = await generateTextWithFile(filePath, shortenStr(promt1));
+        // }
         // response1 = await generateText({
         //     runtime,
         //     context: shortenStr(promt1),
@@ -456,10 +459,11 @@ API request errors also need to be recorded, and they will not be used if the er
 [Block 0: User's question history, \n Question1: xxx \n Question2: xxx \n ... \n QuestionN: xxx (The latest question)\n]
 [Block 1: Plan Block: 1.xxx. 2.xxx. (Clarify the core points of the question (e.g., the definition and scope of xxx).)]
 [Block 2: Steps Logs Block: 1.xxx. 2.xxx. (You can record the simple situation and feedback in each step here. The feedback may be positive or negative to help you formulate the next step plan.)]
-[Block 3: Data Collected Block: data1, data2, ... (This is a step-by-step result. Your each network request is processed, refined, and collected here. As you collect more and more data, when you have enough data, you can answer the user's question.)]
+[Block 3: Data Collected Block: data1, data2, ... (This is a step-by-step result. Your each network request is processed, refined, and collected here. As you collect more and more data, when you have enough data, you can answer the user's question.
+Note: Do not omit the abbreviations of the original data here. If you omit them, you will not be able to analyze the omitted data later.
+)]
 [Block 4: Next step plan Block: xxx (Adjust your plan continuously based on the data you collect.)]
-[Block 5: Temporary Block: (1) data1, The temporary results of network requests are organized and refined, and then merged into Part 3. (2) data2, The current output needs to be saved in the current block for the next step of input.
-For example, the return value next_cursor is used as the cursor parameter to complete the page query when turning pages.]
+[Block 5: Temporary Block: (1) data1, The temporary results of network requests are organized and refined, and then merged into Part 3. (2) data2, The current output needs to be saved in the current block for the next step of input.]
 \n`;
 let promptPartTwo = `[Area2]:
 [Block 0: ...]
@@ -479,22 +483,34 @@ let promptPartThree = `
     
     do {
         ++step;
-        if(step > 30) {
+        if (step > 30) {
             console.log(`handleProtocols step: ${step} is too much, break.`);
             break;
         }
-        console.log(`handleProtocols step: ${step} begin -------------------------------------`);
-        let chatContextAccmulatingStr = promptPartOne + promptPartTwo + promptPartThree;
+        console.log(
+            `handleProtocols step: ${step} begin -------------------------------------`
+        );
+        let chatContextAccmulatingStr =
+            promptPartOne + promptPartTwo + promptPartThree;
 
-        if(chatContextAccmulatingStr.length > charLengthLimit) {
-            console.log(`handleProtocols step: ${step} chatContextAccmulatingStr is too much, break.`);
-            console.log(`handleProtocols step: ${step} end   -------------------------------------`);
+        if (chatContextAccmulatingStr.length > charLengthLimit) {
+            console.log(
+                `handleProtocols step: ${step} chatContextAccmulatingStr is too much, break.`
+            );
+            console.log(
+                `handleProtocols step: ${step} end   -------------------------------------`
+            );
             break; // context length limit 128k for GPT-4.
         }
 
-        if (!obj?.need_network.includes("true") || !obj?.api_available.includes("true")) {
+        if (
+            !obj?.need_network.includes("true") ||
+            !obj?.api_available.includes("true")
+        ) {
             // STEP: No need to query network data.
-            console.log(`handleProtocols step: ${step} end   -------------------------------------`);
+            console.log(
+                `handleProtocols step: ${step} end   -------------------------------------`
+            );
             break;
         }
 
@@ -513,30 +529,38 @@ let promptPartThree = `
         Only one http request interface is returned at a time, and subsequent data can be requested in subsequent loops.
         Please return this JSON object directly without any explanation, comments, other content, or markdown syntax modification.`;
 
-        chatContextAccmulatingStr = promptPartOne + promptPartTwo + promptPartThree;
-        if(chatContextAccmulatingStr.length > charLengthLimit) {
-            console.log(`handleProtocols step: ${step} promt2 is too much, break.`);
+        chatContextAccmulatingStr =
+            promptPartOne + promptPartTwo + promptPartThree;
+        if (chatContextAccmulatingStr.length > charLengthLimit) {
+            console.log(
+                `handleProtocols step: ${step} promt2 is too much, break.`
+            );
             return chatContextAccmulatingStr;
         }
         let response2 = "";
         try {
-        response2 = await generateText({
-            runtime,
-            context: shortenStr(chatContextAccmulatingStr),
-            modelClass: ModelClass.MEDIUM,
-        });
+            response2 = await generateText({
+                runtime,
+                context: shortenStr(chatContextAccmulatingStr),
+                modelClass: ModelClass.MEDIUM,
+            });
         } catch (error) {
             console.error("handleProtocols error: ", error);
             return "system error 1001";
         }
 
-        console.log("handleProtocols response2: ", response2);
-        const response2Str = response2.replace(/```json/g, "").replace(/```/g, "");
+        console.log("handleProtocols API Call response2: ", response2);
+        const response2Str = response2
+            .replace(/```json/g, "")
+            .replace(/```/g, "");
         let Obj = null;
         try {
             Obj = JSON.parse(response2Str);
         } catch (e) {
-            console.log("handleProtocols response2Str parse error: ", e);
+            console.log(
+                "handleProtocols response2Str parse error: ",
+                e.toString().slice(0, 200)
+            );
             continue;
         }
 
@@ -555,25 +579,30 @@ let promptPartThree = `
             //         headers: Obj.headers,
             //     });
             // }
-            console.log("3 handleProtocols Obj: ", Obj);
+            console.log("3 handleProtocols API call  Obj: ", Obj);
             apires = await APIWrapperFactory.executeRequest(Obj, taskId);
-            console.log("4 handleProtocols Obj: ", JSON.stringify(apires).slice(0, 200));
+            console.log(
+                "4 handleProtocols API call res: ",
+                JSON.stringify(apires).slice(0, 200)
+            );
             // This is what you want to add
             const content = `\n
             [Question: ${originText}]
             [API: ${JSON.stringify(Obj)}]
             [Responce: ${JSON.stringify(apires)}].
             \n`;
-            
-            const filename = "chat-cache-file_" + taskId + ".txt";
+
+            const filename = taskId + "_data.txt";
             appendToChatCache(content, filename, (err) => {
                 console.error("Custom error handling:", err);
             });
 
             promptPartThree = `\n[Area3]\nThe user origin quesiton[Question: ${originText}], The current API [API: ${JSON.stringify(
                 Obj
-            )}] The response str is too long, Based on the user's question, please remove irrelevant text, remove duplicate text and compress responce. For example, if the user's question is not related to the timestamp, the timestamp field can be removed. 
-            Some fields are not related to the question and cannot be removed, such as next_cursor used for paging query, which needs to be used as the value of cursor as a parameter in the next query to complete the paging query.
+            )}] Refine the response, You can reduce some unused fields, but don't reduce the total number of querying items.
+            Based on the user's question, please remove irrelevant text, remove duplicate text and compress responce.
+            For example, if the user's question is not related to the timestamp, the timestamp field can be removed. 
+        
             [Responce: ${JSON.stringify(apires)}].\n`;
             // The response str is too long, Use AI to remove irrelevant text and compress it.
             // const promtShorten = apiNeedShortenStr;
@@ -582,9 +611,14 @@ let promptPartThree = `
                 shortenapires = await generateText({
                     // Compress redundant and irrelevant text
                     runtime,
-                    context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
+                    context: shortenStr(
+                        promptPartOne + promptPartTwo + promptPartThree
+                    ),
                     modelClass: ModelClass.LARGE,
                 });
+                console.log(
+                    `${JSON.stringify(apires)}  >>>>>>>>>>  ${shortenapires}`
+                );
             } catch (e) {
                 console.log("handleProtocols error: ", e);
                 return "system error 1001";
@@ -602,7 +636,9 @@ let promptPartThree = `
             // chatContextAccmulatingStr += errorStr;
             currentApiStr = `The current API [API: ${JSON.stringify(
                 Obj
-            )}] request failed, The responce [Responce: ${e.toString().slice(200)}].\n`;
+            )}] request failed, The responce [Responce: ${e
+                .toString()
+                .slice(200)}].\n`;
             apiSuccess = false;
         }
         // currentAPIResStr += currentApiStr;
@@ -614,7 +650,9 @@ let promptPartThree = `
         // }
         promptPartTwo += `[Block 5: ${currentApiStr}]\n`;
         promptPartThree = `\n[Area3]\nPlease summarize the AI Block 5 to AI Block 3, and then Return Second Area(AI Area). Copy the user's question to the history question Area2-Block 0.`;
-        const promptReorganizeThinkGraph = shortenStr(promptPartOne + promptPartTwo + promptPartThree);
+        const promptReorganizeThinkGraph = shortenStr(
+            promptPartOne + promptPartTwo + promptPartThree
+        );
         try {
             promptPartTwo = await generateText({
                 runtime,
@@ -622,10 +660,17 @@ let promptPartThree = `
                 modelClass: ModelClass.LARGE,
             });
             // save memory
-            await runtime.cacheManager.set(taskId + "_memory_by_step", `current_step: ${step}\n` +   promptReorganizeThinkGraph );
-            updateCacheText(promptReorganizeThinkGraph, taskId + "_memory.txt", (err) => {
-                console.error("Save memory err:", err);
-            });
+            await runtime.cacheManager.set(
+                taskId + "_memory_by_step",
+                `current_step: ${step}\n` + promptReorganizeThinkGraph
+            );
+            updateCacheText(
+                promptReorganizeThinkGraph,
+                taskId + "_memory.txt",
+                (err) => {
+                    console.error("Save memory err:", err);
+                }
+            );
         } catch (e) {
             console.log("handleProtocols error: ", e);
             return "system error 1001";
@@ -636,9 +681,9 @@ let promptPartThree = `
         //     continue;
         // }
 
-        console.log(
-            `handleProtocols chatContextAccmulatingStr: ${chatContextAccmulatingStr}`
-        );
+        // console.log(
+        //     `handleProtocols chatContextAccmulatingStr: ${chatContextAccmulatingStr}`
+        // );
 
         // Check if the goal is completed
         promptPartThree = `\n[Area3]\n
@@ -654,32 +699,36 @@ let promptPartThree = `
         Please use JSON to return the result, without including any other content or requiring markdown syntax modification, The JSON format is: {"need_network": "true", "api_available":"false"}\n`;
         let response3 = "";
         try {
-            const filePath = "chat-cache-file_" + taskId + ".txt";
-            const fileExists = fs.existsSync(filePath);
-            console.log(
-                `online query Chat cache file ${filePath} exists: ${fileExists}`
-            );
-            if (!fileExists) {
-                response3 = await generateText({
-                    runtime,
-                    context: shortenStr(
-                        promptPartOne + promptPartTwo + promptPartThree
-                    ),
-                    modelClass: ModelClass.MEDIUM,
-                });
-            } else {
-                response3 = await generateTextWithFile(
-                    filePath,
-                    shortenStr(promptPartOne + promptPartTwo + promptPartThree)
-                );
-            }
+            // const filePath = "chat-cache-file_" + taskId + ".txt";
+            // const fileExists = fs.existsSync(filePath);
+            // console.log(
+            //     `online query Chat cache file ${filePath} exists: ${fileExists}`
+            // );
+            // if (!fileExists) {
+            response3 = await generateText({
+                runtime,
+                context: shortenStr(
+                    promptPartOne + promptPartTwo + promptPartThree
+                ),
+                modelClass: ModelClass.MEDIUM,
+            });
+            // } else {
+            //     response3 = await generateTextWithFile(
+            //         filePath,
+            //         shortenStr(promptPartOne + promptPartTwo + promptPartThree)
+            //     );
+            // }
         } catch (e) {
             console.log("handleProtocols error: ", e);
             return "system error 1001";
         }
 
-        console.log(`handleProtocols response3: ${response3}`);
-        const response3Str = response3.replace(/```json/g, "").replace(/```/g, "");
+        console.log(
+            `handleProtocols weather continue query data? response3: ${response3}`
+        );
+        const response3Str = response3
+            .replace(/```json/g, "")
+            .replace(/```/g, "");
         try {
             obj = JSON.parse(response3Str);
         } catch (e) {
@@ -692,34 +741,47 @@ let promptPartThree = `
         //     context: shortenStr("Summarize and reflect on the following results: [User-Question: xxx][Plan: 1.xxx. 2.xxx. 3.xxx.][Step: 1.xxx. 2.xxx. 3.xxx.][Results has collected: xxxx]" + chatContextAccmulatingStr),
         //     modelClass: ModelClass.LARGE,
         // });
-        console.log(`handleProtocols chatContextAccmulatingStr: ${chatContextAccmulatingStr}`);
+        console.log(
+            `handleProtocols chatContextAccmulatingStr: ${chatContextAccmulatingStr}`
+        );
 
-        console.log(`handleProtocols step: ${step} end   -------------------------------------`);
-
-
+        console.log(
+            `handleProtocols step: ${step} end   -------------------------------------`
+        );
     } while (obj);
     promptPartThree = `\n[Area3]\nBased on the above results, answer user questions briefly and directly. The data here may not be sufficient, but first answer the user's question. For example, if the user asked to find 100 KOLs, but now there are only 10, answer the user's question first.`;
     let responseFinal = "";
-    try {     
+    try {
         // chat with the data txt file.
-        const filePath = "chat-cache-file_" + taskId + ".txt";
-        const fileExists = fs.existsSync(filePath);
-        console.log(`Chat cache file ${filePath} exists: ${fileExists}`);
-        if(!fileExists) {
-            responseFinal = await generateText({
-             runtime,
-             context: shortenStr(promptPartOne + promptPartTwo + promptPartThree),
-             modelClass: ModelClass.LARGE,
-            });   
-        } else {
-            responseFinal = await generateTextWithFile(filePath, shortenStr(promptPartOne + promptPartTwo + promptPartThree));
-        }
-        const content = `AI Agent Memory:\n ${promptPartTwo}`;
-        const filename = "chat-cache-file_" + taskId + ".txt";
-        appendToChatCache(content, filename, (err) => {
-            console.error("Custom error handling:", err);
+        // const filePath = "chat-cache-file_" + taskId + ".txt";
+        // const fileExists = fs.existsSync(filePath);
+        // console.log(`Chat cache file ${filePath} exists: ${fileExists}`);
+        // if(!fileExists) {
+        // todo : analyze with data file.
+        // const filename = taskId + "_data.txt";
+        //     appendToChatCache(content, filename, (err) => {
+        //         console.error("Custom error handling:", err);
+        //     });
+        const data_cached_str = readCacheFile(taskId + "_data.txt");
+        const promptQuestionWithData =`You are an AI Agent based on Xiaohongshu(RedNote/小红书), with strong market research and user analysis capabilities.
+            User Question: ${obj.questionText}.
+            Below are some data related to user questions, obtained through API queries.
+            ${data_cached_str};
+            When answering user questions, please think through them step by step. Answers need to be complete, without omissions or abbreviations.
+            `
+        responseFinal = await generateText({
+            runtime,
+            context: shortenStr(promptQuestionWithData),
+            modelClass: ModelClass.LARGE,
         });
-        console.log("handleProtocols appendToChatCache.");
+        // } else {
+        //     responseFinal = await generateTextWithFile(filePath, shortenStr(promptPartOne + promptPartTwo + promptPartThree));
+        // }
+        // const content = `AI Agent Memory:\n ${promptPartTwo}`;
+        // const filename = taskId + "_memory_.txt";
+        // appendToChatCache(content, filename, (err) => {
+        //     console.error("Custom error handling:", err);
+        // });
     } catch (e) {
         console.log("handleProtocols error: ", e);
         return "system error 1003";

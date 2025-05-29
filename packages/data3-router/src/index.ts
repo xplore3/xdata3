@@ -268,14 +268,19 @@ export class DirectClient {
                         .padStart(4, "0");
                     return `TASK-${timestamp}-${seq}`;
                 }
+                let withPreContext = false;
 
                 if (!taskId) {
                     taskId = generateTaskId();
+                } else {
+                    withPreContext = true;
                 }
+                
                 const responseStr = await this.handleMessageWithAI(
                     runtime,
                     originQuestingText,
-                    taskId
+                    taskId,
+                    withPreContext,
                 );
                 //                 const finalAnswerStr = await handleProtocolsProcessing(
                 //     runtime,
@@ -1204,8 +1209,10 @@ export class DirectClient {
     public async handleMessageWithAI(
         runtime: IAgentRuntime,
         originQuestingText: string,
-        taskId: string
+        taskId: string,
+        withPreContext: boolean
     ): Promise<string> {
+        console.log("handleMessageWithAI originQuestingText:  ", originQuestingText);
         if (!originQuestingText) {
             return null;
         }
@@ -1236,19 +1243,21 @@ export class DirectClient {
             "before append, taskQuestionObj: promptModifyNum : " +
                 JSON.stringify(taskQuestionObj)
         );
-        const quickResponse = await handleProtocolsForQuickResponce(
-            runtime,
-            originQuestingText,
-            taskId
-        );
-        if (quickResponse) {
-            // Priority use quick responce
-            taskQuestionObj.prevQuestionText = originQuestingText;
-            await runtime.cacheManager.set(
-                "XData_task_question_" + taskId,
-                taskQuestionObj
+        if (!withPreContext) {
+            const quickResponse = await handleProtocolsForQuickResponce(
+                runtime,
+                originQuestingText,
+                taskId
             );
-            return quickResponse;
+            if (quickResponse) {
+                // Priority use quick responce
+                taskQuestionObj.prevQuestionText = originQuestingText;
+                await runtime.cacheManager.set(
+                    "XData_task_question_" + taskId,
+                    taskQuestionObj
+                );
+                return quickResponse;
+            }
         }
 
         if (taskQuestionObj?.promptModifyNum <= 1) {
@@ -1289,7 +1298,7 @@ export class DirectClient {
                         modelClass: ModelClass.MEDIUM,
                     });
                     console.log(
-                        `[[${taskQuestionObj.questionText} +++++  ${originQuestingText} ====>  ${questionAfter} ]]`
+                        `[[Refine with Additional: Question: ${taskQuestionObj.questionText} +++++  Additional: ${originQuestingText} ====>  ${questionAfter} ]]`
                     );
                     taskQuestionObj.questionText = questionAfter;
                     await runtime.cacheManager.set(
@@ -1346,6 +1355,23 @@ export class DirectClient {
          * key in cache: XData_task_question_{taskId}
          */
 
+        if(taskQuestionObj?.prevQuestionText) {
+            const refineQuestionPrompt = `Current-User-Question:${taskQuestionObj.questionText}.
+            Previous-User-Question:${taskQuestionObj.prevQuestionText}.
+            Please complete and refine the user's current problem based on the previous user's problem`;
+            
+            const refineQuestion = await generateText({
+                        runtime,
+                        context: refineQuestionPrompt,
+                        modelClass: ModelClass.MEDIUM,
+            });
+            console.log(
+                `[[Refine with Previous: Cur: ${taskQuestionObj.questionText} +++++  Pre: ${taskQuestionObj.prevQuestionText} ====>  ${refineQuestion} ]]`
+            );
+
+            taskQuestionObj.questionText = refineQuestion;
+        }
+
         const finalAnswerStr = await handleProtocolsProcessing(
             runtime,
             taskQuestionObj.questionText,
@@ -1355,7 +1381,7 @@ export class DirectClient {
         taskQuestionObj = await runtime.cacheManager.get(
             "XData_task_question_" + taskId
         );
-        taskQuestionObj.promptModifyNum = 0;
+        // taskQuestionObj.promptModifyNum = 0;
         if (!taskQuestionObj.prevQuestionText) {
             taskQuestionObj.prevQuestionText = taskQuestionObj.questionText;
         } else {

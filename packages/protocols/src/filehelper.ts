@@ -4,17 +4,34 @@ import { fileURLToPath } from 'url';
 
 // "chat-cache-file.txt"
 export function appendToChatCache(content: string, filename: string, onError?: (err: Error) => void) {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    const filePath = path.join(__dirname, filename);
+    const filePath = path.join(
+        process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
+        "data",
+        filename
+    );
     // file: fs.createReadStream("chat-cache-file_" + taskId + ".txt"),    
     fs.appendFile(filePath, content, (err) => {
         if (err) {
             onError?.(err) || console.error("Failed to write file:", err);
             return;
         }
-        console.log("Content successfully appended to file: ", filename);
+        console.log("Content successfully appended to file: ", filePath);
+        console.log("Content: \n", content);
     });
+}
+
+export function readCacheFile(filename: string): string {
+    const filePath = path.join(
+        process.cwd(),
+        "data",
+        filename
+    );
+    try {
+        return fs.readFileSync(filePath, 'utf-8');
+    } catch (err) {
+        console.error("Failed to read file:", err);
+        return null;
+    }
 }
 
 export function updateCacheText(content: string, filename: string, onError?: (err: Error) => void) {
@@ -30,5 +47,6 @@ export function updateCacheText(content: string, filename: string, onError?: (er
             return;
         }
         console.log("Content successfully overwritten to file: ", filePath);
+        console.log("Content: \n", content);
     });
 }
