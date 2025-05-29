@@ -25,11 +25,11 @@
                 {
                     "type": "Data3 Wrapper API",
                     "description": "This is the API for searching notes on 小红书(RedNote).",
-                    "input": "Parameters: keyword (search term), page (The page number ranges from 1 to 10, and the maximum page number is 10.)",
+                    "input": "Parameters: keyword (search term)",
                     "output": "notes array(note.user.nickname,note.user.red_official_verified,note.collected_count,note.liked_count,note.comments_count,note.id,note?.title,note.desc,note?.abstract_show,note.timestamp)",
                     "route": "notes_search",
-                    "params": "{keyword: keyword, page:num}",
-                    "additional": ""
+                    "params": "{keyword: keyword}",
+                    "additional": "This is an automatic page turning API. Each call returns a different content and the last page is empty."
                 },
                 {
                     "type": "Data3 Wrapper API",
@@ -43,20 +43,20 @@
                 {
                     "type": "Data3 Wrapper API",
                     "description": "This API retrieves the ranking of 小红书(RedNote) topics based on interaction count",
-                    "input": "The params 1 means the page 1, Page numbers range from 1 to 10. There are 20 items per page",
+                    "input": "No params",
                     "output": "Hot topic list array containing: [ topicName, interactiveCount, noteNum, topicType, topicSecondType.]",
                     "route": "hot_topics",
-                    "params": "{page: 1}",
-                    "additional": ""
+                    "params": "{}",
+                    "additional": "This is an automatic page turning API. Each call returns a different content and the last page is empty."
                 },
                 {
                     "type": "Data3 Wrapper API",
                     "description": "This API retrieves the ranking of 小红书(RedNote) hot words",
-                    "input": "The params 1 means the page 1, Page numbers range from 1 to 10. There are 20 items per page",
+                    "input": "No params",
                     "output": "Hot words list array containing: [ hotWord, noteCount, noteLabel]",
                     "route": "hot_words",
-                    "params": "{page: 1}",
-                    "additional": ""
+                    "params": "{}",
+                    "additional": "This is an automatic page turning API. Each call returns a different content and the last page is empty."
                 }
             ]
         }
