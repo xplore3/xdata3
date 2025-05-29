@@ -1,4 +1,5 @@
 import axios from "axios";
+import { sleep } from "openai/core.mjs";
 
 class APIWrapperFactory {
     private static instance: APIWrapperFactory;
@@ -356,7 +357,6 @@ class APIWrapperFactory {
                     }
 
                     result = filterNotes(response.data?.data?.notes || []);
-                    // const cursor = lastestCursor;
                     if (lastestCursor) {
                         // try {
                         //     obj = JSON.parse(cursor) || {};
@@ -389,7 +389,17 @@ class APIWrapperFactory {
 
             case "notes_search":
                 try {
-                    const url = `http://47.120.60.92:8080/api/search?keyword=${obj?.params?.keyword}&page=${obj?.params?.page}&sort=popularity_descending`;
+                    const note_page_num_key = "notes_search_" + taskId;
+                    const lastPageNum =
+                        APIWrapperFactory.cursorMap.get(note_page_num_key) || 0;
+                    if (lastPageNum === 11) {
+                        console.log(
+                            `executeRequest lastCursor is blank_holder`
+                        );
+                        APIWrapperFactory.cursorMap.set(note_page_num_key, 0);
+                        return null;
+                    }
+                    const url = `http://47.120.60.92:8080/api/search?keyword=${obj?.params?.keyword}&page=${lastPageNum}&sort=popularity_descending`;
                     console.log(`executeRequest url by params: ${url}`);
                     const response = await axios.get(url);
                     console.log(
@@ -401,6 +411,7 @@ class APIWrapperFactory {
                     console.log(
                         `executeRequest response.data.data.items: ${response.data?.data?.items?.length}`
                     );
+                    APIWrapperFactory.cursorMap.set(note_page_num_key, (lastPageNum + 1));
 
                     result = (response.data?.data?.items || []).map((obj) => ({
                         author: obj?.note?.user?.nickname || "unknown",
@@ -809,29 +820,50 @@ async function exampleUsage() {
         //     route: "get_user",
         //     params: { userId: "58e6693382ec392748251566" },
         // };
-        const obj = {
-            route: "get_note_list",
-            params: { userId: "5d526ee0000000001200e485" },
-        };
+        // const obj = {
+        //     route: "get_note_list",
+        //     params: { userId: "5d526ee0000000001200e485" },
+        // };
+        const obj = { route: "notes_search", params: { keyword: "中医"} };
+
         const noteSet = new Set();
 
-        while (true) {
-            const searchResults = await APIWrapperFactory.executeRequest(
+        // while (true) {
+        //     const searchResults = await APIWrapperFactory.executeRequest(
+        //         obj,
+        //         "22244"
+        //     );
+        //     try {
+        //         for (const item of searchResults) {
+        //             noteSet.add(item.timestamp);
+        //             console.log("item: ", item.title);
+        //         }
+        //         console.log(
+        //             " yykai searchResults get user res size: ",
+        //             noteSet.size
+        //         );
+        //     } catch (error) {
+        //         console.log("error: ", error);
+        //     }
+
+        //     sleep(2000);
+        //     if (!searchResults) {
+        //         console.log("searchResults is null");
+        //         break;
+        //     }
+        // }
+          const searchResults = await APIWrapperFactory.executeRequest(
                 obj,
                 "22244"
             );
             for (const item of searchResults) {
-                noteSet.add(item.note_id);
-                // console.log("item: ", item);
+                noteSet.add(item.timestamp);
+                console.log("item: ", item.title);
             }
             console.log(
                 " yykai searchResults get user res size: ",
                 noteSet.size
             );
-            if (!searchResults) {
-                break;
-            }
-        }
         // console.log('Search Results:', searchResults);
     } catch (error) {
         console.error("Error:", error.message);
