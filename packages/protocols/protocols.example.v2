@@ -2,7 +2,7 @@
     "XData_Collection": [
         {
             "Group": "RedNote_API",
-            "description": "Search note, comment on 小红书(RedNote/Xiaohongshu), Hot topic, Hot words",
+            "description": "Search user's profile, note, comment on 小红书(RedNote/Xiaohongshu). You can only use the data listed in the following API. You do not need to use other undeclared APIs.",
             "APIs": [
                 {
                     "type": "Data3 Wrapper API",
