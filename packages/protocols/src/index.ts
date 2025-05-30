@@ -18,7 +18,7 @@ import { KeyWordGenerator } from "./keywords";
  * GPT 4.1 mini token limit: 1M Tokens
  * 1 token is about 4 chars.
  * */
-const charLengthLimit = 100000 * 3;
+const charLengthLimit = 1000000 * 3;
 
 export const getProtocolArray = async (runtime: any) => {
     const oldXDataSourceArray = await runtime.cacheManager.get(
@@ -366,6 +366,7 @@ export const handleProtocolsForQuickResponce = async (
             [Question: ${originText}]
             [API: ${JSON.stringify(searchObj)}]
             [Responce: ${JSON.stringify(apires)}].
+            如果 API 出现错误，导致数据查询失败，请直接回答：API请求出现错误，请在聊天框中输入【人工】，以便人工处理。
             \n`;
     try {
       responseFinal = await generateText({
@@ -766,12 +767,12 @@ let promptPartThree = `
         const memory_cached_str = readCacheFile(taskId + "_memory.txt");
         const promptQuestionWithData =`You are an AI Agent based on Xiaohongshu(RedNote/小红书), with strong market research and user analysis capabilities.
             User Question: ${obj.questionText}.
-            Below is AI reasoning process:
+            Below is AI reasoning process(The reasoning process is reference information. When answering questions, do not answer the reasoning process. Just answer directly according to the user's question.):
             ${memory_cached_str}
             Below are some data related to user questions, obtained through API queries.
             ${data_cached_str};
             When answering user questions, please think through them step by step. Answers need to be complete, without omissions or abbreviations.
-            `;
+            如果 API 出现错误，导致数据查询失败，请直接回答：API请求出现错误，请在聊天框中输入【人工】，以便人工处理。`;
 
         responseFinal = await generateText({
             runtime,
