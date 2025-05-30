@@ -772,7 +772,7 @@ let promptPartThree = `
             Below are some data related to user questions, obtained through API queries.
             ${data_cached_str};
             When answering user questions, please think through them step by step. Answers need to be complete, without omissions or abbreviations.
-            如果 API 出现错误，导致数据查询失败，请直接回答：API请求出现错误，请在聊天框中输入【人工】，以便人工处理。`;
+            如果 API 出现错误，导致数据查询失败，请你先尽可能的回答用户问题，最后追加一句提示：API请求出现错误，请在聊天框中输入【人工】，以便人工处理。`;
 
         responseFinal = await generateText({
             runtime,
