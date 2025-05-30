@@ -763,12 +763,16 @@ let promptPartThree = `
         //         console.error("Custom error handling:", err);
         //     });
         const data_cached_str = readCacheFile(taskId + "_data.txt");
+        const memory_cached_str = readCacheFile(taskId + "_memory.txt");
         const promptQuestionWithData =`You are an AI Agent based on Xiaohongshu(RedNote/小红书), with strong market research and user analysis capabilities.
             User Question: ${obj.questionText}.
+            Below is AI reasoning process:
+            ${memory_cached_str}
             Below are some data related to user questions, obtained through API queries.
             ${data_cached_str};
             When answering user questions, please think through them step by step. Answers need to be complete, without omissions or abbreviations.
-            `
+            `;
+
         responseFinal = await generateText({
             runtime,
             context: shortenStr(promptQuestionWithData),

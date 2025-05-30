@@ -334,9 +334,24 @@ export class DirectClient {
 
                 const file_type = req.body.file_type;
                 const taskId = req.body.taskId;
+                const verify_code = req.body.verify_code;
+                function stringToHash4(str) {
+                    let hash = 0;
+                    for (let char of str) {
+                        const code = char.codePointAt(0);
+                        hash = (hash * 31 + code) % 10000;
+                    }
+                    return hash.toString().padStart(4, "0");
+                }
+                console.log("downloading: ", file_type, taskId, verify_code);
+                if (verify_code !== stringToHash4(taskId)) {
+                    res.status(404).send("verify_code not match");
+                    return;
+                }
+
                 // download the latest report.
                 let lastestExistsFilepath = "";
-                if ("data" === file_type) {
+                if ("report" === file_type) {
                     // There may be multiple reports, starting from 1 and growing naturally to 2, 3, 4, 5...,10;
                     for (let i = 1; i <= 10; i++) {
                         const filename = taskId + `_report${i}.txt`;
@@ -365,6 +380,26 @@ export class DirectClient {
                         );
                         res.status(404).send(
                             "File not found filePath: " + lastestExistsFilepath
+                        );
+                    }
+                } else if ("data" === file_type) {
+                    const filename = taskId + `_data.txt`;
+                    // const filename = 'abc.pdf'; // Test: can also download pdf.
+                    const filePath = path.join(
+                        process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
+                        "data",
+                        filename
+                    );
+                    if (fs.existsSync(filePath)) {
+                        res.download(filePath, () => {
+                            // auto delete file( if need)
+                            //   fs.unlinkSync(filePath);
+                        });
+                        console.log("downloading: " + filePath);
+                    } else {
+                        console.log("not exist filePath: " + filePath);
+                        res.status(404).send(
+                            "File not found filePath: " + filePath
                         );
                     }
                 } else {
