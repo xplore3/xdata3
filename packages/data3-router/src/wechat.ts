@@ -238,6 +238,11 @@ export class WechatHandler {
                 await this.sendMessage(userId, openKfId, output);
                 return true;
             }
+            else if (cmd === '人工' || cmd === '人工支持' || cmd === '人工客服') {
+                const output: string = `点击：https://work.weixin.qq.com/kfid/kfc24a58f16a24c1eaf 进行人工服务`;
+                await this.sendMessage(userId, openKfId, output);
+                return true;
+            }
         }
         catch (err) {
             console.log(err);
