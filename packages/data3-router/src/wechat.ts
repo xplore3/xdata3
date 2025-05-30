@@ -139,6 +139,70 @@ export class WechatHandler {
         }
     }
 
+    async getExternalUserBase(code: string) {
+        try {
+            console.log("getExternalUserBase " + code);
+            const token = await this.getAccessToken();
+            const resp = await axios.get(`https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token=${token}&code=${code}`);
+            console.log("getExternalUserBase " + resp.data.errmsg);
+            if (resp.data.errcode !== 0) {
+                throw new Error(`getExternalUserBase failed: ${resp.data.errmsg}`);
+            }
+            console.log(resp.data);
+            const userId = resp.data.openid || resp.data.userid; // Wecom UserID
+            console.log("getExternalUserBase userId: " + userId);
+
+            // More Detail
+            const detailRes = await axios.get(`https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token=${token}&userid=${userId}`);
+            console.log(detailRes.data);
+
+            return resp.data;
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
+    async getExternalUserDetail(external_userid: string) {
+        try {
+            console.log("getExternalUserDetail " + external_userid);
+            const token = await this.getAccessToken();
+            const param = {
+                external_userid_list: [
+		            external_userid
+	            ],
+	            need_enter_session_context: 0
+            };
+            const resp = await axios.post(`https://qyapi.weixin.qq.com/cgi-bin/kf/customer/batchget?access_token=${token}`, param);
+            //console.log(resp);
+            console.log("getExternalUserDetail " + resp.data.errmsg);
+            if (resp.data.errcode !== 0) {
+                throw new Error(`getExternalUserDetail failed: ${resp.data.errmsg}`);
+            }
+            return resp.data;
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
+    async handleWecomAuth(req: express.Request, res: express.Response) {
+        console.log("handleWecomAuth");
+        console.log(req.query);
+        try {
+            const { code, state } = req.query;
+            console.log(state)
+            if (code) {
+                const userInfo = await this.getExternalUserBase(code as string);
+                console.log(userInfo);
+            }
+            res.send('success')
+        } catch (err) {
+            console.error('[WecomListener] Error handleWecomAuth:', err)
+            res.send('fail')
+        }
+    }
+
     async handleWechatInputMessage(req: express.Request, res: express.Response) {
         console.log("handleWechatInputMessage");
         console.log(req.query);
@@ -173,6 +237,9 @@ export class WechatHandler {
                         console.log(firstMsg.text.content);
                         const firstText = firstMsg.text.content;
                         const userId = firstMsg.external_userid;
+                        // Test for external_userid
+                        const userInfo = await this.getExternalUserInfo(userId);
+                        console.log(userInfo);
 
                         // Check If Menu
                         if (await this.checkCommandMenu(firstText, userId, decryptedXml.xml.OpenKfId)) {

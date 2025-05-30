@@ -576,6 +576,12 @@ export class DirectClient {
             }
         );
         this.app.get(
+            "/:agentId/wecom_auth",
+            async (req: express.Request, res: express.Response) => {
+                await wechatHandler.handleWecomAuth(req, res);
+            }
+        );
+        this.app.get(
             "/:agentId/task_status",
             async (req: express.Request, res: express.Response) => {
                 const agentId = req.params.agentId;
@@ -1606,6 +1612,20 @@ export class DirectClient {
                 res.json([]);
             }
         }
+    }
+
+    private async composePrompt(agent: IAgentRuntime, prompt: string, userId: string): Promise<string> {
+        const roomId = stringToUuid("default-data-room-" + userId);
+        if (!agent) {
+            throw new Error("Agent not found");
+        }
+        return composeContext({
+            state: await agent.composeState(
+                { content: { text: prompt }, userId, roomId },
+                { agentName: agent.character.name }
+            ),
+            template: messageHandlerTemplate,
+        });
     }
 }
 
