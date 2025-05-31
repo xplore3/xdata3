@@ -18,7 +18,8 @@ import { KeyWordGenerator } from "./keywords";
  * GPT 4.1 mini token limit: 1M Tokens
  * 1 token is about 4 chars.
  * */
-const charLengthLimit = 1000000 * 3;
+// const charLengthLimit = 500000; // openai
+const charLengthLimit = 240000; // deepseek
 
 export const getProtocolArray = async (runtime: any) => {
     const oldXDataSourceArray = await runtime.cacheManager.get(
@@ -400,20 +401,21 @@ export const handleProtocolsByLongLogic = async (runtime: any, originText: any, 
     );
     function shortenStr(str) {
         if (str.length > charLengthLimit) {
+            console.warn("prompt too long, prompt: str: " + str)
             return str.slice(0, charLengthLimit);
         }
+        console.log(`str len:  ${(1.0 * str.length / 1000)} k.`);
         return str;
     }
     const promt1 = `Do the following questions need to be queried online?\n
         [Question: ${originText}] \n At the same time, you can read this list of HTTP APIs [APIs: ${JSON.stringify(
         apiXDataSourceArray
     )}.\n
-        Please return a Boolean(need_network) value, true or false, to indicate whether this issue needs to be queried online.
+        Please return a Boolean(need_network) value, true or false, to indicate whether this question needs to be queried online.
         Is there a suitable API in the API list to answer the user's question?
         Please return a Boolean(api_available) value, true or false, to indicate whether there is a suitable API for user's question.
         Please use JSON to return the result, without including any other content or requiring markdown syntax modification.
-        The JSON format is: {"need_network": "true", "api_available":"false"}\n`;
-    console.log("handleprotocols promt1: ", promt1);
+        The JSON format is: {"need_network": true, "api_available": true}\n`;
     let response1 = "";
     try {
         // load memory load and data.
@@ -422,11 +424,14 @@ export const handleProtocolsByLongLogic = async (runtime: any, originText: any, 
         // const fileExists = fs.existsSync(filePath);
         // console.log(`online query Chat cache file ${filePath} exists: ${fileExists}`);
         // if(!fileExists) {
+            console.log("handleprotocols need query prompt: ", promt1);
             response1 = await generateText({
              runtime,
              context: shortenStr(promt1),
              modelClass: ModelClass.MEDIUM,
             });   
+            console.log("handleProtocols need query response: ", response1);
+
         // } else {
         //     response1 = await generateTextWithFile(filePath, shortenStr(promt1));
         // }
@@ -440,7 +445,6 @@ export const handleProtocolsByLongLogic = async (runtime: any, originText: any, 
         return "system error 1001";
     }
 
-    console.log("handleProtocols response1: ", response1);
     const response1Str = response1.replace(/```json/g, "").replace(/```/g, "");
 
     let obj = JSON.parse(response1Str);
@@ -484,7 +488,7 @@ let promptPartThree = `
     
     do {
         ++step;
-        if (step > 30) {
+        if (step > 15) {
             console.log(`handleProtocols step: ${step} is too much, break.`);
             break;
         }
@@ -505,10 +509,11 @@ let promptPartThree = `
         }
 
         if (
-            !obj?.need_network.includes("true") ||
-            !obj?.api_available.includes("true")
+            !(obj?.need_network == true) ||
+            !(obj?.api_available == true)
         ) {
             // STEP: No need to query network data.
+            console.log("is continue? " , JSON.stringify(obj));
             console.log(
                 `handleProtocols step: ${step} end   -------------------------------------`
             );
@@ -540,17 +545,19 @@ let promptPartThree = `
         }
         let response2 = "";
         try {
+            console.log("handleProtocols API Selecting prompt: ",  shortenStr(chatContextAccmulatingStr));
             response2 = await generateText({
                 runtime,
                 context: shortenStr(chatContextAccmulatingStr),
                 modelClass: ModelClass.MEDIUM,
             });
+            console.log("handleProtocols API Selecting response: ", response2);
+
         } catch (error) {
             console.error("handleProtocols error: ", error);
             return "system error 1001";
         }
 
-        console.log("handleProtocols API Call response2: ", response2);
         const response2Str = response2
             .replace(/```json/g, "")
             .replace(/```/g, "");
@@ -615,10 +622,10 @@ let promptPartThree = `
                     context: shortenStr(
                         promptPartOne + promptPartTwo + promptPartThree
                     ),
-                    modelClass: ModelClass.LARGE,
+                    modelClass: ModelClass.MEDIUM,
                 });
                 console.log(
-                    `${JSON.stringify(apires)}  >>>>>>>>>>  ${shortenapires}`
+                    `API Response shortten ${JSON.stringify(apires)}\n  >>>>>>>>>>  \n${shortenapires}`
                 );
             } catch (e) {
                 console.log("handleProtocols error: ", e);
@@ -641,6 +648,17 @@ let promptPartThree = `
                 .toString()
                 .slice(200)}].\n`;
             apiSuccess = false;
+            
+            // const content = `\n
+            // [Question: ${originText}]
+            // [API: ${JSON.stringify(Obj)}]
+            // [Responce: ${JSON.stringify(e.toString().slice(0, 200))}].
+            // \n`;
+
+            // const filename = taskId + "_data.txt";
+            // appendToChatCache(content, filename, (err) => {
+            //     console.error("Custom error handling:", err);
+            // });
         }
         // currentAPIResStr += currentApiStr;
 
@@ -658,7 +676,7 @@ let promptPartThree = `
             promptPartTwo = await generateText({
                 runtime,
                 context: promptReorganizeThinkGraph,
-                modelClass: ModelClass.LARGE,
+                modelClass: ModelClass.MEDIUM,
             });
             // save memory
             await runtime.cacheManager.set(
@@ -695,9 +713,10 @@ let promptPartThree = `
         If the collected data is not enough, you need to continue searching online.You need to continue collecting data until the problem is finally solved. For example, if a user needs to find 100 KOLs, but you only find 10, this is not enough.
         There is another situation where you should end the API request. This is when there is insufficient data but there is no suitable API to obtain new data. No new data can be requested by requesting the API again. At this time, it is time to end the request.
         Please return a Boolean value, true or false, to indicate whether this issue needs to be queried online.\n
-        Is there a suitable API in the API list to answer the user's question?
-        Please return a Boolean(api_available) value, true or false, to indicate whether there is a suitable API for user's question(An API that has too many errors will not be allowed to be used again).
-        Please use JSON to return the result, without including any other content or requiring markdown syntax modification, The JSON format is: {"need_network": "true", "api_available":"false"}\n`;
+        Is there a suitable API in the API list to answer the user's question?        Please return a Boolean(need_network) value, true or false, to indicate whether this question needs to be queried online.
+        Please return a Boolean(api_available) value, true or false, to indicate whether there is a suitable API for user's question(If an API that has too many errors will not be allowed to be used again). As long as at least one of the APIs listed above is still available, do not return false(api_available) when replenishing data. .
+        For the API that can turn pages, you need to call it more than 5 times to get more data.
+        Please use JSON to return the result, without including any other content or requiring markdown syntax modification, The JSON format is: {"need_network": true, "api_available": true}\n`;
         let response3 = "";
         try {
             // const filePath = "chat-cache-file_" + taskId + ".txt";
@@ -725,7 +744,7 @@ let promptPartThree = `
         }
 
         console.log(
-            `handleProtocols weather continue query data? response3: ${response3}`
+            `handleProtocols is continue? prompt: ${shortenStr(promptPartOne + promptPartTwo + promptPartThree)}, response: ${response3}`
         );
         const response3Str = response3
             .replace(/```json/g, "")
@@ -742,9 +761,9 @@ let promptPartThree = `
         //     context: shortenStr("Summarize and reflect on the following results: [User-Question: xxx][Plan: 1.xxx. 2.xxx. 3.xxx.][Step: 1.xxx. 2.xxx. 3.xxx.][Results has collected: xxxx]" + chatContextAccmulatingStr),
         //     modelClass: ModelClass.LARGE,
         // });
-        console.log(
-            `handleProtocols chatContextAccmulatingStr: ${chatContextAccmulatingStr}`
-        );
+        // console.log(
+        //     `handleProtocols chatContextAccmulatingStr: ${chatContextAccmulatingStr}`
+        // );
 
         console.log(
             `handleProtocols step: ${step} end   -------------------------------------`
@@ -765,20 +784,25 @@ let promptPartThree = `
         //     });
         const data_cached_str = readCacheFile(taskId + "_data.txt");
         const memory_cached_str = readCacheFile(taskId + "_memory.txt");
-        const promptQuestionWithData =`You are an AI Agent based on Xiaohongshu(RedNote/小红书), with strong market research and user analysis capabilities.
+        const promptQuestionWithData =`You are a data analysis expert specializing in data analysis of the social media platform Xiaohongshu.(RedNote/小红书), with strong market research and user analysis capabilities.
+            Not only can you accurately answer data questions raised by the business (descriptive, diagnostic),
+            but you can also proactively explore the hidden information in the data, raise valuable business questions and new opportunities (exploratory, predictive, guiding), and through excellent communication, transform data insights into practical actions to drive business growth, optimize user experience, and improve operational efficiency.
             User Question: ${obj.questionText}.
             Below is AI reasoning process(The reasoning process is reference information. When answering questions, do not answer the reasoning process. Just answer directly according to the user's question.):
             ${memory_cached_str}
             Below are some data related to user questions, obtained through API queries.
             ${data_cached_str};
-            When answering user questions, please think through them step by step. Answers need to be complete, without omissions or abbreviations.
-            如果 API 出现错误，导致数据查询失败，请你先尽可能的回答用户问题，最后追加一句提示：API请求出现错误，请在聊天框中输入【人工】，以便人工处理。`;
-
+           `;
+// todo: 异常使用代理处理就好了。
+//              如果 API 出现错误，导致数据查询失败，请你先尽可能的回答用户问题，最后追加一句提示：API请求出现错误，请在聊天框中输入【人工】，以便人工处理。
         responseFinal = await generateText({
             runtime,
             context: shortenStr(promptQuestionWithData),
             modelClass: ModelClass.LARGE,
         });
+        console.log("report, prompt: ", shortenStr(promptQuestionWithData));
+        console.log("report: responce: ", responseFinal);
+
         // } else {
         //     responseFinal = await generateTextWithFile(filePath, shortenStr(promptPartOne + promptPartTwo + promptPartThree));
         // }

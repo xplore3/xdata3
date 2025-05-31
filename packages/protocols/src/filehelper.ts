@@ -47,6 +47,6 @@ export function updateCacheText(content: string, filename: string, onError?: (er
             return;
         }
         console.log("Content successfully overwritten to file: ", filePath);
-        console.log("Content: \n", content);
+        console.log(`======================== ${filename} begin ==================== \n ${content} \n===================== ${filename} end =======================`);
     });
 }
