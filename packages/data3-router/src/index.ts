@@ -1614,15 +1614,16 @@ export class DirectClient {
         }
     }
 
-    private async composePrompt(agent: IAgentRuntime, prompt: string, userId: string): Promise<string> {
-        const roomId = stringToUuid("default-data-room-" + userId);
-        if (!agent) {
+    private async composePrompt(runtime: IAgentRuntime, prompt: string, user: string): Promise<string> {
+        const roomId = stringToUuid("default-data-room-" + user);
+        if (!runtime) {
             throw new Error("Agent not found");
         }
+        const userId = stringToUuid(user ?? "user");
         return composeContext({
-            state: await agent.composeState(
-                { content: { text: prompt }, userId, roomId },
-                { agentName: agent.character.name }
+            state: await runtime.composeState(
+                { content: { text: prompt }, userId, roomId, agentId: runtime.agentId },
+                { agentName: runtime.character.name }
             ),
             template: messageHandlerTemplate,
         });

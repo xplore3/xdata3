@@ -238,7 +238,7 @@ export class WechatHandler {
                         const firstText = firstMsg.text.content;
                         const userId = firstMsg.external_userid;
                         // Test for external_userid
-                        const userInfo = await this.getExternalUserInfo(userId);
+                        const userInfo = await this.getExternalUserBase(userId);
                         console.log(userInfo);
 
                         // Check If Menu
