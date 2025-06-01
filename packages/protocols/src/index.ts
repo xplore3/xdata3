@@ -138,19 +138,20 @@ export const handleProtocolsForPrompt = async (runtime: any, originText: any, ta
  * words before returning.
  * This part of the logic not require processing of context memory.
  */
-export const handleProtocolsProcessing = async (runtime: any, originText: any, taskId: any) => {
+export const handleProtocolsProcessing = async (runtime: any, promptInjectBaseUserInfoStr: any, originText: any, taskId: any) => {
     // Try quick Responce first.
     // let responce = await handleProtocolsForQuickResponce(runtime, originText, taskId);
     // console.log("yykai handleProtocolsForQuickResponce responce: ", responce);
     // if(!responce) {
     //     responce = await handleProtocolsByLongLogic(runtime, originText, taskId);
     // }
-    const responce = await handleProtocolsByLongLogic(runtime, originText, taskId);
+    const responce = await handleProtocolsByLongLogic(runtime, promptInjectBaseUserInfoStr, originText, taskId);
     return responce;
 }
 
 export const handleProtocolsForQuickResponce = async (
     runtime: any,
+    promptInjectBaseUserInfoStr: any,
     originText: any,
     taskId: any
 ) => {
@@ -228,13 +229,16 @@ export const handleProtocolsForQuickResponce = async (
     console.log(containsKeywords("Very Good")); // false
     console.log(containsKeywords("很好，回答的不错")); // false
     */
-
+   const promptInjectBaseUserInfoAndOriginText = `You are a AI data Agent, You need to answer user's questions based on background knowledge.
+    [BACKGROUND KNOWLEDGE: ${promptInjectBaseUserInfoStr}]
+    [USER QUESTION: ${originText}]
+    `;
     /** quick responce, without query data. */
     if(!containsKeywords(originText)) {
         console.log("handleProtocolsForQuickResponce without query data. originText: ", originText);
         const responce = await generateText({
             runtime,
-            context: originText,
+            context: promptInjectBaseUserInfoAndOriginText,
             modelClass: ModelClass.SMALL,
         });
         return responce;
@@ -286,7 +290,8 @@ export const handleProtocolsForQuickResponce = async (
     ) {
         return null;
     }
-    let promptPartThree = `You are a Data AI agent, [User Question: ${originText}].
+    let promptPartThree = `You are a Data AI agent. [YOU BACKGROUND KNOWLEDGE:\ ${promptInjectBaseUserInfoStr}]
+        [USER QUESTION: ${originText}].
         You need to call once HTTP API request to answer user questions.
         Please analyze the description of the API below. ${JSON.stringify(
             apiXDataSourceArray
@@ -299,7 +304,6 @@ export const handleProtocolsForQuickResponce = async (
         Please return this JSON object directly without any explanation, comments, other content, or markdown syntax modification.
         `;
     let response2 = "";
-    console.log("handleProtocols promptPartThree: ", promptPartThree);
     try {
         response2 = await generateText({
             runtime,
@@ -362,11 +366,12 @@ export const handleProtocolsForQuickResponce = async (
         apiSuccess = false;
     }
     // This is what you want to add
-    const content = `\n The user's question, the API used, and the result of the API request are as follows.
+    const content = `You are a Data AI agent. [BACKGROUND KNOWLEDGE: ${promptInjectBaseUserInfoStr}]
+    The user's question, the API used, and the result of the API request are as follows.
     You need to answer the user's question based on the result of the API request.
-            [Question: ${originText}]
+            [QUESTION: ${originText}]
             [API: ${JSON.stringify(searchObj)}]
-            [Responce: ${JSON.stringify(apires)}].
+            [RESPONCE: ${JSON.stringify(apires)}].
             如果 API 出现错误，导致数据查询失败，请直接回答：API请求出现错误，请在聊天框中输入【人工】，以便人工处理。
             \n`;
     try {
@@ -395,10 +400,11 @@ export const handleProtocolsForQuickResponce = async (
     return responseFinal;
 };
 
-export const handleProtocolsByLongLogic = async (runtime: any, originText: any, taskId: any) => {
+export const handleProtocolsByLongLogic = async (runtime: any, promptInjectBaseUserInfoStr:any ,originText: any, taskId: any) => {
     const apiXDataSourceArray = await runtime.cacheManager.get(
         "XData_Collection"
     );
+    
     function shortenStr(str) {
         if (str.length > charLengthLimit) {
             console.warn("prompt too long, prompt: str: " + str)
@@ -407,8 +413,10 @@ export const handleProtocolsByLongLogic = async (runtime: any, originText: any, 
         console.log(`str len:  ${(1.0 * str.length / 1000)} k.`);
         return str;
     }
-    const promt1 = `Do the following questions need to be queried online?\n
-        [Question: ${originText}] \n At the same time, you can read this list of HTTP APIs [APIs: ${JSON.stringify(
+    const promt1 = ` You are an AI agent. You need to determine whether the user's question requires an online query.
+    [BACKGROUND KNOWLEDGE: ${promptInjectBaseUserInfoStr}]
+    Do the following questions need to be queried online?\n
+        [QUESTION: ${originText}] \n At the same time, you can read this list of HTTP APIs [APIS: ${JSON.stringify(
         apiXDataSourceArray
     )}.\n
         Please return a Boolean(need_network) value, true or false, to indicate whether this question needs to be queried online.
@@ -451,7 +459,8 @@ export const handleProtocolsByLongLogic = async (runtime: any, originText: any, 
 
 let promptPartOne = `
 You are a data AI Agent that answers some user questions by querying network data multiple times.
-[User Original question: ${originText}]
+[BACKGROUND KNOWLEDGE: ${promptInjectBaseUserInfoStr}]
+[USER ORIGINAL QUESTION: ${originText}]
 To make it easier for you to perform long logical inferences, I have mapped out the inference areas in your context.
 This is a dynamic reasoning graph that includes the original question, each network request, and the new data collected at each step, as well as future plans, summaries, and reflections.
 You Context is divided into three areas, and each area has some blocks.
@@ -787,11 +796,13 @@ let promptPartThree = `
         const promptQuestionWithData =`You are a data analysis expert specializing in data analysis of the social media platform Xiaohongshu.(RedNote/小红书), with strong market research and user analysis capabilities.
             Not only can you accurately answer data questions raised by the business (descriptive, diagnostic),
             but you can also proactively explore the hidden information in the data, raise valuable business questions and new opportunities (exploratory, predictive, guiding), and through excellent communication, transform data insights into practical actions to drive business growth, optimize user experience, and improve operational efficiency.
-            User Question: ${obj.questionText}.
-            Below is AI reasoning process(The reasoning process is reference information. When answering questions, do not answer the reasoning process. Just answer directly according to the user's question.):
-            ${memory_cached_str}
+            You answer user's questions based on background knowledge and API return data.
+            [BACKGROUND KNOWLEDGE: ${promptInjectBaseUserInfoStr}].
+            [USER QUESTION: ${obj.questionText}].
+            Below is AI reasoning process(The reasoning process is reference information. When answering questions, do not answer the reasoning process. Just answer directly according to the user's question.)
+            [REASONING PROCESS: ${memory_cached_str}].
             Below are some data related to user questions, obtained through API queries.
-            ${data_cached_str};
+            [API QUERY DATA: ${data_cached_str}]
            `;
 // todo: 异常使用代理处理就好了。
 //              如果 API 出现错误，导致数据查询失败，请你先尽可能的回答用户问题，最后追加一句提示：API请求出现错误，请在聊天框中输入【人工】，以便人工处理。
