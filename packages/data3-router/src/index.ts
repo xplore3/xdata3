@@ -281,6 +281,7 @@ export class DirectClient {
                     originQuestingText,
                     taskId,
                     withPreContext,
+                    userId
                 );
                 //                 const finalAnswerStr = await handleProtocolsProcessing(
                 //     runtime,
@@ -455,6 +456,7 @@ export class DirectClient {
 
                 handleProtocolsProcessing(
                     runtime,
+                    " ",
                     text,
                     "xxx" /** taskID */
                 ).then((resStr) => {
@@ -1251,12 +1253,19 @@ export class DirectClient {
         runtime: IAgentRuntime,
         originQuestingText: string,
         taskId: string,
-        withPreContext: boolean
+        withPreContext: boolean,
+        userId: string,
     ): Promise<string> {
         console.log("handleMessageWithAI originQuestingText:  ", originQuestingText);
         if (!originQuestingText) {
             return null;
         }
+        
+        const promptInjectBaseUserInfo = await this.composePrompt(runtime, originQuestingText, userId);
+        console.log(`handleProtocolsForQuickResponce promptInjectBaseInfo:  
+        ============================begin===========================\n
+        ${promptInjectBaseUserInfo}
+        ===========================end============================\n`);
 
         // Get lastest memory // refresh taskQuestionObj
         let taskQuestionObj = await runtime.cacheManager.get(
@@ -1287,6 +1296,7 @@ export class DirectClient {
         if (!withPreContext) {
             const quickResponse = await handleProtocolsForQuickResponce(
                 runtime,
+                promptInjectBaseUserInfo,
                 originQuestingText,
                 taskId
             );
@@ -1415,6 +1425,7 @@ export class DirectClient {
 
         const finalAnswerStr = await handleProtocolsProcessing(
             runtime,
+            promptInjectBaseUserInfo,
             taskQuestionObj.questionText,
             taskId
         );
