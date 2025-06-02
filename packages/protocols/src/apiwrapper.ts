@@ -389,7 +389,9 @@ class APIWrapperFactory {
 
             case "notes_search":
                 try {
-                    const url = `http://47.120.60.92:8080/api/search?keyword=${obj?.params?.keyword}&page=${obj?.params?.page}&sort=popularity_descending`;
+                    const keyword = obj?.params?.keyword || obj?.params?.key1 || "";
+                    const page = obj?.params?.page || 1;
+                    const url = `http://47.120.60.92:8080/api/search?keyword=${keyword}&page=${page}&sort=popularity_descending`;
                     console.log(`executeRequest url by params: ${url}`);
                     const response = await axios.get(url);
                     console.log(
