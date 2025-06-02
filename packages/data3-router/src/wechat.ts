@@ -1,4 +1,4 @@
-import { DirectClient } from "./index";
+import { dataHandlerTemplate, DirectClient } from "./index";
 import express from "express";
 import axios from 'axios';
 
@@ -281,7 +281,7 @@ export class WechatHandler {
                         try {
                             let immResp = "...";
                             if (firstText.length < 20) {
-                                immResp = await this.generateQuickResponse(runtime, firstText);
+                                immResp = await this.generateQuickResponse(runtime, firstText, userId);
                             }
                             else {
                                 const lang = this.detectLanguage(firstText);
@@ -443,7 +443,7 @@ export class WechatHandler {
         try {
             return await generateText({
                 runtime,
-                context: input,
+                context: this.client.composePrompt(runtime, input, userId),
                 modelClass: ModelClass.SMALL,
             });
         }
@@ -537,12 +537,12 @@ export class WechatHandler {
         }
     }
 
-    private async generateQuickResponse(runtime: IAgentRuntime, text: string) {
+    private async generateQuickResponse(runtime: IAgentRuntime, text: string, userId: string) {
         try {
             const prompt = `根据用户的输入内容：【${text}】，快速给出一个同种语言的简短回复，只给出结果就可以`;
             let resp = await generateText({
                 runtime,
-                context: prompt,
+                context: this.client.composePrompt(runtime, prompt, userId),
                 modelClass: ModelClass.SMALL,
             });
 

@@ -130,7 +130,9 @@ Response format should be formatted in a JSON block like this:
 `;
 
 export const dataHandlerTemplate =
-    `Some additional information about the task:
+    `
+##
+Some additional information about the task:
 #####################################
 # Knowledge
 {{knowledge}}
@@ -1663,7 +1665,7 @@ export class DirectClient {
         }
     }
 
-    private async composePrompt(runtime: IAgentRuntime, prompt: string, user: string): Promise<string> {
+    async composePrompt(runtime: IAgentRuntime, prompt: string, user: string): Promise<string> {
         const roomId = stringToUuid("default-data-room-" + user);
         if (!runtime) {
             throw new Error("Agent not found");
