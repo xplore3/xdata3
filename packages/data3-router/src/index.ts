@@ -130,7 +130,8 @@ Response format should be formatted in a JSON block like this:
 `;
 
 export const dataHandlerTemplate =
-    `
+    `Some additional information about the task:
+#####################################
 # Knowledge
 {{knowledge}}
 
@@ -143,11 +144,8 @@ About {{agentName}}:
 
 {{attachments}}
 
-# Capabilities
-Note that {{agentName}} is capable of reading/seeing/hearing various forms of media, including images, videos, audio, plaintext and PDFs. Recent attachments have been included above under the "Attachments" section.
-
 {{recentMessages}}
-
+#####################################
 `;
 
 export class DirectClient {
