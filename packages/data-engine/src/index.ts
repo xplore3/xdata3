@@ -111,10 +111,38 @@ export class SqliteDatabaseAdapter
         return account;
     }
 
+    async getAccountByOpenId(openid: string): Promise<Account | null> {
+        const sql = "SELECT * FROM accounts WHERE openid = ?";
+        const account = this.db.prepare(sql).get(openid) as Account;
+        if (!account) return null;
+        if (account) {
+            if (typeof account.details === "string") {
+                account.details = JSON.parse(
+                    account.details as unknown as string
+                );
+            }
+        }
+        return account;
+    }
+
+    async getAccountByExternalUserId(external_userid: string): Promise<Account | null> {
+        const sql = "SELECT * FROM accounts WHERE external_userid = ?";
+        const account = this.db.prepare(sql).get(external_userid) as Account;
+        if (!account) return null;
+        if (account) {
+            if (typeof account.details === "string") {
+                account.details = JSON.parse(
+                    account.details as unknown as string
+                );
+            }
+        }
+        return account;
+    }
+
     async createAccount(account: Account): Promise<boolean> {
         try {
             const sql =
-                "INSERT INTO accounts (id, name, username, email, avatarUrl, details) VALUES (?, ?, ?, ?, ?, ?)";
+                "INSERT INTO accounts (id, name, username, email, avatarUrl, openid, external_userid, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             this.db
                 .prepare(sql)
                 .run(
@@ -123,11 +151,37 @@ export class SqliteDatabaseAdapter
                     account.username,
                     account.email,
                     account.avatarUrl,
+                    account.openid,
+                    account.external_userid,
                     JSON.stringify(account.details)
                 );
             return true;
         } catch (error) {
             console.log("Error creating account", error);
+            return false;
+        }
+    }
+
+    async updateAccount(account: Account): Promise<boolean> {
+        try {
+            // Update by external_userid
+            const sql =
+                "UPDATE accounts SET id = ?, name = ?, username = ?, email = ?, avatarUrl = ?, openid = ?, details = ? WHERE external_userid = ?";
+            this.db
+                .prepare(sql)
+                .run(
+                    account.id,
+                    account.name,
+                    account.username,
+                    account.email,
+                    account.avatarUrl,
+                    account.openid,
+                    JSON.stringify(account.details),
+                    account.external_userid
+                );
+            return true;
+        } catch (error) {
+            console.log("Error update account", error);
             return false;
         }
     }
@@ -177,6 +231,45 @@ export class SqliteDatabaseAdapter
             params.tableName,
             params.agentId,
             ...params.roomIds,
+        ];
+
+        // Add ordering and limit
+        sql += ` ORDER BY createdAt DESC`;
+        if (params.limit) {
+            sql += ` LIMIT ?`;
+            queryParams.push(params.limit.toString());
+        }
+
+        const stmt = this.db.prepare(sql);
+        const rows = stmt.all(...queryParams) as (Memory & {
+            content: string;
+        })[];
+
+        return rows.map((row) => ({
+            ...row,
+            content: JSON.parse(row.content),
+        }));
+    }
+
+    async getMemoriesByUserId(params: {
+        agentId: UUID;
+        userId: UUID;
+        tableName: string;
+        limit?: number;
+    }): Promise<Memory[]> {
+        if (!params.tableName) {
+            // default to messages
+            params.tableName = "messages";
+        }
+        if (!params.userId) {
+            throw new Error("userId is required");
+        }
+        let sql = `SELECT * FROM memories WHERE type = ? AND agentId = ? AND userId = ?`;
+
+        const queryParams = [
+            params.tableName,
+            params.agentId,
+            params.userId,
         ];
 
         // Add ordering and limit
@@ -770,6 +863,7 @@ export class SqliteDatabaseAdapter
     async getKnowledge(params: {
         id?: UUID;
         agentId: UUID;
+        userId?: UUID;
         limit?: number;
         query?: string;
     }): Promise<RAGKnowledgeItem[]> {
@@ -781,6 +875,11 @@ export class SqliteDatabaseAdapter
             queryParams.push(params.id);
         }
 
+        if (params.userId) {
+            sql += ` OR userId = ?`;
+            queryParams.push(params.userId);
+        }
+
         if (params.limit) {
             sql += ` LIMIT ?`;
             queryParams.push(params.limit);
@@ -789,6 +888,7 @@ export class SqliteDatabaseAdapter
         interface KnowledgeRow {
             id: UUID;
             agentId: UUID;
+            userId: UUID;
             content: string;
             embedding: Buffer | null;
             createdAt: string | number;
@@ -799,6 +899,7 @@ export class SqliteDatabaseAdapter
         return rows.map((row) => ({
             id: row.id,
             agentId: row.agentId,
+            userId: row.userId,
             content: JSON.parse(row.content),
             embedding: row.embedding
                 ? new Float32Array(row.embedding)
@@ -812,6 +913,7 @@ export class SqliteDatabaseAdapter
 
     async searchKnowledge(params: {
         agentId: UUID;
+        userId: UUID;
         embedding: Float32Array;
         match_threshold: number;
         match_count: number;
@@ -830,6 +932,7 @@ export class SqliteDatabaseAdapter
         interface KnowledgeSearchRow {
             id: UUID;
             agentId: UUID;
+            userId: UUID;
             content: string;
             embedding: Buffer | null;
             createdAt: string | number;
@@ -868,6 +971,7 @@ export class SqliteDatabaseAdapter
             JOIN vector_scores v ON k.id = v.id
             LEFT JOIN keyword_matches kw ON k.id = kw.id
             WHERE (k.agentId IS NULL AND k.isShared = 1) OR k.agentId = ?
+            OR (k.userId = ?)
             AND (
                 v.vector_score >= ?  -- Using match_threshold parameter
                 OR (kw.keyword_score > 1.0 AND v.vector_score >= 0.3)
@@ -882,6 +986,7 @@ export class SqliteDatabaseAdapter
             `%${params.searchText?.toLowerCase() || ""}%`,
             params.agentId,
             params.agentId,
+            params.userId,
             params.match_threshold,
             params.match_count,
         ];
@@ -922,9 +1027,9 @@ export class SqliteDatabaseAdapter
             this.db.transaction(() => {
                 const sql = `
                     INSERT INTO knowledge (
-                    id, agentId, content, embedding, createdAt,
+                    id, agentId, userId, content, embedding, createdAt,
                     isMain, originalId, chunkIndex, isShared
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `;
 
                 const embeddingArray = knowledge.embedding || null;
@@ -937,6 +1042,7 @@ export class SqliteDatabaseAdapter
                     .run(
                         knowledge.id,
                         metadata.isShared ? null : knowledge.agentId,
+                        knowledge.userId,
                         JSON.stringify(knowledge.content),
                         embeddingArray,
                         knowledge.createdAt || Date.now(),

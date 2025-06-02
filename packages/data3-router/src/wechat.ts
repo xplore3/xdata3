@@ -9,6 +9,7 @@ import {
     ModelClass,
     generateText,
     type IAgentRuntime,
+    createAccountByExternalData,
 } from "@data3os/agentcontext";
 import {
     handleProtocols,
@@ -139,7 +140,7 @@ export class WechatHandler {
         }
     }
 
-    async getExternalUserBase(code: string) {
+    async getExternalUserBase(runtime: IAgentRuntime, code: string) {
         try {
             console.log("getExternalUserBase " + code);
             const token = await this.getAccessToken();
@@ -149,12 +150,24 @@ export class WechatHandler {
                 throw new Error(`getExternalUserBase failed: ${resp.data.errmsg}`);
             }
             console.log(resp.data);
-            const userId = resp.data.openid || resp.data.userid; // Wecom UserID
+            const userId = resp.data.openid || resp.data.userid || resp.data.UserId; // Wecom UserID
             console.log("getExternalUserBase userId: " + userId);
+            let external_userid = resp.data.external_userid || code;
 
             // More Detail
-            const detailRes = await axios.get(`https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token=${token}&userid=${userId}`);
-            console.log(detailRes.data);
+            if (userId) {
+                const detailRes = await axios.get(`https://qyapi.weixin.qq.com/cgi-bin/user/get?access_token=${token}&userid=${userId}`);
+                console.log(detailRes.data);
+                external_userid = detailRes.data.external_userid;
+            }
+
+            // Update the account
+            const result = await createAccountByExternalData({
+                runtime,
+                openid: userId,
+                external_userid
+            });
+            console.log("getExternalUserBase: " + result);
 
             return resp.data;
         }
@@ -193,8 +206,11 @@ export class WechatHandler {
             const { code, state } = req.query;
             console.log(state)
             if (code) {
-                const userInfo = await this.getExternalUserBase(code as string);
-                console.log(userInfo);
+                const runtime = this.getAgentId(req, res);
+                if (runtime) {
+                    const userInfo = await this.getExternalUserBase(runtime, code as string);
+                    console.log(userInfo);
+                }
             }
             res.send('success')
         } catch (err) {
@@ -228,6 +244,11 @@ export class WechatHandler {
                 const decryptedXml = await xml2js.parseStringPromise(decrypted.message, { explicitArray: false })
                 //const msg = decryptedXml.xml
                 console.log(decryptedXml.xml);
+                if (decryptedXml.xml.Token == null || decryptedXml.xml.Token == undefined) {
+                    console.error('[WecomListener] Invalid message format:', decryptedXml.xml);
+                    res.status(400).send('Invalid message format');
+                    return;
+                }
                 const msg = await this.syncMessage(decryptedXml.xml.Token, decryptedXml.xml.OpenKfId);
                 console.log(msg);
                 if (msg.errcode == 0 && msg.msg_list && msg.msg_list.length > 0) {
@@ -238,7 +259,7 @@ export class WechatHandler {
                         const firstText = firstMsg.text.content;
                         const userId = firstMsg.external_userid;
                         // Test for external_userid
-                        const userInfo = await this.getExternalUserBase(userId);
+                        const userInfo = await this.getExternalUserBase(runtime, userId);
                         console.log(userInfo);
 
                         // Check If Menu
@@ -277,6 +298,12 @@ export class WechatHandler {
                             console.log(err);
                         }
                         job.stop();
+                    }
+                    else if (firstMsg.msgtype == 'channels') {
+                        console.log(firstMsg.channels);
+                    }
+                    else if (firstMsg.msgtype == 'merged_msg') {
+                        console.log(firstMsg.merged_msg);
                     }
                 }
 

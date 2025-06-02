@@ -74,7 +74,7 @@ async function set(
         id: item.id,
         agentId: runtime.agentId,
         roomId: runtime.agentId,
-        userId: runtime.agentId,
+        userId: item.userId || runtime.agentId,
         createdAt: Date.now(),
         content: item.content,
         embedding: getEmbeddingZeroVector(),
@@ -89,7 +89,7 @@ async function set(
             id: stringToUuid(item.id + preprocessed),
             roomId: runtime.agentId,
             agentId: runtime.agentId,
-            userId: runtime.agentId,
+            userId: item.userId || runtime.agentId,
             createdAt: Date.now(),
             content: {
                 source: item.id,
@@ -110,7 +110,7 @@ async function set(
             id: stringToUuid(item.id + fragment),
             roomId: runtime.agentId,
             agentId: runtime.agentId,
-            userId: runtime.agentId,
+            userId: item.userId || runtime.agentId,
             createdAt: Date.now(),
             content: {
                 source: item.id,

@@ -129,6 +129,27 @@ Response format should be formatted in a JSON block like this:
 \`\`\`
 `;
 
+export const dataHandlerTemplate =
+    `
+# Knowledge
+{{knowledge}}
+
+# Task: Generate dialog and actions for the character {{agentName}}.
+About {{agentName}}:
+{{bio}}
+{{lore}}
+
+{{providers}}
+
+{{attachments}}
+
+# Capabilities
+Note that {{agentName}} is capable of reading/seeing/hearing various forms of media, including images, videos, audio, plaintext and PDFs. Recent attachments have been included above under the "Attachments" section.
+
+{{recentMessages}}
+
+`;
+
 export class DirectClient {
     public app: express.Application;
     public agents: Map<string, IAgentRuntime>; // container management
@@ -1639,7 +1660,7 @@ export class DirectClient {
                 { content: { text: prompt }, userId, roomId, agentId: runtime.agentId },
                 { agentName: runtime.character.name }
             ),
-            template: messageHandlerTemplate,
+            template: dataHandlerTemplate,
         });
     }
 }

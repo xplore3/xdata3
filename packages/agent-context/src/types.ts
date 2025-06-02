@@ -553,6 +553,12 @@ export interface Account {
     /** Username */
     username: string;
 
+    /** OpenID in Wechat */
+    openid: string;
+
+    /** User in Wechat Message */
+    external_userid: string;
+
     /** Optional additional details */
     details?: { [key: string]: any };
 
@@ -996,8 +1002,17 @@ export interface IDatabaseAdapter {
     /** Get account by ID */
     getAccountById(userId: UUID): Promise<Account | null>;
 
+    /** Get account by OpenID */
+    getAccountByOpenId(openid: string): Promise<Account | null>;
+
+    /** Get account by ExternalUserID */
+    getAccountByExternalUserId(external_userid: string): Promise<Account | null>;
+
     /** Create new account */
     createAccount(account: Account): Promise<boolean>;
+
+    /** Update a account */
+    updateAccount(account: Account): Promise<boolean>;
 
     /** Get memories matching criteria */
     getMemories(params: {
@@ -1018,6 +1033,13 @@ export interface IDatabaseAdapter {
         tableName: string;
         agentId: UUID;
         roomIds: UUID[];
+        limit?: number;
+    }): Promise<Memory[]>;
+
+    getMemoriesByUserId(params: {
+        tableName: string;
+        agentId: UUID;
+        userId: UUID;
         limit?: number;
     }): Promise<Memory[]>;
 
@@ -1139,6 +1161,7 @@ export interface IDatabaseAdapter {
     getKnowledge(params: {
         id?: UUID;
         agentId: UUID;
+        userId?: UUID;
         limit?: number;
         query?: string;
         conversationContext?: string;
@@ -1149,6 +1172,7 @@ export interface IDatabaseAdapter {
         embedding: Float32Array;
         match_threshold: number;
         match_count: number;
+        userId?: UUID;
         searchText?: string;
     }): Promise<RAGKnowledgeItem[]>;
 
@@ -1191,6 +1215,11 @@ export interface IMemoryManager {
         content: string,
     ): Promise<{ embedding: number[]; levenshtein_score: number }[]>;
 
+    getMemoriesByUserId(params: {
+        userId: UUID;
+        limit?: number;
+    }): Promise<Memory[]>;
+
     getMemoryById(id: UUID): Promise<Memory | null>;
     getMemoriesByRoomIds(params: {
         roomIds: UUID[];
@@ -1225,6 +1254,7 @@ export interface IRAGKnowledgeManager {
         limit?: number;
         conversationContext?: string;
         agentId?: UUID;
+        userId?: UUID;
     }): Promise<RAGKnowledgeItem[]>;
     createKnowledge(item: RAGKnowledgeItem): Promise<void>;
     removeKnowledge(id: UUID): Promise<void>;
@@ -1233,6 +1263,7 @@ export interface IRAGKnowledgeManager {
         embedding: Float32Array | number[];
         match_threshold?: number;
         match_count?: number;
+        userId?: UUID;
         searchText?: string;
     }): Promise<RAGKnowledgeItem[]>;
     clearKnowledge(shared?: boolean): Promise<void>;
@@ -1550,12 +1581,14 @@ export enum LoggingLevel {
 
 export type KnowledgeItem = {
     id: UUID;
+    userId: UUID; // Add for Data3
     content: Content;
 };
 
 export interface RAGKnowledgeItem {
     id: UUID;
     agentId: UUID;
+    userId: UUID; // Add for Data3
     content: {
         text: string;
         metadata?: {

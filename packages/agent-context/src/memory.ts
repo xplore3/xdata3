@@ -198,6 +198,15 @@ export class MemoryManager implements IMemoryManager {
         });
     }
 
+    async getMemoriesByUserId(params: { userId: UUID, limit?: number; }): Promise<Memory[]> {
+        return await this.runtime.databaseAdapter.getMemoriesByUserId({
+            tableName: this.tableName,
+            agentId: this.runtime.agentId,
+            userId: params.userId,
+            limit: params.limit
+        });
+    }
+
     async getMemoryById(id: UUID): Promise<Memory | null> {
         const result = await this.runtime.databaseAdapter.getMemoryById(id);
         if (result && result.agentId !== this.runtime.agentId) return null;
