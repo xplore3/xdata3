@@ -191,7 +191,7 @@ export abstract class DatabaseAdapter<DB = any> implements IDatabaseAdapter {
     abstract searchMemories(params: {
         tableName: string;
         agentId: UUID;
-        roomId: UUID;
+        userId: UUID;
         embedding: number[];
         match_threshold: number;
         match_count: number;

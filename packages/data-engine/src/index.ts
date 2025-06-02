@@ -384,7 +384,7 @@ export class SqliteDatabaseAdapter
 
     async searchMemories(params: {
         tableName: string;
-        roomId: UUID;
+        userId: UUID;
         agentId?: UUID;
         embedding: number[];
         match_threshold: number;
@@ -395,14 +395,14 @@ export class SqliteDatabaseAdapter
         const queryParams = [
             new Float32Array(params.embedding), // Ensure embedding is Float32Array
             params.tableName,
-            params.roomId,
+            params.userId,
         ];
 
         let sql = `
             SELECT *, vec_distance_L2(embedding, ?) AS similarity
             FROM memories
             WHERE type = ?
-            AND roomId = ?`;
+            AND userId = ?`;
 
         if (params.unique) {
             sql += " AND `unique` = 1";
