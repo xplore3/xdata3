@@ -998,6 +998,7 @@ export class SqliteDatabaseAdapter
             const results = rows.map((row) => ({
                 id: row.id,
                 agentId: row.agentId,
+                userId: row.userId,
                 content: JSON.parse(row.content),
                 embedding: row.embedding
                     ? new Float32Array(row.embedding)

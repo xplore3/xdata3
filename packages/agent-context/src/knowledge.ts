@@ -61,7 +61,7 @@ async function get(
 
     return knowledgeDocuments
         .filter((memory) => memory !== null)
-        .map((memory) => ({ id: memory.id, content: memory.content }));
+        .map((memory) => ({ id: memory.id, userId: memory.userId, content: memory.content }));
 }
 
 async function set(
