@@ -136,9 +136,11 @@ export class DirectClient {
     public startAgent: Function; // Store startAgent functor
     public loadCharacterTryPath: Function; // Store loadCharacterTryPath functor
     public jsonToCharacter: Function; // Store jsonToCharacter functor
+    public concurrentNum: number;
 
     constructor() {
         data3Logger.log("DirectClient constructor");
+        this.concurrentNum = 0;
         this.app = express();
         this.app.use(cors());
         this.app.use((req, res, next) => {
@@ -227,6 +229,17 @@ export class DirectClient {
             "/:agentId/message",
             upload.single("file"),
             async (req: express.Request, res: express.Response) => {
+                const maxNum = 1;
+                if (this.concurrentNum >= maxNum) {
+                    res.json({
+                        user: "Data3",
+                        text: "sever is busy, try latter.",
+                        taskId: "",
+                        action: "NONE",
+                    });
+                    return;
+                }
+                this.concurrentNum ++;
                 const agentId = req.params.agentId;
                 const roomId = stringToUuid(
                     req.body.roomId ?? "default-room-" + agentId
@@ -275,13 +288,14 @@ export class DirectClient {
                 } else {
                     withPreContext = true;
                 }
-                
+
                 const responseStr = await this.handleMessageWithAI(
                     runtime,
                     originQuestingText,
                     taskId,
-                    withPreContext,
+                    withPreContext
                 );
+                this.concurrentNum --;
                 //                 const finalAnswerStr = await handleProtocolsProcessing(
                 //     runtime,
                 //     originQuestingText,
