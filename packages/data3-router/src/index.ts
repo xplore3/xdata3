@@ -312,6 +312,7 @@ export class DirectClient {
 
                 const responseStr = await this.handleMessageWithAI(
                     runtime,
+                    userId,
                     originQuestingText,
                     taskId,
                     withPreContext
@@ -1284,6 +1285,7 @@ export class DirectClient {
 
     public async handleMessageWithAI(
         runtime: IAgentRuntime,
+        userId: string,
         originQuestingText: string,
         taskId: string,
         withPreContext: boolean
@@ -1398,6 +1400,10 @@ export class DirectClient {
                         taskQuestionObj.prevQuestionText;
                 }
 
+                
+                console.log(promptQuestion);
+                promptQuestion = await this.composePrompt(runtime, promptQuestion, userId);
+                console.log("New: " + promptQuestion);
                 const obj = await handleProtocolsForPrompt(
                     runtime,
                     promptQuestion,
@@ -1432,10 +1438,13 @@ export class DirectClient {
          */
 
         if(taskQuestionObj?.prevQuestionText) {
-            const refineQuestionPrompt = `Current-User-Question:${taskQuestionObj.questionText}.
+            let refineQuestionPrompt = `Current-User-Question:${taskQuestionObj.questionText}.
             Previous-User-Question:${taskQuestionObj.prevQuestionText}.
             Please complete and refine the user's current problem based on the previous user's problem`;
-            
+
+            console.log(refineQuestionPrompt);
+            refineQuestionPrompt = await this.composePrompt(runtime, refineQuestionPrompt, userId);
+            console.log("New: " + refineQuestionPrompt);
             const refineQuestion = await generateText({
                         runtime,
                         context: refineQuestionPrompt,
@@ -1448,9 +1457,14 @@ export class DirectClient {
             taskQuestionObj.questionText = refineQuestion;
         }
 
+        let finalQuestion = taskQuestionObj.questionText;
+        console.log(finalQuestion);
+        finalQuestion = await this.composePrompt(runtime, finalQuestion, userId);
+        console.log("New: " + finalQuestion);
         const finalAnswerStr = await handleProtocolsProcessing(
             runtime,
-            taskQuestionObj.questionText,
+            //taskQuestionObj.questionText,
+            finalQuestion,
             taskId
         );
 
