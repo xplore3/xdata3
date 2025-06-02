@@ -443,7 +443,7 @@ export class WechatHandler {
         try {
             return await generateText({
                 runtime,
-                context: this.client.composePrompt(runtime, input, userId),
+                context: await this.client.composePrompt(runtime, input, userId),
                 modelClass: ModelClass.SMALL,
             });
         }
@@ -542,7 +542,7 @@ export class WechatHandler {
             const prompt = `根据用户的输入内容：【${text}】，快速给出一个同种语言的简短回复，只给出结果就可以`;
             let resp = await generateText({
                 runtime,
-                context: this.client.composePrompt(runtime, prompt, userId),
+                context: await this.client.composePrompt(runtime, prompt, userId),
                 modelClass: ModelClass.SMALL,
             });
 
