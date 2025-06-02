@@ -1081,7 +1081,7 @@ export interface IDatabaseAdapter {
         params: {
             match_threshold?: number;
             count?: number;
-            roomId?: UUID;
+            userId?: UUID;
             agentId?: UUID;
             unique?: boolean;
             tableName: string;
@@ -1230,7 +1230,7 @@ export interface IMemoryManager {
         opts: {
             match_threshold?: number;
             count?: number;
-            roomId: UUID;
+            userId: UUID;
             unique?: boolean;
         },
     ): Promise<Memory[]>;

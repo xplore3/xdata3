@@ -1322,6 +1322,9 @@ export class DirectClient {
                 JSON.stringify(taskQuestionObj)
         );
         if (!withPreContext) {
+            //console.log(originQuestingText);
+            //originQuestingText = await this.composePrompt(runtime, originQuestingText, userId);
+            //console.log("New: " + originQuestingText);
             const quickResponse = await handleProtocolsForQuickResponce(
                 runtime,
                 originQuestingText,
@@ -1400,7 +1403,6 @@ export class DirectClient {
                         taskQuestionObj.prevQuestionText;
                 }
 
-                
                 console.log(promptQuestion);
                 promptQuestion = await this.composePrompt(runtime, promptQuestion, userId);
                 console.log("New: " + promptQuestion);
@@ -1669,7 +1671,7 @@ export class DirectClient {
             throw new Error("Agent not found");
         }
         const userId = stringToUuid(user ?? "user");
-        return composeContext({
+        return prompt + composeContext({
             state: await runtime.composeState(
                 { content: { text: prompt }, userId, roomId, agentId: runtime.agentId },
                 { agentName: runtime.character.name }

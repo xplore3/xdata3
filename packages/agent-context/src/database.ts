@@ -219,7 +219,7 @@ export abstract class DatabaseAdapter<DB = any> implements IDatabaseAdapter {
         params: {
             match_threshold?: number;
             count?: number;
-            roomId?: UUID;
+            userId?: UUID;
             agentId?: UUID;
             unique?: boolean;
             tableName: string;

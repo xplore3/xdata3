@@ -347,7 +347,7 @@ export class SqliteDatabaseAdapter
                 {
                     tableName,
                     agentId: memory.agentId,
-                    roomId: memory.roomId,
+                    userId: memory.userId,
                     match_threshold: 0.95, // 5% similarity threshold
                     count: 1,
                 }
@@ -435,7 +435,7 @@ export class SqliteDatabaseAdapter
         params: {
             match_threshold?: number;
             count?: number;
-            roomId?: UUID;
+            userId?: UUID;
             agentId: UUID;
             unique?: boolean;
             tableName: string;
@@ -457,9 +457,9 @@ export class SqliteDatabaseAdapter
             sql += " AND `unique` = 1";
         }
 
-        if (params.roomId) {
-            sql += " AND roomId = ?";
-            queryParams.push(params.roomId);
+        if (params.userId) {
+            sql += " AND userId = ?";
+            queryParams.push(params.userId);
         }
         sql += ` ORDER BY similarity DESC`;
 

@@ -20,7 +20,7 @@ async function get(
     }
 
     const processed = preprocess(message.content.text);
-    data3Logger.debug("Knowledge query:", {
+    data3Logger.log("Knowledge query:", {
         original: message.content.text,
         processed,
         length: processed?.length,
@@ -36,7 +36,7 @@ async function get(
     const fragments = await runtime.knowledgeManager.searchMemoriesByEmbedding(
         embedding,
         {
-            roomId: message.agentId,
+            userId: message.userId || message.agentId,
             count: 5,
             match_threshold: 0.1,
         }
@@ -160,7 +160,9 @@ export function preprocess(content: string): string {
             // Remove multiple newlines
             .replace(/\n{3,}/g, "\n\n")
             // Remove special characters except those common in URLs
-            .replace(/[^a-zA-Z0-9\s\-_./:?=&]/g, "")
+            //.replace(/[^a-zA-Z0-9\s\-_./:?=&]/g, "")
+            // Use Unicode property escapes for letters and numbers, keep Chinese
+            .replace(/[^\p{L}\p{N}\s\-_./:?=&]/gu, "")
             .trim()
             .toLowerCase()
     );
