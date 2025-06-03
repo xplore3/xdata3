@@ -18,6 +18,7 @@ import {
     type Memory,
     type Plugin,
     generateText,
+    parseJSONObjectFromText,
 } from "@data3os/agentcontext";
 
 import {
@@ -309,6 +310,65 @@ export class DirectClient {
                 } else {
                     withPreContext = true;
                 }
+                const messageId = stringToUuid(Date.now().toString());
+
+                // const attachments: Media[] = [];
+                // if ((req as any).file) {
+                //     const filePath = path.join(
+                //         process.cwd(),
+                //         "data",
+                //         "uploads",
+                //         (req as any).file.filename
+                //     );
+                //     attachments.push({
+                //         id: Date.now().toString(),
+                //         url: filePath,
+                //         title: (req as any).file.originalname,
+                //         source: "direct",
+                //         description: `Uploaded file: ${
+                //             (req as any).file.originalname
+                //         }`,
+                //         text: "",
+                //         contentType: (req as any).file.mimetype,
+                //     });
+                // }
+
+                const content: Content = {
+                    text: originQuestingText,
+                    // attachments,
+                    attachments: [],
+                    source: "direct",
+                    inReplyTo: undefined,
+                };
+
+                const userMessage = {
+                    content,
+                    userId,
+                    roomId,
+                    agentId: runtime.agentId,
+                };
+
+                const memory: Memory = {
+                    id: stringToUuid(messageId + "-" + userId),
+                    ...userMessage,
+                    agentId: runtime.agentId,
+                    userId,
+                    roomId,
+                    content,
+                    createdAt: Date.now(),
+                };
+
+                await runtime.messageManager.addEmbeddingToMemory(memory);
+                await runtime.messageManager.createMemory(memory);
+
+                let state = await runtime.composeState(userMessage, {
+                    agentName: runtime.character.name,
+                });
+
+                // const context = composeContext({
+                //     state,
+                //     template: messageHandlerTemplate,
+                // });
 
                 const responseStr = await this.handleMessageWithAI(
                     runtime,
@@ -318,6 +378,43 @@ export class DirectClient {
                     userId
                 );
                 this.concurrentNum --;
+
+                // const parsedContent = parseJSONObjectFromText(
+                //     responseStr
+                // ) as Content;
+                const parsedContent: Content = {
+                    text: responseStr,
+                    // attachments,
+                    attachments: [],
+                    source: "direct",
+                    inReplyTo: messageId,
+                };
+                // const response = await generateMessageResponse({
+                //     runtime: runtime,
+                //     context,
+                //     modelClass: ModelClass.LARGE,
+                // });
+
+                if (!parsedContent) {
+                    res.status(500).send(
+                        "No response from generateMessageResponse"
+                    );
+                    return;
+                }
+
+                // save response to memory
+                const responseMessage: Memory = {
+                    id: stringToUuid(messageId + "-" + runtime.agentId),
+                    ...userMessage,
+                    userId: runtime.agentId,
+                    content: parsedContent,
+                    embedding: getEmbeddingZeroVector(),
+                    createdAt: Date.now(),
+                };
+
+                await runtime.messageManager.createMemory(responseMessage);
+
+                state = await runtime.updateRecentMessageState(state);
                 //                 const finalAnswerStr = await handleProtocolsProcessing(
                 //     runtime,
                 //     originQuestingText,
