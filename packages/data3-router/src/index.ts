@@ -130,8 +130,7 @@ Response format should be formatted in a JSON block like this:
 \`\`\`
 `;
 
-export const dataHandlerTemplate =
-    `
+export const dataHandlerTemplate = `
 ##
 Some additional information about the task:
 #####################################
@@ -150,7 +149,14 @@ About {{agentName}}:
 {{recentMessages}}
 #####################################
 `;
-
+function stringToHash4(str) {
+    let hash = 0;
+    for (let char of str) {
+        const code = char.codePointAt(0);
+        hash = (hash * 31 + code) % 10000;
+    }
+    return hash.toString().padStart(4, "0");
+}
 export class DirectClient {
     public app: express.Application;
     public agents: Map<string, IAgentRuntime>; // container management
@@ -261,7 +267,7 @@ export class DirectClient {
                     });
                     return;
                 }
-                this.concurrentNum ++;
+                this.concurrentNum++;
                 const agentId = req.params.agentId;
                 const roomId = stringToUuid(
                     req.body.roomId ?? "default-room-" + agentId
@@ -377,7 +383,7 @@ export class DirectClient {
                     withPreContext,
                     userId
                 );
-                this.concurrentNum --;
+                this.concurrentNum--;
 
                 // const parsedContent = parseJSONObjectFromText(
                 //     responseStr
@@ -420,9 +426,14 @@ export class DirectClient {
                 //     originQuestingText,
                 //     taskId
                 // );
+                const verify_code = stringToHash4(taskId);
+                const responseTail = `\n
+                下载报告密码: ${verify_code}.
+                下载报告地址: https://data3.site/download?taskId=${taskId}&file_type=report
+                `;
                 res.json({
                     user: "Data3",
-                    text: responseStr,
+                    text: responseStr + responseTail,
                     taskId,
                     action: "NONE",
                 });
@@ -468,14 +479,7 @@ export class DirectClient {
                 const file_type = req.body.file_type;
                 const taskId = req.body.taskId;
                 const verify_code = req.body.verify_code;
-                function stringToHash4(str) {
-                    let hash = 0;
-                    for (let char of str) {
-                        const code = char.codePointAt(0);
-                        hash = (hash * 31 + code) % 10000;
-                    }
-                    return hash.toString().padStart(4, "0");
-                }
+
                 console.log("downloading: ", file_type, taskId, verify_code);
                 if (verify_code !== stringToHash4(taskId)) {
                     res.status(404).send("verify_code not match");
@@ -1386,23 +1390,30 @@ export class DirectClient {
         originQuestingText: string,
         taskId: string,
         withPreContext: boolean,
-        userId: string,
+        userId: string
     ): Promise<string> {
-        console.log("handleMessageWithAI originQuestingText:  ", originQuestingText);
+        console.log(
+            "handleMessageWithAI originQuestingText:  ",
+            originQuestingText
+        );
         if (!originQuestingText) {
             return null;
         }
-        
-        const promptInjectBaseUserInfo = await this.composePrompt(runtime, originQuestingText, userId);
+
+        const promptInjectBaseUserInfo = await this.composePrompt(
+            runtime,
+            originQuestingText,
+            userId
+        );
         console.log(`handleProtocolsForQuickResponce promptInjectBaseInfo:  
         ============================begin===========================\n
         ${promptInjectBaseUserInfo}
         ===========================end============================\n`);
 
         // Get lastest memory // refresh taskQuestionObj
-        let taskQuestionObj = await runtime.cacheManager.get(
+        let taskQuestionObj = (await runtime.cacheManager.get(
             "XData_task_question_" + taskId
-        ) as TaskQuestionObj | undefined;
+        )) as TaskQuestionObj | undefined;
         if (!taskQuestionObj) {
             taskQuestionObj = {
                 questionText: "",
@@ -1509,7 +1520,11 @@ export class DirectClient {
                 }
 
                 console.log(promptQuestion);
-                promptQuestion = await this.composePrompt(runtime, promptQuestion, userId);
+                promptQuestion = await this.composePrompt(
+                    runtime,
+                    promptQuestion,
+                    userId
+                );
                 console.log("New: " + promptQuestion);
                 const obj = await handleProtocolsForPrompt(
                     runtime,
@@ -1544,18 +1559,22 @@ export class DirectClient {
          * key in cache: XData_task_question_{taskId}
          */
 
-        if(taskQuestionObj?.prevQuestionText) {
+        if (taskQuestionObj?.prevQuestionText) {
             let refineQuestionPrompt = `Current-User-Question:${taskQuestionObj.questionText}.
             Previous-User-Question:${taskQuestionObj.prevQuestionText}.
             Please complete and refine the user's current problem based on the previous user's problem`;
 
             console.log(refineQuestionPrompt);
-            refineQuestionPrompt = await this.composePrompt(runtime, refineQuestionPrompt, userId);
+            refineQuestionPrompt = await this.composePrompt(
+                runtime,
+                refineQuestionPrompt,
+                userId
+            );
             console.log("New: " + refineQuestionPrompt);
             const refineQuestion = await generateText({
-                        runtime,
-                        context: refineQuestionPrompt,
-                        modelClass: ModelClass.MEDIUM,
+                runtime,
+                context: refineQuestionPrompt,
+                modelClass: ModelClass.MEDIUM,
             });
             console.log(
                 `[[Refine with Previous: Cur: ${taskQuestionObj.questionText} +++++  Pre: ${taskQuestionObj.prevQuestionText} ====>  ${refineQuestion} ]]`
@@ -1566,13 +1585,17 @@ export class DirectClient {
 
         let finalQuestion = taskQuestionObj.questionText;
         console.log(finalQuestion);
-        finalQuestion = await this.composePrompt(runtime, finalQuestion, userId);
+        finalQuestion = await this.composePrompt(
+            runtime,
+            finalQuestion,
+            userId
+        );
         console.log("New: " + finalQuestion);
         const finalAnswerStr = await handleProtocolsProcessing(
             runtime,
             promptInjectBaseUserInfo,
             // finalQuestion,
-              taskQuestionObj.questionText,
+            taskQuestionObj.questionText,
             taskId
         );
 
@@ -1771,19 +1794,31 @@ export class DirectClient {
         }
     }
 
-    async composePrompt(runtime: IAgentRuntime, prompt: string, user: string): Promise<string> {
+    async composePrompt(
+        runtime: IAgentRuntime,
+        prompt: string,
+        user: string
+    ): Promise<string> {
         const roomId = stringToUuid("default-data-room-" + user);
         if (!runtime) {
             throw new Error("Agent not found");
         }
         const userId = stringToUuid(user ?? "user");
-        return prompt + composeContext({
-            state: await runtime.composeState(
-                { content: { text: prompt }, userId, roomId, agentId: runtime.agentId },
-                { agentName: runtime.character.name }
-            ),
-            template: dataHandlerTemplate,
-        });
+        return (
+            prompt +
+            composeContext({
+                state: await runtime.composeState(
+                    {
+                        content: { text: prompt },
+                        userId,
+                        roomId,
+                        agentId: runtime.agentId,
+                    },
+                    { agentName: runtime.character.name }
+                ),
+                template: dataHandlerTemplate,
+            })
+        );
     }
 }
 
