@@ -215,9 +215,26 @@ export const handleProtocolsForQuickResponce = async (
 
         const lowerText = text.toLowerCase();
 
-        return keywords.some((keyword) =>
-            lowerText.includes(keyword.toLowerCase())
-        );
+        if (
+            keywords.some((keyword) =>
+                lowerText.includes(keyword.toLowerCase())
+            )
+        ) {
+            return true;
+        }
+
+        const pattern1 = /用户.*资料/i;
+        const pattern2 = /用户.*ID/i;
+        const pattern3 = /查询.*用户/i;
+
+        if (pattern1.test(text)
+            || pattern2.test(text)
+            || pattern3.test(text)
+        ) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -233,9 +250,28 @@ export const handleProtocolsForQuickResponce = async (
     [BACKGROUND KNOWLEDGE: ${promptInjectBaseUserInfoStr}]
     [USER QUESTION: ${originText}]
     `;
+
+    //  // 测试用例：
+    // console.log(containsKeywords("Redbook的笔记获得很多likes")); // true（匹配"likes"）
+    // console.log(containsKeywords("USERID是必填字段")); // true（匹配"UserID"关键词）
+    // console.log(containsKeywords("这篇和品牌方无关")); // true（匹配"品牌方"关键词）
+    // console.log(containsKeywords("Hello World")); // false（无匹配）
+    // console.log(containsKeywords("Very Good")); // false（无匹配）
+    // console.log(containsKeywords("很好，回答的不错")); // false（无匹配）
+
+    // 新增测试用例：
+    // console.log(containsKeywords("用户123资料")); // true（匹配"用户.*资料"模式）
+    // console.log(containsKeywords("用户abc id是唯一的")); // true（匹配"用户.*ID"模式）
+    // console.log(containsKeywords("用户资料很重要")); // true（匹配"用户.*资料"，xxxx可为0字符）
+    // console.log(containsKeywords("UserID必须填写")); // true（匹配"UserID"关键词，非新模式）
+    // console.log(containsKeywords("ID 资料用户")); // false（不匹配模式，顺序错误）
+
     /** quick responce, without query data. */
-    if(!containsKeywords(originText)) {
-        console.log("handleProtocolsForQuickResponce without query data. originText: ", originText);
+    if (!containsKeywords(originText)) {
+        console.log(
+            "handleProtocolsForQuickResponce without query data. originText: ",
+            originText
+        );
         const responce = await generateText({
             runtime,
             context: promptInjectBaseUserInfoAndOriginText,
