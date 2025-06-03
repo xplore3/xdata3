@@ -426,14 +426,9 @@ export class DirectClient {
                 //     originQuestingText,
                 //     taskId
                 // );
-                const verify_code = stringToHash4(taskId);
-                const responseTail = `\n
-                下载报告密码: ${verify_code}.
-                下载报告地址: https://data3.site/download?taskId=${taskId}&file_type=report
-                `;
                 res.json({
                     user: "Data3",
-                    text: responseStr + responseTail,
+                    text: responseStr,
                     taskId,
                     action: "NONE",
                 });

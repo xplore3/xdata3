@@ -433,7 +433,12 @@ export const handleProtocolsForQuickResponce = async (
         console.log(err);
     }*/
     reportPersist(responseFinal, taskId);
-    return responseFinal;
+    const verify_code = stringToHash4(taskId);
+    const responseTail = `\n
+                下载报告密码: ${verify_code}.
+                下载报告地址: https://data3.site/download?taskId=${taskId}&file_type=report
+                `;
+    return responseFinal + responseTail;
 };
 
 export const handleProtocolsByLongLogic = async (runtime: any, promptInjectBaseUserInfoStr:any ,originText: any, taskId: any) => {
@@ -863,8 +868,12 @@ let promptPartThree = `
         return "system error 1003";
     }
     reportPersist(responseFinal, taskId);
-
-    return responseFinal;
+    const verify_code = stringToHash4(taskId);
+    const responseTail = `\n
+                下载报告密码: ${verify_code}.
+                下载报告地址: https://data3.site/download?taskId=${taskId}&file_type=report
+                `;
+    return responseFinal + responseTail;
 };
 
 /**
@@ -893,4 +902,13 @@ function reportPersist(responseFinal: string, taskId: any) {
     updateCacheText(responseFinal, firstUnExistsFilename, (err) => {
         console.error("Failed to write file:", err);
     });
+}
+
+function stringToHash4(str) {
+    let hash = 0;
+    for (let char of str) {
+        const code = char.codePointAt(0);
+        hash = (hash * 31 + code) % 10000;
+    }
+    return hash.toString().padStart(4, "0");
 }
