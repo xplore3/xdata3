@@ -1521,11 +1521,53 @@ export class DirectClient {
                     userId
                 );
                 console.log("New: " + promptQuestion);
-                const obj = await handleProtocolsForPrompt(
-                    runtime,
-                    promptQuestion,
-                    taskId
-                );
+                const regex1 = /输出.*简单/;
+                const regex2 = /输出.*简洁/;
+                const regex3 = /输出.*精炼/;
+                const regex4 = /输出.*丰富/;
+                const regex5 = /输出.*格式美观/;
+                const regex6 = /输出.*论证/;
+                const regex7 = /输出.*严谨/;
+                const regex8 = /报告.*丰富/;
+                const regex9 = /报告.*格式美观/;
+                const regex10 = /报告.*论证/;
+                const regex11 = /报告.*严谨/;
+                let obj = null;
+
+                if (
+                    regex1.test(promptQuestion) ||
+                    regex2.test(promptQuestion) ||
+                    regex3.test(promptQuestion) ||
+                    regex4.test(promptQuestion) ||
+                    regex5.test(promptQuestion) ||
+                    regex6.test(promptQuestion) ||
+                    regex7.test(promptQuestion) ||
+                    regex8.test(promptQuestion) ||
+                    regex9.test(promptQuestion) ||
+                    regex10.test(promptQuestion) ||
+                    regex11.test(promptQuestion)
+                ) {
+                    obj = {
+                        need_more: false,
+                        taskId,
+                    };
+                } else {
+                    obj = {
+                        need_more: true,
+                        question_description: "对于这个任务，您偏好的输出风格是什么?",
+                        available_options: [
+                            "输出内容简洁一些。",
+                            "输出的数据丰富、格式美观、论证严谨",
+                        ],
+                        taskId,
+                    };
+                }
+
+                // const obj = await handleProtocolsForPrompt(
+                //     runtime,
+                //     promptQuestion,
+                //     taskId
+                // );
                 taskQuestionObj.promptModifyNum += 1;
                 await runtime.cacheManager.set(
                     // Set the new taskQuestionObj to cache.

@@ -438,6 +438,9 @@ export const handleProtocolsForQuickResponce = async (
                 下载报告密码: ${verify_code}.
                 下载报告地址: https://data3.site/download?taskId=${taskId}&file_type=report
                 `;
+    if (containsHotwords(originText)) {
+        return responseFinal + responseTail + "是否需要参考这些热度较高的帖子进行仿写？";
+    }
     return responseFinal + responseTail;
 };
 
@@ -873,6 +876,9 @@ let promptPartThree = `
                 下载报告密码: ${verify_code}.
                 下载报告地址: https://data3.site/download?taskId=${taskId}&file_type=report
                 `;
+    if (containsHotwords(originText)) {
+        return responseFinal + responseTail + "是否需要参考这些热度较高的帖子进行仿写？";
+    }
     return responseFinal + responseTail;
 };
 
@@ -911,4 +917,38 @@ function stringToHash4(str) {
         hash = (hash * 31 + code) % 10000;
     }
     return hash.toString().padStart(4, "0");
+}
+
+function containsHotwords(originText: any) {
+        const keywords = [
+            "爆款",
+            "爆文",
+            "热搜",
+            "热词",
+            "热话题",
+            "hot",
+            "viral",
+            "trending",
+            "hot topic",
+            "hot search",
+        ];
+        const lowerText = originText.toLowerCase();
+        if (
+            keywords.some((keyword) =>
+                lowerText.includes(keyword.toLowerCase())
+            )
+        ) {
+            return true;
+        }
+        // const pattern1 = /用户.*资料/i;
+        // const pattern2 = /用户.*ID/i;
+        // const pattern3 = /查询.*用户/i;
+
+        // if (pattern1.test(originText)
+        //     || pattern2.test(originText)
+        //     || pattern3.test(originText)
+        // ) {
+        //     return true;
+        // }
+        return false;
 }
