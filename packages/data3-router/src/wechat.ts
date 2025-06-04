@@ -412,6 +412,7 @@ export class WechatHandler {
                 },
                 data: {
                     taskId,
+                    userId,
                     text: input
                 }
             };
