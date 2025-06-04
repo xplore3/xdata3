@@ -1622,9 +1622,12 @@ export class DirectClient {
          */
 
         if (taskQuestionObj?.prevQuestionText) {
-            let refineQuestionPrompt = `Current-User-Question:${taskQuestionObj.questionText}.
-            Previous-User-Question:${taskQuestionObj.prevQuestionText}.
-            Please complete and refine the user's current problem based on the previous user's problem`;
+            let refineQuestionPrompt = `
+            Please summarize the user's original question and additional information in one sentence. A one-sentence summary is sufficient, no explanation is needed.
+                    This sentence should not be a summary, but rather a statement from the user's perspective that a question or task has been raised to the AI Agent.
+            Current-User-Question:${taskQuestionObj.questionText}.
+            Previous-User-Question(No need to answer, just provide context): ${taskQuestionObj.prevQuestionText}.
+            `;
 
             console.log(refineQuestionPrompt);
             refineQuestionPrompt = await this.composePrompt(

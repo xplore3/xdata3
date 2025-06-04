@@ -16,7 +16,7 @@ export function appendToChatCache(content: string, filename: string, onError?: (
             return;
         }
         console.log("Content successfully appended to file: ", filePath);
-        console.log("Content: \n", content);
+        console.log("Content: \n", content.slice(0, 200));
     });
 }
 
@@ -47,6 +47,6 @@ export function updateCacheText(content: string, filename: string, onError?: (er
             return;
         }
         console.log("Content successfully overwritten to file: ", filePath);
-        console.log(`======================== ${filename} begin ==================== \n ${content} \n===================== ${filename} end =======================`);
+        console.log(`======================== ${filename} begin ==================== \n ${content.slice(0, 200)}\n ... \n===================== ${filename} end =======================`);
     });
 }
