@@ -24,7 +24,7 @@ class APIWrapperFactory {
     ): Promise<any | undefined> {
         // {"route": "notes_search","params": {"key1": "v1","key2": "v2"}}
         console.log(`executeRequest params: ${JSON.stringify(obj)}`);
-        let result;
+        let result = [];
         switch (obj.route) {
             case "get_user":
                 console.log(`get_user params: ${JSON.stringify(obj)}`);
@@ -389,33 +389,46 @@ class APIWrapperFactory {
 
             case "notes_search":
                 try {
-                    const keyword = obj?.params?.keyword || obj?.params?.key1 || "";
+                    const keyword =
+                        obj?.params?.keyword || obj?.params?.key1 || "";
                     const page = obj?.params?.page || 1;
-                    const url = `http://47.120.60.92:8080/api/search?keyword=${keyword}&page=${page}&sort=popularity_descending`;
-                    console.log(`executeRequest url by params: ${url}`);
-                    const response = await axios.get(url);
-                    console.log(
-                        `executeRequest response: ${JSON.stringify(
-                            response.data
-                        ).slice(0, 300)}`
-                    );
+                    // Get more data.
+                    // page 1: get data from 1 to 5.
+                    // page 2: get data from 6 to 10.
+                    const pageStart = (page - 1) * 5 + 1;
+                    const pageEnd = page * 5;
+                    for (let mPage = pageStart; mPage <= pageEnd; mPage++) {
+                        let tempResult = [];
+                        const url = `http://47.120.60.92:8080/api/search?keyword=${keyword}&page=${mPage}&sort=popularity_descending`;
+                        console.log(`executeRequest url by params: ${url}`);
+                        const response = await axios.get(url);
+                        console.log(
+                            `executeRequest response: ${JSON.stringify(
+                                response.data
+                            ).slice(0, 300)}`
+                        );
 
-                    console.log(
-                        `executeRequest response.data.data.items: ${response.data?.data?.items?.length}`
-                    );
+                        console.log(
+                            `executeRequest response.data.data.items: ${response.data?.data?.items?.length}`
+                        );
 
-                    result = (response.data?.data?.items || []).map((obj) => ({
-                        author: obj?.note?.user?.nickname || "unknown",
-                        collected_count: obj?.note?.collected_count || 0,
-                        shared_count: obj?.note?.shared_count || 0,
-                        liked_count: obj?.note?.liked_count || 0,
-                        comments_count: obj?.note?.comments_count || 0,
-                        id: obj?.note?.id,
-                        title: obj?.note?.title,
-                        desc: obj?.note?.desc || "",
-                        timestamp: obj?.note?.timestamp || 0,
-                    }));
-                    console.log(`executeRequest result: ${result.length}`);
+                        tempResult = (response.data?.data?.items || []).map(
+                            (obj) => ({
+                                author: obj?.note?.user?.nickname || "unknown",
+                                collected_count:
+                                    obj?.note?.collected_count || 0,
+                                shared_count: obj?.note?.shared_count || 0,
+                                liked_count: obj?.note?.liked_count || 0,
+                                comments_count: obj?.note?.comments_count || 0,
+                                id: obj?.note?.id,
+                                title: obj?.note?.title,
+                                desc: obj?.note?.desc || "",
+                                timestamp: obj?.note?.timestamp || 0,
+                            })
+                        );
+                        result = result.concat(tempResult);
+                        console.log(`executeRequest result: ${result.length}`);
+                    }
                 } catch (error) {
                     console.error("Error fetching data:", error);
                 }
