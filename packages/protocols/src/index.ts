@@ -438,10 +438,15 @@ export const handleProtocolsForQuickResponce = async (
                 下载报告密码: ${verify_code}.
                 下载报告地址: https://data3.site/download?taskId=${taskId}&file_type=report
                 `;
-    if (containsHotwords(originText)) {
+    if (containsHotwords(originText) && !responseFinal.includes("【人工】")) {
         return responseFinal + responseTail + "是否需要参考这些热度较高的帖子进行仿写？";
     }
-    return responseFinal + responseTail;
+
+    if(!responseFinal.includes("【人工】")) {
+        return responseFinal + responseTail;
+    } else {
+       return responseFinal;
+    }
 };
 
 export const handleProtocolsByLongLogic = async (runtime: any, promptInjectBaseUserInfoStr:any ,originText: any, taskId: any) => {
@@ -876,10 +881,13 @@ let promptPartThree = `
                 下载报告密码: ${verify_code}.
                 下载报告地址: https://data3.site/download?taskId=${taskId}&file_type=report
                 `;
-    if (containsHotwords(originText)) {
+    if (containsHotwords(originText) && !responseFinal.includes("【人工】")) {
         return responseFinal + responseTail + "是否需要参考这些热度较高的帖子进行仿写？";
     }
-    return responseFinal + responseTail;
+    if(!responseFinal.includes("【人工】")) {
+        return responseFinal + responseTail;
+    }
+    return responseFinal;
 };
 
 /**
