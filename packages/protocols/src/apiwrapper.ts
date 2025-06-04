@@ -110,7 +110,7 @@ class APIWrapperFactory {
                         default:
                             genderStr = "未知性别";
                     }
-                    result = {
+                    const userprofile = {
                         desc,
                         fans,
                         follows,
@@ -122,9 +122,10 @@ class APIWrapperFactory {
                         note_count: notes,
                         tags,
                     };
+                    return userprofile;
                 } catch (error) {
                     console.error("Failed to fetch user info:", error);
-                    result = "Feach data error, msg: " + error.msg;
+                    return "Feach data error, msg: " + error.msg;
                 }
                 break;
             case "hot_words":
@@ -243,12 +244,14 @@ class APIWrapperFactory {
                 }
                 break;
             case "notes_comment_by_next_page":
+                for (let i = 0; i < 4; i++) {
+                let tempResult = [];
                 const lastCursor =
                     APIWrapperFactory.cursorMap.get(taskId) || "";
                 if (lastCursor === "blank_holder") {
                     console.log(`executeRequest lastCursor is blank_holder`);
                     APIWrapperFactory.cursorMap.set(taskId, "");
-                    return;
+                    return result;
                 }
                 const urlWithparams = `http://47.120.60.92:8080/api/comment?noteId=${obj?.params?.noteId}&lastCursor=${lastCursor}`;
                 console.log(`executeRequest urlWithparams: ${urlWithparams}`);
@@ -308,12 +311,17 @@ class APIWrapperFactory {
                     response.data?.data?.comments || []
                 );
 
-                result = filterComments(comments);
+
+                tempResult = filterComments(comments);
+                result = result.concat(tempResult);
+                }
                 console.log(`executeRequest result: ${result.length}`);
                 break;
 
             case "get_note_list":
                 {
+                    for (let i = 0; i < 4; i++) {
+                        
                     const note_curosr_key = "get_note_list_" + taskId;
                     const lastCursor =
                         APIWrapperFactory.cursorMap.get(note_curosr_key) || "";
@@ -322,7 +330,7 @@ class APIWrapperFactory {
                             `executeRequest lastCursor is blank_holder`
                         );
                         APIWrapperFactory.cursorMap.set(note_curosr_key, "");
-                        return null;
+                        return result;
                     }
                     const urlWithparams = `http://47.120.60.92:8080/api/noteList?userId=${obj?.params?.userId}&lastCursor=${lastCursor}`;
                     console.log(
@@ -355,7 +363,8 @@ class APIWrapperFactory {
                         });
                     }
 
-                    result = filterNotes(response.data?.data?.notes || []);
+                    const tempResult = filterNotes(response.data?.data?.notes || []);
+                    result = result.concat(tempResult);
                     // const cursor = lastestCursor;
                     if (lastestCursor) {
                         // try {
@@ -382,7 +391,8 @@ class APIWrapperFactory {
                             "blank_holder"
                         );
                     }
-                    // console.log(`executeRequest result 2333333: ${JSON.stringify(result)}`);
+                    }
+                    console.log(`executeRequest result size: ${result.length}`);
                 }
 
                 break;
