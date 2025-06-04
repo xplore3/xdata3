@@ -68,7 +68,7 @@ export class PromptController {
             try {
                 const userId = stringToUuid(req.body.userId ?? "user");
                 for (const item of req.body.knowledges) {
-                    await knowledge.set(this, {
+                    await knowledge.set(runtime, {
                         id: stringToUuid(item),
                         userId: userId,
                         content: {

@@ -8,6 +8,7 @@ import { decrypt, encrypt, getJsApiSignature, getSignature } from "@wecom/crypto
 import {
     ModelClass,
     generateText,
+    stringToUuid,
     type IAgentRuntime,
     createAccountByExternalData,
 } from "@data3os/agentcontext";
@@ -443,7 +444,7 @@ export class WechatHandler {
         try {
             return await generateText({
                 runtime,
-                context: await this.client.composePrompt(runtime, input, userId),
+                context: await this.client.composePrompt(runtime, input, stringToUuid(userId)),
                 modelClass: ModelClass.SMALL,
             });
         }
@@ -542,7 +543,7 @@ export class WechatHandler {
             const prompt = `根据用户的输入内容：【${text}】，快速给出一个同种语言的简短回复，只给出结果就可以`;
             let resp = await generateText({
                 runtime,
-                context: await this.client.composePrompt(runtime, prompt, userId),
+                context: await this.client.composePrompt(runtime, prompt, stringToUuid(userId)),
                 modelClass: ModelClass.SMALL,
             });
 

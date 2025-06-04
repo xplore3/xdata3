@@ -17,6 +17,7 @@ import {
     type Media,
     type Memory,
     type Plugin,
+    type UUID,
     generateText,
     parseJSONObjectFromText,
 } from "@data3os/agentcontext";
@@ -1397,7 +1398,7 @@ export class DirectClient {
         originQuestingText: string,
         taskId: string,
         withPreContext: boolean,
-        userId: string
+        userId: UUID
     ): Promise<string> {
         console.log(
             "handleMessageWithAI originQuestingText:  ",
@@ -1846,13 +1847,12 @@ export class DirectClient {
     async composePrompt(
         runtime: IAgentRuntime,
         prompt: string,
-        user: string
+        userId: UUID
     ): Promise<string> {
-        const roomId = stringToUuid("default-data-room-" + user);
+        const roomId = stringToUuid("default-data-room-" + userId);
         if (!runtime) {
             throw new Error("Agent not found");
         }
-        const userId = stringToUuid(user ?? "user");
         return (
             prompt +
             composeContext({
