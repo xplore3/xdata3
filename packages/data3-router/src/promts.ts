@@ -1,10 +1,12 @@
 import { DirectClient } from "./index";
 import {
     type IAgentRuntime,
+    knowledge,
+    stringToUuid,
 } from "@data3os/agentcontext";
 import express from "express";
 
-export class PromptTemplates {
+export class PromptController {
     constructor(private client: DirectClient) {}
 
     userId: string = null;
@@ -48,11 +50,50 @@ export class PromptTemplates {
         const runtime = this.getAgentId(req, res);
         if (runtime) {
             try {
-                const prompts = await PromptTemplates.getPromptTemplates();
+                const prompts = await PromptController.getPromptTemplates();
                 const output: string = prompts.map((line, i) => `(${i + 1}). ${line}`).join('\n\n');
                 res.send(output);
             } catch (err) {
-                console.error('[WecomListener] Error handling callback:', err)
+                console.error('[PromptController] Error handling template:', err)
+                res.send('fail')
+            }
+        }
+    }
+
+    async handleAddKnowledge(req: express.Request, res: express.Response) {
+        console.log("handleAddKnowledge");
+        console.log(req.query);
+        const runtime = this.getAgentId(req, res);
+        if (runtime) {
+            try {
+                const userId = stringToUuid(req.body.userId ?? "user");
+                for (const item of req.body.knowledges) {
+                    await knowledge.set(this, {
+                        id: stringToUuid(item),
+                        userId: userId,
+                        content: {
+                            text: item,
+                        },
+                    });
+                }
+                res.send('success');
+            } catch (err) {
+                console.error('[PromptController] Error handling addknowledge:', err)
+                res.send('fail')
+            }
+        }
+    }
+
+    async handleSwitchModelProvider(req: express.Request, res: express.Response) {
+        console.log("handleSwitchModelProvider");
+        console.log(req.query);
+        const runtime = this.getAgentId(req, res);
+        if (runtime) {
+            try {
+                runtime.modelProvider = req.body.model_provider;
+                res.send('success');
+            } catch (err) {
+                console.error('[PromptController] Error handling provider:', err)
                 res.send('fail')
             }
         }

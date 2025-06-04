@@ -1,4 +1,4 @@
-import { dataHandlerTemplate, DirectClient } from "./index";
+import { DirectClient } from "./index";
 import express from "express";
 import axios from 'axios';
 

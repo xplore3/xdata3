@@ -42,7 +42,7 @@ import { z } from "zod";
 import { createApiRouter } from "./api.ts";
 import { createVerifiableLogApiRouter } from "./verifiable-log-api.ts";
 import { WechatHandler } from "./wechat.ts";
-import { PromptTemplates } from "./promts.ts";
+import { PromptController } from "./promts.ts";
 import { fileURLToPath } from "url";
 
 const storage = multer.diskStorage({
@@ -687,11 +687,23 @@ export class DirectClient {
             }
         );
 
-        const templateHandler = new PromptTemplates(this);
+        const templateHandler = new PromptController(this);
         this.app.get(
             "/:agentId/prompt_templates",
             async (req: express.Request, res: express.Response) => {
                 await templateHandler.handlePromptTemplates(req, res);
+            }
+        );
+        this.app.post(
+            "/:agentId/add_knowledge",
+            async (req: express.Request, res: express.Response) => {
+                await templateHandler.handleAddKnowledge(req, res);
+            }
+        );
+        this.app.post(
+            "/:agentId/switch_model",
+            async (req: express.Request, res: express.Response) => {
+                await templateHandler.handleSwitchModelProvider(req, res);
             }
         );
 
