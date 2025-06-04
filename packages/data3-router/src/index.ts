@@ -150,6 +150,11 @@ About {{agentName}}:
 {{recentMessages}}
 #####################################
 `;
+// Note(Important) : The message list is too long and may be trimmed sometimes.
+// So put the messages({{recentMessages}}) at the end, trim some old ones and keep the new ones.
+// Prioritize removing messages over other fields.
+
+
 function stringToHash4(str) {
     let hash = 0;
     for (let char of str) {
@@ -270,10 +275,12 @@ export class DirectClient {
                 }
                 this.concurrentNum++;
                 const agentId = req.params.agentId;
-                const roomId = stringToUuid(
-                    req.body.roomId ?? "default-room-" + agentId
-                );
-                const userId = stringToUuid(req.body.userId ?? "user");
+                const username = req.body.userId ?? "user";
+                // const roomId = stringToUuid(
+                //    req.body.roomId ?? "default-room-" + agentId
+                // );
+                const userId = stringToUuid(username);
+                const roomId = stringToUuid("default-data-room-" + userId);
 
                 let runtime = this.agents.get(agentId);
 
@@ -367,6 +374,7 @@ export class DirectClient {
 
                 await runtime.messageManager.addEmbeddingToMemory(memory);
                 await runtime.messageManager.createMemory(memory);
+                // console.log("userMessage :", userMessage , username);
 
                 let state = await runtime.composeState(userMessage, {
                     agentName: runtime.character.name,
@@ -382,6 +390,7 @@ export class DirectClient {
                     originQuestingText,
                     taskId,
                     withPreContext,
+                    username,
                     userId
                 );
                 this.concurrentNum--;
@@ -1398,6 +1407,7 @@ export class DirectClient {
         originQuestingText: string,
         taskId: string,
         withPreContext: boolean,
+        username: string,
         userId: UUID
     ): Promise<string> {
         console.log(
@@ -1408,11 +1418,13 @@ export class DirectClient {
             return null;
         }
 
-        const promptInjectBaseUserInfo = await this.composePrompt(
+        // context(chat history & background knowledge) length not exceed 20k
+        const baseUserInfo = await this.composePrompt(
             runtime,
             originQuestingText,
             userId
         );
+        const promptInjectBaseUserInfo = baseUserInfo.slice(0, 20000);
         console.log(`handleProtocolsForQuickResponce promptInjectBaseInfo:  
         ============================begin===========================\n
         ${promptInjectBaseUserInfo}
@@ -1527,13 +1539,13 @@ export class DirectClient {
                         taskQuestionObj.prevQuestionText;
                 }
 
-                console.log(promptQuestion);
-                promptQuestion = await this.composePrompt(
-                    runtime,
-                    promptQuestion,
-                    userId
-                );
-                console.log("New: " + promptQuestion);
+                // console.log(promptQuestion);
+                // promptQuestion = await this.composePrompt(
+                //     runtime,
+                //     promptQuestion,
+                //     userId
+                // );
+                // console.log("New: " + promptQuestion);
                 const regex1 = /输出.*简单/;
                 const regex2 = /输出.*简洁/;
                 const regex3 = /输出.*精炼/;
@@ -1853,16 +1865,19 @@ export class DirectClient {
         if (!runtime) {
             throw new Error("Agent not found");
         }
-        return (
-            prompt +
-            composeContext({
-                state: await runtime.composeState(
-                    {
+        const userMessage = {
                         content: { text: prompt },
                         userId,
                         roomId,
                         agentId: runtime.agentId,
-                    },
+                    };
+        console.log("userMessage: ", userMessage, userId);
+
+        return (
+            prompt +
+            composeContext({
+                state: await runtime.composeState(
+                    userMessage,
                     { agentName: runtime.character.name }
                 ),
                 template: dataHandlerTemplate,
