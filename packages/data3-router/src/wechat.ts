@@ -15,7 +15,7 @@ import {
     handleProtocols,
 } from "data3-protocols";
 import cron from "node-cron";
-import { PromptTemplates } from "./promts";
+import { PromptController } from "./promts";
 
 
 export class WechatHandler {
@@ -327,7 +327,7 @@ export class WechatHandler {
     async checkCommandMenu(cmd: string, userId: string, openKfId: string) {
         try {
             if (cmd === '模板' || cmd === '获取模板' || cmd === '所有模板') {
-                const prompts = await PromptTemplates.getPromptTemplates();
+                const prompts = await PromptController.getPromptTemplates();
                 const output: string = `${prompts.map((line, i) => `${i + 1}. ${line}`).join('\n\n')}`;
                 await this.sendMessage(userId, openKfId, output);
                 return true;
