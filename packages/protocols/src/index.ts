@@ -546,7 +546,7 @@ let promptPartThree = `
     
     do {
         ++step;
-        if (step > 15) {
+        if (step > 12) {
             console.log(`handleProtocols step: ${step} is too much, break.`);
             break;
         }
