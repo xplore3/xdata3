@@ -522,10 +522,11 @@ export class DirectClient {
 
                     if (fs.existsSync(lastestExistsFilepath)) {
                         if (!fs.existsSync(pdfFilepath)) {
-                            await convertMarkdownToPdf(
-                                lastestExistsFilepath,
-                                pdfFilepath
-                            );
+                            // TODO: The function costs too much time.
+                            // await convertMarkdownToPdf(
+                            //     lastestExistsFilepath,
+                            //     pdfFilepath
+                            // );
                         }
                         if (fs.existsSync(pdfFilepath)) {
                             res.download(pdfFilepath, () => {});
