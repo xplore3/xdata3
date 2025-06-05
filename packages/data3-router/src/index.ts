@@ -452,7 +452,7 @@ export class DirectClient {
             "/:agentId/download",
             // upload.single("file"),
             async (req: express.Request, res: express.Response) => {
-                console.log("downloading: ", req.body);
+                console.log("downloading, body: ", req.body);
                 const agentId = req.params.agentId;
                 const roomId = stringToUuid(
                     req.body.roomId ?? "default-room-" + agentId
@@ -492,6 +492,98 @@ export class DirectClient {
                     res.status(404).send("verify_code not match");
                     return;
                 }
+
+                // download the latest report.
+                let lastestExistsFilepath = "";
+                let pdfFilepath = "";
+
+                if ("report" === file_type) {
+                    // There may be multiple reports, starting from 1 and growing naturally to 2, 3, 4, 5...,10;
+                    for (let i = 1; i <= 10; i++) {
+                        const filename = taskId + `_report${i}.txt`;
+                        const filePdfname = taskId + `_report${i}.pdf`;
+                        // const filename = 'abc.pdf'; // Test: can also download pdf.
+                        const filePath = path.join(
+                            process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
+                            "data",
+                            filename
+                        );
+                        if (fs.existsSync(filePath)) {
+                            lastestExistsFilepath = filePath;
+                            pdfFilepath = path.join(
+                                process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
+                                "data",
+                                filePdfname
+                            );
+                        } else {
+                            break;
+                        }
+                    }
+
+                    if (fs.existsSync(lastestExistsFilepath)) {
+                        if (!fs.existsSync(pdfFilepath)) {
+                            // TODO: The function costs too much time.
+                            // await convertMarkdownToPdf(
+                            //     lastestExistsFilepath,
+                            //     pdfFilepath
+                            // );
+                        }
+                        if (fs.existsSync(pdfFilepath)) {
+                            res.download(pdfFilepath, () => {});
+                            console.log("downloading: " + pdfFilepath);
+                            return;
+                        }
+
+                        res.download(lastestExistsFilepath, () => {});
+                        console.log("downloading: " + lastestExistsFilepath);
+                        return;
+                    } else {
+                        console.log(
+                            "not exist filePath: " + lastestExistsFilepath
+                        );
+                        res.status(404).send(
+                            "File not found filePath: " + lastestExistsFilepath
+                        );
+                    }
+                } else if ("data" === file_type) {
+                    const filename = taskId + `_data.txt`;
+                    // const filename = 'abc.pdf'; // Test: can also download pdf.
+                    const filePath = path.join(
+                        process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
+                        "data",
+                        filename
+                    );
+                    if (fs.existsSync(filePath)) {
+                        res.download(filePath, () => {
+                            // auto delete file( if need)
+                            //   fs.unlinkSync(filePath);
+                        });
+                        console.log("downloading: " + filePath);
+                    } else {
+                        console.log("not exist filePath: " + filePath);
+                        res.status(404).send(
+                            "File not found filePath: " + filePath
+                        );
+                    }
+                } else {
+                    res.status(404).send(
+                        "File file_type not support: " + file_type
+                    );
+                }
+
+                return;
+            }
+        );
+
+        this.app.get(
+            "/:agentId/download2",
+            // upload.single("file"),
+            async (req: express.Request, res: express.Response) => {
+                console.log("downloading 2 query: ", req.query);
+                // todo: Add file timeout control
+
+                const file_type = req.query.file_type;
+                const taskId = req.query.taskId;
 
                 // download the latest report.
                 let lastestExistsFilepath = "";
