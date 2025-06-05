@@ -22,7 +22,7 @@ import {
     parseJSONObjectFromText,
 } from "@data3os/agentcontext";
 
-import { mdToPdf } from 'md-to-pdf';
+import { mdToPdf } from "md-to-pdf";
 
 import {
     getProtocolArray,
@@ -202,10 +202,37 @@ export class DirectClient {
             "/media/uploads",
             express.static(path.join(process.cwd(), "/data/uploads"))
         );
+        const aifilepath = path.join(process.cwd(), "/files");
+        this.app.use((req, res, next) => {
+            console.log("req.path:  " + req.path);
+            if(req.path.indexOf("/media/files") === -1) {
+                next();
+                return;
+            }
+            const fullPath = req.path;
+            const basePath = "/media/files";
+            const newPath = path.relative(basePath, fullPath);
+            const filePath = path.join(process.cwd(), "files", newPath);
+            console.log("fix path:  " + filePath);
+            if(fs.existsSync(filePath) === false) {
+                res.status(404).send("File not found");
+                return;
+            }
+
+            fs.stat(filePath, (err, stats) => {
+                if (err) return next(err);
+                const now = Date.now();
+                const fileAge = now - stats.mtimeMs;
+                if (fileAge > 3 * 24 * 3600000) {
+                    res.status(403).send("文件已过期");
+                } else {
+                    next();
+                }
+            });
+        });
         this.app.use(
             "/media/files",
-            express.static(path.join(process.cwd(), "/data"))
-            // express.static(path.join(process.cwd()))
+            express.static(aifilepath)
         );
         this.app.use(
             "/media/generated",
@@ -497,213 +524,6 @@ export class DirectClient {
                     res.status(404).send("verify_code not match");
                     return;
                 }
-
-                // download the latest report.
-                let lastestExistsFilepath = "";
-                let pdfFilepath = "";
-
-                if ("report" === file_type) {
-                    // There may be multiple reports, starting from 1 and growing naturally to 2, 3, 4, 5...,10;
-                    for (let i = 1; i <= 10; i++) {
-                        const filename = taskId + `_report${i}.txt`;
-                        const filePdfname = taskId + `_report${i}.pdf`;
-                        // const filename = 'abc.pdf'; // Test: can also download pdf.
-                        const filePath = path.join(
-                            process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
-                            "data",
-                            filename
-                        );
-                        if (fs.existsSync(filePath)) {
-                            lastestExistsFilepath = filePath;
-                            pdfFilepath = path.join(
-                                process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
-                                "data",
-                                filePdfname
-                            );
-                        } else {
-                            break;
-                        }
-                    }
-
-                    if (fs.existsSync(lastestExistsFilepath)) {
-                        if (!fs.existsSync(pdfFilepath)) {
-                            // TODO: The function costs too much time.
-                            // await convertMarkdownToPdf(
-                            //     lastestExistsFilepath,
-                            //     pdfFilepath
-                            // );
-                        }
-                        if (fs.existsSync(pdfFilepath)) {
-                            res.download(pdfFilepath, () => {});
-                            console.log("downloading: " + pdfFilepath);
-                            return;
-                        }
-
-                        res.download(lastestExistsFilepath, () => {});
-                        console.log("downloading: " + lastestExistsFilepath);
-                        return;
-                    } else {
-                        console.log(
-                            "not exist filePath: " + lastestExistsFilepath
-                        );
-                        res.status(404).send(
-                            "File not found filePath: " + lastestExistsFilepath
-                        );
-                    }
-                } else if ("data" === file_type) {
-                    const filename = taskId + `_data.txt`;
-                    // const filename = 'abc.pdf'; // Test: can also download pdf.
-                    const filePath = path.join(
-                        process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
-                        "data",
-                        filename
-                    );
-                    if (fs.existsSync(filePath)) {
-                        res.download(filePath, () => {
-                            // auto delete file( if need)
-                            //   fs.unlinkSync(filePath);
-                        });
-                        console.log("downloading: " + filePath);
-                    } else {
-                        console.log("not exist filePath: " + filePath);
-                        res.status(404).send(
-                            "File not found filePath: " + filePath
-                        );
-                    }
-                } else {
-                    res.status(404).send(
-                        "File file_type not support: " + file_type
-                    );
-                }
-
-                return;
-            }
-        );
-
-        this.app.get(
-            "/:agentId/download2",
-            // upload.single("file"),
-            async (req: express.Request, res: express.Response) => {
-                console.log("downloading 2 query: ", req.query);
-                // todo: Add file timeout control
-
-                const file_type = req.query.file_type;
-                const taskId = req.query.taskId;
-
-                // download the latest report.
-                let lastestExistsFilepath = "";
-                let pdfFilepath = "";
-
-                if ("report" === file_type) {
-                    // There may be multiple reports, starting from 1 and growing naturally to 2, 3, 4, 5...,10;
-                    for (let i = 1; i <= 10; i++) {
-                        const filename = taskId + `_report${i}.txt`;
-                        const filePdfname = taskId + `_report${i}.pdf`;
-                        // const filename = 'abc.pdf'; // Test: can also download pdf.
-                        const filePath = path.join(
-                            process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
-                            "data",
-                            filename
-                        );
-                        if (fs.existsSync(filePath)) {
-                            lastestExistsFilepath = filePath;
-                            pdfFilepath = path.join(
-                                process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
-                                "data",
-                                filePdfname
-                            );
-                        } else {
-                            break;
-                        }
-                    }
-
-                    if (fs.existsSync(lastestExistsFilepath)) {
-                        if (!fs.existsSync(pdfFilepath)) {
-                            // TODO: The function costs too much time.
-                            // await convertMarkdownToPdf(
-                            //     lastestExistsFilepath,
-                            //     pdfFilepath
-                            // );
-                        }
-                        if (fs.existsSync(pdfFilepath)) {
-                            res.download(pdfFilepath, () => {});
-                            console.log("downloading: " + pdfFilepath);
-                            return;
-                        }
-
-                        res.download(lastestExistsFilepath, () => {});
-                        console.log("downloading: " + lastestExistsFilepath);
-                        return;
-                    } else {
-                        console.log(
-                            "not exist filePath: " + lastestExistsFilepath
-                        );
-                        res.status(404).send(
-                            "File not found filePath: " + lastestExistsFilepath
-                        );
-                    }
-                } else if ("data" === file_type) {
-                    const filename = taskId + `_data.txt`;
-                    // const filename = 'abc.pdf'; // Test: can also download pdf.
-                    const filePath = path.join(
-                        process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
-                        "data",
-                        filename
-                    );
-                    if (fs.existsSync(filePath)) {
-                        res.download(filePath, () => {
-                            // auto delete file( if need)
-                            //   fs.unlinkSync(filePath);
-                        });
-                        console.log("downloading: " + filePath);
-                    } else {
-                        console.log("not exist filePath: " + filePath);
-                        res.status(404).send(
-                            "File not found filePath: " + filePath
-                        );
-                    }
-                } else {
-                    res.status(404).send(
-                        "File file_type not support: " + file_type
-                    );
-                }
-
-                return;
-            }
-        );
-
-        this.app.get(
-            "/:agentId/download3",
-            // upload.single("file"),
-            async (req: express.Request, res: express.Response) => {
-                console.log("downloading 3 query: ", req.query);
-                // todo: Add file timeout control
-                   const fileContent = `春江花月夜
-春江潮水连海平，海上明月共潮生①。
-滟滟随波千万里②，何处春江无月明！
-江流宛转绕芳甸③，月照花林皆似霰④。
-空里流霜不觉飞⑤，汀上白沙看不见⑥。
-江天一色无纤尘⑦，皎皎空中孤月轮⑧。
-江畔何人初见月？江月何年初照人？
-人生代代无穷已⑨，江月年年望相似⑩。
-不知江月待何人，但见长江送流水⑪。
-白云一片去悠悠⑫，青枫浦上不胜愁⑬。
-谁家今夜扁舟子⑭？何处相思明月楼⑮？
-可怜楼上月裴回⑯，应照离人妆镜台⑰。
-玉户帘中卷不去⑱，捣衣砧上拂还来⑲。
-此时相望不相闻⑳，愿逐月华流照君㉑。
-鸿雁长飞光不度，鱼龙潜跃水成文㉒。
-昨夜闲潭梦落花㉓，可怜春半不还家。
-江水流春去欲尽，江潭落月复西斜。
-斜月沉沉藏海雾，碣石潇湘无限路㉔。
-不知乘月几人归㉕，落月摇情满江树㉖。`;
-    res.setHeader('Content-Type', 'text/plain');
-    res.setHeader('Content-Disposition', 'attachment; filename=example.txt');
-    res.send(fileContent);
-    return;
-
-                const file_type = req.query.file_type;
-                const taskId = req.query.taskId;
 
                 // download the latest report.
                 let lastestExistsFilepath = "";
@@ -1812,7 +1632,8 @@ export class DirectClient {
                 } else {
                     obj = {
                         need_more: true,
-                        question_description: "对于这个任务，您偏好的输出风格是什么?",
+                        question_description:
+                            "对于这个任务，您偏好的输出风格是什么?",
                         available_options: [
                             "输出内容简洁一些。",
                             "输出的数据丰富、格式美观、论证严谨",
@@ -2102,20 +1923,19 @@ export class DirectClient {
             throw new Error("Agent not found");
         }
         const userMessage = {
-                        content: { text: prompt },
-                        userId,
-                        roomId,
-                        agentId: runtime.agentId,
-                    };
+            content: { text: prompt },
+            userId,
+            roomId,
+            agentId: runtime.agentId,
+        };
         console.log("userMessage: ", userMessage, userId);
 
         return (
             prompt +
             composeContext({
-                state: await runtime.composeState(
-                    userMessage,
-                    { agentName: runtime.character.name }
-                ),
+                state: await runtime.composeState(userMessage, {
+                    agentName: runtime.character.name,
+                }),
                 template: dataHandlerTemplate,
             })
         );

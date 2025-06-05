@@ -432,14 +432,10 @@ export const handleProtocolsForQuickResponce = async (
     } catch (err) {
         console.log(err);
     }*/
-    reportPersist(responseFinal, taskId);
-    const verify_code = stringToHash4(taskId);
-    const responseTail = `\n
-                下载报告密码: ${verify_code}.
-                下载报告地址: https://data3.site/download?taskId=${taskId}&file_type=report
-                `;
+    const finalfilepath = reportPersist(responseFinal, taskId);
+    const responseTail = `\n下载报告地址(三天后过期): ${finalfilepath}`;
     if (containsHotwords(originText) && !responseFinal.includes("【人工】")) {
-        return responseFinal + responseTail + "是否需要参考这些热度较高的帖子进行仿写？";
+        return responseFinal + responseTail + "\n是否需要参考这些热度较高的帖子进行仿写？";
     }
 
     if(!responseFinal.includes("【人工】")) {
@@ -875,14 +871,10 @@ let promptPartThree = `
         console.log("handleProtocols error: ", e);
         return "system error 1003";
     }
-    reportPersist(responseFinal, taskId);
-    const verify_code = stringToHash4(taskId);
-    const responseTail = `\n
-                下载报告密码: ${verify_code}.
-                下载报告地址: https://data3.site/download?taskId=${taskId}&file_type=report
-                `;
+    const finalfilepath = reportPersist(responseFinal, taskId);
+    const responseTail = `\n下载报告地址(三天后过期): ${finalfilepath}`;
     if (containsHotwords(originText) && !responseFinal.includes("【人工】")) {
-        return responseFinal + responseTail + "是否需要参考这些热度较高的帖子进行仿写？";
+        return responseFinal + responseTail + "\n是否需要参考这些热度较高的帖子进行仿写？";
     }
     if(!responseFinal.includes("【人工】")) {
         return responseFinal + responseTail;
@@ -905,7 +897,7 @@ function reportPersist(responseFinal: string, taskId: any) {
         // const filename = 'abc.pdf'; // Test: can also download pdf.
         const filePath = path.join(
             process.cwd(), // /root/xdata3/data3-agent/data/Task-111111_report1.txt
-            "data",
+            "files",
             filename
         );
         if (!fs.existsSync(filePath)) {
@@ -916,6 +908,7 @@ function reportPersist(responseFinal: string, taskId: any) {
     updateCacheText(responseFinal, firstUnExistsFilename, (err) => {
         console.error("Failed to write file:", err);
     });
+    return `http://97.64.21.158:3333/media/files/${firstUnExistsFilename}`;
 }
 
 function stringToHash4(str) {

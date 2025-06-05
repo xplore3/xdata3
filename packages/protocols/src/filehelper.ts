@@ -5,8 +5,8 @@ import { fileURLToPath } from 'url';
 // "chat-cache-file.txt"
 export function appendToChatCache(content: string, filename: string, onError?: (err: Error) => void) {
     const filePath = path.join(
-        process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
-        "data",
+        process.cwd(), // /root/xdata3/data3-agent/files/111111_memory.txt
+        "files",
         filename
     );
     // file: fs.createReadStream("chat-cache-file_" + taskId + ".txt"),    
@@ -23,7 +23,7 @@ export function appendToChatCache(content: string, filename: string, onError?: (
 export function readCacheFile(filename: string): string {
     const filePath = path.join(
         process.cwd(),
-        "data",
+        "files",
         filename
     );
     try {
@@ -36,8 +36,8 @@ export function readCacheFile(filename: string): string {
 
 export function updateCacheText(content: string, filename: string, onError?: (err: Error) => void) {
         const filePath = path.join(
-        process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
-        "data",
+        process.cwd(), // /root/xdata3/data3-agent/files/111111_memory.txt
+        "files",
         filename
     );
     // file: taskId + "_memory.txt"
