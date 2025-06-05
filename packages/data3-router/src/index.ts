@@ -203,6 +203,11 @@ export class DirectClient {
             express.static(path.join(process.cwd(), "/data/uploads"))
         );
         this.app.use(
+            "/media/files",
+            express.static(path.join(process.cwd(), "/data"))
+            // express.static(path.join(process.cwd()))
+        );
+        this.app.use(
             "/media/generated",
             express.static(path.join(process.cwd(), "/generatedImages"))
         );
