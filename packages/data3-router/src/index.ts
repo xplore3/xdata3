@@ -22,6 +22,8 @@ import {
     parseJSONObjectFromText,
 } from "@data3os/agentcontext";
 
+import { mdToPdf } from 'md-to-pdf';
+
 import {
     getProtocolArray,
     updateProtocolArray,
@@ -493,10 +495,13 @@ export class DirectClient {
 
                 // download the latest report.
                 let lastestExistsFilepath = "";
+                let pdfFilepath = "";
+
                 if ("report" === file_type) {
                     // There may be multiple reports, starting from 1 and growing naturally to 2, 3, 4, 5...,10;
                     for (let i = 1; i <= 10; i++) {
                         const filename = taskId + `_report${i}.txt`;
+                        const filePdfname = taskId + `_report${i}.pdf`;
                         // const filename = 'abc.pdf'; // Test: can also download pdf.
                         const filePath = path.join(
                             process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
@@ -505,17 +510,32 @@ export class DirectClient {
                         );
                         if (fs.existsSync(filePath)) {
                             lastestExistsFilepath = filePath;
+                            pdfFilepath = path.join(
+                                process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
+                                "data",
+                                filePdfname
+                            );
                         } else {
                             break;
                         }
                     }
 
                     if (fs.existsSync(lastestExistsFilepath)) {
-                        res.download(lastestExistsFilepath, () => {
-                            // auto delete file( if need)
-                            //   fs.unlinkSync(filePath);
-                        });
+                        if (!fs.existsSync(pdfFilepath)) {
+                            await convertMarkdownToPdf(
+                                lastestExistsFilepath,
+                                pdfFilepath
+                            );
+                        }
+                        if (fs.existsSync(pdfFilepath)) {
+                            res.download(pdfFilepath, () => {});
+                            console.log("downloading: " + pdfFilepath);
+                            return;
+                        }
+
+                        res.download(lastestExistsFilepath, () => {});
                         console.log("downloading: " + lastestExistsFilepath);
+                        return;
                     } else {
                         console.log(
                             "not exist filePath: " + lastestExistsFilepath
@@ -1912,3 +1932,38 @@ const directPlugin: Plugin = {
     clients: [DirectClientInterface],
 };
 export default directPlugin;
+
+const convertMarkdownToPdf = async (inputFilePath, outputFilePath) => {
+    try {
+        const cssPath = path.join(process.cwd(), "github-markdown.css");
+        const cssContent = await fs.readFileSync(cssPath, "utf-8");
+        const config = {
+            css: cssContent,
+            pdf_options: {
+                format: "A4" as const,
+                margin: {
+                    top: "20mm",
+                    right: "15mm",
+                    bottom: "20mm",
+                    left: "15mm",
+                },
+                printBackground: true,
+            },
+            launch_options: {
+                args: [
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-dev-shm-usage",
+                ],
+                executablePath:
+                    process.env.CHROMIUM_PATH || "/usr/bin/chromium-browser",
+            },
+        };
+
+        const pdf = await mdToPdf({ path: inputFilePath }, config);
+        await fs.promises.writeFile(outputFilePath, pdf.content);
+        console.log("PDF generated successfully");
+    } catch (error) {
+        console.error("Conversion failed:", error.message);
+    }
+};
