@@ -414,7 +414,7 @@ class APIWrapperFactory {
                     // page 2: get data from 6 to 10.
                     const pageStart = (page - 1) * 5 + 1;
                     const pageEnd = page * 5;
-                    let extractPath = null;
+                    let extractPath = null, filterPath = null;
                     for (let mPage = pageStart; mPage <= pageEnd; mPage++) {
                         let tempResult = [];
                         const url = `http://47.120.60.92:8080/api/search?keyword=${keyword}&page=${mPage}&sort=popularity_descending`;
@@ -444,13 +444,22 @@ class APIWrapperFactory {
                                 timestamp: obj?.note?.timestamp || 0,
                             })
                         );*/
-                        if (extractPath === null) {
-                            const item = response.data?.data?.items?.[0];
-                            extractPath = IntentionHandler.genExtractMapper(runtime, message, item);
+                        if (extractPath === null || filterPath === null) {
+                            const items = response.data?.data?.items;
+                            if (items && items.length > 0) {
+                                let { extract: extractPath, filter: filterPath } = await IntentionHandler.genExtractMapper(runtime, message, items[0]);
+                            }
                         }
+                        console.log(`executeRequest extractPath: ${extractPath}`);
+                        console.log(`executeRequest filterPath: ${filterPath}`);
                         tempResult = JSONPath({
                             path: extractPath,
                             json: response.data?.data?.items || []
+                        });
+                        console.log(tempResult);
+                        tempResult = JSONPath({
+                            path: filterPath,
+                            json: tempResult || []
                         });
                         console.log(tempResult);
                         result = result.concat(tempResult);
