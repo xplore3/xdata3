@@ -53,7 +53,7 @@ export class IntentionHandler {
         extract是一个用\`\`括住的包含\${...\}的能够进行字段映射的模板字符串表达式string，filter能给'jsonpath-plus'库使用的JSONPath。
         转换后的结果需要至少包含这些字段：
         { 
-          id, author, title, content/desc/description, date/timestamp, tags/tabs, url,
+          id, author, title, content/desc/description, date/timestamp, url,
           collected_count, shared_count, comments_count, likes_count
         }，这些字段可以是原有字段的组合或转换。其中，id是唯一标识符，author是作者，title是标题，content/desc/description是内容描述。
         根据指令要求，还需要对collected_count/shared_count/comments_count/likes_count的数量进行过滤。
@@ -67,23 +67,19 @@ export class IntentionHandler {
             \"id\": \${item.note?.id || ''},
             \"author\": \${item.note?.user?.nickname || ''},
             \"title\": \${item.note?.title || ''},
-            \"description\": \${item.note?.desc || ''},
+            \"desc\": \${item.note?.desc || ''},
             \"date\": \${item.note?.update_time || item.note?.timestamp || 0},
-            \"tags\": \${item.note?.tag_info?.title || ''},
             \"url\": \${item.note?.images_list?.[0]?.url || ''},
             \"collected_count\": \${item.note?.collected_count || 0},
             \"shared_count\": \${item.note?.shared_count || 0},
             \"comments_count\": \${item.note?.comments_count || 0},
             \"likes_count\": \${item.note?.liked_count || 0}
           }\`",
-          "filter": "$[?(
-            @.note && 
-            @.note.desc && 
-            @.note.desc.match(/中药养生/) && 
-            @.note.collected_count > 1000 && 
-            @.note.shared_count > 500 && 
-            @.note.comments_count > 100 && 
-            @.note.liked_count > 5000
+          "filter": $.[?(@.note &&
+            (@.note.collected_count || 0) > 1000 &&
+            (@.note.shared_count || 0) > 500 &&
+            (@.note.comments_count || 0) > 100 &&
+            (@.note.liked_count || 0) > 1000
           )]"
         }
         输出结果用{extract: string, filter: string}只包含string和JSONPath表达式，不要包含其他内容，以便于进行JSON解析。`;
@@ -103,11 +99,11 @@ export class IntentionHandler {
         else {
           response = JSON.parse(response);
         }
-        return {extract: response.extract, filter: response.filter};
       }
       catch (e) {
         console.error("Failed to parse JSON from response:", e);
       }
+      return {extract: response.extract, filter: response.filter};
     } catch (err) {
       console.log(err);
     }
