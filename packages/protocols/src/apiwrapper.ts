@@ -415,7 +415,7 @@ class APIWrapperFactory {
                     // page 2: get data from 6 to 10.
                     const pageStart = (page - 1) * 5 + 1;
                     const pageEnd = page * 5;
-                    let extractPath = null, filterPath = null;
+                    let extractPath: string = null, filterPath: string = null;
                     for (let mPage = pageStart; mPage <= pageEnd; mPage++) {
                         let tempResult = [];
                         const url = `http://47.120.60.92:8080/api/search?keyword=${keyword}&page=${mPage}&sort=popularity_descending`;
@@ -454,8 +454,6 @@ class APIWrapperFactory {
                                 filterPath = mapper.filter;
                             }
                         }
-                        console.log(`executeRequest extractPath: ${extractPath}`);
-                        console.log(`executeRequest filterPath: ${filterPath}`);
                         tempResult = JSONPath({
                             path: filterPath,
                             json: response.data?.data?.items
