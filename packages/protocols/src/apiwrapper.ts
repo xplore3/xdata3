@@ -456,9 +456,10 @@ class APIWrapperFactory {
                         }
                         console.log(`executeRequest extractPath: ${extractPath}`);
                         console.log(`executeRequest filterPath: ${filterPath}`);
+                        tempResult = response.data?.data?.items;
                         tempResult = JSONPath({
                             path: filterPath,
-                            json: tempResult || []
+                            json: tempResult
                         });
                         console.log(tempResult);
                         //tempResult = tempResult.map(item => {

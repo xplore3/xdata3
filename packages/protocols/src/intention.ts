@@ -63,7 +63,7 @@ export class IntentionHandler {
         - extraxt添加存在性检查（\${item.note && ...}）或使用可选链（?.）和默认值（||）。
         正确输出示例如下：
         {
-          "extract": "\`{
+          extract: "\`{
             'id': \${item.note?.id || ''},
             'author': \${item.note?.user?.nickname || ''},
             'title': \${item.note?.title || ''},
@@ -75,7 +75,7 @@ export class IntentionHandler {
             'comments_count': \${item.note?.comments_count || 0},
             'likes_count': \${item.note?.liked_count || 0}
           }\`",
-          "filter": $.[?(@.note && (@.note.collected_count || 0) > 1000 && (@.note.shared_count || 0) > 500 && (@.note.comments_count || 0) > 100 && (@.note.liked_count || 0) > 1000)]"
+          filter: "$.[?(@.note && (@.note.collected_count || 0) > 1000 && (@.note.shared_count || 0) > 500 && (@.note.comments_count || 0) > 100 && (@.note.liked_count || 0) > 1000)]"
         }
         输出结果用{extract: string, filter: string}只包含string和JSONPath表达式，不要包含其他内容，以便于进行JSON解析。`;
     try {
@@ -116,7 +116,7 @@ export class IntentionHandler {
             'likes_count': \${item.note?.liked_count || 0}
           }\``,
       // Should be a online valid JSONPath expression
-      filter: `$.[?(@.note && (@.note.collected_count || 0) > 1000 && (@.note.shared_count || 0) > 500 && (@.note.comments_count || 0) > 100 && (@.note.liked_count || 0) > 1000)]`
+      filter: "$.[?(@.note && (@.note.collected_count || 0) > 1000 && (@.note.shared_count || 0) > 500 && (@.note.comments_count || 0) > 100 && (@.note.liked_count || 0) > 1000)]"
     };
   }
 }
