@@ -358,7 +358,7 @@ export class DirectClient {
                 } else {
                     withPreContext = true;
                 }
-                const messageId = stringToUuid(Date.now().toString());
+                const messageId = stringToUuid(userId + Date.now().toString());
 
                 // const attachments: Media[] = [];
                 // if ((req as any).file) {
@@ -383,6 +383,9 @@ export class DirectClient {
 
                 const content: Content = {
                     text: originQuestingText,
+                    intention: {
+                        taskId
+                    },
                     // attachments,
                     attachments: [],
                     source: "direct",
@@ -397,7 +400,7 @@ export class DirectClient {
                 };
 
                 const memory: Memory = {
-                    id: stringToUuid(messageId + "-" + userId),
+                    id: messageId,
                     ...userMessage,
                     agentId: runtime.agentId,
                     userId,
@@ -406,7 +409,7 @@ export class DirectClient {
                     createdAt: Date.now(),
                 };
 
-                await runtime.messageManager.addEmbeddingToMemory(memory);
+                //await runtime.messageManager.addEmbeddingToMemory(memory);
                 await runtime.messageManager.createMemory(memory);
                 // console.log("userMessage :", userMessage , username);
 
@@ -421,11 +424,8 @@ export class DirectClient {
 
                 const responseStr = await this.handleMessageWithAI(
                     runtime,
-                    originQuestingText,
-                    taskId,
                     withPreContext,
-                    username,
-                    userId
+                    memory
                 );
                 this.concurrentNum--;
 
@@ -454,7 +454,7 @@ export class DirectClient {
 
                 // save response to memory
                 const responseMessage: Memory = {
-                    id: stringToUuid(messageId + "-" + runtime.agentId),
+                    id: messageId,
                     ...userMessage,
                     userId: runtime.agentId,
                     content: parsedContent,
@@ -648,11 +648,38 @@ export class DirectClient {
                     return;
                 }
 
+                const content: Content = {
+                    text: text,
+                    intention: {
+                        taskId: req.body.taskId || 'Task-Data3-Get'
+                    },
+                    // attachments,
+                    attachments: [],
+                    source: "direct",
+                    inReplyTo: undefined,
+                };
+
+                const userMessage = {
+                    content,
+                    userId,
+                    roomId,
+                    agentId: runtime.agentId,
+                };
+
+                const memory: Memory = {
+                    id: stringToUuid(userId + Date.now().toString()),
+                    ...userMessage,
+                    agentId: runtime.agentId,
+                    userId,
+                    roomId,
+                    content,
+                    createdAt: Date.now(),
+                };
+
                 handleProtocolsProcessing(
                     runtime,
                     " ",
-                    text,
-                    "xxx" /** taskID */
+                    memory
                 ).then((resStr) => {
                     res.json({ res: resStr });
                 });
@@ -1457,12 +1484,11 @@ export class DirectClient {
 
     public async handleMessageWithAI(
         runtime: IAgentRuntime,
-        originQuestingText: string,
-        taskId: string,
         withPreContext: boolean,
-        username: string,
-        userId: UUID
+        message: Memory
     ): Promise<string> {
+        const originQuestingText = message.content.text;
+        const taskId = message.content.intention?.taskId || "";
         console.log(
             "handleMessageWithAI originQuestingText:  ",
             originQuestingText
@@ -1475,7 +1501,7 @@ export class DirectClient {
         const baseUserInfo = await this.composePrompt(
             runtime,
             originQuestingText,
-            userId
+            message.userId,
         );
         const promptInjectBaseUserInfo = baseUserInfo.slice(0, 20000);
         console.log(`handleProtocolsForQuickResponce promptInjectBaseInfo:  
@@ -1516,8 +1542,7 @@ export class DirectClient {
             const quickResponse = await handleProtocolsForQuickResponce(
                 runtime,
                 promptInjectBaseUserInfo,
-                originQuestingText,
-                taskId
+                message
             );
             if (quickResponse) {
                 // Priority use quick responce
@@ -1687,7 +1712,7 @@ export class DirectClient {
             refineQuestionPrompt = await this.composePrompt(
                 runtime,
                 refineQuestionPrompt,
-                userId
+                message.userId
             );
             console.log("New: " + refineQuestionPrompt);
             const refineQuestion = await generateText({
@@ -1707,15 +1732,14 @@ export class DirectClient {
         finalQuestion = await this.composePrompt(
             runtime,
             finalQuestion,
-            userId
+            message.userId
         );
         console.log("New: " + finalQuestion);
         const finalAnswerStr = await handleProtocolsProcessing(
             runtime,
             promptInjectBaseUserInfo,
             // finalQuestion,
-            taskQuestionObj.questionText,
-            taskId
+            message
         );
 
         taskQuestionObj = await runtime.cacheManager.get(

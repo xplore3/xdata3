@@ -1801,12 +1801,15 @@ const formatKnowledge = (knowledge: KnowledgeItem[]) => {
     return knowledge.map(item => {
         // Get the main content text
         const text = item.content.text;
+    
+        // Get the intention, if available
+        const intention = item.content.intention ? `\nIntention: ${item.content.intention}` : '';
         
         // Clean up formatting but maintain natural text flow
         const cleanedText = text
             .trim()
             .replace(/\n{3,}/g, '\n\n'); // Replace excessive newlines
             
-        return cleanedText;
+        return cleanedText + intention;
     }).join('\n\n'); // Separate distinct pieces with double newlines
 };

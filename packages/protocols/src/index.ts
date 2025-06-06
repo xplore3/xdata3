@@ -1,4 +1,8 @@
-import { generateText, ModelClass } from "@data3os/agentcontext";
+import {
+    generateText,
+    ModelClass,
+    type Memory,
+} from "@data3os/agentcontext";
 import { generateTextWithFile } from './aichatwithfiles';
 import fs from 'fs';
 import path from 'path';
@@ -138,27 +142,30 @@ export const handleProtocolsForPrompt = async (runtime: any, originText: any, ta
  * words before returning.
  * This part of the logic not require processing of context memory.
  */
-export const handleProtocolsProcessing = async (runtime: any, promptInjectBaseUserInfoStr: any, originText: any, taskId: any) => {
+export const handleProtocolsProcessing = async (runtime: any,
+    promptInjectBaseUserInfoStr: any,
+    message: Memory) => {
     // Try quick Responce first.
     // let responce = await handleProtocolsForQuickResponce(runtime, originText, taskId);
     // console.log("yykai handleProtocolsForQuickResponce responce: ", responce);
     // if(!responce) {
     //     responce = await handleProtocolsByLongLogic(runtime, originText, taskId);
     // }
-    const responce = await handleProtocolsByLongLogic(runtime, promptInjectBaseUserInfoStr, originText, taskId);
+    const responce = await handleProtocolsByLongLogic(runtime, promptInjectBaseUserInfoStr, message);
     return responce;
 }
 
 export const handleProtocolsForQuickResponce = async (
     runtime: any,
     promptInjectBaseUserInfoStr: any,
-    originText: any,
-    taskId: any
+    message: Memory
 ) => {
     let responseFinal = null;
     const apiXDataSourceArray = await runtime.cacheManager.get(
         "XData_Collection"
     );
+    const originText = message.content.text
+    const taskId = message.content.intention?.taskId || '';
     function shortenStr(str) {
         if (str.length > charLengthLimit) {
             return str.slice(0, charLengthLimit);
@@ -388,7 +395,7 @@ export const handleProtocolsForQuickResponce = async (
 
         /********* data3 protocol v2 begin *********/
         console.log("1 handleProtocols Obj: ", searchObj);
-        apires = await APIWrapperFactory.executeRequest(searchObj, taskId);
+        apires = await APIWrapperFactory.executeRequest(runtime, searchObj, message);
         console.log("2 handleProtocols Obj: ", JSON.stringify(apires).slice(0, 200));
         /********* data3 protocol v2 end *********/
     } catch (e) {
@@ -445,7 +452,12 @@ export const handleProtocolsForQuickResponce = async (
     }
 };
 
-export const handleProtocolsByLongLogic = async (runtime: any, promptInjectBaseUserInfoStr:any ,originText: any, taskId: any) => {
+export const handleProtocolsByLongLogic = async (runtime: any,
+    promptInjectBaseUserInfoStr:any,
+    message: Memory
+) => {
+    const originText = message.content.text;
+    const taskId = message.content.intention?.taskId || '';
     const apiXDataSourceArray = await runtime.cacheManager.get(
         "XData_Collection"
     );
@@ -615,9 +627,9 @@ let promptPartThree = `
         const response2Str = response2
             .replace(/```json/g, "")
             .replace(/```/g, "");
-        let Obj = null;
+        let taskJson = null;
         try {
-            Obj = JSON.parse(response2Str);
+            taskJson = JSON.parse(response2Str);
         } catch (e) {
             console.log(
                 "handleProtocols response2Str parse error: ",
@@ -641,8 +653,8 @@ let promptPartThree = `
             //         headers: Obj.headers,
             //     });
             // }
-            console.log("3 handleProtocols API call  Obj: ", Obj);
-            apires = await APIWrapperFactory.executeRequest(Obj, taskId);
+            console.log("3 handleProtocols API call  Obj: ", taskJson);
+            apires = await APIWrapperFactory.executeRequest(runtime, taskJson, message);
             console.log(
                 "4 handleProtocols API call res: ",
                 JSON.stringify(apires).slice(0, 200)
@@ -650,7 +662,7 @@ let promptPartThree = `
             // This is what you want to add
             const content = `\n
             [Question: ${originText}]
-            [API: ${JSON.stringify(Obj)}]
+            [API: ${JSON.stringify(taskJson)}]
             [Responce: ${JSON.stringify(apires)}].
             \n`;
 
@@ -687,7 +699,7 @@ let promptPartThree = `
             }
 
             currentApiStr = `The current API [API: ${JSON.stringify(
-                Obj
+                taskJson
             )}] The responce [Responce: ${shortenapires}].\n`;
             // console.log("handleProtocols promtShorten: ", promtShorten);
             // console.log("handleProtocols currentApiStr: ", currentApiStr);
@@ -697,7 +709,7 @@ let promptPartThree = `
             console.log("handleProtocols error: ", e);
             // chatContextAccmulatingStr += errorStr;
             currentApiStr = `The current API [API: ${JSON.stringify(
-                Obj
+                taskJson
             )}] request failed, The responce [Responce: ${e
                 .toString()
                 .slice(200)}].\n`;

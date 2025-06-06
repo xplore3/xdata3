@@ -1,4 +1,9 @@
 import axios from "axios";
+import { JSONPath } from 'jsonpath-plus';
+import {
+    type Memory,
+} from "@data3os/agentcontext";
+import { IntentionHandler } from "./intention";
 
 class APIWrapperFactory {
     private static instance: APIWrapperFactory;
@@ -19,11 +24,13 @@ class APIWrapperFactory {
      */
 
     public static async executeRequest(
+        runtime: any,
         obj: any,
-        taskId: string
+        message: Memory
     ): Promise<any | undefined> {
         // {"route": "notes_search","params": {"key1": "v1","key2": "v2"}}
         console.log(`executeRequest params: ${JSON.stringify(obj)}`);
+        const taskId = message.content.intention?.taskId || '';
         let result = [];
         switch (obj.route) {
             case "get_user":
@@ -407,6 +414,7 @@ class APIWrapperFactory {
                     // page 2: get data from 6 to 10.
                     const pageStart = (page - 1) * 5 + 1;
                     const pageEnd = page * 5;
+                    let extractPath = null;
                     for (let mPage = pageStart; mPage <= pageEnd; mPage++) {
                         let tempResult = [];
                         const url = `http://47.120.60.92:8080/api/search?keyword=${keyword}&page=${mPage}&sort=popularity_descending`;
@@ -422,7 +430,7 @@ class APIWrapperFactory {
                             `executeRequest response.data.data.items: ${response.data?.data?.items?.length}`
                         );
 
-                        tempResult = (response.data?.data?.items || []).map(
+                        /*tempResult = (response.data?.data?.items || []).map(
                             (obj) => ({
                                 author: obj?.note?.user?.nickname || "unknown",
                                 collected_count:
@@ -435,7 +443,16 @@ class APIWrapperFactory {
                                 desc: obj?.note?.desc || "",
                                 timestamp: obj?.note?.timestamp || 0,
                             })
-                        );
+                        );*/
+                        if (extractPath === null) {
+                            const item = response.data?.data?.items?.[0];
+                            extractPath = IntentionHandler.genExtractMapper(runtime, message, item);
+                        }
+                        tempResult = JSONPath({
+                            path: extractPath,
+                            json: response.data?.data?.items || []
+                        });
+                        console.log(tempResult);
                         result = result.concat(tempResult);
                         console.log(`executeRequest result: ${result.length}`);
                     }

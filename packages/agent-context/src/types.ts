@@ -5,12 +5,47 @@ import type { Readable } from "stream";
  */
 export type UUID = `${string}-${string}-${string}-${string}-${string}`;
 
+/*
+ * Represents the intention of an agent to perform a specific action or retrieve data
+ */
+export interface Intention {
+    /** The task related to the intention */
+    taskId: string;
+
+    /** Summary of the Intention */
+    summary?: string;
+
+    /** Quick Mode or Reasoning Mode */
+    mode?: "quick" | "reasoning";
+
+    /** Data Retrieve Command */
+    command?: string;
+
+    /** Data Retrieve Source/URL/Host/API */
+    route?: string;
+
+    /** Data API Params */
+    params?: Record<string, any>;
+
+    /** RawData from route */
+    rawData?: JSON | string;
+
+    /** Data Extract JsonPath */
+    extractPath?: JSON;
+
+    /** Procecced output */
+    output?: JSON;
+}
+
 /**
  * Represents the content of a message or communication
  */
 export interface Content {
     /** The main text content */
     text: string;
+
+    /** Optional intention for the content */
+    intention?: Intention;
 
     /** Optional action associated with the message */
     action?: string;
