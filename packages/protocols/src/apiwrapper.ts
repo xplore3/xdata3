@@ -449,6 +449,7 @@ class APIWrapperFactory {
                             const items = response.data?.data?.items;
                             if (items && items.length > 0) {
                                 const mapper = await IntentionHandler.genExtractMapper(runtime, message, items[0]);
+                                console.log(mapper);
                                 extractPath = mapper.extract;
                                 filterPath = mapper.filter;
                             }

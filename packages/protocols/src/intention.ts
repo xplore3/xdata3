@@ -59,7 +59,7 @@ export class IntentionHandler {
         根据指令要求，还需要对collected_count/shared_count/comments_count/likes_count的数量进行过滤。
         extract和filter需要处理一些边界情况，比如：
         - 如果某个字段不存在，则不包含该字段；
-        - filter添加存在性检查（@.note && ...）;
+        - filter添加存在性检查（@.note && ...）, filter只需进行数量的过滤，不需要进行关键词匹配；
         - extraxt添加存在性检查（\${item.note && ...\}）或使用可选链（?.）和默认值（||）。
         正确输出示例如下：
         {
