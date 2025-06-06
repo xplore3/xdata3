@@ -456,15 +456,15 @@ class APIWrapperFactory {
                         console.log(`executeRequest extractPath: ${extractPath}`);
                         console.log(`executeRequest filterPath: ${filterPath}`);
                         tempResult = JSONPath({
-                            path: extractPath,
-                            json: response.data?.data?.items || []
-                        });
-                        console.log(tempResult);
-                        tempResult = JSONPath({
                             path: filterPath,
                             json: tempResult || []
                         });
                         console.log(tempResult);
+                        //tempResult = tempResult.map(item => {
+                        //    return eval(extractPath);
+                        //});
+                        const extractFunc = new Function('item', 'return ' + extractPath);
+                        tempResult = tempResult.map(item => extractFunc(item));
                         result = result.concat(tempResult);
                         console.log(`executeRequest result: ${result.length}`);
                     }
