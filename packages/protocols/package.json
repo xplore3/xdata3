@@ -23,6 +23,7 @@
         "openai": "^4.92.1",
         "data3-scraper": "workspace:*",
         "pdfkit": "0.17.1",
+        "jsonpath-plus": "^10.3.0",
         "axios": "^1.8.4"
     },
     "devDependencies": {

@@ -672,7 +672,7 @@ let promptPartThree = `
             });
 
             promptPartThree = `\n[Area3]\nThe user origin quesiton[Question: ${originText}], The current API [API: ${JSON.stringify(
-                Obj
+                taskJson
             )}] Refine the response, You can reduce some unused fields, but don't reduce the total number of querying items.
             Based on the user's question, please remove irrelevant text, remove duplicate text and compress responce.
             For example, if the user's question is not related to the timestamp, the timestamp field can be removed. 
