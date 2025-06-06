@@ -407,7 +407,8 @@ class APIWrapperFactory {
             case "notes_search":
                 try {
                     const keyword =
-                        obj?.params?.keyword || obj?.params?.key1 || "";
+                        obj?.params?.keyword || obj?.params?.key1 ||
+                        obj?.params?.product || obj?.params?.query || "";
                     const page = obj?.params?.page || 1;
                     // Get more data.
                     // page 1: get data from 1 to 5.
@@ -447,7 +448,9 @@ class APIWrapperFactory {
                         if (extractPath === null || filterPath === null) {
                             const items = response.data?.data?.items;
                             if (items && items.length > 0) {
-                                let { extract: extractPath, filter: filterPath } = await IntentionHandler.genExtractMapper(runtime, message, items[0]);
+                                const mapper = await IntentionHandler.genExtractMapper(runtime, message, items[0]);
+                                extractPath = mapper.extract;
+                                filterPath = mapper.filter;
                             }
                         }
                         console.log(`executeRequest extractPath: ${extractPath}`);

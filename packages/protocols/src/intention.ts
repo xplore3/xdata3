@@ -66,7 +66,17 @@ export class IntentionHandler {
         modelClass: ModelClass.SMALL,
       });
       console.log(response);
-      return {extract: response.extract, filter: response.filter};
+      try {
+        const match = response.match(/```json\s*([\s\S]*?)```/);
+        if (match) {
+          const jsonString = match[1];
+          response = JSON.parse(jsonString);
+        }
+        return {extract: response.extract, filter: response.filter};
+      }
+      catch (e) {
+        console.error("Failed to parse JSON from response:", e);
+      }
     } catch (err) {
       console.log(err);
     }
