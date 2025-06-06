@@ -529,7 +529,54 @@ export class DirectClient {
                 let lastestExistsFilepath = "";
                 let pdfFilepath = "";
 
-                if ("report" === file_type) {
+                if ("report_pdf" === file_type) {
+                    // There may be multiple reports, starting from 1 and growing naturally to 2, 3, 4, 5...,10;
+                    for (let i = 1; i <= 10; i++) {
+                        const filename = taskId + `_report${i}.txt`;
+                        const filePdfname = taskId + `_report${i}.pdf`;
+                        // const filename = 'abc.pdf'; // Test: can also download pdf.
+                        const filePath = path.join(
+                            process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
+                            "data",
+                            filename
+                        );
+                        if (fs.existsSync(filePath)) {
+                            lastestExistsFilepath = filePath;
+                            pdfFilepath = path.join(
+                                process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
+                                "data",
+                                filePdfname
+                            );
+                        } else {
+                            break;
+                        }
+                    }
+
+                    if (fs.existsSync(lastestExistsFilepath)) {
+                        if (!fs.existsSync(pdfFilepath)) {
+                            await convertMarkdownToPdf(
+                                lastestExistsFilepath,
+                                pdfFilepath
+                            );
+                        }
+                        if (fs.existsSync(pdfFilepath)) {
+                            res.download(pdfFilepath, () => {});
+                            console.log("downloading: " + pdfFilepath);
+                            return;
+                        }
+
+                        res.download(lastestExistsFilepath, () => {});
+                        console.log("downloading: " + lastestExistsFilepath);
+                        return;
+                    } else {
+                        console.log(
+                            "not exist filePath: " + lastestExistsFilepath
+                        );
+                        res.status(404).send(
+                            "File not found filePath: " + lastestExistsFilepath
+                        );
+                    }
+                } else if ("report" === file_type) {
                     // There may be multiple reports, starting from 1 and growing naturally to 2, 3, 4, 5...,10;
                     for (let i = 1; i <= 10; i++) {
                         const filename = taskId + `_report${i}.txt`;
@@ -1996,6 +2043,15 @@ const convertMarkdownToPdf = async (inputFilePath, outputFilePath) => {
         const cssContent = await fs.readFileSync(cssPath, "utf-8");
         const config = {
             css: cssContent,
+            launch_options: {
+                args: [
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-dev-shm-usage",
+                ],
+                headless: true,
+                executablePath: process.env.CHROMIUM_PATH,
+            },
             pdf_options: {
                 format: "A4" as const,
                 margin: {
@@ -2006,14 +2062,9 @@ const convertMarkdownToPdf = async (inputFilePath, outputFilePath) => {
                 },
                 printBackground: true,
             },
-            launch_options: {
-                args: [
-                    "--no-sandbox",
-                    "--disable-setuid-sandbox",
-                    "--disable-dev-shm-usage",
-                ],
-                executablePath:
-                    process.env.CHROMIUM_PATH || "/usr/bin/chromium-browser",
+            body: {
+                fontFamily:
+                    "'Source Han Sans CN', 'Microsoft YaHei', sans-serif",
             },
         };
 
