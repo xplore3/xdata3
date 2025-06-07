@@ -4,6 +4,9 @@ import {
     type Memory,
 } from "@data3os/agentcontext";
 import { IntentionHandler } from "./intention";
+import { updateCacheText } from "./filehelper";
+import fs from 'fs';
+import path from 'path';
 
 class APIWrapperFactory {
     private static instance: APIWrapperFactory;
@@ -30,7 +33,7 @@ class APIWrapperFactory {
     ): Promise<any | undefined> {
         // {"route": "notes_search","params": {"key1": "v1","key2": "v2"}}
         console.log(`executeRequest params: ${JSON.stringify(obj)}`);
-        const taskId = message.content.intention?.taskId || '';
+        const taskId = message.content.intention?.taskId || "";
         let result = [];
         switch (obj.route) {
             case "get_user":
@@ -252,75 +255,82 @@ class APIWrapperFactory {
                 break;
             case "notes_comment_by_next_page":
                 for (let i = 0; i < 4; i++) {
-                let tempResult = [];
-                const lastCursor =
-                    APIWrapperFactory.cursorMap.get(taskId) || "";
-                if (lastCursor === "blank_holder") {
-                    console.log(`executeRequest lastCursor is blank_holder`);
-                    APIWrapperFactory.cursorMap.set(taskId, "");
-                    return result;
-                }
-                const urlWithparams = `http://47.120.60.92:8080/api/comment?noteId=${obj?.params?.noteId}&lastCursor=${lastCursor}`;
-                console.log(`executeRequest urlWithparams: ${urlWithparams}`);
-                const response = await axios.get(urlWithparams);
-                // http://47.120.60.92:8080/api/comment?noteId=682eb2aa0000000021005a6d&lastCursor=
-                console.log(
-                    `executeRequest response: ${JSON.stringify(response.data)}`
-                );
-                const cursor = response.data?.data?.cursor;
-                if (cursor !== undefined) {
-                    try {
-                        obj = JSON.parse(cursor) || {};
-                    } catch (error) {
-                        if (cursor) {
-                            obj.cursor = cursor;
-                        }
-                        console.error("Failed to parse cursor:", error);
+                    let tempResult = [];
+                    const lastCursor =
+                        APIWrapperFactory.cursorMap.get(taskId) || "";
+                    if (lastCursor === "blank_holder") {
+                        console.log(
+                            `executeRequest lastCursor is blank_holder`
+                        );
+                        APIWrapperFactory.cursorMap.set(taskId, "");
+                        return result;
                     }
+                    const urlWithparams = `http://47.120.60.92:8080/api/comment?noteId=${obj?.params?.noteId}&lastCursor=${lastCursor}`;
                     console.log(
-                        `executeRequest obj cursor: ${JSON.stringify(
-                            obj.cursor
+                        `executeRequest urlWithparams: ${urlWithparams}`
+                    );
+                    const response = await axios.get(urlWithparams);
+                    // http://47.120.60.92:8080/api/comment?noteId=682eb2aa0000000021005a6d&lastCursor=
+                    console.log(
+                        `executeRequest response: ${JSON.stringify(
+                            response.data
                         )}`
                     );
-                    APIWrapperFactory.cursorMap.set(taskId, obj.cursor);
-                } else {
-                    console.log(`executeRequest cursor is undefined`);
-                    APIWrapperFactory.cursorMap.set(taskId, "blank_holder");
-                }
-
-                function filterComments(comments) {
-                    return comments.map((comment) => {
-                        const filteredComment = {
-                            content: comment?.content || "",
-                            ip_location: comment?.ip_location || "",
-                            time: comment?.time || "",
-                            username: comment?.user?.nickname || "",
-                        };
-
-                        if (
-                            comment.sub_comments &&
-                            comment.sub_comments.length > 0
-                        ) {
-                            filteredComment.sub_comments =
-                                comment.sub_comments.map((subComment) => ({
-                                    content: subComment?.content || "",
-                                    ip_location: subComment?.ip_location || "",
-                                    time: subComment?.time || "",
-                                    username: subComment?.user?.nickname || "",
-                                }));
+                    const cursor = response.data?.data?.cursor;
+                    if (cursor !== undefined) {
+                        try {
+                            obj = JSON.parse(cursor) || {};
+                        } catch (error) {
+                            if (cursor) {
+                                obj.cursor = cursor;
+                            }
+                            console.error("Failed to parse cursor:", error);
                         }
+                        console.log(
+                            `executeRequest obj cursor: ${JSON.stringify(
+                                obj.cursor
+                            )}`
+                        );
+                        APIWrapperFactory.cursorMap.set(taskId, obj.cursor);
+                    } else {
+                        console.log(`executeRequest cursor is undefined`);
+                        APIWrapperFactory.cursorMap.set(taskId, "blank_holder");
+                    }
 
-                        return filteredComment;
-                    });
-                }
+                    function filterComments(comments) {
+                        return comments.map((comment) => {
+                            const filteredComment = {
+                                content: comment?.content || "",
+                                ip_location: comment?.ip_location || "",
+                                time: comment?.time || "",
+                                username: comment?.user?.nickname || "",
+                            };
 
-                const comments = filterComments(
-                    response.data?.data?.comments || []
-                );
+                            if (
+                                comment.sub_comments &&
+                                comment.sub_comments.length > 0
+                            ) {
+                                filteredComment.sub_comments =
+                                    comment.sub_comments.map((subComment) => ({
+                                        content: subComment?.content || "",
+                                        ip_location:
+                                            subComment?.ip_location || "",
+                                        time: subComment?.time || "",
+                                        username:
+                                            subComment?.user?.nickname || "",
+                                    }));
+                            }
 
+                            return filteredComment;
+                        });
+                    }
 
-                tempResult = filterComments(comments);
-                result = result.concat(tempResult);
+                    const comments = filterComments(
+                        response.data?.data?.comments || []
+                    );
+
+                    tempResult = filterComments(comments);
+                    result = result.concat(tempResult);
                 }
                 console.log(`executeRequest result: ${result.length}`);
                 break;
@@ -328,76 +338,82 @@ class APIWrapperFactory {
             case "get_note_list":
                 {
                     for (let i = 0; i < 4; i++) {
-                        
-                    const note_curosr_key = "get_note_list_" + taskId;
-                    const lastCursor =
-                        APIWrapperFactory.cursorMap.get(note_curosr_key) || "";
-                    if (lastCursor === "blank_holder") {
+                        const note_curosr_key = "get_note_list_" + taskId;
+                        const lastCursor =
+                            APIWrapperFactory.cursorMap.get(note_curosr_key) ||
+                            "";
+                        if (lastCursor === "blank_holder") {
+                            console.log(
+                                `executeRequest lastCursor is blank_holder`
+                            );
+                            APIWrapperFactory.cursorMap.set(
+                                note_curosr_key,
+                                ""
+                            );
+                            return result;
+                        }
+                        const urlWithparams = `http://47.120.60.92:8080/api/noteList?userId=${obj?.params?.userId}&lastCursor=${lastCursor}`;
                         console.log(
-                            `executeRequest lastCursor is blank_holder`
+                            `executeRequest urlWithparams: ${urlWithparams}`
                         );
-                        APIWrapperFactory.cursorMap.set(note_curosr_key, "");
-                        return result;
-                    }
-                    const urlWithparams = `http://47.120.60.92:8080/api/noteList?userId=${obj?.params?.userId}&lastCursor=${lastCursor}`;
-                    console.log(
-                        `executeRequest urlWithparams: ${urlWithparams}`
-                    );
-                    const response = await axios.get(urlWithparams);
-                    // http://47.120.60.92:8080/api/noteList?userId=66896ebc000000000303084b&lastCursor=
-                    // console.log(
-                    //     `executeRequest response: ${JSON.stringify(response.data)}`
-                    // );
-                    let lastestCursor = null;
-
-                    function filterNotes(notes) {
-                        return notes.map((note) => {
-                            lastestCursor = note?.cursor;
-                            // console.log(`executeRequest note: ${JSON.stringify(note)}`);
-                            const filteredNote = {
-                                share_count: note?.share_count || "",
-                                title: note?.title || "",
-                                linkes_count: note?.likes || "",
-                                collected_count: note?.collected_count || "",
-                                comments_count: note?.comments_count || "",
-                                nickname: note?.user?.nickname || "",
-                                display_title: note?.display_title || "",
-                                note_id: note?.id || "",
-                                desc: note?.desc || "",
-                                create_time: note?.create_time || "",
-                            };
-                            return filteredNote;
-                        });
-                    }
-
-                    const tempResult = filterNotes(response.data?.data?.notes || []);
-                    result = result.concat(tempResult);
-                    // const cursor = lastestCursor;
-                    if (lastestCursor) {
-                        // try {
-                        //     obj = JSON.parse(cursor) || {};
-                        // } catch (error) {
-                        //     if (cursor) {
-                        //         obj.cursor = cursor;
-                        //     }
-                        //     console.error("Failed to parse cursor:", error);
-                        // }
+                        const response = await axios.get(urlWithparams);
+                        // http://47.120.60.92:8080/api/noteList?userId=66896ebc000000000303084b&lastCursor=
                         // console.log(
-                        //     `executeRequest obj cursor: ${JSON.stringify(
-                        //         obj?.cursor
-                        //     )}`
+                        //     `executeRequest response: ${JSON.stringify(response.data)}`
                         // );
-                        APIWrapperFactory.cursorMap.set(
-                            note_curosr_key,
-                            lastestCursor
+                        let lastestCursor = null;
+
+                        function filterNotes(notes) {
+                            return notes.map((note) => {
+                                lastestCursor = note?.cursor;
+                                // console.log(`executeRequest note: ${JSON.stringify(note)}`);
+                                const filteredNote = {
+                                    share_count: note?.share_count || "",
+                                    title: note?.title || "",
+                                    linkes_count: note?.likes || "",
+                                    collected_count:
+                                        note?.collected_count || "",
+                                    comments_count: note?.comments_count || "",
+                                    nickname: note?.user?.nickname || "",
+                                    display_title: note?.display_title || "",
+                                    note_id: note?.id || "",
+                                    desc: note?.desc || "",
+                                    create_time: note?.create_time || "",
+                                };
+                                return filteredNote;
+                            });
+                        }
+
+                        const tempResult = filterNotes(
+                            response.data?.data?.notes || []
                         );
-                    } else {
-                        console.log(`executeRequest cursor is undefined`);
-                        APIWrapperFactory.cursorMap.set(
-                            note_curosr_key,
-                            "blank_holder"
-                        );
-                    }
+                        result = result.concat(tempResult);
+                        // const cursor = lastestCursor;
+                        if (lastestCursor) {
+                            // try {
+                            //     obj = JSON.parse(cursor) || {};
+                            // } catch (error) {
+                            //     if (cursor) {
+                            //         obj.cursor = cursor;
+                            //     }
+                            //     console.error("Failed to parse cursor:", error);
+                            // }
+                            // console.log(
+                            //     `executeRequest obj cursor: ${JSON.stringify(
+                            //         obj?.cursor
+                            //     )}`
+                            // );
+                            APIWrapperFactory.cursorMap.set(
+                                note_curosr_key,
+                                lastestCursor
+                            );
+                        } else {
+                            console.log(`executeRequest cursor is undefined`);
+                            APIWrapperFactory.cursorMap.set(
+                                note_curosr_key,
+                                "blank_holder"
+                            );
+                        }
                     }
                     console.log(`executeRequest result size: ${result.length}`);
                 }
@@ -407,15 +423,19 @@ class APIWrapperFactory {
             case "notes_search":
                 try {
                     const keyword =
-                        obj?.params?.keyword || obj?.params?.key1 ||
-                        obj?.params?.product || obj?.params?.query || "";
+                        obj?.params?.keyword ||
+                        obj?.params?.key1 ||
+                        obj?.params?.product ||
+                        obj?.params?.query ||
+                        "";
                     const page = obj?.params?.page || 1;
                     // Get more data.
                     // page 1: get data from 1 to 5.
                     // page 2: get data from 6 to 10.
                     const pageStart = (page - 1) * 5 + 1;
                     const pageEnd = page * 5;
-                    let extractPath: string = null, filterPath: string = null;
+                    let extractPath: string = null,
+                        filterPath: string = null;
                     for (let mPage = pageStart; mPage <= pageEnd; mPage++) {
                         let tempResult = [];
                         const url = `http://47.120.60.92:8080/api/search?keyword=${keyword}&page=${mPage}&sort=popularity_descending`;
@@ -448,7 +468,12 @@ class APIWrapperFactory {
                         if (extractPath === null || filterPath === null) {
                             const items = response.data?.data?.items;
                             if (items && items.length > 0) {
-                                const mapper = await IntentionHandler.genExtractMapper(runtime, message, items[0]);
+                                const mapper =
+                                    await IntentionHandler.genExtractMapper(
+                                        runtime,
+                                        message,
+                                        items[0]
+                                    );
                                 console.log(mapper);
                                 extractPath = mapper.extract;
                                 filterPath = mapper.filter;
@@ -456,14 +481,19 @@ class APIWrapperFactory {
                         }
                         tempResult = JSONPath({
                             path: filterPath,
-                            json: response.data?.data?.items
+                            json: response.data?.data?.items,
                         });
                         console.log(tempResult);
                         //tempResult = tempResult.map(item => {
                         //    return eval(extractPath);
                         //});
-                        const extractFunc = new Function('item', 'return ' + extractPath);
-                        tempResult = tempResult.map(item => extractFunc(item));
+                        const extractFunc = new Function(
+                            "item",
+                            "return " + extractPath
+                        );
+                        tempResult = tempResult.map((item) =>
+                            extractFunc(item)
+                        );
                         result = result.concat(tempResult);
                         console.log(`executeRequest result: ${result.length}`);
                     }
@@ -475,7 +505,60 @@ class APIWrapperFactory {
                 console.error(`Unknown route: ${JSON.stringify(obj)}`);
         }
         // console.log(`executeRequest result: ${JSON.stringify(result)}`);
+        const csvRes = await APIWrapperFactory.convertToCSV(result);
+        APIWrapperFactory.csvDataPersist(csvRes, taskId);
         return result;
+    }
+
+    public static csvDataPersist(responseFinal: string, taskId: any) {
+        let firstUnExistsFilename = "";
+        for (let i = 1; i <= 10; i++) {
+            const filename = taskId + `_raw_data${i}.csv`;
+            // const filename = 'abc.pdf'; // Test: can also download pdf.
+            const filePath = path.join(
+                process.cwd(), // /root/xdata3/data3-agent/data/Task-111111_report1.txt
+                "files",
+                filename
+            );
+            if (!fs.existsSync(filePath)) {
+                firstUnExistsFilename = filename;
+                break;
+            }
+        }
+        updateCacheText(responseFinal, firstUnExistsFilename, (err) => {
+            console.error("Failed to write file:", err);
+        });
+        return `http://97.64.21.158:3333/media/files/${firstUnExistsFilename}`;
+    }
+
+    public static async convertToCSV(data) {
+        const fields = null;
+        const delimiter = ",";
+        const includeHeader = true;
+
+        if (!Array.isArray(data) || data.length === 0) {
+            return "";
+        }
+        const fieldNames = fields || Object.keys(data[0]);
+        const escapeField = (value) => {
+            if (value === null || value === undefined) return "";
+            const strValue = String(value);
+            if (
+                strValue.includes('"') ||
+                strValue.includes(delimiter) ||
+                strValue.includes("\n")
+            ) {
+                return `"${strValue.replace(/"/g, '""')}"`;
+            }
+            return strValue;
+        };
+        const buildRow = (obj) =>
+            fieldNames.map((field) => escapeField(obj[field])).join(delimiter);
+        let csv = "";
+        if (includeHeader) {
+            csv += fieldNames.map(escapeField).join(delimiter) + "\n";
+        }
+        return csv + data.map(buildRow).join("\n");
     }
 
     // async getHotWords(page = 1) {

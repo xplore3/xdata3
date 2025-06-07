@@ -397,6 +397,16 @@ export const handleProtocolsForQuickResponce = async (
         console.log("1 handleProtocols Obj: ", searchObj);
         apires = await APIWrapperFactory.executeRequest(runtime, searchObj, message);
         console.log("2 handleProtocols Obj: ", JSON.stringify(apires).slice(0, 200));
+                    const content = `\n
+            [Question: ${originText}]
+            [API: ${JSON.stringify(searchObj)}]
+            [Responce: ${JSON.stringify(apires)}].
+            \n`;
+
+            const filename = taskId + "_data.txt";
+            appendToChatCache(content, filename, (err) => {
+                console.error("Custom error handling:", err);
+            });
         /********* data3 protocol v2 end *********/
     } catch (e) {
         console.log("handleProtocols error: ", e);
