@@ -342,7 +342,8 @@ export const handleProtocolsForQuickResponce = async (
         Extracting the parameters of the problem from the user's question, ${originText}, 
         Retrieve from the API description in other parameters. 
         If you decide to use a quick responce mode, please return a JSON object containing the following fields:
-        {"quickMode": true,"route": "notes_search","params": {"key1": "v1","key2": "v2"}}
+        {"quickMode": true,"route": "notes_search","params": {"key1": "v1","key2": "v2", "totalItemCount": 100}}
+        This 'totalItemCount' field indicates how many data items the user wants to obtain.
         When you use an API to search for multiple keywords, you can split them up, such as: Query(A), Query(B), Query(C). Instead of just Query(A B C), it is easy to get no results if you query many groups of keywords at the same time.
         Please return this JSON object directly without any explanation, comments, other content, or markdown syntax modification.
         `;
@@ -378,6 +379,7 @@ export const handleProtocolsForQuickResponce = async (
     let apires = null;
     let currentApiStr = "";
     let apiSuccess = false;
+    let csvdataurl = null;
     try {
         /********* data3 protocol v1 begin *********
         if (Obj.method == "post") {
@@ -395,8 +397,12 @@ export const handleProtocolsForQuickResponce = async (
 
         /********* data3 protocol v2 begin *********/
         console.log("1 handleProtocols Obj: ", searchObj);
-        apires = await APIWrapperFactory.executeRequest(runtime, searchObj, message);
-        console.log("2 handleProtocols Obj: ", JSON.stringify(apires).slice(0, 200));
+                // return {result , csvfileurl };
+
+        const {result, csvfileurl} = await APIWrapperFactory.executeRequest(runtime, searchObj, message);
+        apires = result;
+        csvdataurl = csvfileurl;
+        console.log("2 handleProtocols Obj: ", JSON.stringify(apires)?.slice(0, 200));
                     const content = `\n
             [Question: ${originText}]
             [API: ${JSON.stringify(searchObj)}]
@@ -407,6 +413,7 @@ export const handleProtocolsForQuickResponce = async (
             appendToChatCache(content, filename, (err) => {
                 console.error("Custom error handling:", err);
             });
+        apiSuccess = true;
         /********* data3 protocol v2 end *********/
     } catch (e) {
         console.log("handleProtocols error: ", e);
@@ -425,15 +432,15 @@ export const handleProtocolsForQuickResponce = async (
             [QUESTION: ${originText}]
             [API: ${JSON.stringify(searchObj)}]
             [RESPONCE: ${JSON.stringify(apires)}].
-            如果 API 出现错误，导致数据查询失败，请直接回答：API请求出现错误，请在聊天框中输入【人工】，以便人工处理。
             \n`;
+    console.log("qucikResponce: prompt: \n " + content);
     try {
       responseFinal = await generateText({
         runtime,
         context: shortenStr(content),
         modelClass: ModelClass.SMALL,
     });
-       console.log("quick responce: \n" + responseFinal)
+       console.log("quick responce: final: \n" + responseFinal)
     }
     catch (error) {
         console.error("handleProtocols error: ", error);
@@ -449,8 +456,11 @@ export const handleProtocolsForQuickResponce = async (
     } catch (err) {
         console.log(err);
     }*/
+    if(!apiSuccess) {
+        responseFinal += '\nAPI请求出现错误，请在聊天框中输入【人工】，以便人工处理。';
+    }
     const finalfilepath = reportPersist(responseFinal, taskId);
-    const responseTail = `\n下载报告地址(三天后过期): ${finalfilepath}`;
+    const responseTail = `\n下载报告地址(三天后过期): ${finalfilepath}\n下载数据地址${csvdataurl}`;
     if (containsHotwords(originText) && !responseFinal.includes("【人工】")) {
         return responseFinal + responseTail + "\n是否需要参考这些热度较高的帖子进行仿写？";
     }
@@ -558,10 +568,10 @@ let promptPartThree = `
 \n[Area3]:
 `; // [The third area] interact Block.
 
-
-
     let step = 0;
-    
+    let csvdataurl = null;
+    let apiSuccess = false;
+
     do {
         ++step;
         if (step > 12) {
@@ -605,7 +615,8 @@ let promptPartThree = `
         Extracting the parameters of the problem from the user's question, ${originText}, 
         Retrieve from the API description in other parameters. 
         Please return a JSON object containing the following fields:
-        {"route": "notes_search","params": {"key1": "val1", "key2": "val2", "count": 100}}
+        {"route": "notes_search","params": {"key1": "val1", "key2": "val2", "totalItemCount": 100}}
+        This 'totalItemCount' field indicates how many data items the user wants to obtain.
         When you use an API to search for multiple keywords, you can split them up, such as: Query(A), Query(B), Query(C). Instead of just Query(A B C), it is easy to get no results if you query many groups of keywords at the same time.There is another situation where there is a dependency relationship, and this time you only need to return the interface of the current data. I will add the return result of this data query and origin question text in the next loop. Based on the new return result, you can continue to select the API for network calls and complete the dependency calls.
         At the same time, you also need to retrieve the parameters that may be used in [Area2][Block 5].
         Only one http request interface is returned at a time, and subsequent data can be requested in subsequent loops.
@@ -650,7 +661,6 @@ let promptPartThree = `
 
         let apires = null;
         let currentApiStr = "";
-        let apiSuccess = false;
         try {
             // if (Obj.method == "post") {
             //     apires = await axios.post(Obj.baseurl, Obj.body, {
@@ -664,7 +674,9 @@ let promptPartThree = `
             //     });
             // }
             console.log("3 handleProtocols API call  Obj: ", taskJson);
-            apires = await APIWrapperFactory.executeRequest(runtime, taskJson, message);
+            const {result, csvfileurl }= await APIWrapperFactory.executeRequest(runtime, taskJson, message);
+            csvdataurl = csvfileurl;
+            apires = result;
             console.log(
                 "4 handleProtocols API call res: ",
                 JSON.stringify(apires).slice(0, 200)
@@ -893,8 +905,11 @@ let promptPartThree = `
         console.log("handleProtocols error: ", e);
         return "system error 1003";
     }
+    if(!apiSuccess) {
+        responseFinal += '\nAPI请求出现错误，请在聊天框中输入【人工】，以便人工处理。';
+    }
     const finalfilepath = reportPersist(responseFinal, taskId);
-    const responseTail = `\n下载报告地址(三天后过期): ${finalfilepath}`;
+    const responseTail = `\n下载报告地址: ${finalfilepath}\n下载数据地址：${csvdataurl}\n(三天后过期)`;
     if (containsHotwords(originText) && !responseFinal.includes("【人工】")) {
         return responseFinal + responseTail + "\n是否需要参考这些热度较高的帖子进行仿写？";
     }

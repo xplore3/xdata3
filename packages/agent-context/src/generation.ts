@@ -604,7 +604,7 @@ export async function generateText({
                 });
 
                 response = openaiResponse;
-                console.log("Received response from OpenAI model.", response);
+                console.log("Received response from OpenAI model.");
                 break;
             }
 

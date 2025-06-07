@@ -34,6 +34,7 @@ class APIWrapperFactory {
         // {"route": "notes_search","params": {"key1": "v1","key2": "v2"}}
         console.log(`executeRequest params: ${JSON.stringify(obj)}`);
         const taskId = message.content.intention?.taskId || "";
+        const totalItemCount = obj?.params?.totalItemCount;
         let result = [];
         switch (obj.route) {
             case "get_user":
@@ -432,13 +433,16 @@ class APIWrapperFactory {
                     // Get more data.
                     // page 1: get data from 1 to 5.
                     // page 2: get data from 6 to 10.
-                    const pageStart = (page - 1) * 5 + 1;
-                    const pageEnd = page * 5;
+                    // const pageStart = (page - 1) * 5 + 1;
+                    // const pageEnd = page * 5;
                     let extractPath: string = null,
                         filterPath: string = null;
-                    for (let mPage = pageStart; mPage <= pageEnd; mPage++) {
+                    const maxPageNum = 300;
+                    for (let mPage = 1; mPage <= maxPageNum && result.length < totalItemCount; mPage++) {
                         let tempResult = [];
-                        const url = `http://47.120.60.92:8080/api/search?keyword=${keyword}&page=${mPage}&sort=popularity_descending`;
+                        //const url = `http://47.120.60.92:8080/api/search?keyword=${keyword}&page=${mPage}&sort=popularity_descending`;
+                        // popularity_descending :(Hot) , time_descending :(New)
+                        const url = `http://47.117.133.51:30015/api/xiaohongshu/search-note/v2?token=QdQU3VTR&keyword=${keyword}&page=${mPage}&sort=popularity_descending&noteType=_0&noteTime`;
                         console.log(`executeRequest url by params: ${url}`);
                         const response = await axios.get(url);
                         console.log(
@@ -497,6 +501,8 @@ class APIWrapperFactory {
                         result = result.concat(tempResult);
                         console.log(`executeRequest result: ${result.length}`);
                     }
+                    result?.slice(0, totalItemCount);
+                    console.log(`executeRequest result, after cut.: ${result?.length}`);
                 } catch (error) {
                     console.error("Error fetching data:", error);
                 }
@@ -506,8 +512,8 @@ class APIWrapperFactory {
         }
         // console.log(`executeRequest result: ${JSON.stringify(result)}`);
         const csvRes = await APIWrapperFactory.convertToCSV(result);
-        APIWrapperFactory.csvDataPersist(csvRes, taskId);
-        return result;
+        const csvfileurl = APIWrapperFactory.csvDataPersist(csvRes, taskId);
+        return {result , csvfileurl };
     }
 
     public static csvDataPersist(responseFinal: string, taskId: any) {
@@ -532,34 +538,58 @@ class APIWrapperFactory {
     }
 
     public static async convertToCSV(data) {
-        const fields = null;
-        const delimiter = ",";
-        const includeHeader = true;
+    const fields = null;
+    const delimiter = ",";
+    const includeHeader = true;
 
-        if (!Array.isArray(data) || data.length === 0) {
-            return "";
-        }
-        const fieldNames = fields || Object.keys(data[0]);
-        const escapeField = (value) => {
-            if (value === null || value === undefined) return "";
-            const strValue = String(value);
-            if (
-                strValue.includes('"') ||
-                strValue.includes(delimiter) ||
-                strValue.includes("\n")
-            ) {
-                return `"${strValue.replace(/"/g, '""')}"`;
+    if (Array.isArray(data) && typeof data[0] === 'string') {
+        data = data.map(item => {
+            let parsed;
+            try {
+                const jsonString = item
+                    .replace(/'/g, '"')  
+                    .replace(/(\w+):\s*([^,\s]+)/g, '"$1": "$2"');
+
+                parsed = JSON.parse(jsonString);
+            } catch (e) {
+                const fixedString = item
+                    .replace(/'/g, '"')
+                    .replace(/id":\s*([a-f0-9]+)/gi, 'id": "$1"');
+                
+                try {
+                    parsed = JSON.parse(fixedString);
+                } catch (finalError) {
+                    console.error("解析失败:", item);
+                    parsed = {};
+                }
             }
-            return strValue;
-        };
-        const buildRow = (obj) =>
-            fieldNames.map((field) => escapeField(obj[field])).join(delimiter);
-        let csv = "";
-        if (includeHeader) {
-            csv += fieldNames.map(escapeField).join(delimiter) + "\n";
-        }
-        return csv + data.map(buildRow).join("\n");
+            return parsed;
+        });
     }
+
+    if (!Array.isArray(data) || data.length === 0) {
+        return "";
+    }
+
+    const fieldNames = fields || Object.keys(data[0]);
+    const escapeField = (value) => {
+        if (value === null || value === undefined) return "";
+        const strValue = String(value);
+        if (strValue.includes('"') || strValue.includes(delimiter) || strValue.includes("\n")) {
+            return `"${strValue.replace(/"/g, '""')}"`;
+        }
+        return strValue;
+    };
+
+    const buildRow = (obj) =>
+        fieldNames.map((field) => escapeField(obj[field])).join(delimiter);
+
+    let csv = includeHeader 
+        ? fieldNames.map(escapeField).join(delimiter) + "\n"
+        : "";
+
+    return csv + data.map(buildRow).join("\n");
+}
 
     // async getHotWords(page = 1) {
     //     return RedNoteHotwordAPI.getHotWords(page);
