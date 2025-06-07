@@ -440,9 +440,10 @@ class APIWrapperFactory {
                     const maxPageNum = 300;
                     for (let mPage = 1; mPage <= maxPageNum && result.length < totalItemCount; mPage++) {
                         let tempResult = [];
-                        //const url = `http://47.120.60.92:8080/api/search?keyword=${keyword}&page=${mPage}&sort=popularity_descending`;
+                        const sort =  obj?.params?.sort || "popularity_descending";
+                        //const url = `http://47.120.60.92:8080/api/search?keyword=${keyword}&page=${mPage}&sort=${sort}`;
                         // popularity_descending :(Hot) , time_descending :(New)
-                        const url = `http://47.117.133.51:30015/api/xiaohongshu/search-note/v2?token=QdQU3VTR&keyword=${keyword}&page=${mPage}&sort=popularity_descending&noteType=_0&noteTime`;
+                        const url = `http://47.117.133.51:30015/api/xiaohongshu/search-note/v2?token=QdQU3VTR&keyword=${keyword}&page=${mPage}&sort=${sort}&noteType=_0&noteTime`;
                         console.log(`executeRequest url by params: ${url}`);
                         const response = await axios.get(url);
                         console.log(
