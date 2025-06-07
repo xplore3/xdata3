@@ -27,6 +27,9 @@ export interface Intention {
     /** Data API Params */
     params?: Record<string, any>;
 
+    /** Data Reqeust Count */
+    count?: number;
+
     /** RawData from route */
     rawData?: JSON | string;
 
