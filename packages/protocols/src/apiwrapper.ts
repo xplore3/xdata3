@@ -513,7 +513,10 @@ class APIWrapperFactory {
         }
         // console.log(`executeRequest result: ${JSON.stringify(result)}`);
         const csvRes = await APIWrapperFactory.convertToCSV(result);
-        const csvfileurl = APIWrapperFactory.csvDataPersist(csvRes, taskId);
+        let csvfileurl = "";
+        if(result?.length > 0) {
+            csvfileurl = APIWrapperFactory.csvDataPersist(csvRes, taskId);
+        }
         return {result , csvfileurl };
     }
 
