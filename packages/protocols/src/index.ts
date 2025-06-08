@@ -945,7 +945,8 @@ function reportPersist(responseFinal: string, taskId: any) {
     updateCacheText(responseFinal, firstUnExistsFilename, (err) => {
         console.error("Failed to write file:", err);
     });
-    return `http://97.64.21.158:3333/media/files/${firstUnExistsFilename}`;
+    return `https://data3.site/media/files/${firstUnExistsFilename}`;
+    //return `http://97.64.21.158:3333/media/files/${firstUnExistsFilename}`;
 }
 
 function stringToHash4(str) {
