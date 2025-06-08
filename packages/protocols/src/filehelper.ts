@@ -4,6 +4,13 @@ import { fileURLToPath } from 'url';
 
 // "chat-cache-file.txt"
 export function appendToChatCache(content: string, filename: string, onError?: (err: Error) => void) {
+    const filedir = path.join(process.cwd(), "files");
+    if (!fs.existsSync(filedir)) {
+        fs.mkdirSync(filedir, { recursive: true });
+        console.log(`created: ${filedir}`);
+    } else {
+        console.log(`exist: ${filedir}`);
+    }
     const filePath = path.join(
         process.cwd(), // /root/xdata3/data3-agent/files/111111_memory.txt
         "files",
@@ -21,6 +28,13 @@ export function appendToChatCache(content: string, filename: string, onError?: (
 }
 
 export function readCacheFile(filename: string): string {
+    const filedir = path.join(process.cwd(), "files");
+    if (!fs.existsSync(filedir)) {
+        fs.mkdirSync(filedir, { recursive: true });
+        console.log(`created: ${filedir}`);
+    } else {
+        console.log(`exist: ${filedir}`);
+    }
     const filePath = path.join(
         process.cwd(),
         "files",
@@ -35,6 +49,13 @@ export function readCacheFile(filename: string): string {
 }
 
 export function updateCacheText(content: string, filename: string, onError?: (err: Error) => void) {
+    const filedir = path.join(process.cwd(), "files");
+    if (!fs.existsSync(filedir)) {
+        fs.mkdirSync(filedir, { recursive: true });
+        console.log(`created: ${filedir}`);
+    } else {
+        console.log(`exist: ${filedir}`);
+    }
         const filePath = path.join(
         process.cwd(), // /root/xdata3/data3-agent/files/111111_memory.txt
         "files",
