@@ -28,7 +28,7 @@
                     "input": "Parameters: keyword (search term), sort (popularity_descending or time_descending)",
                     "output": "notes array(note.user.nickname,note.user.red_official_verified,note.collected_count,note.liked_count,note.comments_count,note.id,note?.title,note.desc,note?.abstract_show,note.timestamp)",
                     "route": "notes_search",
-                    "params": "{"keyword": "keyword", "sort": "popularity_descending"}",
+                    "params": "{'keyword': 'keyword', 'sort': 'popularity_descending'}",
                     "additional": ""
                 },
                 {
