@@ -85,7 +85,10 @@ export const handleProtocols = async (runtime: any, originText: any) => {
  * This part of the logic not require processing of context memory.
  */
 export const handleProtocolsForPrompt = async (runtime: any, originText: any, taskId: any) => {
-    const promt1 = `You are an interactive AI agent that can have multiple interactions when solving problems.
+    const promt1 = `You are operating as a Top-tier Personal Assistant, providing continuous support until the user's issue is completely resolved. Immediately cease responses once resolution is confirmed.
+When encountering uncertain problems, you must utilize tools to read and verify content; speculation or fabrication of information is strictly prohibited. If existing data APIs cannot address the user's query, objectively point out the inability to respond due to insufficient data.
+Before each tool invocation, fully plan your approach and rigorously combine insights from previous tool results. Avoid relying solely on sequential tool calls to accomplish tasks.
+You are an interactive AI agent that can have multiple interactions when solving problems.
     You need to help the user solve the following task [Question: ${originText}],
     Before solving the task, in order to solve the problem better and more accurately, please help the user refine and specify the problem description. You are an interactive AI, and at this stage you only need to refine and specify the problem.
     For simple questions, you can ask less or no questions. For a complex question, you need to ask multiple questions. To facilitate user interaction, please ask multiple-choice questions for interaction.
@@ -253,7 +256,9 @@ export const handleProtocolsForQuickResponce = async (
     console.log(containsKeywords("Very Good")); // false
     console.log(containsKeywords("很好，回答的不错")); // false
     */
-   const promptInjectBaseUserInfoAndOriginText = `You are a AI data Agent, You need to answer user's questions based on background knowledge.
+   const promptInjectBaseUserInfoAndOriginText = `You are a AI data Agent.You are operating as a Top-tier Personal Assistant, providing continuous support until the user's issue is completely resolved. Immediately cease responses once resolution is confirmed.
+When encountering uncertain problems, you must utilize tools to read and verify content; speculation or fabrication of information is strictly prohibited. If existing data APIs cannot address the user's query, objectively point out the inability to respond due to insufficient data.
+Before each tool invocation, fully plan your approach and rigorously combine insights from previous tool results. Avoid relying solely on sequential tool calls to accomplish tasks. You need to answer user's questions based on background knowledge.
     [BACKGROUND KNOWLEDGE: ${promptInjectBaseUserInfoStr}]
     [USER QUESTION: ${originText}]
     `;
@@ -333,7 +338,9 @@ export const handleProtocolsForQuickResponce = async (
     ) {
         return null;
     }
-    let promptPartThree = `You are a Data AI agent. [YOU BACKGROUND KNOWLEDGE:\ ${promptInjectBaseUserInfoStr}]
+    let promptPartThree = `You are a Data AI agent. You are operating as a Top-tier Personal Assistant, providing continuous support until the user's issue is completely resolved. Immediately cease responses once resolution is confirmed.
+When encountering uncertain problems, you must utilize tools to read and verify content; speculation or fabrication of information is strictly prohibited. If existing data APIs cannot address the user's query, objectively point out the inability to respond due to insufficient data.
+Before each tool invocation, fully plan your approach and rigorously combine insights from previous tool results. Avoid relying solely on sequential tool calls to accomplish tasks.[YOU BACKGROUND KNOWLEDGE:\ ${promptInjectBaseUserInfoStr}]
         [USER QUESTION: ${originText}].
         You need to call once HTTP API request to answer user questions.
         Please analyze the description of the API below. ${JSON.stringify(
@@ -372,8 +379,9 @@ export const handleProtocolsForQuickResponce = async (
     } catch (e) {
         console.log("handleProtocols response2Str parse error: ", e);
     }
-    if(!searchObj?.route) {
-        return null; 
+    console.log(`handleProtocols route: ${searchObj?.route} quick responce apiXDataSourceArray: ${JSON.stringify(apiXDataSourceArray)} `);
+    if(!isRouteInAPIArray(searchObj?.route, apiXDataSourceArray)) {
+        return `${searchObj?.route} is not in API list.`;
     }
 
     let apires = null;
@@ -426,7 +434,9 @@ export const handleProtocolsForQuickResponce = async (
         apiSuccess = false;
     }
     // This is what you want to add
-    const content = `You are a Data AI agent. [BACKGROUND KNOWLEDGE: ${promptInjectBaseUserInfoStr}]
+    const content = `You are a Data AI agent. You are operating as a Top-tier Personal Assistant, providing continuous support until the user's issue is completely resolved. Immediately cease responses once resolution is confirmed.
+When encountering uncertain problems, you must utilize tools to read and verify content; speculation or fabrication of information is strictly prohibited. If existing data APIs cannot address the user's query, objectively point out the inability to respond due to insufficient data.
+Before each tool invocation, fully plan your approach and rigorously combine insights from previous tool results. Avoid relying solely on sequential tool calls to accomplish tasks.[BACKGROUND KNOWLEDGE: ${promptInjectBaseUserInfoStr}]
     The user's question, the API used, and the result of the API request are as follows.
     You need to answer the user's question based on the result of the API request.
             [QUESTION: ${originText}]
@@ -501,7 +511,9 @@ export const handleProtocolsByLongLogic = async (runtime: any,
         console.log(`str len:  ${(1.0 * str.length / 1000)} k.`);
         return str;
     }
-    const promt1 = ` You are an AI agent. You need to determine whether the user's question requires an online query.
+    const promt1 = ` You are an AI agent. You are operating as a Top-tier Personal Assistant, providing continuous support until the user's issue is completely resolved. Immediately cease responses once resolution is confirmed.
+When encountering uncertain problems, you must utilize tools to read and verify content; speculation or fabrication of information is strictly prohibited. If existing data APIs cannot address the user's query, objectively point out the inability to respond due to insufficient data.
+Before each tool invocation, fully plan your approach and rigorously combine insights from previous tool results. Avoid relying solely on sequential tool calls to accomplish tasks. You need to determine whether the user's question requires an online query.
     [BACKGROUND KNOWLEDGE: ${promptInjectBaseUserInfoStr}]
     Do the following questions need to be queried online?\n
         [QUESTION: ${originText}] \n At the same time, you can read this list of HTTP APIs [APIS: ${JSON.stringify(
@@ -547,6 +559,9 @@ export const handleProtocolsByLongLogic = async (runtime: any,
 
 let promptPartOne = `
 You are a data AI Agent that answers some user questions by querying network data multiple times.
+You are operating as a Top-tier Personal Assistant, providing continuous support until the user's issue is completely resolved. Immediately cease responses once resolution is confirmed.
+When encountering uncertain problems, you must utilize tools to read and verify content; speculation or fabrication of information is strictly prohibited. If existing data APIs cannot address the user's query, objectively point out the inability to respond due to insufficient data.
+Before each tool invocation, fully plan your approach and rigorously combine insights from previous tool results. Avoid relying solely on sequential tool calls to accomplish tasks.
 [BACKGROUND KNOWLEDGE: ${promptInjectBaseUserInfoStr}]
 [USER ORIGINAL QUESTION: ${originText}]
 To make it easier for you to perform long logical inferences, I have mapped out the inference areas in your context.
@@ -662,6 +677,10 @@ let promptPartThree = `
         let taskJson = null;
         try {
             taskJson = JSON.parse(response2Str);
+            console.log(`handleProtocols route: ${taskJson?.route} long logic apiXDataSourceArray: ${JSON.stringify(apiXDataSourceArray)} `);
+            if(!isRouteInAPIArray(taskJson?.route, apiXDataSourceArray)) {
+                promptPartTwo += `\n ${taskJson?.route} is not in API list, please select another API.`;
+            }
         } catch (e) {
             console.log(
                 "handleProtocols response2Str parse error: ",
@@ -884,6 +903,9 @@ let promptPartThree = `
         const data_cached_str = readCacheFile(taskId + "_data.txt");
         const memory_cached_str = readCacheFile(taskId + "_memory.txt");
         const promptQuestionWithData =`You are a data analysis expert specializing in data analysis of the social media platform Xiaohongshu.(RedNote/小红书), with strong market research and user analysis capabilities.
+        You are operating as a Top-tier Personal Assistant, providing continuous support until the user's issue is completely resolved. Immediately cease responses once resolution is confirmed.
+When encountering uncertain problems, you must utilize tools to read and verify content; speculation or fabrication of information is strictly prohibited. If existing data APIs cannot address the user's query, objectively point out the inability to respond due to insufficient data.
+Before each tool invocation, fully plan your approach and rigorously combine insights from previous tool results. Avoid relying solely on sequential tool calls to accomplish tasks.
             Not only can you accurately answer data questions raised by the business (descriptive, diagnostic),
             but you can also proactively explore the hidden information in the data, raise valuable business questions and new opportunities (exploratory, predictive, guiding), and through excellent communication, transform data insights into practical actions to drive business growth, optimize user experience, and improve operational efficiency.
             You answer user's questions based on background knowledge and API return data.
@@ -1011,4 +1033,10 @@ function containsHotwords(originText: any) {
         //     return true;
         // }
         return false;
+}
+
+function isRouteInAPIArray(routeStr, apiArray) {
+  const apiList = apiArray?.[0]?.APIs;
+  if (!Array.isArray(apiList)) return false;
+  return apiList.some(api => api.route === routeStr);
 }
