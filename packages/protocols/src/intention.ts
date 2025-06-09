@@ -98,6 +98,27 @@ export class IntentionHandler {
       }
       catch (e) {
         console.error("Failed to parse JSON from response:", e);
+
+        // Invalid JSON, fallback to default
+        response = await generateText({
+          runtime,
+          context: prompt + `\n\n上一个输出${response}有问题，不能正确JSON解析，请重新生成。`,
+          modelClass: ModelClass.SMALL,
+        });
+        console.log(response);
+        try {
+          const match = response.match(/```json\s*([\s\S]*?)```/);
+          if (match) {
+            const jsonString = match[1];
+            response = JSON.parse(jsonString);
+          }
+          else {
+            response = JSON.parse(response);
+          }
+        }
+        catch (e) {
+          console.error("Failed again to parse response:", e);
+        }
       }
       return {extract: response.extract, filter: response.filter};
     } catch (err) {
