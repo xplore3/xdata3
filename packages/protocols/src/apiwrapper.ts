@@ -34,7 +34,7 @@ class APIWrapperFactory {
         // {"route": "notes_search","params": {"key1": "v1","key2": "v2"}}
         console.log(`executeRequest params: ${JSON.stringify(obj)}`);
         const taskId = message.content.intention?.taskId || "";
-        const totalItemCount = obj?.params?.totalItemCount;
+        const totalItemCount = obj?.params?.totalItemCount || 10;
         let result = [];
         switch (obj.route) {
             case "get_user":
@@ -141,7 +141,6 @@ class APIWrapperFactory {
                 break;
             case "hot_words":
                 try {
-                    const totalItemCount = obj?.params?.totalItemCount || 10;
                     console.log(
                         "Fetching hot words... totalItemCount: " +
                             totalItemCount
@@ -214,7 +213,6 @@ class APIWrapperFactory {
                 break;
             case "hot_topics":
                 try {
-                    const totalItemCount = obj?.params?.totalItemCount || 10;
                     console.log(
                         "Fetching hot topics... totalItemCount: " +
                             totalItemCount
