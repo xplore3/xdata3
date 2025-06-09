@@ -314,7 +314,7 @@ export class DirectClient {
                 //    req.body.roomId ?? "default-room-" + agentId
                 // );
                 const userId = stringToUuid(username);
-                const roomId = stringToUuid("default-data-room-" + userId);
+                const roomId = stringToUuid("default-data-room-" + username);
 
                 let runtime = this.agents.get(agentId);
 
@@ -456,7 +456,7 @@ export class DirectClient {
                 const responseMessage: Memory = {
                     id: messageId,
                     ...userMessage,
-                    userId: runtime.agentId,
+                    userId: userId,
                     content: parsedContent,
                     embedding: getEmbeddingZeroVector(),
                     createdAt: Date.now(),
