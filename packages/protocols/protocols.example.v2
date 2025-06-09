@@ -43,19 +43,19 @@
                 {
                     "type": "Data3 Wrapper API",
                     "description": "This API retrieves the ranking of 小红书(RedNote) topics based on interaction count",
-                    "input": "The params 1 means the page 1, Page numbers range from 1 to 10. There are 20 items per page",
+                    "input": "'totalItemCount', This 'totalItemCount' field indicates how many data items the user wants to obtain.",
                     "output": "Hot topic list array containing: [ topicName, interactiveCount, noteNum, topicType, topicSecondType.]",
                     "route": "hot_topics",
-                    "params": "{page: 1}",
+                    "params": "{totalItemCount: 10}",
                     "additional": ""
                 },
                 {
                     "type": "Data3 Wrapper API",
                     "description": "This API retrieves the ranking of 小红书(RedNote) hot words",
-                    "input": "The params 1 means the page 1, Page numbers range from 1 to 10. There are 20 items per page",
+                    "input": "'totalItemCount', This 'totalItemCount' field indicates how many data items the user wants to obtain.",
                     "output": "Hot words list array containing: [ hotWord, noteCount, noteLabel]",
                     "route": "hot_words",
-                    "params": "{page: 1}",
+                    "params": "{totalItemCount: 10}",
                     "additional": ""
                 }
             ]

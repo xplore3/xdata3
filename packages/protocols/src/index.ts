@@ -461,9 +461,16 @@ export const handleProtocolsForQuickResponce = async (
     }
     const finalfilepath = reportPersist(responseFinal, taskId);
     //const responseTail = `\n下载报告地址: ${finalfilepath}\n下载数据地址: ${csvdataurl}\n(您可以把URL粘贴到其他AI大模型聊天框中继续分析一下,数据三天后过期)`;
-    let responseTail = "";
+    // let responseTail = "";
+    let responseTail = `\n下载报告地址: ${finalfilepath}`;
+    if(responseFinal.length < 200 && 
+        (responseFinal.includes("没有找到") 
+        || responseFinal.includes("找不到")
+        || responseFinal.includes("没有检索到") ) ) {
+        responseTail = "";
+    }
     if(csvdataurl) {
-        responseTail = `\n下载数据地址: ${csvdataurl}\n(您可以把URL粘贴到其他AI大模型聊天框中继续分析一下,数据三天后过期)`;
+        responseTail += `\n下载数据地址: ${csvdataurl}\n(您可以把URL粘贴到其他AI大模型聊天框中继续分析一下,数据三天后过期)`;
     }
     if (containsHotwords(originText) && !responseFinal.includes("【人工】")) {
         return responseFinal + responseTail + "\n是否需要参考这些热度较高的帖子进行仿写？";
