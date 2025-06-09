@@ -1,4 +1,6 @@
 import axios from "axios";
+import ExcelJS from 'exceljs';
+
 import { JSONPath } from 'jsonpath-plus';
 import {
     type Memory,
@@ -534,20 +536,21 @@ class APIWrapperFactory {
                 console.error(`Unknown route: ${JSON.stringify(obj)}`);
         }
         // console.log(`executeRequest result: ${JSON.stringify(result)}`);
-        const csvRes = await APIWrapperFactory.convertToCSV(result);
+        // const csvRes = await APIWrapperFactory.convertToCSV(result);
         let csvfileurl = "";
         if(result?.length > 0) {
-            csvfileurl = APIWrapperFactory.csvDataPersist(csvRes, taskId);
+            csvfileurl = APIWrapperFactory.excelDataPersist(result, taskId);
         }
         return {result , csvfileurl };
     }
 
-    public static csvDataPersist(responseFinal: string, taskId: any) {
+    public static excelDataPersist(result: any, taskId: any) {
         let firstUnExistsFilename = "";
+        let filePath;
         for (let i = 1; i <= 10; i++) {
-            const filename = taskId + `_raw_data${i}.csv`;
+            const filename = taskId + `_raw_data${i}.xlsx`;
             // const filename = 'abc.pdf'; // Test: can also download pdf.
-            const filePath = path.join(
+            filePath = path.join(
                 process.cwd(), // /root/xdata3/data3-agent/data/Task-111111_report1.txt
                 "files",
                 filename
@@ -557,12 +560,30 @@ class APIWrapperFactory {
                 break;
             }
         }
-        updateCacheText(responseFinal, firstUnExistsFilename, (err) => {
-            console.error("Failed to write file:", err);
-        });
+        this.exportToExcel(result, filePath);
+        // updateCacheText(responseFinal, firstUnExistsFilename, (err) => {
+        //     console.error("Failed to write file:", err);
+        // });
         return `https://data3.site/media/files/${firstUnExistsFilename}`;
         //return `http://97.64.21.158:3333/media/files/${firstUnExistsFilename}`;
     }
+    
+public static exportToExcel(data, filePath) {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Data');
+
+  const headers = Object.keys(data[0]);
+  worksheet.addRow(headers);
+
+  data.forEach(item => {
+    const row = headers.map(header => item[header]);
+    worksheet.addRow(row);
+  });
+
+  //await 
+  workbook.xlsx.writeFile(filePath);
+  console.log(`Excel save to: ${filePath}`);
+}
 
     public static async convertToCSV(data) {
     const fields = null;

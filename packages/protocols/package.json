@@ -25,6 +25,7 @@
         "jsonpath-plus": "^10.3.0",
         "md-to-pdf": "^5.2.4",
         "pdfkit": "0.17.1",
+        "exceljs": "^4.4.0",
         "axios": "^1.8.4"
     },
     "devDependencies": {
