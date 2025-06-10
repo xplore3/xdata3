@@ -609,7 +609,7 @@ class APIWrapperFactory {
 1. 文本 txt 数据，方便把 URL 复制到 AI 中进行分析。
     https://data3.site/media/files/${firstUnExistsTxtFilename}
 2. excel 数据，格式优美，方便阅读。
-    https://data3.site/media/files/${firstUnExistsTxtFilename}`;
+    https://data3.site/media/files/${firstUnExistsExcelFilename}`;
         //return `http://97.64.21.158:3333/media/files/${firstUnExistsFilename}`;
     }
 
