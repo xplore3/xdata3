@@ -584,7 +584,7 @@ class APIWrapperFactory {
         let filePath;
         for (let i = 1; i <= 10; i++) {
             // const filename = taskId + `_raw_data${i}.xlsx`;
-            const filename = taskId + `_raw_data${i}.csv`;
+            const filename = taskId + `_raw_data${i}.txt`;
             // const filename = 'abc.pdf'; // Test: can also download pdf.
             filePath = path.join(
                 process.cwd(), // /root/xdata3/data3-agent/data/Task-111111_report1.txt
