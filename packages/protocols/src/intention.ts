@@ -169,21 +169,21 @@ export class IntentionHandler {
         - filter添加存在性检查（@.note && ...）, filter只需进行数量的过滤，不需要进行关键词匹配；
         正确输出示例如下：
         {
-          extract: "\`$map($, function($item) {
+          extract: \`$map($, function($item) {
           {
-            "id": $item.note.id,
-            "author": $item.note.user.nickname,
-            "title": $item.note.title,
-            "description": $item.note.desc,
-            "date": [$item.note.update_time, $item.note.timestamp, 0][0],
-            "tags": $item.note.tag_info.title,
-            "url": $item.note.images_list[0].url,
-            "collected_count": $item.note.collected_count,
-            "shared_count": $item.note.shared_count,
-            "comments_count": $item.note.comments_count,
-            "likes_count": $item.note.liked_count
+            'id': $item.note.id,
+            'author': $item.note.user.nickname,
+            'title': $item.note.title,
+            'description': $item.note.desc,
+            'date': [$item.note.update_time, $item.note.timestamp, 0][0],
+            'tags': $item.note.tag_info.title,
+            'url': $item.note.images_list[0].url,
+            'collected_count': $item.note.collected_count,
+            'shared_count': $item.note.shared_count,
+            'comments_count': $item.note.comments_count,
+            'likes_count': $item.note.liked_count
           }
-          }\`",
+          }\`,
           filter: "$.[?(@.note && (@.note.collected_count || 0) > 1000 && (@.note.shared_count || 0) > 500 && (@.note.comments_count || 0) > 100 && (@.note.liked_count || 0) > 1000)]"
         }
         输出结果不要包含行尾的行连接符斜杠，以免JSON.parse()解析失败。各个字段的值都不需要换行或换行符。
@@ -235,21 +235,21 @@ export class IntentionHandler {
       console.log(err);
     }
     return {
-      extract: `\`$map($, function($item) {
+      extract: `$map($, function($item) {
         {
-          "id": $item.note.id,
-          "author": $item.note.user.nickname,
-          "title": $item.note.title,
-          "description": $item.note.desc,
-          "date": [$item.note.update_time, $item.note.timestamp, 0][0],
-          "tags": $item.note.tag_info.title,
-          "url": $item.note.images_list[0].url,
-          "collected_count": $item.note.collected_count,
-          "shared_count": $item.note.shared_count,
-          "comments_count": $item.note.comments_count,
-          "likes_count": $item.note.liked_count
+          'id': $item.note.id,
+          'author': $item.note.user.nickname,
+          'title': $item.note.title,
+          'description': $item.note.desc,
+          'date': [$item.note.update_time, $item.note.timestamp, 0][0],
+          'tags': $item.note.tag_info.title,
+          'url': $item.note.images_list[0].url,
+          'collected_count': $item.note.collected_count,
+          'shared_count': $item.note.shared_count,
+          'comments_count': $item.note.comments_count,
+          'likes_count': $item.note.liked_count
         }
-      }\``,
+      }`,
       // Should be a online valid JSONPath expression
       filter: "$.[?(@.note && (@.note.collected_count || 0) > 1000 && (@.note.shared_count || 0) > 500 && (@.note.comments_count || 0) > 100 && (@.note.liked_count || 0) > 1000)]"
     };
