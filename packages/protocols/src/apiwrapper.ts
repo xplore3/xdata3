@@ -560,6 +560,7 @@ class APIWrapperFactory {
                         //);
                         const expression = jsonata(extractPath);
                         tempResult = await expression.evaluate(tempResult);
+                        console.log(`----------------------jsonata begin-------------------\n${JSON.stringify(tempResult)}\n------------------------jsonata end---------------------\n`);
                         result = result.concat(tempResult);
                         console.log(`executeRequest result: ${result.length}`);
                     }
@@ -618,75 +619,88 @@ class APIWrapperFactory {
     }
 
     public static exportToExcel(data, filePath) {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Data");
-        const headers = Object.keys(data[0]);
-        worksheet.columns = headers.map((header) => ({
-            header,
-            key: header,
-            width: 20,
-        }));
-        data.forEach((item) => worksheet.addRow(item));
-        workbook.xlsx.writeFile(filePath);
-        console.log(`Excel save to: ${filePath}`);
+        try {
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet("Data");
+            const headers = Object.keys(data[0]);
+            worksheet.columns = headers.map((header) => ({
+                header,
+                key: header,
+                width: 20,
+            }));
+            data.forEach((item) => {
+                if (typeof item === "object" && item !== null) {
+                    worksheet.addRow(item);
+                }
+            });
+            workbook.xlsx.writeFile(filePath);
+            console.log(`Excel save to: ${filePath}`);
+        } catch (e) {
+            console.log("exportToExcel error: ", e);
+        }
     }
 
     public static convertToCSV(data) {
         const fields = null;
         const delimiter = ",";
         const includeHeader = true;
-
-        if (Array.isArray(data) && typeof data[0] === "string") {
-            data = data.map((item) => {
-                let parsed;
-                try {
-                    const jsonString = item
-                        .replace(/'/g, '"')
-                        .replace(/(\w+):\s*([^,\s]+)/g, '"$1": "$2"');
-
-                    parsed = JSON.parse(jsonString);
-                } catch (e) {
-                    const fixedString = item
-                        .replace(/'/g, '"')
-                        .replace(/id":\s*([a-f0-9]+)/gi, 'id": "$1"');
-
+        try {
+            if (Array.isArray(data) && typeof data[0] === "string") {
+                data = data.map((item) => {
+                    let parsed;
                     try {
-                        parsed = JSON.parse(fixedString);
-                    } catch (finalError) {
-                        console.error("解析失败:", item);
-                        parsed = {};
+                        const jsonString = item
+                            .replace(/'/g, '"')
+                            .replace(/(\w+):\s*([^,\s]+)/g, '"$1": "$2"');
+
+                        parsed = JSON.parse(jsonString);
+                    } catch (e) {
+                        const fixedString = item
+                            .replace(/'/g, '"')
+                            .replace(/id":\s*([a-f0-9]+)/gi, 'id": "$1"');
+
+                        try {
+                            parsed = JSON.parse(fixedString);
+                        } catch (finalError) {
+                            console.error("解析失败:", item);
+                            parsed = {};
+                        }
                     }
-                }
-                return parsed;
-            });
-        }
-
-        if (!Array.isArray(data) || data.length === 0) {
-            return "";
-        }
-
-        const fieldNames = fields || Object.keys(data[0]);
-        const escapeField = (value) => {
-            if (value === null || value === undefined) return "";
-            const strValue = String(value);
-            if (
-                strValue.includes('"') ||
-                strValue.includes(delimiter) ||
-                strValue.includes("\n")
-            ) {
-                return `"${strValue.replace(/"/g, '""')}"`;
+                    return parsed;
+                });
             }
-            return strValue;
-        };
 
-        const buildRow = (obj) =>
-            fieldNames.map((field) => escapeField(obj[field])).join(delimiter);
+            if (!Array.isArray(data) || data.length === 0) {
+                return "";
+            }
 
-        let csv = includeHeader
-            ? fieldNames.map(escapeField).join(delimiter) + "\n"
-            : "";
+            const fieldNames = fields || Object.keys(data[0]);
+            const escapeField = (value) => {
+                if (value === null || value === undefined) return "";
+                const strValue = String(value);
+                if (
+                    strValue.includes('"') ||
+                    strValue.includes(delimiter) ||
+                    strValue.includes("\n")
+                ) {
+                    return `"${strValue.replace(/"/g, '""')}"`;
+                }
+                return strValue;
+            };
 
-        return csv + data.map(buildRow).join("\n");
+            const buildRow = (obj) =>
+                fieldNames
+                    .map((field) => escapeField(obj[field]))
+                    .join(delimiter);
+
+            let csv = includeHeader
+                ? fieldNames.map(escapeField).join(delimiter) + "\n"
+                : "";
+
+            return csv + data.map(buildRow).join("\n");
+        } catch (e) {
+            console.log("convertToCSV error: ", e);
+        }
     }
 
     // async getHotWords(page = 1) {
