@@ -456,6 +456,7 @@ class APIWrapperFactory {
                 try {
                     const keyword =
                         obj?.params?.keyword ||
+                        obj?.params?.keywords ||
                         obj?.params?.key1 ||
                         obj?.params?.product ||
                         obj?.params?.query ||
@@ -558,7 +559,7 @@ class APIWrapperFactory {
                         //    extractFunc(item)
                         //);
                         const expression = jsonata(extractPath);
-                        tempResult = expression.evaluate(tempResult);
+                        tempResult = await expression.evaluate(tempResult);
                         result = result.concat(tempResult);
                         console.log(`executeRequest result: ${result.length}`);
                     }
