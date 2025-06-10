@@ -515,7 +515,7 @@ class APIWrapperFactory {
                             `executeRequest response.data.data.items: ${response.data?.data?.items?.length}`
                         );
 
-                        /*tempResult = (response.data?.data?.items || []).map(
+                        tempResult = (response.data?.data?.items || []).map(
                             (obj) => ({
                                 author: obj?.note?.user?.nickname || "unknown",
                                 collected_count:
@@ -528,8 +528,8 @@ class APIWrapperFactory {
                                 desc: obj?.note?.desc || "",
                                 timestamp: obj?.note?.timestamp || 0,
                             })
-                        );*/
-                        if (extractPath === null || filterPath === null) {
+                        );
+                        /*if (extractPath === null || filterPath === null) {
                             const items = response.data?.data?.items;
                             if (items && items.length > 0) {
                                 const mapper =
@@ -559,7 +559,7 @@ class APIWrapperFactory {
                         //    extractFunc(item)
                         //);
                         const expression = jsonata(extractPath);
-                        tempResult = await expression.evaluate(tempResult);
+                        tempResult = await expression.evaluate(tempResult);*/
                         console.log(`----------------------jsonata begin-------------------\n${JSON.stringify(tempResult)}\n------------------------jsonata end---------------------\n`);
                         result = result.concat(tempResult);
                         console.log(`executeRequest result: ${result.length}`);
