@@ -1,6 +1,7 @@
 import axios from "axios";
 import ExcelJS from "exceljs";
 
+import jsonata from "jsonata";
 import { JSONPath } from "jsonpath-plus";
 import { type Memory } from "@data3os/agentcontext";
 import { IntentionHandler } from "./intention";
@@ -513,7 +514,7 @@ class APIWrapperFactory {
                             `executeRequest response.data.data.items: ${response.data?.data?.items?.length}`
                         );
 
-                        tempResult = (response.data?.data?.items || []).map(
+                        /*tempResult = (response.data?.data?.items || []).map(
                             (obj) => ({
                                 author: obj?.note?.user?.nickname || "unknown",
                                 collected_count:
@@ -526,12 +527,12 @@ class APIWrapperFactory {
                                 desc: obj?.note?.desc || "",
                                 timestamp: obj?.note?.timestamp || 0,
                             })
-                        ); /*
+                        );*/
                         if (extractPath === null || filterPath === null) {
                             const items = response.data?.data?.items;
                             if (items && items.length > 0) {
                                 const mapper =
-                                    await IntentionHandler.genExtractMapper(
+                                    await IntentionHandler.genExtractorByJsonata(
                                         runtime,
                                         message,
                                         items[0]
@@ -549,13 +550,15 @@ class APIWrapperFactory {
                         //tempResult = tempResult.map(item => {
                         //    return eval(extractPath);
                         //});
-                        const extractFunc = new Function(
-                            "item",
-                            "return " + extractPath
-                        );
-                        tempResult = tempResult.map((item) =>
-                            extractFunc(item)
-                        ); */
+                        //const extractFunc = new Function(
+                        //    "item",
+                        //    "return " + extractPath
+                        //);
+                        //tempResult = tempResult.map((item) =>
+                        //    extractFunc(item)
+                        //);
+                        const expression = jsonata(extractPath);
+                        tempResult = expression.evaluate(tempResult);
                         result = result.concat(tempResult);
                         console.log(`executeRequest result: ${result.length}`);
                     }

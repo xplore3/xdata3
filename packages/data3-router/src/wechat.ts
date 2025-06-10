@@ -200,6 +200,23 @@ export class WechatHandler {
         }
     }
 
+    async getExternalContract(external_userid: string) {
+        try {
+            console.log("getExternalContract " + external_userid);
+            const token = await this.getAccessToken();
+            const resp = await axios.get(`https://qyapi.weixin.qq.com/cgi-bin/externalcontact/get?access_token=${token}&external_userid=${external_userid}`, {});
+            //console.log(resp);
+            console.log("getExternalContract " + resp.data.errmsg);
+            if (resp.data.errcode !== 0) {
+                throw new Error(`getExternalContract failed: ${resp.data.errmsg}`);
+            }
+            return resp.data;
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
     async handleWecomAuth(req: express.Request, res: express.Response) {
         console.log("handleWecomAuth");
         console.log(req.query);
@@ -260,7 +277,9 @@ export class WechatHandler {
                         const firstText = firstMsg.text.content;
                         const userId = firstMsg.external_userid;
                         // Test for external_userid
-                        const userInfo = await this.getExternalUserDetail(userId);
+                        let userInfo = await this.getExternalUserDetail(userId);
+                        console.log(userInfo);
+                        userInfo = await this.getExternalContract(userId);
                         console.log(userInfo);
 
                         // Check If Menu

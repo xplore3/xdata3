@@ -22,6 +22,7 @@
         "@data3os/agentcontext": "workspace:*",
         "openai": "^4.92.1",
         "data3-scraper": "workspace:*",
+        "jsonata": "2.0.6",
         "jsonpath-plus": "^10.3.0",
         "md-to-pdf": "^5.2.4",
         "pdfkit": "0.17.1",
