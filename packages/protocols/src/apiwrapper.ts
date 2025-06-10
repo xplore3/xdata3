@@ -515,7 +515,7 @@ class APIWrapperFactory {
                             `executeRequest response.data.data.items: ${response.data?.data?.items?.length}`
                         );
 
-                        tempResult = (response.data?.data?.items || []).map(
+                        /*tempResult = (response.data?.data?.items || []).map(
                             (obj) => ({
                                 author: obj?.note?.user?.nickname || "unknown",
                                 collected_count:
@@ -528,8 +528,8 @@ class APIWrapperFactory {
                                 desc: obj?.note?.desc || "",
                                 timestamp: obj?.note?.timestamp || 0,
                             })
-                        );
-                        /*if (extractPath === null || filterPath === null) {
+                        );*/
+                        if (extractPath === null || filterPath === null) {
                             const items = response.data?.data?.items;
                             if (items && items.length > 0) {
                                 const mapper =
@@ -543,24 +543,43 @@ class APIWrapperFactory {
                                 filterPath = mapper.filter;
                             }
                         }
-                        tempResult = JSONPath({
-                            path: filterPath,
-                            json: response.data?.data?.items,
-                        });
-                        console.log(tempResult);
-                        //tempResult = tempResult.map(item => {
-                        //    return eval(extractPath);
-                        //});
-                        //const extractFunc = new Function(
-                        //    "item",
-                        //    "return " + extractPath
-                        //);
-                        //tempResult = tempResult.map((item) =>
-                        //    extractFunc(item)
-                        //);
-                        const expression = jsonata(extractPath);
-                        tempResult = await expression.evaluate(tempResult);*/
-                        console.log(`----------------------jsonata begin-------------------\n${JSON.stringify(tempResult)}\n------------------------jsonata end---------------------\n`);
+                        try {
+                            tempResult = JSONPath({
+                                path: filterPath,
+                                json: response.data?.data?.items,
+                            }) || [];
+                            console.log(tempResult.length);
+                            //tempResult = tempResult.map(item => {
+                            //    return eval(extractPath);
+                            //});
+                            //const extractFunc = new Function(
+                            //    "item",
+                            //    "return " + extractPath
+                            //);
+                            //tempResult = tempResult.map((item) =>
+                            //    extractFunc(item)
+                            //);
+                            const expression = jsonata(extractPath);
+                            tempResult = await expression.evaluate(tempResult) || [];
+                        }
+                        catch (err) {
+                            console.log(err);
+                            tempResult = (response.data?.data?.items || []).map(
+                                (obj) => ({
+                                    author: obj?.note?.user?.nickname || "unknown",
+                                    collected_count:
+                                        obj?.note?.collected_count || 0,
+                                    shared_count: obj?.note?.shared_count || 0,
+                                    liked_count: obj?.note?.liked_count || 0,
+                                    comments_count: obj?.note?.comments_count || 0,
+                                    id: obj?.note?.id,
+                                    title: obj?.note?.title,
+                                    desc: obj?.note?.desc || "",
+                                    timestamp: obj?.note?.timestamp || 0,
+                                })
+                            );
+                        }
+                        console.log(`${JSON.stringify(tempResult)}\n------------------------jsonata---------------------\n`);
                         result = result.concat(tempResult);
                         console.log(`executeRequest result: ${result.length}`);
                     }
