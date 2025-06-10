@@ -349,7 +349,7 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
         Extracting the parameters of the problem from the user's question, ${originText}, 
         Retrieve from the API description in other parameters. 
         If you decide to use a quick responce mode, please return a JSON object containing the following fields:
-        {"quickMode": true,"route": "notes_search","params": {"key1": "v1","key2": "v2", "totalItemCount": 100}}
+        {"quickMode": true,"route": "notes_search","params": {"key1": "v1","key2": "v2", "totalItemCount": 10}}
         This 'totalItemCount' field indicates how many data items the user wants to obtain.
         When you use an API to search for multiple keywords, you can split them up, such as: Query(A), Query(B), Query(C). Instead of just Query(A B C), it is easy to get no results if you query many groups of keywords at the same time.
         Please return this JSON object directly without any explanation, comments, other content, or markdown syntax modification.
@@ -641,7 +641,7 @@ let promptPartThree = `
         Extracting the parameters of the problem from the user's question, ${originText}, 
         Retrieve from the API description in other parameters. 
         Please return a JSON object containing the following fields:
-        {"route": "notes_search","params": {"key1": "val1", "key2": "val2", "totalItemCount": 100}}
+        {"route": "notes_search","params": {"key1": "val1", "key2": "val2", "totalItemCount": 10}}
         This 'totalItemCount' field indicates how many data items the user wants to obtain.
         When you use an API to search for multiple keywords, you can split them up, such as: Query(A), Query(B), Query(C). Instead of just Query(A B C), it is easy to get no results if you query many groups of keywords at the same time.There is another situation where there is a dependency relationship, and this time you only need to return the interface of the current data. I will add the return result of this data query and origin question text in the next loop. Based on the new return result, you can continue to select the API for network calls and complete the dependency calls.
         At the same time, you also need to retrieve the parameters that may be used in [Area2][Block 5].
