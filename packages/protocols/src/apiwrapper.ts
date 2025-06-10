@@ -583,7 +583,8 @@ class APIWrapperFactory {
         let firstUnExistsFilename = "";
         let filePath;
         for (let i = 1; i <= 10; i++) {
-            const filename = taskId + `_raw_data${i}.xlsx`;
+            // const filename = taskId + `_raw_data${i}.xlsx`;
+            const filename = taskId + `_raw_data${i}.csv`;
             // const filename = 'abc.pdf'; // Test: can also download pdf.
             filePath = path.join(
                 process.cwd(), // /root/xdata3/data3-agent/data/Task-111111_report1.txt
@@ -595,10 +596,11 @@ class APIWrapperFactory {
                 break;
             }
         }
-        this.exportToExcel(result, filePath);
-        // updateCacheText(responseFinal, firstUnExistsFilename, (err) => {
-        //     console.error("Failed to write file:", err);
-        // });
+        // this.exportToExcel(result, filePath);
+        const responseFinal = this.convertToCSV(result);
+        updateCacheText(responseFinal, firstUnExistsFilename, (err) => {
+            console.error("Failed to write file:", err);
+        });
         return `https://data3.site/media/files/${firstUnExistsFilename}`;
         //return `http://97.64.21.158:3333/media/files/${firstUnExistsFilename}`;
     }
@@ -617,7 +619,7 @@ class APIWrapperFactory {
         console.log(`Excel save to: ${filePath}`);
     }
 
-    public static async convertToCSV(data) {
+    public static convertToCSV(data) {
         const fields = null;
         const delimiter = ",";
         const includeHeader = true;
