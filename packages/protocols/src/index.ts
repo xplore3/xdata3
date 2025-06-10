@@ -366,7 +366,12 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
         return null;
     } 
 
-    console.log("handleProtocols response2: ", response2);
+    console.log(`================quickresp==============================
+        ${promptPartThree}
+        --------------------------------------------------------
+        ${response2}
+        ========================================================
+        `);
     const response2Str = response2.replace(/```json/g, "").replace(/```/g, "");
     let searchObj = null;
     try {

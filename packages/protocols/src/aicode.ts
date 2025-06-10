@@ -27,7 +27,7 @@ export async function executeAICode(
     const prompt = `
       下面是一个 json 结构，输入为这个对象的数组，请你按照用户的问题写一个过滤，筛选出用户需要的列表。
       缺少的数据不需要补充，只做出筛选即可。
-      只筛选点赞数liked_count、收藏数collected_count、分享shared_count、时间timestamp这四个字段。除非用户问题中明确要求标题title、描述desc包含某个关键词，否则不筛选标题、描述。
+      筛选条件只筛选点赞数liked_count、收藏数collected_count、分享shared_count、时间timestamp这四个字段。返回结果的时候需要所有字段都返回。
       因为这是根据 API 返回的结果，帖子已经和关键字相关联了。
       请你使用 node js 代码实现。
 [用户问题： ${originquestion}]
@@ -60,7 +60,7 @@ function calculate(arr) {
             aicode = await generateText({
                 runtime,
                 context: prompt,
-                modelClass: ModelClass.MEDIUM,
+                modelClass: ModelClass.LARGE,
             });
             aicode = aicode
                 .replace(/```javascript/g, "")
@@ -68,7 +68,11 @@ function calculate(arr) {
                 .replace(/```/g, "");
             aiCodeCache.set(cacheKey, aicode);
             console.log(
-                `====================aicode begin====================\n${aicode}\n====================aicode end====================`
+                `====================aicode begin====================
+                ${prompt}
+                ----------------------------------------------------
+                ${aicode}
+                ====================aicode end====================`
             );
         } catch (e) {
             console.error("Failed to generate ai code:", e);
@@ -92,5 +96,6 @@ function calculate(arr) {
     vm.run(aiGeneratedCode);
     const exportedFunction = vm.sandbox.resultExports.calculate;
     const results = exportedFunction(items);
+    console.log("ai code results len: ", results.length);   
     return results;
 }

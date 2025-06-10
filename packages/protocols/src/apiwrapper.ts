@@ -558,9 +558,11 @@ class APIWrapperFactory {
                             extractFunc(item)
                         ); */
                         /** AI code filter */
-                        const resultAfterSelect = executeAICode(tempResult, message.content.text, runtime);
+                        const resultAfterSelect = await executeAICode(tempResult, message.content.text, runtime);
+                        console.log(`executeRequest resultAfterSelect len: ${resultAfterSelect.length}`);
                         result = result.concat(resultAfterSelect);
-                        console.log(`executeRequest result: ${result.length}`);
+                        console.log(`executeRequest result len: ${result.length}`);
+                        // console.log(`executeRequest result: ${result}`);
                     }
                     result?.slice(0, totalItemCount);
                     console.log(
