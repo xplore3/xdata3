@@ -481,28 +481,28 @@ class APIWrapperFactory {
                         const url1 = `http://47.117.133.51:30015/api/xiaohongshu/search-note/v2?token=QdQU3VTR&keyword=${keyword}&page=${mPage}&sort=${sort}&noteType=_0&noteTime`;
                         const url2 = `http://47.120.60.92:8080/api/search?keyword=${keyword}&page=${mPage}&sort=${sort}`;
                         console.log(`executeRequest url by params: ${url1}`);
-                        let response = await axios.get(url1);
+                        let response = await axios.get(
+                            "https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/search-note/v2",
+                            {
+                                params: {
+                                    keyword: keyword,
+                                    page: mPage,
+                                    sort: sort,
+                                    noteType: "_0",
+                                },
+                                headers: {
+                                    "x-rapidapi-host":
+                                        "xiaohongshu-all-api.p.rapidapi.com",
+                                    "x-rapidapi-key":
+                                        "010987dba4mshacddc04aa8d0269p1136ddjsnfb7887207281",
+                                },
+                            }
+                        );
+                        if (response.data?.code != 0) {
+                            response = await axios.get(url1);
+                        }
                         if (response.data?.code != 0) {
                             response = await axios.get(url2);
-                            if (response.data?.code != 0) {
-                                response = await axios.get(
-                                    "https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/search-note/v2",
-                                    {
-                                        params: {
-                                            keyword: keyword,
-                                            page: mPage,
-                                            sort: sort,
-                                            noteType: "_0",
-                                        },
-                                        headers: {
-                                            "x-rapidapi-host":
-                                                "xiaohongshu-all-api.p.rapidapi.com",
-                                            "x-rapidapi-key":
-                                                "010987dba4mshacddc04aa8d0269p1136ddjsnfb7887207281",
-                                        },
-                                    }
-                                );
-                            }
                         }
                         console.log(
                             `executeRequest response: ${JSON.stringify(
