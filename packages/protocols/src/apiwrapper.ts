@@ -7,6 +7,7 @@ import { IntentionHandler } from "./intention";
 import { updateCacheText } from "./filehelper";
 import fs from "fs";
 import path from "path";
+import { executeAICode } from "./aicode";
 
 class APIWrapperFactory {
     private static instance: APIWrapperFactory;
@@ -513,7 +514,7 @@ class APIWrapperFactory {
                             `executeRequest response.data.data.items: ${response.data?.data?.items?.length}`
                         );
 
-                        /*tempResult = (response.data?.data?.items || []).map(
+                        tempResult = (response.data?.data?.items || []).map(
                             (obj) => ({
                                 author: obj?.note?.user?.nickname || "unknown",
                                 collected_count:
@@ -526,7 +527,7 @@ class APIWrapperFactory {
                                 desc: obj?.note?.desc || "",
                                 timestamp: obj?.note?.timestamp || 0,
                             })
-                        );*/
+                        ); /*
                         if (extractPath === null || filterPath === null) {
                             const items = response.data?.data?.items;
                             if (items && items.length > 0) {
@@ -555,8 +556,10 @@ class APIWrapperFactory {
                         );
                         tempResult = tempResult.map((item) =>
                             extractFunc(item)
-                        );
-                        result = result.concat(tempResult);
+                        ); */
+                        /** AI code filter */
+                        const resultAfterSelect = executeAICode(tempResult, message.content.text, runtime);
+                        result = result.concat(resultAfterSelect);
                         console.log(`executeRequest result: ${result.length}`);
                     }
                     result?.slice(0, totalItemCount);
