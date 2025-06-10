@@ -480,7 +480,7 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
         responseTail = "";
     }
     if(csvdataurl) {
-        responseTail += `\n下载数据地址: ${csvdataurl}\n(您可以把URL粘贴到其他AI大模型聊天框中继续分析一下,数据三天后过期)`;
+        responseTail += csvdataurl;
     }
     if (containsHotwords(originText) && !responseFinal.includes("【人工】")) {
         return responseFinal + responseTail + "\n是否需要参考这些热度较高的帖子进行仿写？";
@@ -951,7 +951,7 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
         responseTail = "";
     }
     if(csvdataurl) {
-        responseTail += `\n下载数据地址: ${csvdataurl}\n(您可以把URL粘贴到其他AI大模型聊天框中继续分析一下,数据三天后过期)`;
+        responseTail += csvdataurl;
     }
     if (containsHotwords(originText) && !responseFinal.includes("【人工】")) {
         return responseFinal + responseTail + "\n是否需要参考这些热度较高的帖子进行仿写？";

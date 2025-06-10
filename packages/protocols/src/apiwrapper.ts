@@ -580,28 +580,36 @@ class APIWrapperFactory {
     }
 
     public static excelDataPersist(result: any, taskId: any) {
-        let firstUnExistsFilename = "";
+        const responceStr = "";
+        let firstUnExistsTxtFilename = "";
+        let firstUnExistsExcelFilename = "";
+
         let filePath;
         for (let i = 1; i <= 10; i++) {
-            // const filename = taskId + `_raw_data${i}.xlsx`;
-            const filename = taskId + `_raw_data${i}.txt`;
+            const excelfilename = taskId + `_raw_data${i}.xlsx`;
+            const txtfilename = taskId + `_raw_data${i}.txt`;
             // const filename = 'abc.pdf'; // Test: can also download pdf.
             filePath = path.join(
                 process.cwd(), // /root/xdata3/data3-agent/data/Task-111111_report1.txt
                 "files",
-                filename
+                excelfilename
             );
             if (!fs.existsSync(filePath)) {
-                firstUnExistsFilename = filename;
+                firstUnExistsTxtFilename = txtfilename;
+                firstUnExistsExcelFilename = excelfilename;
                 break;
             }
         }
-        // this.exportToExcel(result, filePath);
+        this.exportToExcel(result, filePath);
         const responseFinal = this.convertToCSV(result);
-        updateCacheText(responseFinal, firstUnExistsFilename, (err) => {
+        updateCacheText(responseFinal, firstUnExistsTxtFilename, (err) => {
             console.error("Failed to write file:", err);
         });
-        return `https://data3.site/media/files/${firstUnExistsFilename}`;
+        return `\n数据下载: 
+1. 文本 txt 数据，方便把 URL 复制到 AI 中进行分析。
+    https://data3.site/media/files/${firstUnExistsTxtFilename}
+2. excel 数据，格式优美，方便阅读。
+    https://data3.site/media/files/${firstUnExistsTxtFilename}`;
         //return `http://97.64.21.158:3333/media/files/${firstUnExistsFilename}`;
     }
 
