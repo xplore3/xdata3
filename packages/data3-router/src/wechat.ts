@@ -389,7 +389,9 @@ export class WechatHandler {
                         const match = status.match(/current_step:\s*(\d+)/);
                         const step = match ? parseInt(match[1], 10) : null;
                         status = `Step ${step} ...`;
-                    } catch (error) {}
+                    } catch (error) {
+                        status = '......';
+                    }
                     await this.sendMessage(userId, openKfId, status);
                 }
             }
