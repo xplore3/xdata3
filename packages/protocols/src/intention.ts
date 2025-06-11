@@ -75,7 +75,7 @@ export class IntentionHandler {
             'comments_count': \${item.note?.comments_count || 0},
             'likes_count': \${item.note?.liked_count || 0}
           }\`",
-          filter: "$.[?(@.note && (@.note.collected_count || 0) > 1000 && (@.note.shared_count || 0) > 500 && (@.note.comments_count || 0) > 100 && (@.note.liked_count || 0) > 1000)]"
+          filter: "$.[?(@.note && (@.note.collected_count || 0) > 100 && (@.note.shared_count || 0) > 50 && (@.note.comments_count || 0) > 10 && (@.note.liked_count || 0) > 100)]"
         }
         输出结果不要包含行尾的行连接符斜杠，以免JSON.parse()解析失败。各个字段的值都不需要换行或换行符。
         输出结果须是一个有效的JSON对象，且包含extract和filter两个字段。这个JSON对象需要能被JSON.parse()正确解析。
@@ -139,7 +139,7 @@ export class IntentionHandler {
             'likes_count': \${item.note?.liked_count || 0}
           }\``,
       // Should be a online valid JSONPath expression
-      filter: "$.[?(@.note && (@.note.collected_count || 0) > 1000 && (@.note.shared_count || 0) > 500 && (@.note.comments_count || 0) > 100 && (@.note.liked_count || 0) > 1000)]"
+      filter: "$.[?(@.note && (@.note.collected_count || 0) > 100 && (@.note.shared_count || 0) > 50 && (@.note.comments_count || 0) > 10 && (@.note.liked_count || 0) > 100)]"
     };
   }
 
@@ -184,7 +184,7 @@ export class IntentionHandler {
             'likes_count': $item.note.liked_count
           }
           }\`,
-          filter: "$.[?(@.note && (@.note.collected_count || 0) > 1000 && (@.note.shared_count || 0) > 500 && (@.note.comments_count || 0) > 100 && (@.note.liked_count || 0) > 1000)]"
+          filter: "$.[?(@.note && (@.note.collected_count || 0) > 100 && (@.note.shared_count || 0) > 50 && (@.note.comments_count || 0) > 10 && (@.note.liked_count || 0) > 100)]"
         }
         输出结果不要包含行尾的行连接符斜杠，以免JSON.parse()解析失败。各个字段的值都不需要换行或换行符。
         extract字段中不要包含'|','||','?','??'这样的运算符，当前JSONata版本不支持，可以在extract使用$exists()，不过filter字段不可以使用$exists()。
@@ -252,7 +252,7 @@ export class IntentionHandler {
         }
       }`,
       // Should be a online valid JSONPath expression
-      filter: "$.[?(@.note && (@.note.collected_count || 0) > 1000 && (@.note.shared_count || 0) > 500 && (@.note.comments_count || 0) > 100 && (@.note.liked_count || 0) > 1000)]"
+      filter: "$.[?(@.note && (@.note.collected_count || 0) > 100 && (@.note.shared_count || 0) > 50 && (@.note.comments_count || 0) > 10 && (@.note.liked_count || 0) > 100)]"
     };
   }
 }
