@@ -26,19 +26,19 @@
                     "type": "Data3 Wrapper API",
                     "description": "This is the API for searching notes on 小红书(RedNote).",
                     "input": "Parameters: keyword (search term), sort (popularity_descending or time_descending). This 'totalItemCount' field indicates how many data items the user wants to obtain.",
-                    "output": "notes array(note.user.nickname,note.user.red_official_verified,note.collected_count,note.liked_count,note.comments_count,note.id,note?.title,note.desc,note?.abstract_show,note.timestamp)",
+                    "output": "notes array, This only contains the content of the note, not the text of the comment.(note.user.nickname,note.user.red_official_verified,note.collected_count,note.liked_count,note.comments_count,note.id,note?.title,note.desc,note?.abstract_show,note.timestamp)",
                     "route": "notes_search",
                     "params": "{'keyword': 'keyword', 'sort': 'popularity_descending', totalItemCount: 10}",
-                    "additional": ""
+                    "additional": "如果是分析评论的问题，需要先查找笔记，并保留笔记ID到上下文中，再通过笔记ID查询评论。"
                 },
                 {
                     "type": "Data3 Wrapper API",
-                    "description": "This is the API for querying top-level(level-1) comments on 小红书(RedNote) notes.",
+                    "description": "This is the API for querying top-level(level-1) comments on 小红书(RedNote) notes. If the user's question does not contain a note ID, you need to first query the note content based on the keyword, obtain the note ID in it, and then query the comment text based on the note ID.",
                     "input": "noteId: Target note ID.",
-                    "output": "comment array(content,id,note_id,sub_comments,ip_location)",
+                    "output": "comment array,(content,id,note_id,sub_comments,ip_location)",
                     "route": "notes_comment_by_next_page",
                     "params": "{noteId: id}",
-                    "additional": "This is an automatic page turning API. Each call returns a different content and the last page is empty."
+                    "additional": "如果是分析评论的问题，需要先查找笔记，并保留笔记ID到上下文中，再通过笔记ID查询评论。"
                 },
                 {
                     "type": "Data3 Wrapper API",

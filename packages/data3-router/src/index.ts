@@ -1782,6 +1782,7 @@ export class DirectClient {
             message.userId
         );
         console.log("New: " + finalQuestion);
+        message.content.text = finalQuestion;
         const finalAnswerStr = await handleProtocolsProcessing(
             runtime,
             promptInjectBaseUserInfo,

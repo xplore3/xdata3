@@ -742,9 +742,9 @@ let promptPartThree = `
                     ),
                     modelClass: ModelClass.MEDIUM,
                 });
-                console.log(
-                    `API Response shortten ${JSON.stringify(apires)}\n  >>>>>>>>>>  \n${shortenapires}`
-                );
+                // console.log(
+                //     `API Response shortten ${JSON.stringify(apires)}\n  >>>>>>>>>>  \n${shortenapires}`
+                // );
             } catch (e) {
                 console.log("handleProtocols error: ", e);
                 return "system error 1001";
@@ -910,7 +910,7 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
             but you can also proactively explore the hidden information in the data, raise valuable business questions and new opportunities (exploratory, predictive, guiding), and through excellent communication, transform data insights into practical actions to drive business growth, optimize user experience, and improve operational efficiency.
             You answer user's questions based on background knowledge and API return data.
             [BACKGROUND KNOWLEDGE: ${promptInjectBaseUserInfoStr}].
-            [USER QUESTION: ${obj.questionText}].
+            [USER QUESTION: ${originText}].
             Below is AI reasoning process(The reasoning process is reference information. When answering questions, do not answer the reasoning process. Just answer directly according to the user's question.)
             [REASONING PROCESS: ${memory_cached_str}].
             Below are some data related to user questions, obtained through API queries.
@@ -923,7 +923,7 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
             context: shortenStr(promptQuestionWithData),
             modelClass: ModelClass.LARGE,
         });
-        console.log("report, prompt: ", shortenStr(promptQuestionWithData));
+        console.log("report, prompt: ", shortenStr(promptQuestionWithData).slice(0, 300));
         console.log("report: responce: ", responseFinal);
 
         // } else {
