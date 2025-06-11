@@ -773,6 +773,9 @@ Note(Important!): For any questions related to comments, you need to query the n
 
         let apires = null;
         let currentApiStr = "";
+        let apires2;
+        let csvdataurl2;
+        let searchObj2;
         try {
             // if (Obj.method == "post") {
             //     apires = await axios.post(Obj.baseurl, Obj.body, {
@@ -792,6 +795,32 @@ Note(Important!): For any questions related to comments, you need to query the n
                     taskJson,
                     message
                 );
+            if (
+                (taskJson?.route == "get_note_list" ||
+                    taskJson?.route == "notes_search") &&
+                (originText.includes("评论") ||
+                    originText.toLocaleLowerCase().includes("comment"))
+            ) {
+                if (result?.length > 0) {
+                    const note_id = result[0].id || result[0].note_id;
+                    if (note_id) {
+                        searchObj2 = {
+                            route: "notes_comment_by_next_page",
+                            params: {
+                                noteId: note_id,
+                            },
+                        };
+                        const { result, csvfileurl } =
+                            await APIWrapperFactory.executeRequest(
+                                runtime,
+                                searchObj2,
+                                message
+                            );
+                        apires2 = result;
+                        csvdataurl2 = csvfileurl;
+                    }
+                }
+            }
             csvdataurl = csvfileurl;
             apires = result;
             console.log(
@@ -799,11 +828,17 @@ Note(Important!): For any questions related to comments, you need to query the n
                 JSON.stringify(apires).slice(0, 200)
             );
             // This is what you want to add
-            const content = `\n
+            let content = `\n
             [Question: ${originText}]
             [API: ${JSON.stringify(taskJson)}]
             [Responce: ${JSON.stringify(apires)}].
             \n`;
+            if (apires2) {
+                content += `
+        [API2: ${JSON.stringify(searchObj2)}]
+        [Responce2: ${JSON.stringify(apires2)}].
+        \n`;
+            }
 
             const filename = taskId + "_data.txt";
             appendToChatCache(content, filename, (err) => {
@@ -816,7 +851,9 @@ Note(Important!): For any questions related to comments, you need to query the n
             Based on the user's question, please remove irrelevant text, remove duplicate text and compress responce.
             For example, if the user's question is not related to the timestamp, the timestamp field can be removed. 
         
-            [Responce: ${JSON.stringify(apires)}].\n`;
+            [Responce: ${JSON.stringify(apires)}]
+            [Responce2: ${JSON.stringify(apires2)}].\n`;
+
             // The response str is too long, Use AI to remove irrelevant text and compress it.
             // const promtShorten = apiNeedShortenStr;
             let shortenapires = "";
