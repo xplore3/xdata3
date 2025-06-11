@@ -159,7 +159,7 @@ class APIWrapperFactory {
                     result = [userprofile];
                     // return userprofile;
                 } catch (error) {
-                    console.error("Failed to fetch user info:", error);
+                    console.error("Failed to fetch user info:", error.message);
                     return "Feach data error, msg: " + error.msg;
                 }
                 break;
@@ -231,7 +231,7 @@ class APIWrapperFactory {
                             JSON.stringify(result).slice(0, 100)
                     );
                 } catch (error) {
-                    console.error("Failed to fetch hot words:", error);
+                    console.error("Failed to fetch hot words:", error.message);
                     result = [];
                 }
                 break;
@@ -304,7 +304,7 @@ class APIWrapperFactory {
                             JSON.stringify(result).slice(0, 100)
                     );
                 } catch (error) {
-                    console.log("Error fetching hot topics:", error);
+                    console.log("Error fetching hot topics:", error.message);
                     result = [];
                 }
                 break;
@@ -346,7 +346,7 @@ class APIWrapperFactory {
                         // http://47.120.60.92:8080/api/comment?noteId=682eb2aa0000000021005a6d&lastCursor=
                     }
                     }catch(error){
-                        console.log(`executeRequest error: ${error}`);
+                        console.log(`executeRequest error: ${error.message}`);
                     }
                     console.log(
                         `executeRequest response: ${JSON.stringify(
@@ -361,7 +361,7 @@ class APIWrapperFactory {
                             if (cursor) {
                                 obj.cursor = cursor;
                             }
-                            console.error("Failed to parse cursor:", error);
+                            console.error("Failed to parse cursor:", error.message);
                         }
                         console.log(
                             `executeRequest obj cursor: ${JSON.stringify(
@@ -586,10 +586,11 @@ class APIWrapperFactory {
                             break; // You have already turned the last page. Don't turn the pages back any further.
                         }
                         }catch (e) {
-                            console.error("Failed to request http api, e: ", e);
+                            console.error("Failed to request http api, e: ", e.message);
+                            continue;
                         }
 
-                        /*tempResult = (response.data?.data?.items || []).map(
+                        tempResult = (response.data?.data?.items || []).map(
                             (obj) => ({
                                 author: obj?.note?.user?.nickname || "unknown",
                                 collected_count:
@@ -602,7 +603,7 @@ class APIWrapperFactory {
                                 desc: obj?.note?.desc || "",
                                 timestamp: obj?.note?.timestamp || 0,
                             })
-                        );*/
+                        ); /*
                         if (extractPath === null || filterPath === null) {
                             const items = response.data?.data?.items;
                             if (items && items.length > 0) {
@@ -652,8 +653,8 @@ class APIWrapperFactory {
                                     timestamp: obj?.note?.timestamp || 0,
                                 })
                             );
-                        }
-                        console.log(`${JSON.stringify(tempResult)}\n------------------------jsonata---------------------\n`);
+                        }*/
+                        console.log(`${JSON.stringify(tempResult)}\n------------------------json code---------------------\n`);
                         result = result.concat(tempResult);
                         console.log(`executeRequest result: ${result.length}`);
                     }
@@ -662,7 +663,7 @@ class APIWrapperFactory {
                         `executeRequest result, after cut.: ${result?.length}`
                     );
                 } catch (error) {
-                    console.error("Error fetching data:", error);
+                    console.error("Error fetching data:", error.message);
                 }
                 break;
             default:
@@ -731,7 +732,7 @@ class APIWrapperFactory {
             workbook.xlsx.writeFile(filePath);
             console.log(`Excel save to: ${filePath}`);
         } catch (e) {
-            console.log("exportToExcel error: ", e);
+            console.log("exportToExcel error: ", e.message);
         }
     }
 
@@ -794,7 +795,7 @@ class APIWrapperFactory {
 
             return csv + data.map(buildRow).join("\n");
         } catch (e) {
-            console.log("convertToCSV error: ", e);
+            console.log("convertToCSV error: ", e.message);
         }
     }
 

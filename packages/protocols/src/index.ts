@@ -577,7 +577,7 @@ API request errors also need to be recorded, and they will not be used if the er
 [Block 1: Plan Block: 1.xxx. 2.xxx. (Clarify the core points of the question (e.g., the definition and scope of xxx).)]
 [Block 2: Steps Logs Block: 1.xxx. 2.xxx. (You can record the simple situation and feedback in each step here. The feedback may be positive or negative to help you formulate the next step plan.)]
 [Block 3: Data Collected Block: data1, data2, ... (This is a step-by-step result. Your each network request is processed, refined, and collected here. As you collect more and more data, when you have enough data, you can answer the user's question.
-Note: Do not omit the abbreviations of the original data here. If you omit them, you will not be able to analyze the omitted data later.
+Note(Important!): For any questions related to comments, you need to query the notes first, get the note ID inside (note that the note ID should be recorded in the context), and then query the comments by the note ID.
 )]
 [Block 4: Next step plan Block: xxx (Adjust your plan continuously based on the data you collect.)]
 [Block 5: Temporary Block: (1) data1, The temporary results of network requests are organized and refined, and then merged into Part 3. (2) data2, The current output needs to be saved in the current block for the next step of input.]
