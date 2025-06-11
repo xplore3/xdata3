@@ -43,9 +43,29 @@ class APIWrapperFactory {
                 const userId = obj?.params?.userId;
                 // http://47.120.60.92:8080/api/userInfo?userId=66896ebc000000000303084b
                 try {
-                    const urlUserInfo = `http://47.120.60.92:8080/api/userInfo?userId=${userId}`;
-                    console.log(`urlUserInfo with params: ${urlUserInfo}`);
-                    const response = await axios.get(urlUserInfo);
+                    const urlUserInfo1 = {
+                        method: "GET",
+                        url: "https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-user/v3",
+                        params: {
+                            userId: userId,
+                        },
+                        headers: {
+                            "x-rapidapi-key":
+                                "010987dba4mshacddc04aa8d0269p1136ddjsnfb7887207281",
+                            "x-rapidapi-host":
+                                "xiaohongshu-all-api.p.rapidapi.com",
+                        },
+                    };
+                    let response;
+                    console.log(`urlUserInfo1 with params: ${urlUserInfo1}`);
+                    response = await axios.request(urlUserInfo1);
+                    if (response.data?.code != 0) {
+                        const urlUserInfo2 = `http://47.120.60.92:8080/api/userInfo?userId=${userId}`;
+                        console.log(`urlUserInfo2 with params: ${urlUserInfo2}`);
+                        response = await axios.get(urlUserInfo2);
+                    }
+
+
                     /**
                      * User response:
                      * {
@@ -101,6 +121,7 @@ class APIWrapperFactory {
                         follows,
                         gender,
                         id,
+                        userid,
                         ip_location,
                         location,
                         nickname,
@@ -127,14 +148,16 @@ class APIWrapperFactory {
                         fans,
                         follows,
                         genderStr,
-                        id,
+                        id: id || userid,
                         ip_location,
                         location,
                         nickname,
                         note_count: notes,
                         tags,
                     };
-                    return userprofile;
+                    // const {result, csvfileurl}
+                    result = [userprofile];
+                    // return userprofile;
                 } catch (error) {
                     console.error("Failed to fetch user info:", error);
                     return "Feach data error, msg: " + error.msg;
