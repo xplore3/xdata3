@@ -112,7 +112,7 @@ You are an interactive AI agent that can have multiple interactions when solving
         });
     } catch (error) {
         console.error("handleProtocols error: ", error);
-        return "system error 1001";
+        return "智能体出错了，请稍后再试";
     }
 
     console.log("handleProtocols response need_more: ", response1);
@@ -632,7 +632,7 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
         // });
     } catch (error) {
         console.error("handleProtocols error: ", error);
-        return "system error 1001";
+        return "智能体出错了，请稍后再试";
     }
 
     const response1Str = response1.replace(/```json/g, "").replace(/```/g, "");
@@ -749,7 +749,7 @@ Note(Important!): For any questions related to comments, you need to query the n
             console.log("handleProtocols API Selecting response: ", response2);
         } catch (error) {
             console.error("handleProtocols error: ", error);
-            return "system error 1001";
+            return "智能体出错了，请稍后再试";
         }
 
         const response2Str = response2
@@ -876,7 +876,7 @@ Note(Important!): For any questions related to comments, you need to query the n
                 // );
             } catch (e) {
                 console.log("handleProtocols error: ", e);
-                return "system error 1001";
+                return "智能体出错了，请稍后再试";
             }
 
             currentApiStr = `The current API [API: ${JSON.stringify(
@@ -939,7 +939,7 @@ Note(Important!): For any questions related to comments, you need to query the n
             );
         } catch (e) {
             console.log("handleProtocols error: ", e);
-            return "system error 1001";
+            return "智能体出错了，请稍后再试";
         }
         // if(!apiSuccess) {
         //     console.log(`handleProtocols step: ${step} api failed, break.`);
@@ -987,7 +987,7 @@ Note(Important!): For any questions related to comments, you need to query the n
             // }
         } catch (e) {
             console.log("handleProtocols error: ", e);
-            return "system error 1001";
+            return "智能体出错了，请稍后再试";
         }
 
         console.log(
@@ -1067,7 +1067,7 @@ Note(Important!): For any questions related to comments, you need to query the n
         // });
     } catch (e) {
         console.log("handleProtocols error: ", e);
-        return "system error 1003";
+        return "智能体出错了，请稍后再试";
     }
     if (!apiSuccess) {
         responseFinal +=
