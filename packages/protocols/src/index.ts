@@ -548,12 +548,8 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
     ) {
         responseTail = "";
     }
-    if (csvdataurl) {
-        responseTail += csvdataurl;
-    }
-    if (csvdataurl2) {
-        responseTail += csvdataurl2;
-    }
+
+    responseTail += getDynamicTail(taskId);
     if (containsHotwords(originText) && !responseFinal.includes("【人工】")) {
         return (
             responseFinal +
@@ -1082,9 +1078,7 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
     ) {
         responseTail = "";
     }
-    if (csvdataurl) {
-        responseTail += csvdataurl;
-    }
+    responseTail += getDynamicTail(taskId);
     if (containsHotwords(originText) && !responseFinal.includes("【人工】")) {
         return (
             responseFinal +
@@ -1172,3 +1166,55 @@ function isRouteInAPIArray(routeStr, apiArray) {
     if (!Array.isArray(apiList)) return false;
     return apiList.some((api) => api.route === routeStr);
 }
+function getDynamicTail(taskId: string) {
+    const textFilePaths = [];
+    const excelFilePaths = [];
+    for (let i = 1; i <= 10; i++) {
+        const filenametxt = taskId + `_raw_data${i}.txt`;
+        const filenamexlsx = taskId + `_raw_data${i}.xlsx`;
+
+        // const filename = 'abc.pdf'; // Test: can also download pdf.
+        const filePathtxt = path.join(
+            process.cwd(), // /root/xdata3/data3-agent/data/Task-111111_report1.txt
+            "files",
+            filenametxt
+        );
+        if (fs.existsSync(filePathtxt)) {
+            //
+            const url = `https://data3.site/media/files/${filenametxt}`;
+            textFilePaths.push(url);
+        }
+        // const filename = 'abc.pdf'; // Test: can also download pdf.
+        const filePathxlsx = path.join(
+            process.cwd(), // /root/xdata3/data3-agent/data/Task-111111_report1.txt
+            "files",
+            filenamexlsx
+        );
+        if (fs.existsSync(filePathxlsx)) {
+            //
+            const url = `https://data3.site/media/files/${filenamexlsx}`;
+            excelFilePaths.push(url);
+        }
+    }
+    let dynamicTail = "";
+    if (textFilePaths.length > 0 || excelFilePaths.length > 0) {
+        dynamicTail += "\n数据下载:";
+
+        if (textFilePaths.length > 0) {
+            dynamicTail += "\n1. 文本数据（可粘贴至AI分析）:";
+            dynamicTail += `\n${textFilePaths.join("\n")}`;
+        }
+
+        if (excelFilePaths.length > 0) {
+            dynamicTail += "\n2. Excel数据（格式美观）:";
+            dynamicTail += `\n${excelFilePaths.join("\n")}`;
+        }
+
+        dynamicTail += "\n（数据三天后过期）";
+    }
+    if (textFilePaths.length > 0 || excelFilePaths.length > 0) {
+        return dynamicTail;
+    }
+    return "";
+}
+
