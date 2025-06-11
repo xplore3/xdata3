@@ -441,8 +441,17 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
                 originText.toLocaleLowerCase().includes("comment"))
         ) {
             if (result?.length > 0) {
-                const note_id = result[0].id || result[0].note_id;
-                if (note_id) {
+                const mostCommentedNote = result.reduce((prev, current) =>
+                    prev?.comments_count > current?.comments_count
+                        ? prev
+                        : current
+                );
+
+                const comments_count = mostCommentedNote?.comments_count || 0;
+                const note_id =
+                    mostCommentedNote?.id || mostCommentedNote?.note_id;
+
+                if (comments_count > 0 && note_id) {
                     searchObj2 = {
                         route: "notes_comment_by_next_page",
                         params: {
