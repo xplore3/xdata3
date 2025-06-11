@@ -479,10 +479,9 @@ class APIWrapperFactory {
                         const sort =
                             obj?.params?.sort || "popularity_descending";
                         // popularity_descending :(Hot) , time_descending :(New)
-                        const url1 = `http://47.117.133.51:30015/api/xiaohongshu/search-note/v2?token=QdQU3VTR&keyword=${keyword}&page=${mPage}&sort=${sort}&noteType=_0&noteTime`;
-                        const url2 = `http://47.120.60.92:8080/api/search?keyword=${keyword}&page=${mPage}&sort=${sort}`;
-                        console.log(`executeRequest url by params: ${url1}`);
-                        let response = await axios.get(
+                        let response;
+                        try{
+                        response = await axios.get(
                             "https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/search-note/v2",
                             {
                                 params: {
@@ -499,10 +498,15 @@ class APIWrapperFactory {
                                 },
                             }
                         );
+                        
                         if (response.data?.code != 0) {
+                            const url1 = `http://47.117.133.51:30015/api/xiaohongshu/search-note/v2?token=QdQU3VTR&keyword=${keyword}&page=${mPage}&sort=${sort}&noteType=_0&noteTime`;
+                            console.log(`executeRequest url by params: ${url1}`);
                             response = await axios.get(url1);
                         }
                         if (response.data?.code != 0) {
+                            const url2 = `http://47.120.60.92:8080/api/search?keyword=${keyword}&page=${mPage}&sort=${sort}`;
+                            console.log(`executeRequest url by params: ${url2}`);
                             response = await axios.get(url2);
                         }
                         console.log(
@@ -512,8 +516,14 @@ class APIWrapperFactory {
                         );
 
                         console.log(
-                            `executeRequest response.data.data.items: ${response.data?.data?.items?.length}`
+                            `executeRequest response.data.data.items: ${response?.data?.data?.items?.length}`
                         );
+                        if (response?.data?.data?.items?.length == 0) {
+                            break; // You have already turned the last page. Don't turn the pages back any further.
+                        }
+                        }catch (e) {
+                            console.error("Failed to request http api, e: ", e);
+                        }
 
                         /*tempResult = (response.data?.data?.items || []).map(
                             (obj) => ({
