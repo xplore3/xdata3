@@ -6,9 +6,9 @@
             "APIs": [
                 {
                     "type": "Data3 Wrapper API",
-                    "description": "This is the API for querying user's infomation(profile) on 小红书(RedNote).",
+                    "description": "This is the API for querying user's personal infomation(profile/资料) on 小红书(RedNote).",
                     "input": "userId: Target user ID.",
-                    "output": "user's infomation(profile), (desc,fans,follows,gender,id,ip_location,location,nickname,notes,tags)",
+                    "output": "user's personal infomation(profile/资料), (desc,fans,follows,gender,id,ip_location,location,nickname,notes,tags)",
                     "route": "get_user",
                     "params": "{userId: id}",
                     "additional": ""
