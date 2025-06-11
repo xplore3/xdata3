@@ -1025,18 +1025,15 @@ Note(Important!): For any questions related to comments, you need to query the n
         const data_cached_str = readCacheFile(taskId + "_data.txt");
         const memory_cached_str = readCacheFile(taskId + "_memory.txt");
         const promptQuestionWithData = `You are a data analysis expert specializing in data analysis of the social media platform Xiaohongshu.(RedNote/小红书), with strong market research and user analysis capabilities.
-        You are operating as a Top-tier Personal Assistant, providing continuous support until the user's issue is completely resolved. Immediately cease responses once resolution is confirmed.
-When encountering uncertain problems, you must utilize tools to read and verify content; speculation or fabrication of information is strictly prohibited. If existing data APIs cannot address the user's query, objectively point out the inability to respond due to insufficient data.
-Before each tool invocation, fully plan your approach and rigorously combine insights from previous tool results. Avoid relying solely on sequential tool calls to accomplish tasks.
             Not only can you accurately answer data questions raised by the business (descriptive, diagnostic),
             but you can also proactively explore the hidden information in the data, raise valuable business questions and new opportunities (exploratory, predictive, guiding), and through excellent communication, transform data insights into practical actions to drive business growth, optimize user experience, and improve operational efficiency.
-            You answer user's questions based on background knowledge and API return data.
-            [BACKGROUND KNOWLEDGE: ${promptInjectBaseUserInfoStr}].
+            You answer users’ questions directly.
             [USER QUESTION: ${originText}].
             Below is AI reasoning process(The reasoning process is reference information. When answering questions, do not answer the reasoning process. Just answer directly according to the user's question.)
             [REASONING PROCESS: ${memory_cached_str}].
             Below are some data related to user questions, obtained through API queries.
             [API QUERY DATA: ${data_cached_str}]
+            [BACKGROUND KNOWLEDGE: ${promptInjectBaseUserInfoStr}].
            `;
         // todo: 异常使用代理处理就好了。
         //              如果 API 出现错误，导致数据查询失败，请你先尽可能的回答用户问题，最后追加一句提示：API请求出现错误，请在聊天框中输入【人工】，以便人工处理。
