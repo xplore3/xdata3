@@ -37,6 +37,7 @@ class APIWrapperFactory {
         const taskId = message.content.intention?.taskId || "";
         const totalItemCount = obj?.params?.totalItemCount || 10;
         let result = [];
+        let response;
         switch (obj.route) {
             case "get_user":
                 console.log(`get_user params: ${JSON.stringify(obj)}`);
@@ -56,7 +57,6 @@ class APIWrapperFactory {
                                 "xiaohongshu-all-api.p.rapidapi.com",
                         },
                     };
-                    let response;
                     console.log(`urlUserInfo1 with params: ${urlUserInfo1}`);
                     response = await axios.request(urlUserInfo1);
                     if (response.data?.code != 0) {
@@ -174,7 +174,7 @@ class APIWrapperFactory {
                         page <= 10 && result.length < totalItemCount;
                         page++
                     ) {
-                        const response = await axios.post(
+                        response = await axios.post(
                             "https://gw.newrank.cn/api/xhsv2/nr/app/xh/v2/rank/hotWordHotList",
                             {
                                 typeV1: "",
@@ -246,7 +246,7 @@ class APIWrapperFactory {
                         page <= 10 && result.length < totalItemCount;
                         page++
                     ) {
-                        const response = await axios.post(
+                        response = await axios.post(
                             "https://gw.newrank.cn/api/xh/xdnphb/nr/app/xhs/rank/topicRank",
                             {
                                 type: "\u5168\u90E8",
@@ -318,18 +318,40 @@ class APIWrapperFactory {
                             `executeRequest lastCursor is blank_holder`
                         );
                         APIWrapperFactory.cursorMap.set(taskId, "");
-                        return result;
+                        break;
                     }
-                    const urlWithparams = `http://47.120.60.92:8080/api/comment?noteId=${obj?.params?.noteId}&lastCursor=${lastCursor}`;
-                    console.log(
-                        `executeRequest urlWithparams: ${urlWithparams}`
-                    );
-                    const response = await axios.get(urlWithparams);
-                    // http://47.120.60.92:8080/api/comment?noteId=682eb2aa0000000021005a6d&lastCursor=
+
+                    const options = {
+                        method: "GET",
+                        url: "https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-note-comment/v2",
+                        params: {
+                            noteId: obj?.params?.noteId,
+                            lastCursor: lastCursor,
+                        },
+                        headers: {
+                            "x-rapidapi-key":
+                                "010987dba4mshacddc04aa8d0269p1136ddjsnfb7887207281",
+                            "x-rapidapi-host":
+                                "xiaohongshu-all-api.p.rapidapi.com",
+                        },
+                    };
+                    try{
+                    response = await axios.request(options);
+                    if (response.data?.code != 0) {
+                        const urlWithparams = `http://47.120.60.92:8080/api/comment?noteId=${obj?.params?.noteId}&lastCursor=${lastCursor}`;
+                        console.log(
+                            `executeRequest urlWithparams: ${urlWithparams}`
+                        );
+                        response = await axios.get(urlWithparams);
+                        // http://47.120.60.92:8080/api/comment?noteId=682eb2aa0000000021005a6d&lastCursor=
+                    }
+                    }catch(error){
+                        console.log(`executeRequest error: ${error}`);
+                    }
                     console.log(
                         `executeRequest response: ${JSON.stringify(
                             response.data
-                        )}`
+                        ).slice(0, 220)}`
                     );
                     const cursor = response.data?.data?.cursor;
                     if (cursor !== undefined) {
@@ -380,11 +402,11 @@ class APIWrapperFactory {
                         });
                     }
 
-                    const comments = filterComments(
-                        response.data?.data?.comments || []
-                    );
+                    // const comments = filterComments(
+                        // response.data?.data?.comments || []
+                    // );
 
-                    tempResult = filterComments(comments);
+                    tempResult = filterComments(response.data?.data?.comments || []);
                     result = result.concat(tempResult);
                 }
                 console.log(`executeRequest result: ${result.length}`);
@@ -421,7 +443,7 @@ class APIWrapperFactory {
                                     "xiaohongshu-all-api.p.rapidapi.com",
                             },
                         };
-                        let response = await axios.request(options);
+                        response = await axios.request(options);
                         if (response.data?.code != 0) {
                             const urlWithparams = `http://47.120.60.92:8080/api/noteList?userId=${obj?.params?.userId}&lastCursor=${lastCursor}`;
                             console.log(
@@ -522,7 +544,6 @@ class APIWrapperFactory {
                         const sort =
                             obj?.params?.sort || "popularity_descending";
                         // popularity_descending :(Hot) , time_descending :(New)
-                        let response;
                         try{
                         response = await axios.get(
                             "https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/search-note/v2",
