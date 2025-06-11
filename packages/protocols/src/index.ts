@@ -1,15 +1,15 @@
-import {
-    generateText,
-    ModelClass,
-    type Memory,
-} from "@data3os/agentcontext";
-import { generateTextWithFile } from './aichatwithfiles';
-import fs from 'fs';
-import path from 'path';
+import { generateText, ModelClass, type Memory } from "@data3os/agentcontext";
+import { generateTextWithFile } from "./aichatwithfiles";
+import fs from "fs";
+import path from "path";
 import { data3Fetch } from "data3-scraper";
 
 import axios from "axios";
-import { appendToChatCache, readCacheFile, updateCacheText } from "./filehelper";
+import {
+    appendToChatCache,
+    readCacheFile,
+    updateCacheText,
+} from "./filehelper";
 import APIWrapperFactory from "./apiwrapper";
 import { PdfHelper } from "./pdfhelper";
 import { KeyWordGenerator } from "./keywords";
@@ -75,7 +75,7 @@ function shortenStr(str) {
  */
 export const handleProtocols = async (runtime: any, originText: any) => {
     handleProtocolsForPrompt(runtime, originText, "xxx");
-}
+};
 
 /**
  * This is a preprocessing method.
@@ -84,7 +84,11 @@ export const handleProtocols = async (runtime: any, originText: any) => {
  * words before returning.
  * This part of the logic not require processing of context memory.
  */
-export const handleProtocolsForPrompt = async (runtime: any, originText: any, taskId: any) => {
+export const handleProtocolsForPrompt = async (
+    runtime: any,
+    originText: any,
+    taskId: any
+) => {
     const promt1 = `You are operating as a Top-tier Personal Assistant, providing continuous support until the user's issue is completely resolved. Immediately cease responses once resolution is confirmed.
 When encountering uncertain problems, you must utilize tools to read and verify content; speculation or fabrication of information is strictly prohibited. If existing data APIs cannot address the user's query, objectively point out the inability to respond due to insufficient data.
 Before each tool invocation, fully plan your approach and rigorously combine insights from previous tool results. Avoid relying solely on sequential tool calls to accomplish tasks.
@@ -122,17 +126,22 @@ You are an interactive AI agent that can have multiple interactions when solving
      *  additional3: "For other information, you can type";
      *  taskId: taskId;
      * }
-    */ 
+     */
     let obj = null;
     try {
         obj = JSON.parse(response1Str);
         obj.additional3 = "For other information, you can type";
         obj.taskId = taskId;
     } catch (e) {
-        console.error("JSON parse error:", e, "\nResponse content:", response1Str);
-        obj = { 
+        console.error(
+            "JSON parse error:",
+            e,
+            "\nResponse content:",
+            response1Str
+        );
+        obj = {
             need_more: false,
-            error: "Invalid JSON format"
+            error: "Invalid JSON format",
         };
     }
     return obj;
@@ -145,18 +154,24 @@ You are an interactive AI agent that can have multiple interactions when solving
  * words before returning.
  * This part of the logic not require processing of context memory.
  */
-export const handleProtocolsProcessing = async (runtime: any,
+export const handleProtocolsProcessing = async (
+    runtime: any,
     promptInjectBaseUserInfoStr: any,
-    message: Memory) => {
+    message: Memory
+) => {
     // Try quick Responce first.
     // let responce = await handleProtocolsForQuickResponce(runtime, originText, taskId);
     // console.log("yykai handleProtocolsForQuickResponce responce: ", responce);
     // if(!responce) {
     //     responce = await handleProtocolsByLongLogic(runtime, originText, taskId);
     // }
-    const responce = await handleProtocolsByLongLogic(runtime, promptInjectBaseUserInfoStr, message);
+    const responce = await handleProtocolsByLongLogic(
+        runtime,
+        promptInjectBaseUserInfoStr,
+        message
+    );
     return responce;
-}
+};
 
 export const handleProtocolsForQuickResponce = async (
     runtime: any,
@@ -167,8 +182,8 @@ export const handleProtocolsForQuickResponce = async (
     const apiXDataSourceArray = await runtime.cacheManager.get(
         "XData_Collection"
     );
-    const originText = message.content.text
-    const taskId = message.content.intention?.taskId || '';
+    const originText = message.content.text;
+    const taskId = message.content.intention?.taskId || "";
     function shortenStr(str) {
         if (str.length > charLengthLimit) {
             return str.slice(0, charLengthLimit);
@@ -237,10 +252,7 @@ export const handleProtocolsForQuickResponce = async (
         const pattern2 = /用户.*ID/i;
         const pattern3 = /查询.*用户/i;
 
-        if (pattern1.test(text)
-            || pattern2.test(text)
-            || pattern3.test(text)
-        ) {
+        if (pattern1.test(text) || pattern2.test(text) || pattern3.test(text)) {
             return true;
         }
 
@@ -256,7 +268,7 @@ export const handleProtocolsForQuickResponce = async (
     console.log(containsKeywords("Very Good")); // false
     console.log(containsKeywords("很好，回答的不错")); // false
     */
-   const promptInjectBaseUserInfoAndOriginText = `You are a AI data Agent.You are operating as a Top-tier Personal Assistant, providing continuous support until the user's issue is completely resolved. Immediately cease responses once resolution is confirmed.
+    const promptInjectBaseUserInfoAndOriginText = `You are a AI data Agent.You are operating as a Top-tier Personal Assistant, providing continuous support until the user's issue is completely resolved. Immediately cease responses once resolution is confirmed.
 When encountering uncertain problems, you must utilize tools to read and verify content; speculation or fabrication of information is strictly prohibited. If existing data APIs cannot address the user's query, objectively point out the inability to respond due to insufficient data.
 Before each tool invocation, fully plan your approach and rigorously combine insights from previous tool results. Avoid relying solely on sequential tool calls to accomplish tasks. You need to answer user's questions based on background knowledge.
     [BACKGROUND KNOWLEDGE: ${promptInjectBaseUserInfoStr}]
@@ -364,7 +376,7 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
     } catch (error) {
         console.error("handleProtocols error: ", error);
         return null;
-    } 
+    }
 
     console.log("handleProtocols response2: ", response2);
     const response2Str = response2.replace(/```json/g, "").replace(/```/g, "");
@@ -379,8 +391,14 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
     } catch (e) {
         console.log("handleProtocols response2Str parse error: ", e);
     }
-    console.log(`handleProtocols route: ${searchObj?.route} quick responce apiXDataSourceArray: ${JSON.stringify(apiXDataSourceArray)} `);
-    if(!isRouteInAPIArray(searchObj?.route, apiXDataSourceArray)) {
+    console.log(
+        `handleProtocols route: ${
+            searchObj?.route
+        } quick responce apiXDataSourceArray: ${JSON.stringify(
+            apiXDataSourceArray
+        )} `
+    );
+    if (!isRouteInAPIArray(searchObj?.route, apiXDataSourceArray)) {
         return `${searchObj?.route} is not in API list.`;
     }
 
@@ -388,6 +406,9 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
     let currentApiStr = "";
     let apiSuccess = false;
     let csvdataurl = null;
+    let apires2;
+    let csvdataurl2;
+    let searchObj2;
     try {
         /********* data3 protocol v1 begin *********
         if (Obj.method == "post") {
@@ -405,22 +426,62 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
 
         /********* data3 protocol v2 begin *********/
         console.log("1 handleProtocols Obj: ", searchObj);
-                // return {result , csvfileurl };
+        // return {result , csvfileurl };
 
-        const {result, csvfileurl} = await APIWrapperFactory.executeRequest(runtime, searchObj, message);
+        const { result, csvfileurl } = await APIWrapperFactory.executeRequest(
+            runtime,
+            searchObj,
+            message
+        );
+
+        if (
+            (searchObj?.route == "get_note_list" ||
+                searchObj?.route == "notes_search") &&
+            (originText.includes("评论") ||
+                originText.toLocaleLowerCase().includes("comment"))
+        ) {
+            if (result?.length > 0) {
+                const note_id = result[0].id || result[0].note_id;
+                if (note_id) {
+                    searchObj2 = {
+                        route: "notes_comment_by_next_page",
+                        params: {
+                            noteId: note_id,
+                        },
+                    };
+                    const { result, csvfileurl } =
+                        await APIWrapperFactory.executeRequest(
+                            runtime,
+                            searchObj2,
+                            message
+                        );
+                    apires2 = result;
+                    csvdataurl2 = csvfileurl;
+                }
+            }
+        }
         apires = result;
         csvdataurl = csvfileurl;
-        console.log("2 handleProtocols Obj: ", JSON.stringify(apires)?.slice(0, 200));
-                    const content = `\n
-            [Question: ${originText}]
-            [API: ${JSON.stringify(searchObj)}]
-            [Responce: ${JSON.stringify(apires)}].
-            \n`;
+        console.log(
+            "2 handleProtocols Obj: ",
+            JSON.stringify(apires)?.slice(0, 200)
+        );
+        let content = `\n
+        [Question: ${originText}]
+        [API: ${JSON.stringify(searchObj)}]
+        [Responce: ${JSON.stringify(apires)}].`;
 
-            const filename = taskId + "_data.txt";
-            appendToChatCache(content, filename, (err) => {
-                console.error("Custom error handling:", err);
-            });
+        if (apires2) {
+            content += `
+        [API2: ${JSON.stringify(searchObj2)}]
+        [Responce2: ${JSON.stringify(apires2)}].
+        \n`;
+        }
+
+        const filename = taskId + "_data.txt";
+        appendToChatCache(content, filename, (err) => {
+            console.error("Custom error handling:", err);
+        });
         apiSuccess = true;
         /********* data3 protocol v2 end *********/
     } catch (e) {
@@ -434,7 +495,7 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
         apiSuccess = false;
     }
     // This is what you want to add
-    const content = `You are a Data AI agent. You are operating as a Top-tier Personal Assistant, providing continuous support until the user's issue is completely resolved. Immediately cease responses once resolution is confirmed.
+    let content = `You are a Data AI agent. You are operating as a Top-tier Personal Assistant, providing continuous support until the user's issue is completely resolved. Immediately cease responses once resolution is confirmed.
 When encountering uncertain problems, you must utilize tools to read and verify content; speculation or fabrication of information is strictly prohibited. If existing data APIs cannot address the user's query, objectively point out the inability to respond due to insufficient data.
 Before each tool invocation, fully plan your approach and rigorously combine insights from previous tool results. Avoid relying solely on sequential tool calls to accomplish tasks.[BACKGROUND KNOWLEDGE: ${promptInjectBaseUserInfoStr}]
     The user's question, the API used, and the result of the API request are as follows.
@@ -443,16 +504,21 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
             [API: ${JSON.stringify(searchObj)}]
             [RESPONCE: ${JSON.stringify(apires)}].
             \n`;
+    if (apires2) {
+        content += `
+        [API2: ${JSON.stringify(searchObj2)}]
+        [Responce2: ${JSON.stringify(apires2)}].
+        \n`;
+    }
     console.log("qucikResponce: prompt: \n " + content);
     try {
-      responseFinal = await generateText({
-        runtime,
-        context: shortenStr(content),
-        modelClass: ModelClass.SMALL,
-    });
-       console.log("quick responce: final: \n" + responseFinal)
-    }
-    catch (error) {
+        responseFinal = await generateText({
+            runtime,
+            context: shortenStr(content),
+            modelClass: ModelClass.SMALL,
+        });
+        console.log("quick responce: final: \n" + responseFinal);
+    } catch (error) {
         console.error("handleProtocols error: ", error);
         return null;
     }
@@ -466,49 +532,60 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
     } catch (err) {
         console.log(err);
     }*/
-    if(!apiSuccess) {
-        responseFinal += '\nAPI请求出现错误，请在聊天框中输入【人工】，以便人工处理。';
+    if (!apiSuccess) {
+        responseFinal +=
+            "\nAPI请求出现错误，请在聊天框中输入【人工】，以便人工处理。";
     }
     const finalfilepath = reportPersist(responseFinal, taskId);
     //const responseTail = `\n下载报告地址: ${finalfilepath}\n下载数据地址: ${csvdataurl}\n(您可以把URL粘贴到其他AI大模型聊天框中继续分析一下,数据三天后过期)`;
     // let responseTail = "";
     let responseTail = `\n下载报告地址: ${finalfilepath}`;
-    if(responseFinal.length < 200 && 
-        (responseFinal.includes("没有找到") 
-        || responseFinal.includes("找不到")
-        || responseFinal.includes("没有检索到") ) ) {
+    if (
+        responseFinal.length < 200 &&
+        (responseFinal.includes("没有找到") ||
+            responseFinal.includes("找不到") ||
+            responseFinal.includes("没有检索到"))
+    ) {
         responseTail = "";
     }
-    if(csvdataurl) {
+    if (csvdataurl) {
         responseTail += csvdataurl;
     }
+    if (csvdataurl2) {
+        responseTail += csvdataurl2;
+    }
     if (containsHotwords(originText) && !responseFinal.includes("【人工】")) {
-        return responseFinal + responseTail + "\n是否需要参考这些热度较高的帖子进行仿写？";
+        return (
+            responseFinal +
+            responseTail +
+            "\n是否需要参考这些热度较高的帖子进行仿写？"
+        );
     }
 
-    if(!responseFinal.includes("【人工】")) {
+    if (!responseFinal.includes("【人工】")) {
         return responseFinal + responseTail;
     } else {
-       return responseFinal;
+        return responseFinal;
     }
 };
 
-export const handleProtocolsByLongLogic = async (runtime: any,
-    promptInjectBaseUserInfoStr:any,
+export const handleProtocolsByLongLogic = async (
+    runtime: any,
+    promptInjectBaseUserInfoStr: any,
     message: Memory
 ) => {
     const originText = message.content.text;
-    const taskId = message.content.intention?.taskId || '';
+    const taskId = message.content.intention?.taskId || "";
     const apiXDataSourceArray = await runtime.cacheManager.get(
         "XData_Collection"
     );
-    
+
     function shortenStr(str) {
         if (str.length > charLengthLimit) {
-            console.warn("prompt too long, prompt: str: " + str)
+            console.warn("prompt too long, prompt: str: " + str);
             return str.slice(0, charLengthLimit);
         }
-        console.log(`str len:  ${(1.0 * str.length / 1000)} k.`);
+        console.log(`str len:  ${(1.0 * str.length) / 1000} k.`);
         return str;
     }
     const promt1 = ` You are an AI agent. You are operating as a Top-tier Personal Assistant, providing continuous support until the user's issue is completely resolved. Immediately cease responses once resolution is confirmed.
@@ -532,13 +609,13 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
         // const fileExists = fs.existsSync(filePath);
         // console.log(`online query Chat cache file ${filePath} exists: ${fileExists}`);
         // if(!fileExists) {
-            console.log("handleprotocols need query prompt: ", promt1);
-            response1 = await generateText({
-             runtime,
-             context: shortenStr(promt1),
-             modelClass: ModelClass.MEDIUM,
-            });   
-            console.log("handleProtocols need query response: ", response1);
+        console.log("handleprotocols need query prompt: ", promt1);
+        response1 = await generateText({
+            runtime,
+            context: shortenStr(promt1),
+            modelClass: ModelClass.MEDIUM,
+        });
+        console.log("handleProtocols need query response: ", response1);
 
         // } else {
         //     response1 = await generateTextWithFile(filePath, shortenStr(promt1));
@@ -557,7 +634,7 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
 
     let obj = JSON.parse(response1Str);
 
-let promptPartOne = `
+    let promptPartOne = `
 You are a data AI Agent that answers some user questions by querying network data multiple times.
 You are operating as a Top-tier Personal Assistant, providing continuous support until the user's issue is completely resolved. Immediately cease responses once resolution is confirmed.
 When encountering uncertain problems, you must utilize tools to read and verify content; speculation or fabrication of information is strictly prohibited. If existing data APIs cannot address the user's query, objectively point out the inability to respond due to insufficient data.
@@ -582,7 +659,7 @@ Note(Important!): For any questions related to comments, you need to query the n
 [Block 4: Next step plan Block: xxx (Adjust your plan continuously based on the data you collect.)]
 [Block 5: Temporary Block: (1) data1, The temporary results of network requests are organized and refined, and then merged into Part 3. (2) data2, The current output needs to be saved in the current block for the next step of input.]
 \n`;
-let promptPartTwo = `[Area2]:
+    let promptPartTwo = `[Area2]:
 [Block 0: ...]
 [Block 1: ...]
 [Block 2: ...]
@@ -590,7 +667,7 @@ let promptPartTwo = `[Area2]:
 [Block 4: ]
 [Block 5: ]`;
 
-let promptPartThree = `
+    let promptPartThree = `
 \n[Area3]:
 `; // [The third area] interact Block.
 
@@ -620,12 +697,9 @@ let promptPartThree = `
             break; // context length limit 128k for GPT-4.
         }
 
-        if (
-            !(obj?.need_network == true) ||
-            !(obj?.api_available == true)
-        ) {
+        if (!(obj?.need_network == true) || !(obj?.api_available == true)) {
             // STEP: No need to query network data.
-            console.log("is continue? " , JSON.stringify(obj));
+            console.log("is continue? ", JSON.stringify(obj));
             console.log(
                 `handleProtocols step: ${step} end   -------------------------------------`
             );
@@ -658,14 +732,16 @@ let promptPartThree = `
         }
         let response2 = "";
         try {
-            console.log("handleProtocols API Selecting prompt: ",  shortenStr(chatContextAccmulatingStr));
+            console.log(
+                "handleProtocols API Selecting prompt: ",
+                shortenStr(chatContextAccmulatingStr)
+            );
             response2 = await generateText({
                 runtime,
                 context: shortenStr(chatContextAccmulatingStr),
                 modelClass: ModelClass.MEDIUM,
             });
             console.log("handleProtocols API Selecting response: ", response2);
-
         } catch (error) {
             console.error("handleProtocols error: ", error);
             return "system error 1001";
@@ -677,8 +753,14 @@ let promptPartThree = `
         let taskJson = null;
         try {
             taskJson = JSON.parse(response2Str);
-            console.log(`handleProtocols route: ${taskJson?.route} long logic apiXDataSourceArray: ${JSON.stringify(apiXDataSourceArray)} `);
-            if(!isRouteInAPIArray(taskJson?.route, apiXDataSourceArray)) {
+            console.log(
+                `handleProtocols route: ${
+                    taskJson?.route
+                } long logic apiXDataSourceArray: ${JSON.stringify(
+                    apiXDataSourceArray
+                )} `
+            );
+            if (!isRouteInAPIArray(taskJson?.route, apiXDataSourceArray)) {
                 promptPartTwo += `\n ${taskJson?.route} is not in API list, please select another API.`;
             }
         } catch (e) {
@@ -704,7 +786,12 @@ let promptPartThree = `
             //     });
             // }
             console.log("3 handleProtocols API call  Obj: ", taskJson);
-            const {result, csvfileurl }= await APIWrapperFactory.executeRequest(runtime, taskJson, message);
+            const { result, csvfileurl } =
+                await APIWrapperFactory.executeRequest(
+                    runtime,
+                    taskJson,
+                    message
+                );
             csvdataurl = csvfileurl;
             apires = result;
             console.log(
@@ -766,7 +853,7 @@ let promptPartThree = `
                 .toString()
                 .slice(200)}].\n`;
             apiSuccess = false;
-            
+
             // const content = `\n
             // [Question: ${originText}]
             // [API: ${JSON.stringify(Obj)}]
@@ -862,7 +949,9 @@ let promptPartThree = `
         }
 
         console.log(
-            `handleProtocols is continue? prompt: ${shortenStr(promptPartOne + promptPartTwo + promptPartThree)}, response: ${response3}`
+            `handleProtocols is continue? prompt: ${shortenStr(
+                promptPartOne + promptPartTwo + promptPartThree
+            )}, response: ${response3}`
         );
         const response3Str = response3
             .replace(/```json/g, "")
@@ -902,7 +991,7 @@ let promptPartThree = `
         //     });
         const data_cached_str = readCacheFile(taskId + "_data.txt");
         const memory_cached_str = readCacheFile(taskId + "_memory.txt");
-        const promptQuestionWithData =`You are a data analysis expert specializing in data analysis of the social media platform Xiaohongshu.(RedNote/小红书), with strong market research and user analysis capabilities.
+        const promptQuestionWithData = `You are a data analysis expert specializing in data analysis of the social media platform Xiaohongshu.(RedNote/小红书), with strong market research and user analysis capabilities.
         You are operating as a Top-tier Personal Assistant, providing continuous support until the user's issue is completely resolved. Immediately cease responses once resolution is confirmed.
 When encountering uncertain problems, you must utilize tools to read and verify content; speculation or fabrication of information is strictly prohibited. If existing data APIs cannot address the user's query, objectively point out the inability to respond due to insufficient data.
 Before each tool invocation, fully plan your approach and rigorously combine insights from previous tool results. Avoid relying solely on sequential tool calls to accomplish tasks.
@@ -916,14 +1005,17 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
             Below are some data related to user questions, obtained through API queries.
             [API QUERY DATA: ${data_cached_str}]
            `;
-// todo: 异常使用代理处理就好了。
-//              如果 API 出现错误，导致数据查询失败，请你先尽可能的回答用户问题，最后追加一句提示：API请求出现错误，请在聊天框中输入【人工】，以便人工处理。
+        // todo: 异常使用代理处理就好了。
+        //              如果 API 出现错误，导致数据查询失败，请你先尽可能的回答用户问题，最后追加一句提示：API请求出现错误，请在聊天框中输入【人工】，以便人工处理。
         responseFinal = await generateText({
             runtime,
             context: shortenStr(promptQuestionWithData),
             modelClass: ModelClass.LARGE,
         });
-        console.log("report, prompt: ", shortenStr(promptQuestionWithData).slice(0, 300));
+        console.log(
+            "report, prompt: ",
+            shortenStr(promptQuestionWithData).slice(0, 300)
+        );
         console.log("report: responce: ", responseFinal);
 
         // } else {
@@ -938,25 +1030,32 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
         console.log("handleProtocols error: ", e);
         return "system error 1003";
     }
-    if(!apiSuccess) {
-        responseFinal += '\nAPI请求出现错误，请在聊天框中输入【人工】，以便人工处理。';
+    if (!apiSuccess) {
+        responseFinal +=
+            "\nAPI请求出现错误，请在聊天框中输入【人工】，以便人工处理。";
     }
     const finalfilepath = reportPersist(responseFinal, taskId);
     // const responseTail = `\n下载报告地址: ${finalfilepath}\n下载数据地址：${csvdataurl}\n(您可以把URL粘贴到其他AI大模型聊天框中继续分析一下,数据三天后过期)`;
     let responseTail = `\n下载报告地址: ${finalfilepath}`;
-    if(responseFinal.length < 200 && 
-        (responseFinal.includes("没有找到") 
-        || responseFinal.includes("找不到")
-        || responseFinal.includes("没有检索到") ) ) {
+    if (
+        responseFinal.length < 200 &&
+        (responseFinal.includes("没有找到") ||
+            responseFinal.includes("找不到") ||
+            responseFinal.includes("没有检索到"))
+    ) {
         responseTail = "";
     }
-    if(csvdataurl) {
+    if (csvdataurl) {
         responseTail += csvdataurl;
     }
     if (containsHotwords(originText) && !responseFinal.includes("【人工】")) {
-        return responseFinal + responseTail + "\n是否需要参考这些热度较高的帖子进行仿写？";
+        return (
+            responseFinal +
+            responseTail +
+            "\n是否需要参考这些热度较高的帖子进行仿写？"
+        );
     }
-    if(!responseFinal.includes("【人工】")) {
+    if (!responseFinal.includes("【人工】")) {
         return responseFinal + responseTail;
     }
     return responseFinal;
@@ -1002,41 +1101,37 @@ function stringToHash4(str) {
 }
 
 function containsHotwords(originText: any) {
-        const keywords = [
-            "爆款",
-            "爆文",
-            "热搜",
-            "热词",
-            "热话题",
-            "hot",
-            "viral",
-            "trending",
-            "hot topic",
-            "hot search",
-        ];
-        const lowerText = originText.toLowerCase();
-        if (
-            keywords.some((keyword) =>
-                lowerText.includes(keyword.toLowerCase())
-            )
-        ) {
-            return true;
-        }
-        // const pattern1 = /用户.*资料/i;
-        // const pattern2 = /用户.*ID/i;
-        // const pattern3 = /查询.*用户/i;
+    const keywords = [
+        "爆款",
+        "爆文",
+        "热搜",
+        "热词",
+        "热话题",
+        "hot",
+        "viral",
+        "trending",
+        "hot topic",
+        "hot search",
+    ];
+    const lowerText = originText.toLowerCase();
+    if (keywords.some((keyword) => lowerText.includes(keyword.toLowerCase()))) {
+        return true;
+    }
+    // const pattern1 = /用户.*资料/i;
+    // const pattern2 = /用户.*ID/i;
+    // const pattern3 = /查询.*用户/i;
 
-        // if (pattern1.test(originText)
-        //     || pattern2.test(originText)
-        //     || pattern3.test(originText)
-        // ) {
-        //     return true;
-        // }
-        return false;
+    // if (pattern1.test(originText)
+    //     || pattern2.test(originText)
+    //     || pattern3.test(originText)
+    // ) {
+    //     return true;
+    // }
+    return false;
 }
 
 function isRouteInAPIArray(routeStr, apiArray) {
-  const apiList = apiArray?.[0]?.APIs;
-  if (!Array.isArray(apiList)) return false;
-  return apiList.some(api => api.route === routeStr);
+    const apiList = apiArray?.[0]?.APIs;
+    if (!Array.isArray(apiList)) return false;
+    return apiList.some((api) => api.route === routeStr);
 }
