@@ -405,17 +405,34 @@ class APIWrapperFactory {
                                 note_curosr_key,
                                 ""
                             );
-                            return result;
+                            break;
                         }
-                        const urlWithparams = `http://47.120.60.92:8080/api/noteList?userId=${obj?.params?.userId}&lastCursor=${lastCursor}`;
-                        console.log(
-                            `executeRequest urlWithparams: ${urlWithparams}`
-                        );
-                        const response = await axios.get(urlWithparams);
+                        const options = {
+                            method: "GET",
+                            url: "https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-user-note-list/v1",
+                            params: {
+                                userId: obj?.params?.userId,
+                                lastCursor: lastCursor
+                            },
+                            headers: {
+                                "x-rapidapi-key":
+                                    "010987dba4mshacddc04aa8d0269p1136ddjsnfb7887207281",
+                                "x-rapidapi-host":
+                                    "xiaohongshu-all-api.p.rapidapi.com",
+                            },
+                        };
+                        let response = await axios.request(options);
+                        if (response.data?.code != 0) {
+                            const urlWithparams = `http://47.120.60.92:8080/api/noteList?userId=${obj?.params?.userId}&lastCursor=${lastCursor}`;
+                            console.log(
+                                `executeRequest urlWithparams: ${urlWithparams}`
+                            );
+                            response = await axios.get(urlWithparams);
+                        }
                         // http://47.120.60.92:8080/api/noteList?userId=66896ebc000000000303084b&lastCursor=
-                        // console.log(
-                        //     `executeRequest response: ${JSON.stringify(response.data)}`
-                        // );
+                        console.log(
+                            `executeRequest get_note_list response: ${JSON.stringify(response.data).slice(0, 100)}`
+                        );
                         let lastestCursor = null;
 
                         function filterNotes(notes) {
@@ -442,7 +459,10 @@ class APIWrapperFactory {
                         const tempResult = filterNotes(
                             response.data?.data?.notes || []
                         );
+                        console.log(`executeRequest get_note_list tempResult size: ${tempResult.length}`);
                         result = result.concat(tempResult);
+                        console.log(`executeRequest get_note_list result size: ${result.length}`);
+
                         // const cursor = lastestCursor;
                         if (lastestCursor) {
                             // try {
@@ -633,6 +653,8 @@ class APIWrapperFactory {
         if (result?.length > 0) {
             csvfileurl = APIWrapperFactory.excelDataPersist(result, taskId);
         }
+        console.log(`executeRequest result len: ${result.length}`);
+        console.log(`executeRequest csvfileurl: ${csvfileurl}`);
         return { result, csvfileurl };
     }
 
