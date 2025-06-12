@@ -33,6 +33,15 @@
                 },
                 {
                     "type": "Data3 Wrapper API",
+                    "description": "This is the API for searching  comments on 小红书(RedNote).",
+                    "input": "Parameters: keyword (search term), sort (popularity_descending or time_descending). This 'totalItemCount' field indicates how many data items the user wants to obtain.",
+                    "output": "comment array,(content,id,note_id,sub_comments,ip_location)",
+                    "route": "fetch_comments_by_keyword",
+                    "params": "{'keyword': 'keyword', 'sort': 'popularity_descending', totalItemCount: 10}",
+                    "additional": ""
+                },
+                {
+                    "type": "Data3 Wrapper API",
                     "description": "This is the API for querying top-level(level-1) comments on 小红书(RedNote) notes. If the user's question text does not contain a note ID, you need to first query the note content based on the keyword, obtain the note ID in it, and then query the comment text based on the note ID.",
                     "input": "noteId: Target note ID.",
                     "output": "comment array,(content,id,note_id,sub_comments,ip_location)",
