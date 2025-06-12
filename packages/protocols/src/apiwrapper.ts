@@ -773,6 +773,9 @@ class APIWrapperFactory {
             const fieldNames = fields || Object.keys(data[0]);
             const escapeField = (value) => {
                 if (value === null || value === undefined) return "";
+                if (Array.isArray(value)) {
+                    return JSON.stringify(value);
+                }
                 const strValue = String(value);
                 if (
                     strValue.includes('"') ||
