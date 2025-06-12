@@ -549,6 +549,9 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
     //const responseTail = `\n下载报告地址: ${finalfilepath}\n下载数据地址: ${csvdataurl}\n(您可以把URL粘贴到其他AI大模型聊天框中继续分析一下,数据三天后过期)`;
     // let responseTail = "";
     let responseTail = `\n下载报告地址: ${finalfilepath}`;
+    if(!apiSuccess) {
+        responseTail = "";
+    }
     if (
         responseFinal.length < 200 &&
         (responseFinal.includes("没有找到") ||
@@ -1080,8 +1083,12 @@ Note(Important!): For any questions related to comments, you need to query the n
         responseFinal.length < 200 &&
         (responseFinal.includes("没有找到") ||
             responseFinal.includes("找不到") ||
+            responseFinal.includes("未返回任何有效数据") ||
             responseFinal.includes("没有检索到"))
     ) {
+        responseTail = "";
+    }
+    if(!apiSuccess && responseFinal.length < 200) {
         responseTail = "";
     }
     responseTail += getDynamicTail(taskId);
@@ -1221,6 +1228,6 @@ function getDynamicTail(taskId: string) {
     if (textFilePaths.length > 0 || excelFilePaths.length > 0) {
         return dynamicTail;
     }
-    return "";
+    return "获取数据源失败，请稍后再尝试";
 }
 
