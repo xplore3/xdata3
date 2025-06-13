@@ -542,7 +542,8 @@ export class WechatHandler {
 
     private getFirstResponse(language: string) {
         const responseMap: Record<string, string> = {
-            zh: "收到，请稍等……",
+            //zh: "收到，请稍等……",
+            zh: "收到啦！我正在处理你的请求，很快就会给出结果～",
             en: "Ok, please wait a moment...",
             ja: "承知しました。少々お待ちください……",
             ko: "확인했습니다. 잠시만 기다려주세요……",
