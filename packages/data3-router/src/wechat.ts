@@ -85,6 +85,10 @@ export class WechatHandler {
     async sendMessage(external_userid: string, kfid: string, content: string) {
         try {
             console.log("sendMessage " + content);
+            if (!content) {
+                return;
+            }
+            content = this.truncateString(content, 990, 990);
             const token = await this.getAccessToken();
             const msg = {
                 touser: external_userid,
@@ -579,5 +583,16 @@ export class WechatHandler {
         } catch (err) {
             console.log(err);
         }
+    }
+
+    private truncateString(str: string, headLength: number,
+        tailLength: number, ellipsis: string = "\r\n......\r\n"): string {
+        if (str.length <= headLength + tailLength) {
+            return str;
+        }
+
+        const head = str.substring(0, headLength);
+        const tail = str.substring(str.length - tailLength);
+        return `${head}${ellipsis}${tail}`;
     }
 }
