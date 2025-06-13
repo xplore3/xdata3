@@ -88,7 +88,7 @@ export class WechatHandler {
             if (!content) {
                 return;
             }
-            content = this.truncateString(content, 990, 990);
+            content = this.truncateString(content, 450, 450);
             const token = await this.getAccessToken();
             const msg = {
                 touser: external_userid,
@@ -586,7 +586,7 @@ export class WechatHandler {
     }
 
     private truncateString(str: string, headLength: number,
-        tailLength: number, ellipsis: string = "\r\n......\r\n"): string {
+        tailLength: number, ellipsis: string = "\r\n\r\n...... ......\r\n\r\n"): string {
         if (str.length <= headLength + tailLength) {
             return str;
         }
