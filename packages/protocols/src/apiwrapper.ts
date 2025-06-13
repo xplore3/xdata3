@@ -37,6 +37,8 @@ class APIWrapperFactory {
         const taskId = message.content.intention?.taskId || "";
         const totalItemCount = obj?.params?.totalItemCount || 500;
         let result = [];
+        let lastResultLength = -1;
+        let resuntNotUpdateNumber = 0;
         let response;
         switch (obj.route) {
             case "get_user":
@@ -175,6 +177,18 @@ class APIWrapperFactory {
                         page <= 10 && result.length < totalItemCount;
                         page++
                     ) {
+                        if (result.length == lastResultLength) {
+                            console.warn("no more data, this time");
+                            resuntNotUpdateNumber++;
+                            if (resuntNotUpdateNumber >= 5) {
+                                console.log("no more data");
+                                break;
+                            }
+                        } else {
+                            resuntNotUpdateNumber = 0;
+                        }
+                        lastResultLength = result.length;
+                        try{
                         response = await axios.post(
                             "https://gw.newrank.cn/api/xhsv2/nr/app/xh/v2/rank/hotWordHotList",
                             {
@@ -215,6 +229,10 @@ class APIWrapperFactory {
                                 },
                             }
                         );
+                        }catch (error) {
+                            console.error("Failed to fetch hot words:", error.message);
+                            continue
+                        }
                         const tempresult = (
                             response.data?.data?.list || []
                         ).map((item) => ({
@@ -247,6 +265,18 @@ class APIWrapperFactory {
                         page <= 10 && result.length < totalItemCount;
                         page++
                     ) {
+                        if (result.length == lastResultLength) {
+                            console.warn("no more data, this time");
+                            resuntNotUpdateNumber++;
+                            if (resuntNotUpdateNumber >= 5) {
+                                console.log("no more data");
+                                break;
+                            }
+                        } else {
+                            resuntNotUpdateNumber = 0;
+                        }
+                        lastResultLength = result.length;
+                        try {
                         response = await axios.post(
                             "https://gw.newrank.cn/api/xh/xdnphb/nr/app/xhs/rank/topicRank",
                             {
@@ -285,6 +315,10 @@ class APIWrapperFactory {
                                 },
                             }
                         );
+                        } catch (error) {
+                            console.error("Failed to fetch hot topics:", error.message);
+                            continue
+                        }
 
                         const tempresult = (
                             response.data?.data?.list || []
@@ -315,6 +349,17 @@ class APIWrapperFactory {
                     result.length < 500 && result.length < totalItemCount;
                     i++
                 ) {
+                    if (result.length == lastResultLength) {
+                        console.warn("no more data, this time");
+                        resuntNotUpdateNumber++;
+                        if (resuntNotUpdateNumber >= 5) {
+                            console.log("no more data");
+                            break;
+                        }
+                    } else {
+                        resuntNotUpdateNumber = 0;
+                    }
+                    lastResultLength = result.length;
                     let tempResult = [];
                     const lastCursor =
                         APIWrapperFactory.cursorMap.get(taskId) || "";
@@ -352,6 +397,7 @@ class APIWrapperFactory {
                         }
                     } catch (error) {
                         console.log(`executeRequest error: ${error.message}`);
+                        continue
                     }
                     console.log(
                         `executeRequest response: ${JSON.stringify(
@@ -430,6 +476,17 @@ class APIWrapperFactory {
             case "get_note_list":
                 {
                     for (let i = 0; i < 4; i++) {
+                        if (result.length == lastResultLength) {
+                            console.warn("no more data, this time");
+                            resuntNotUpdateNumber++;
+                            if(resuntNotUpdateNumber >= 5) {
+                                console.log("no more data");
+                                break;
+                            }
+                        } else {
+                            resuntNotUpdateNumber = 0;
+                        }
+                        lastResultLength = result.length;
                         const note_curosr_key = "get_note_list_" + taskId;
                         const lastCursor =
                             APIWrapperFactory.cursorMap.get(note_curosr_key) ||
@@ -444,6 +501,9 @@ class APIWrapperFactory {
                             );
                             break;
                         }
+                        try {
+                            
+
                         const options = {
                             method: "GET",
                             url: "https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-user-note-list/v1",
@@ -465,6 +525,10 @@ class APIWrapperFactory {
                                 `executeRequest urlWithparams: ${urlWithparams}`
                             );
                             response = await axios.get(urlWithparams);
+                        }
+                        } catch (error) {
+                            console.log(`executeRequest error: ${error.message}`);
+                            continue
                         }
                         // http://47.120.60.92:8080/api/noteList?userId=66896ebc000000000303084b&lastCursor=
                         console.log(
@@ -561,6 +625,17 @@ class APIWrapperFactory {
                         mPage <= maxPageNum && result.length < totalItemCount;
                         mPage++
                     ) {
+                        if (result.length == lastResultLength) {
+                            console.warn("no more data, this time");
+                            resuntNotUpdateNumber++;
+                            if(resuntNotUpdateNumber >= 5) {
+                                console.log("no more data");
+                                break;
+                            }
+                        } else {
+                            resuntNotUpdateNumber = 0;
+                        }
+                        lastResultLength = result.length;
                         let tempResult = [];
                         const sort =
                             obj?.params?.sort || "popularity_descending";
@@ -779,6 +854,17 @@ class APIWrapperFactory {
                             allComments.length < totalItemCount &&
                             page <= 10
                         ) {
+                        if (result.length == lastResultLength) {
+                            console.warn("no more data, this time");
+                            resuntNotUpdateNumber++;
+                            if(resuntNotUpdateNumber >= 5) {
+                                console.log("no more data");
+                                break;
+                            }
+                        } else {
+                            resuntNotUpdateNumber = 0;
+                        }
+                        lastResultLength = result.length;
                             const noteIds = await getNoteIds(keyword, page);
                             if (noteIds.length === 0) {
                                 console.log("no more notes");
@@ -814,7 +900,7 @@ class APIWrapperFactory {
                         keyword,
                         totalItemCount
                     );
-                    
+
                     function filterComments(comments) {
                         return comments.map((comment) => {
                             const filteredComment = {
@@ -865,6 +951,17 @@ class APIWrapperFactory {
                         mPage <= maxPageNum && result.length < totalItemCount;
                         mPage++
                     ) {
+                        if (result.length == lastResultLength) {
+                            console.warn("no more data, this time");
+                            resuntNotUpdateNumber++;
+                            if(resuntNotUpdateNumber >= 5) {
+                                console.log("no more data");
+                                break;
+                            }
+                        } else {
+                            resuntNotUpdateNumber = 0;
+                        }
+                        lastResultLength = result.length;
                         let tempResult = [];
                         const options = {
                             method: "GET",
@@ -897,8 +994,8 @@ class APIWrapperFactory {
   },
 }   */
                             tempResult = response.data?.data?.users
-                              .filter(user => user != null)
-                              .map((user) => ({
+                                .filter((user) => user != null)
+                                .map((user) => ({
                                     id: user.id,
                                     name: user.name,
                                     desc: user.desc,
@@ -908,13 +1005,13 @@ class APIWrapperFactory {
                                     avatar: user.image,
                                     live_room_id: user.live?.room_id,
                                     live_has_goods: user.live?.has_goods,
-                                })
-                            );
+                                }));
                             // Test log case:
                             // console.log('Sample live object:', response.data.data.users.length);
                             // console.log("results: ", results[0]);
                         } catch (error) {
                             console.error(error);
+                            continue;
                         }
                         result = result.concat(tempResult);
                         console.log(`executeRequest result: ${result.length}`);
@@ -924,7 +1021,10 @@ class APIWrapperFactory {
                         `executeRequest user search result, after cut.: ${result?.length}`
                     );
                 } catch (error) {
-                    console.error("Error user search fetching data:", error.message);
+                    console.error(
+                        "Error user search fetching data:",
+                        error.message
+                    );
                 }
                 break;
             default:
