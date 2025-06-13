@@ -310,7 +310,11 @@ class APIWrapperFactory {
                 }
                 break;
             case "notes_comment_by_next_page":
-                for (let i = 0; result.length < 500 && result.length < totalItemCount; i++) {
+                for (
+                    let i = 0;
+                    result.length < 500 && result.length < totalItemCount;
+                    i++
+                ) {
                     let tempResult = [];
                     const lastCursor =
                         APIWrapperFactory.cursorMap.get(taskId) || "";
@@ -414,9 +418,13 @@ class APIWrapperFactory {
                         response.data?.data?.comments || []
                     );
                     result = result.concat(tempResult);
-                    console.log(`executeRequest result change len: ${result.length}`);
+                    console.log(
+                        `executeRequest result change len: ${result.length}`
+                    );
                 }
-                console.log(`executeRequest result after len: ${result.length}`);
+                console.log(
+                    `executeRequest result after len: ${result.length}`
+                );
                 break;
 
             case "get_note_list":
@@ -839,15 +847,84 @@ class APIWrapperFactory {
                     // response.data?.data?.comments || []
                     // );
 
-                    result = filterComments(
-                        tempResult || []
-                    );
+                    result = filterComments(tempResult || []);
                     result?.slice(0, totalItemCount);
                     console.log(
                         `executeRequest result, after cut.: ${result?.length}`
                     );
                 } catch (error) {
                     console.error("Error fetching data:", error.message);
+                }
+                break;
+            case "users_search":
+                try {
+                    const keyword = obj?.params?.keyword || "";
+                    const maxPageNum = 5;
+                    for (
+                        let mPage = 1;
+                        mPage <= maxPageNum && result.length < totalItemCount;
+                        mPage++
+                    ) {
+                        let tempResult = [];
+                        const options = {
+                            method: "GET",
+                            url: "https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/search-user/v2",
+                            params: {
+                                keyword: keyword,
+                                page: mPage,
+                            },
+                            headers: {
+                                "x-rapidapi-key":
+                                    "010987dba4mshacddc04aa8d0269p1136ddjsnfb7887207281",
+                                "x-rapidapi-host":
+                                    "xiaohongshu-all-api.p.rapidapi.com",
+                            },
+                        };
+                        try {
+                            const response = await axios.request(options);
+                            /** User JSON structure:
+     * {
+  id: '675a82e8000000001d02fc4d',
+  name: 'kazoo美妆',
+  desc: '美妆护肤 | 笔记·1801 | 粉丝·3.9万',
+  red_official_verified: true, 
+  sub_title: '小红书号：11535754580',
+  image: 'https://sns-avatar-qc.xhscdn.com/avatar/2e247c05-14cc-3596-87d1-bc332d6eb21f?imageView2/2/w/360/format/webp',
+  red_official_verified: true, 
+  live: {
+    has_goods: false,
+    room_id: '569783074295376937',
+  },
+}   */
+                            tempResult = response.data?.data?.users
+                              .filter(user => user != null)
+                              .map((user) => ({
+                                    id: user.id,
+                                    name: user.name,
+                                    desc: user.desc,
+                                    official_verified:
+                                        user.red_official_verified,
+                                    sub_title: user.sub_title,
+                                    avatar: user.image,
+                                    live_room_id: user.live?.room_id,
+                                    live_has_goods: user.live?.has_goods,
+                                })
+                            );
+                            // Test log case:
+                            // console.log('Sample live object:', response.data.data.users.length);
+                            // console.log("results: ", results[0]);
+                        } catch (error) {
+                            console.error(error);
+                        }
+                        result = result.concat(tempResult);
+                        console.log(`executeRequest result: ${result.length}`);
+                    }
+                    result?.slice(0, totalItemCount);
+                    console.log(
+                        `executeRequest user search result, after cut.: ${result?.length}`
+                    );
+                } catch (error) {
+                    console.error("Error user search fetching data:", error.message);
                 }
                 break;
             default:
