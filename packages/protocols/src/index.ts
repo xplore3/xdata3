@@ -568,7 +568,7 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
         const obj = {
             need_more: true,
             question_answer: responseFinal + responseTail,
-            available_options: ["是否需要参考这些热度较高的帖子进行仿写？"],
+            available_options: ["参考这些热度较高的帖子进行仿写"],
             taskId,
         };
         return JSON.stringify(obj);
