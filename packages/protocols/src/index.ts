@@ -549,7 +549,7 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
     //const responseTail = `\n下载报告地址: ${finalfilepath}\n下载数据地址: ${csvdataurl}\n(您可以把URL粘贴到其他AI大模型聊天框中继续分析一下,数据三天后过期)`;
     // let responseTail = "";
     let responseTail = `\n下载报告地址: ${finalfilepath}`;
-    if(!apiSuccess) {
+    if (!apiSuccess) {
         responseTail = "";
     }
     if (
@@ -562,12 +562,16 @@ Before each tool invocation, fully plan your approach and rigorously combine ins
     }
 
     responseTail += getDynamicTail(taskId);
+    console.log(`responseTail:  hot ? : ${containsHotwords(originText)}
+    originText: ${originText}`);
     if (containsHotwords(originText) && !responseFinal.includes("【人工】")) {
-        return (
-            responseFinal +
-            responseTail +
-            "\n是否需要参考这些热度较高的帖子进行仿写？"
-        );
+        const obj = {
+            need_more: true,
+            question_answer: responseFinal + responseTail,
+            available_options: ["是否需要参考这些热度较高的帖子进行仿写？"],
+            taskId,
+        };
+        return JSON.stringify(obj);
     }
 
     if (!responseFinal.includes("【人工】")) {
@@ -1088,16 +1092,18 @@ Note(Important!): For any questions related to comments, you need to query the n
     ) {
         responseTail = "";
     }
-    if(!apiSuccess && responseFinal.length < 200) {
+    if (!apiSuccess && responseFinal.length < 200) {
         responseTail = "";
     }
     responseTail += getDynamicTail(taskId);
     if (containsHotwords(originText) && !responseFinal.includes("【人工】")) {
-        return (
-            responseFinal +
-            responseTail +
-            "\n是否需要参考这些热度较高的帖子进行仿写？"
-        );
+        const obj = {
+            need_more: true,
+            question_answer: responseFinal + responseTail,
+            available_options: ["是否需要参考这些热度较高的帖子进行仿写？"],
+            taskId,
+        };
+        return JSON.stringify(obj);
     }
     if (!responseFinal.includes("【人工】")) {
         return responseFinal + responseTail;
@@ -1161,16 +1167,13 @@ function containsHotwords(originText: any) {
     if (keywords.some((keyword) => lowerText.includes(keyword.toLowerCase()))) {
         return true;
     }
-    // const pattern1 = /用户.*资料/i;
-    // const pattern2 = /用户.*ID/i;
-    // const pattern3 = /查询.*用户/i;
 
-    // if (pattern1.test(originText)
-    //     || pattern2.test(originText)
-    //     || pattern3.test(originText)
-    // ) {
-    //     return true;
-    // }
+    const pattern = /(?:热|受欢迎|高点赞).*(?:笔记|帖|文章)/i;
+    if (
+        pattern.test(originText)
+    ) {
+        return true;
+    }
     return false;
 }
 
@@ -1230,4 +1233,3 @@ function getDynamicTail(taskId: string) {
     }
     return "获取数据源失败，请稍后再尝试";
 }
-
