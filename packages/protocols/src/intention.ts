@@ -19,7 +19,30 @@ export class IntentionHandler {
    * @param {string} 
    * @returns {Promise<string>[]} 
    */
-  static async parseIntention(
+  static async parseDataCollectIntention(
+    runtime: IAgentRuntime,
+    message: Memory
+  ): Promise<JSON> {
+    const prompt = ``;
+    try {
+      let response = await generateText({
+        runtime,
+        context: prompt,
+        modelClass: ModelClass.SMALL,
+      });
+      console.log(response);
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  /**
+   * 
+   * @param {string} 
+   * @returns {Promise<string>[]} 
+   */
+  static async processData(
     runtime: IAgentRuntime,
     message: Memory
   ): Promise<JSON> {
