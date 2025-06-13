@@ -35,7 +35,7 @@ class APIWrapperFactory {
         // {"route": "notes_search","params": {"key1": "v1","key2": "v2"}}
         console.log(`executeRequest params: ${JSON.stringify(obj)}`);
         const taskId = message.content.intention?.taskId || "";
-        const totalItemCount = obj?.params?.totalItemCount || 10;
+        const totalItemCount = obj?.params?.totalItemCount || 500;
         let result = [];
         let response;
         switch (obj.route) {
@@ -310,7 +310,7 @@ class APIWrapperFactory {
                 }
                 break;
             case "notes_comment_by_next_page":
-                for (let i = 0; i < 4; i++) {
+                for (let i = 0; result.length < 500 && result.length < totalItemCount; i++) {
                     let tempResult = [];
                     const lastCursor =
                         APIWrapperFactory.cursorMap.get(taskId) || "";
@@ -414,8 +414,9 @@ class APIWrapperFactory {
                         response.data?.data?.comments || []
                     );
                     result = result.concat(tempResult);
+                    console.log(`executeRequest result change len: ${result.length}`);
                 }
-                console.log(`executeRequest result: ${result.length}`);
+                console.log(`executeRequest result after len: ${result.length}`);
                 break;
 
             case "get_note_list":

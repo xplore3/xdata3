@@ -42,12 +42,12 @@
                 },
                 {
                     "type": "Data3 Wrapper API",
-                    "description": "This is the API for querying top-level(level-1) comments on 小红书(RedNote) notes. If the user's question text does not contain a note ID, you need to first query the note content based on the keyword, obtain the note ID in it, and then query the comment text based on the note ID.",
-                    "input": "noteId: Target note ID.",
+                    "description": "Get comments by nodeId on 小红书(RedNote) notes. If the user's question text does not contain a note ID, you need to first query the note content(by route 'notes_search') based on the keyword, obtain the note ID in it, and then query the comment text based on the note ID.",
+                    "input": "noteId: Target note ID. This 'totalItemCount' field indicates how many data items the user wants to obtain.",
                     "output": "comment array,(content,id,note_id,sub_comments,ip_location)",
                     "route": "notes_comment_by_next_page",
-                    "params": "{noteId: id}",
-                    "additional": "如果是分析评论的问题，需要先查找笔记，并保留笔记ID到上下文中，再通过笔记ID查询评论。"
+                    "params": "{noteId: id, totalItemCount: 10}",
+                    "additional": ""
                 },
                 {
                     "type": "Data3 Wrapper API",
