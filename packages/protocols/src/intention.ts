@@ -112,10 +112,10 @@ export class IntentionHandler {
             });
           }
         }
-        response.data_result = "";
-        response.data_result += getDynamicTail(taskId);
+        execJson.data_result = "";
+        execJson.data_result += getDynamicTail(taskId);
       }
-      return response;
+      return execJson;
     } catch (err) {
       console.log(err);
     }
