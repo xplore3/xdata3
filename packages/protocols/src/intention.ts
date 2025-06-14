@@ -52,9 +52,10 @@ export class IntentionHandler {
     message: Memory
   ): Promise<string> {
     const intention_examples = IntentionHandler.getIntentionExamples();
+    console.log(intention_examples);
     const my_data_platform = IntentionHandler.getMyDataPlatform(message.userId);
     const my_data_source = IntentionHandler.getMyDataSource(message.userId);
-    const my_data_bucket = IntentionHandler.getMyDataBucket(message.userId);
+    const my_data_bucket = await IntentionHandler.getMyDataBucket(message.userId);
     const prompt = `
       你是一个数据获取专家，进行数据API调用的程序员，能够基于用户的输入，找到合适的可调用的API，并将API的结果集根据用户的需求进行过滤、精简、排序等一系列的操作，从而输出给用户结构化的，满足用户要求的数据。
       主要有如下一些情况：
@@ -457,12 +458,12 @@ export class IntentionHandler {
     return attachment;
   }
 
-  static async getMyDataPlatform(userId: UUID) {
+  static getMyDataPlatform(userId: UUID) {
     const platforms = ["小红书", "RedNote"];
     return platforms;
   }
 
-  static async getMyDataSource(userId: UUID) {
+  static getMyDataSource(userId: UUID) {
     const sources = [
       'notes_search: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表',
       'users_search: 用以通过关键字搜索小红书账号，获得账号列表',
@@ -476,7 +477,7 @@ export class IntentionHandler {
     return sources;
   }
 
-  static async getIntentionExamples() {
+  static getIntentionExamples() {
     const intentionNote = [
       '1. 分析这些爆文是怎样的结构',
       '2. 分析这些爆文的标题是怎么写的',
