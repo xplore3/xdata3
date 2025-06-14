@@ -19,6 +19,8 @@ import cron from "node-cron";
 import { PromptController } from "./promts";
 
 
+const ORIGIN_INPUT_POST = "_origin_input";
+
 export class WechatHandler {
     constructor(private client: DirectClient) {}
 
@@ -429,6 +431,51 @@ export class WechatHandler {
             // }
 
             const taskId = await this.getCachedData<string>(runtime, userId);
+            if (taskId && taskId != '') {
+                const origin_input = await this.getCachedData<string>(runtime, userId + ORIGIN_INPUT_POST);
+                const config = {
+                    url: 'http://localhost:3333/91edd400-9c4a-0eb5-80ce-9d32973f2c49/data_process',
+                    method: 'post',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    data: {
+                        taskId,
+                        userId,
+                        text: input,
+                        origin_input
+                    }
+                };
+
+                const response = await axios(config);
+                console.log(response.data);
+                if (response.status != 200) {
+                    return "Error in response " + response.statusText;
+                }
+                let options = [];
+                let output = "";
+                try {
+                    const json = JSON.parse(response.data?.text);
+                    if (json) {
+                        options = json.intention_options || json.available_options;
+                        output = json.data_result || json.question_description || json.question_answer;
+                    }
+                } catch (err) {
+                    console.log(err);
+                    const json = response.data?.text;
+                    options = json.intention_options || json.available_options;
+                    output = json.data_result || json.question_description || json.question_answer || json;
+                }
+                // End of the DataProcess
+                if (!options || options.length < 1) {
+                    await this.setCachedData(runtime, userId, '');
+                    await this.setCachedData(runtime, userId + ORIGIN_INPUT_POST, '');
+                }
+                let text = `${output}\n\n${options.join('\n')}`;
+                return text;
+            }
+
+            await this.setCachedData(runtime, userId + ORIGIN_INPUT_POST, input);
             const config = {
                 url: 'http://localhost:3333/91edd400-9c4a-0eb5-80ce-9d32973f2c49/message',
                 method: 'post',
@@ -447,22 +494,25 @@ export class WechatHandler {
             if (response.status != 200) {
                 return "Error in response " + response.statusText;
             }
+            let options = [];
+            let output = "";
             try {
                 const json = JSON.parse(response.data?.text);
                 if (json) {
                     await this.setCachedData(runtime, userId, json.taskId);
-                    if (json.need_more) {
-                        let text = `${json.question_description}\n\n${json.available_options.join('\n')}`;
-                        return text;
-                    }
-                    else {
-                        return json.question_description;
-                    }
+                    options = json.intention_options || json.available_options;
+                    output = json.data_result || json.question_description || json.question_answer;
                 }
             } catch (err) {
                 console.log(err);
+                const json = response.data?.text;
+                await this.setCachedData(runtime, userId, json.taskId);
+                options = json.intention_options || json.available_options;
+                output = json.data_result || json.question_description || json.question_answer || json;
             }
-            return response.data?.text;
+            let text = `${output}\n\n${options.join('\n')}`;
+            return text;
+            //return response.data?.text;
         }
         catch (err) {
             console.log(err);

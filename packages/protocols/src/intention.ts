@@ -136,7 +136,7 @@ export class IntentionHandler {
     message: Memory,
     origin_input: string
   ): Promise<string> {
-    const taskId = message.content?.intention.taskId;
+    const taskId = message.content?.intention?.taskId;
     const attachment = IntentionHandler.getTaskAttachment(taskId);
     const prompt = `
       你是一个数据处理专家，能根据输入的多个结构的数据/文件进行加工、处理、分析、预测的专家，能够基于用户的多轮输入，将数据处理成用户需要的结果。
