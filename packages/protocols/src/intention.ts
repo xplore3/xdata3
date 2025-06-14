@@ -62,6 +62,7 @@ export class IntentionHandler {
         (1). 如果用户的输入里，除了有进行数据获取的需求外，还有其他需求，则将这些需求以意图选项的形式输出出来。
         (2). 如果用户的输入里，不包含数据获取的内容，则将这些内容进行拆解，找到其中的意图选项，输出出来。
         (3). 如果用户的输入里，既不包含数据获取需求，也没有明确的数据处理意图，也无其他意图，则参考最近的消息，给出相关的意图选项。
+        (4). 如果用户的输入跟数据获取或数据处理都没有关系，则参考上下文给出简短回答。
       用户输入：${message.content.text}.
       可用数据平台：${my_data_platform}
       可用数据获取API：${my_data_source}
@@ -77,6 +78,7 @@ export class IntentionHandler {
           "request_count": 100,
           "filter_desc": "the description of the data filter"
         }],
+        "data_result": "简短回答",
         "intention_options": ["使用数据的意图1", "使用数据的意图2", "......"],
       }
       输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
