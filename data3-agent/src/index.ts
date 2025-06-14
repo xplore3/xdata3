@@ -612,10 +612,10 @@ export async function initializeClients(
         }
     }
     
-    const telegramClient = await TelegramClientInterface.start(runtime);
-    if (telegramClient) {
-       clients.push(telegramClient);
-    }
+    //const telegramClient = await TelegramClientInterface.start(runtime);
+    //if (telegramClient) {
+    //   clients.push(telegramClient);
+    //}
 
     return clients;
 }
