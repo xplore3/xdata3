@@ -470,11 +470,14 @@ export class WechatHandler {
                     output = json.data_result || json.question_description || json.question_answer || json;
                 }
                 // End of the DataProcess
+                let text = output;
                 if (!options || options.length < 1) {
                     await this.setCachedData(runtime, userId, '');
                     await this.setCachedData(runtime, userId + ORIGIN_INPUT_POST, '');
                 }
-                let text = `${output}\n\n${options.join('\n')}`;
+                else {
+                    text = `${output}\n\n${options.join('\n')}`;
+                }
                 return text;
             }
 
@@ -513,7 +516,10 @@ export class WechatHandler {
                 options = json.intention_options || json.available_options;
                 output = json.data_result || json.question_description || json.question_answer || json;
             }
-            let text = `${output}\n\n${options.join('\n')}`;
+            let text = output;
+            if (options && options.length > 0) {
+                text = `${output}\n\n${options.join('\n')}`;
+            }
             return text;
             //return response.data?.text;
         }
