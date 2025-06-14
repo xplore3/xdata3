@@ -470,8 +470,8 @@ export class IntentionHandler {
       'notes_search: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表',
       'users_search: 用以通过关键字搜索小红书账号，获得账号列表',
       'get_user: 用以通过单个小红书账号ID获取该账号的详情',
-      'hot_words: 用以获得近期火热的热词等',
-      'hot_topics: 用以获得近期火热的话题/种类等',
+      //'hot_words: 用以获得近期火热的热词等',
+      //'hot_topics: 用以获得近期火热的话题/种类等',
       'notes_comment_by_next_page: 用以通过单个笔记/帖子的ID获取其评论列表',
       'fetch_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表和评论列表',
       'get_note_list: 用以通过单个小红书账号ID获取该账号的笔记/帖子的列表'

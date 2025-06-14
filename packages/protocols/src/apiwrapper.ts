@@ -787,6 +787,11 @@ class APIWrapperFactory {
                         obj?.params?.key1 ||
                         obj?.params?.product ||
                         obj?.params?.query ||
+                        obj?.keyword ||
+                        obj?.keywords ||
+                        obj?.key1 ||
+                        obj?.product ||
+                        obj?.query ||
                         "";
                     // totalItemCount
                     const maxPageNum = 300;
@@ -950,7 +955,18 @@ class APIWrapperFactory {
                 break;
             case "search_user_list":
                 try {
-                    const keyword = obj?.params?.keyword || "";
+                    const keyword =
+                        obj?.params?.keyword ||
+                        obj?.params?.keywords ||
+                        obj?.params?.key1 ||
+                        obj?.params?.product ||
+                        obj?.params?.query ||
+                        obj?.keyword ||
+                        obj?.keywords ||
+                        obj?.key1 ||
+                        obj?.product ||
+                        obj?.query ||
+                        "";
                     const maxPageNum = 5;
                     for (
                         let mPage = 1;
