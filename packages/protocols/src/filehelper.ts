@@ -72,7 +72,7 @@ export function updateCacheText(content: string, filename: string, onError?: (er
     });
 }
 
-function getDynamicTail(taskId: string) {
+export function getDynamicTail(taskId: string) {
     const textFilePaths = [];
     const excelFilePaths = [];
     for (let i = 1; i <= 10; i++) {

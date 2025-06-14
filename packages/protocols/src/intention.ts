@@ -3,7 +3,9 @@ import {
   ModelClass,
   Memory,
   UUID,
+  composeContext,
   generateText,
+  stringToUuid,
   type IAgentRuntime,
 } from "@data3os/agentcontext";
 import {
@@ -66,14 +68,14 @@ export class IntentionHandler {
       -----------------------------
       你需要输出如下：
       {
-        "intention_params":
+        "intention_params": [
         {
           "data_source": "rednote",
           "data_action": "notes_search",
           "keyword": "search key",
           "request_count": 100,
           "filter_desc": "the description of the data filter"
-        },
+        }],
         "intention_options": ["使用数据的意图1", "使用数据的意图2", "others"],
       }
       输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
@@ -89,7 +91,7 @@ export class IntentionHandler {
         modelClass: ModelClass.LARGE,
       });
       console.log(response);
-      response = response .replace(/```json/g, "") .replace(/```/g, "");
+      response = response.replace(/```json/g, "") .replace(/```/g, "");
       let execJson = null;
       try {
         execJson = JSON.parse(response);
@@ -98,15 +100,20 @@ export class IntentionHandler {
       catch (err) {
         console.log(err);
       }
-      if (execJson) {
-        const { result, csvfileurl } = await APIWrapperFactory.executeRequest(
-          runtime, execJson, message);
-        const taskId = message.content.intention?.taskId || "";
-        const filename = taskId + "_data.txt";
-        appendToChatCache(result, filename, (err) => {
-          console.error("Custom error handling:", err);
-        });
-        response = response + getDynamicTail(taskId);
+      const taskId = message.content.intention?.taskId || "";
+      if (execJson && execJson.intention_params) {
+        for (const execParam of execJson.intention_params) {
+          if (execParam.data_action && execParam.data_action != 'others') {
+            const { result, csvfileurl } = await APIWrapperFactory.executeRequest(
+              runtime, execParam, message);
+            const filename = taskId + "_data.txt";
+            appendToChatCache(result, filename, (err) => {
+              console.error("Custom error handling:", err);
+            });
+          }
+        }
+        response.data_result = "";
+        response.data_result += getDynamicTail(taskId);
       }
       return response;
     } catch (err) {
@@ -156,7 +163,8 @@ export class IntentionHandler {
         context: await IntentionHandler.composePrompt(runtime, prompt, message.userId),
         modelClass: ModelClass.LARGE,
       });
-      console.log(response);response = response .replace(/```json/g, "") .replace(/```/g, "");
+      console.log(response);
+      response = response.replace(/```json/g, "") .replace(/```/g, "");
       let execJson = null;
       try {
         execJson = JSON.parse(response);
@@ -252,6 +260,7 @@ export class IntentionHandler {
         });
         console.log(response);
         try {
+          let json = null;
           const match = response.match(/```json\s*([\s\S]*?)```/);
           if (match) {
             const jsonString = match[1];
@@ -260,12 +269,12 @@ export class IntentionHandler {
           else {
             response = JSON.parse(response);
           }
+          return {extract: json.extract, filter: json.filter};
         }
         catch (e) {
           console.error("Failed again to parse response:", e);
         }
       }
-      return {extract: response.extract, filter: response.filter};
     } catch (err) {
       console.log(err);
     }
@@ -362,6 +371,7 @@ export class IntentionHandler {
         });
         console.log(response);
         try {
+          let json = null;
           const match = response.match(/```json\s*([\s\S]*?)```/);
           if (match) {
             const jsonString = match[1];
@@ -370,12 +380,13 @@ export class IntentionHandler {
           else {
             response = JSON.parse(response);
           }
+          return {extract: json.extract, filter: json.filter};
         }
         catch (e) {
           console.error("Failed again to parse response:", e);
         }
       }
-      return {extract: response.extract, filter: response.filter};
+      //return {extract: response.extract, filter: response.filter};
     } catch (err) {
       console.log(err);
     }
