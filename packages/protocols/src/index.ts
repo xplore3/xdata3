@@ -13,6 +13,7 @@ import {
 import APIWrapperFactory from "./apiwrapper";
 import { PdfHelper } from "./pdfhelper";
 import { KeyWordGenerator } from "./keywords";
+import { IntentionHandler } from "./intention";
 //import { fileURLToPath } from 'url';
 
 //const __filename = fileURLToPath(import.meta.url);
@@ -1233,3 +1234,5 @@ function getDynamicTail(taskId: string) {
     }
     return "获取数据源失败，请稍后再尝试";
 }
+
+export { IntentionHandler };

@@ -1,12 +1,38 @@
 // intention.ts
 import {
-    ModelClass,
-    Memory,
-    UUID,
-    generateText,
-    type IAgentRuntime,
+  ModelClass,
+  Memory,
+  UUID,
+  generateText,
+  type IAgentRuntime,
 } from "@data3os/agentcontext";
+import {
+  getDynamicTail,
+  readCacheFile,
+  appendToChatCache,
+} from "./filehelper";
+import APIWrapperFactory from "./apiwrapper";
 
+
+export const dataHandlerTemplate = `
+##
+Some additional information about the task:
+#####################################
+# Knowledge
+{{knowledge}}
+
+# Task: Generate dialog and actions for the character {{agentName}}.
+About {{agentName}}:
+{{bio}}
+{{lore}}
+
+{{providers}}
+
+{{attachments}}
+
+{{recentMessages}}
+#####################################
+`;
 
 export class IntentionHandler {
   runtime: IAgentRuntime = null;
@@ -19,18 +45,69 @@ export class IntentionHandler {
    * @param {string} 
    * @returns {Promise<string>[]} 
    */
-  static async parseDataCollectIntention(
+  static async handleDataCollect(
     runtime: IAgentRuntime,
     message: Memory
-  ): Promise<JSON> {
-    const prompt = ``;
+  ): Promise<string> {
+    const intention_examples = IntentionHandler.getIntentionExamples();
+    const my_data_platform = IntentionHandler.getMyDataPlatform(message.userId);
+    const my_data_source = IntentionHandler.getMyDataSource(message.userId);
+    const my_data_bucket = IntentionHandler.getMyDataBucket(message.userId);
+    const prompt = `
+      你是一个数据获取专家，进行数据API调用的程序员，能够基于用户的输入，找到合适的可调用的API，并将API的结果集根据用户的需求进行过滤、精简、排序等一系列的操作，从而输出给用户结构化的，满足用户要求的数据。
+      主要有如下一些情况：
+        (1). 如果用户的输入里，除了有进行数据获取的需求外，还有其他需求，则将这些需求以意图选项的形式输出出来。
+        (2). 如果用户的输入里，不包含数据获取的内容，则将这些内容进行拆解，找到其中的意图选项，输出出来。
+        (3). 如果用户的输入里，既不包含数据获取需求，也没有明确的数据处理意图，也无其他意图，则参考最近的消息，给出相关的意图选项。
+      用户输入：${message.content.text}.
+      可用数据平台：${my_data_platform}
+      可用数据获取API：${my_data_source}
+      各个API的数据结果示例：${my_data_bucket}
+      -----------------------------
+      你需要输出如下：
+      {
+        "intention_params":
+        {
+          "data_source": "rednote",
+          "data_action": "notes_search",
+          "keyword": "search key",
+          "request_count": 100,
+          "filter_desc": "the description of the data filter"
+        },
+        "intention_options": ["使用数据的意图1", "使用数据的意图2", "others"],
+      }
+      输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
+      data_action的可选项是各个可用的API列表my_data_source中的关键字，如果不在这个列表里，输出为others
+      intenton_options的根据用户输入得出的文字选项，其选项数量可以从1个到5个，其常用示例如下：
+      【${intention_examples}】；
+      -----------------------------
+    `;
     try {
       let response = await generateText({
         runtime,
-        context: prompt,
-        modelClass: ModelClass.SMALL,
+        context: await IntentionHandler.composePrompt(runtime, prompt, message.userId),
+        modelClass: ModelClass.LARGE,
       });
       console.log(response);
+      response = response .replace(/```json/g, "") .replace(/```/g, "");
+      let execJson = null;
+      try {
+        execJson = JSON.parse(response);
+        console.log(execJson);
+      }
+      catch (err) {
+        console.log(err);
+      }
+      if (execJson) {
+        const { result, csvfileurl } = await APIWrapperFactory.executeRequest(
+          runtime, execJson, message);
+        const taskId = message.content.intention?.taskId || "";
+        const filename = taskId + "_data.txt";
+        appendToChatCache(result, filename, (err) => {
+          console.error("Custom error handling:", err);
+        });
+        response = response + getDynamicTail(taskId);
+      }
       return response;
     } catch (err) {
       console.log(err);
@@ -42,18 +119,62 @@ export class IntentionHandler {
    * @param {string} 
    * @returns {Promise<string>[]} 
    */
-  static async processData(
+  static async handleDataProcess(
     runtime: IAgentRuntime,
-    message: Memory
-  ): Promise<JSON> {
-    const prompt = ``;
+    message: Memory,
+    origin_input: string
+  ): Promise<string> {
+    const taskId = message.content?.intention.taskId;
+    const attachment = IntentionHandler.getTaskAttachment(taskId);
+    const prompt = `
+      你是一个数据处理专家，能根据输入的多个结构的数据/文件进行加工、处理、分析、预测的专家，能够基于用户的多轮输入，将数据处理成用户需要的结果。
+      主要有如下一些情况：
+      (1). 如果用户的需求不是一个数据处理的需求，而是一个数据获取的需求，则给出如下结果：
+        {
+          "intention_action": "data_collection",
+          "origin_input": "${origin_input}",
+          "intention_desc": "${message.content.text}",
+          "attachment": "{attachment}",
+        }.
+      (2). 如果需求比较模糊，则可以给出可供选择的一些选项，让用户进行二次选择，以明确其需求。这种情况的输出为一个可解析的JSON结果，如下：
+        {
+          "question_description": "相关的描述",
+          "intention_options": ["进一步的意图1", "进一步的意图2", "......"],
+          "taskId": "${taskId}"
+          ......
+        }
+      (3). 如果用户的需求比较复杂，当前的数据无法满足处理的需求，则需要告知用户缺少什么数据导致无法给出理想结果，并给出intention_options让用户决定是否进一步获取数据。输出结构同(2).
+      (4). 如果用户的输入里，既不包含数据获取需求，也没有明确的数据处理意图，也无其他意图，则参考最近的消息，给出相关的意图选项。输出结构同(2).
+      (5). 如果能够直接给出处理结果，则输出问Markdown形式的文字。
+      -----------------------------
+      用户需求：${message.content.text}, 前置描述：${origin_input}.
+      待处理数据内容：${attachment}
+    `;
     try {
       let response = await generateText({
         runtime,
-        context: prompt,
-        modelClass: ModelClass.SMALL,
+        context: await IntentionHandler.composePrompt(runtime, prompt, message.userId),
+        modelClass: ModelClass.LARGE,
       });
-      console.log(response);
+      console.log(response);response = response .replace(/```json/g, "") .replace(/```/g, "");
+      let execJson = null;
+      try {
+        execJson = JSON.parse(response);
+        console.log(execJson);
+      }
+      catch (err) {
+        console.log(err);
+      }
+      if (execJson) {
+        if (execJson.intention_action && execJson.intention_action === "data_collection") {
+          return await IntentionHandler.handleDataCollect(
+            runtime, message
+          );
+        }
+        if (execJson.question_description) {
+          return JSON.stringify(execJson);
+        }
+      }
       return response;
     } catch (err) {
       console.log(err);
@@ -277,5 +398,307 @@ export class IntentionHandler {
       // Should be a online valid JSONPath expression
       filter: "$.[?(@.note && (@.note.collected_count || 0) > 100 && (@.note.shared_count || 0) > 50 && (@.note.comments_count || 0) > 10 && (@.note.liked_count || 0) > 100)]"
     };
+  }
+
+  static async composePrompt(
+    runtime: IAgentRuntime,
+    prompt: string,
+    userId: UUID
+  ): Promise<string> {
+    const roomId = stringToUuid("default-data-room-" + userId);
+    if (!runtime) {
+      throw new Error("Agent not found");
+    }
+    const userMessage = {
+      content: { text: prompt },
+      userId,
+      roomId,
+      agentId: runtime.agentId,
+    };
+    console.log("userMessage: ", userMessage, userId);
+
+    return (
+      prompt +
+      composeContext({
+        state: await runtime.composeState(userMessage, {
+          agentName: runtime.character.name,
+        }),
+        template: dataHandlerTemplate,
+      })
+    );
+  }
+
+  static async getTaskAttachment(taskId: string) {
+    let attachment = readCacheFile(taskId + "_data.txt");
+    if (!attachment || attachment.length < 1) {
+      attachment = readCacheFile(taskId + "_raw_data.txt");
+      if (!attachment || attachment.length < 1) {
+        attachment = readCacheFile(taskId + "_raw_data1.txt");
+        if (attachment) {
+          attachment = attachment + readCacheFile(taskId + "_raw_data2.txt");
+        }
+      }
+    }
+    return attachment;
+  }
+
+  static async getMyDataPlatform(userId: UUID) {
+    const platforms = ["小红书", "RedNote"];
+    return platforms;
+  }
+
+  static async getMyDataSource(userId: UUID) {
+    const sources = [
+      'notes_search: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表',
+      'users_search: 用以通过关键字搜索小红书账号，获得账号列表',
+      'get_user: 用以通过单个小红书账号ID获取该账号的详情',
+      'hot_words: 用以获得近期火热的热词等',
+      'hot_topics: 用以获得近期火热的话题/种类等',
+      'notes_comment_by_next_page: 用以通过单个笔记/帖子的ID获取其评论列表',
+      'fetch_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表和评论列表',
+      'get_note_list: 用以通过单个小红书账号ID获取该账号的笔记/帖子的列表'
+    ];
+    return sources;
+  }
+
+  static async getIntentionExamples() {
+    const intentionNote = [
+      '1. 分析这些爆文是怎样的结构',
+      '2. 分析这些爆文的标题是怎么写的',
+      '3. 分析前5个爆文',
+      '4. 找出点赞次数最多的5篇，对比其互动率',
+      '5. 找出转发次数最多的5篇，对比其互动率',
+      '6. 找出收藏次数最多的5篇，对比其互动率',
+      '7. 预测下周可能会火的内容方向',
+      '8. 分析帖子/笔记内容是否以“口播/图文/Vlog”为主',
+      '9. 分析这些帖子/笔记封面图/构图是否有共性',
+      '10. 分析这些帖子/笔记中哪类标题格式获得了较高的互动',
+      '11. 给出选题建议',
+      '12. 给出发布时段建议',
+      '13. 给出话题标签组合',
+      '14. 给出话术风格',
+      '15. 给出可交叉组合的话题/元素',
+      '16. 仿写这个帖子',
+      '17. 将帖子/笔记分为不同类型（如：种草/教程/测评/合集类）',
+      '18. 给出标题结构',
+      '19. 封面设计分析',
+      '20. 文案构造分析',
+      '21. 总结可模仿的内容（如：标题模板、内容场景、内容文案、标签组合、发布时间），说明原因',
+      '22. 分析内容未覆盖的机会点（如缺乏情绪向内容/缺少新品对比测评），说明原因',
+      '23. 重构我的笔记',
+      '24. 在我的笔记里加入【****】元素',
+      '25. 将我的产品与【****】热点融合起来',
+      '26. 给出热词Tag列表',
+      '27. 结合我的笔记，为何比如他们发的内容点赞高'
+    ];
+    const intentionComment = [
+      '1. 分析这些帖子的评论是怎么布局的',
+      '2. 分析这些帖子的评论是否有挂商品链接/外链/商链',
+      '3. 分析这些爆文/帖子/视频的互动率是怎样的',
+      '4. 给出高赞的评论内容',
+      '5. 给出这篇帖子的评论主要话题是什么',
+      '6. 分析这些帖子的评论里，用户关心的是‘价格’还是‘使用体验’',
+      '7. 提取这些评论中【5/10】个热门的关键字',
+      '8. 分析一下这些评论的主要几种情绪',
+      '9. 分析一下这些评论的几种主要意图',
+      '10. 分析这些评论里是否有购买咨询或相关意图',
+      '11. 给出评论区的主要互动方式是什么',
+      '12. 拆解其爆款原因：是否为话题+人设+品牌+场景+评论运营等组合驱动'
+    ];
+    const intentionUser = [
+      '1. 账号在一周内/一天内的发帖时间进行统计',
+      '2. 分析哪个时间发布频次高',
+      '3. 分析用户发帖是否存在特定时间节点与活动节奏',
+      '4. 生成发布频率热力图',
+      '5. 整理其发布频率表',
+      '6. 分析账号的灵感库',
+      '7. 找到其近30天内互动表现Top10的内容',
+      '8. 根据达人内容和互动质量，评估达人的合作优先级',
+      '9. 分析达人近10条内容类型分布（种草/教程/测评/生活Vlog）',
+      '10. 分析标题关键词与话题倾向（情绪型？功能型？口语化？）',
+      '11. 分析图文风格（是否注重视觉 / 使用滤镜统一 / 有生活感等等）',
+      '12. 分析是否推广过与我的产品相似的品牌/内容',
+      '13. 达人是否存在“点赞高评论低”的刷赞嫌疑',
+      '14. 根据我的产品生成打招呼的内容，口吻自然、轻松、不带强推感',
+      '15. 根据我的产品和预算情况【****】生成打招呼的内容'
+    ];
+    return `笔记类：[${intentionNote.join(", ")}], 评论类：[${intentionComment.join(", ")}], 达人类：[${intentionUser.join(", ")}]`;
+  }
+
+  static async getMyDataBucket(userId: UUID) {
+    const buckets = [
+      {
+			'model_type': 'note',
+			'note': {
+				'tag_info': {
+					'type': '',
+					'title': ''
+				},
+				'timestamp': 1715940777,
+				'desc': '1、比别人更年轻 2、提升记忆力 3、身体不容易发福 4、没有蛀牙 葡萄酒再好，也不要贪杯喔 #葡萄酒  #今夜来一杯微',
+				'result_from': '',
+				'shared_count': 57,
+				'title': '晚上喝红酒，到底好不好！',
+				'has_music': false,
+				'last_update_time': 1716043421,
+				'collected_count': 187,
+				'comments_count': 79,
+				'id': '66472da90000000005006256',
+				'widgets_context': '{"flags":{},"author_id":"63bd42cd000000002600710d","author_name":"念微醺"}',
+				'collected': false,
+				'nice_count': 0,
+				'niced': false,
+				'liked': false,
+				'debug_info_str': '',
+				'advanced_widgets_groups': {
+					'groups': [{
+						'mode': 1,
+						'fetch_types': ['guos_test', 'note_next_step', 'second_jump_bar', 'cooperate_binds', 'note_collection', 'rec_next_infos', 'image_stickers', 'image_filters', 'product_review', 'related_search', 'cooperate_comment_component', 'image_goods_cards', 'ads_goods_cards', 'ads_comment_component', 'goods_card_v2', 'image_template', 'buyable_goods_card_v2', 'ads_engage_bar', 'challenge_card', 'cooperate_engage_bar', 'guide_post', 'pgy_comment_component', 'pgy_engage_bar', 'bar_below_image', 'aigc_collection', 'co_produce', 'widgets_ndb', 'next_note_guide', 'pgy_bbc_exp', 'async_group', 'super_activity', 'widgets_enhance', 'music_player', 'soundtrack_player']
+					}, {
+						'mode': 0,
+						'fetch_types': ['guos_test', 'vote_stickers', 'bullet_comment_lead', 'note_search_box', 'interact_pk', 'interact_vote', 'guide_heuristic', 'share_to_msg', 'follow_guide', 'note_share_prompt_v1', 'sync_group', 'group_share', 'share_guide_bubble', 'widgets_share', 'guide_navigator']
+					}]
+				},
+				'interaction_area': {
+					'status': false,
+					'text': '772',
+					'type': 1
+				},
+				'update_time': 1719318002000,
+				'type': 'normal',
+				'images_list': [{
+					'url_size_large': 'http://sns-na-i3.xhscdn.com/1040g2sg312t6i5tg3s6g5ott8b6pgs8deglmn60?imageView2/2/w/1080/format/webp&ap=5&sc=SRH_DTL',
+					'original': '',
+					'trace_id': '1040g2sg312t6i5tg3s6g5ott8b6pgs8deglmn60',
+					'need_load_original_image': false,
+					'fileid': '1040g2sg312t6i5tg3s6g5ott8b6pgs8deglmn60',
+					'height': 2560,
+					'width': 1920,
+					'url': 'http://sns-na-i3.xhscdn.com/1040g2sg312t6i5tg3s6g5ott8b6pgs8deglmn60?imageView2/2/w/540/format/jpg/q/75%7CimageMogr2/strip&redImage/frame/0&ap=5&sc=SRH_PRV'
+				}, {
+					'url': '',
+					'url_size_large': 'http://sns-na-i3.xhscdn.com/1040g2sg312t6i5tg3s605ott8b6pgs8d397eqn0?imageView2/2/w/1080/format/webp&ap=5&sc=SRH_DTL',
+					'original': '',
+					'trace_id': '1040g2sg312t6i5tg3s605ott8b6pgs8d397eqn0',
+					'need_load_original_image': false,
+					'fileid': '1040g2sg312t6i5tg3s605ott8b6pgs8d397eqn0',
+					'height': 2560,
+					'width': 1920
+				}, {
+					'trace_id': '1040g2sg312t6i5tg3s5g5ott8b6pgs8dcmspdfo',
+					'need_load_original_image': false,
+					'fileid': '1040g2sg312t6i5tg3s5g5ott8b6pgs8dcmspdfo',
+					'height': 2560,
+					'width': 1920,
+					'url': '',
+					'url_size_large': 'http://sns-na-i3.xhscdn.com/1040g2sg312t6i5tg3s5g5ott8b6pgs8dcmspdfo?imageView2/2/w/1080/format/webp&ap=5&sc=SRH_DTL',
+					'original': ''
+				}, {
+					'need_load_original_image': false,
+					'fileid': '1040g2sg312t6i5tg3s505ott8b6pgs8drro2pfg',
+					'height': 2560,
+					'width': 1920,
+					'url': '',
+					'url_size_large': 'http://sns-na-i3.xhscdn.com/1040g2sg312t6i5tg3s505ott8b6pgs8drro2pfg?imageView2/2/w/1080/format/webp&ap=5&sc=SRH_DTL',
+					'original': '',
+					'trace_id': '1040g2sg312t6i5tg3s505ott8b6pgs8drro2pfg'
+				}],
+				'abstract_show': '晚上喝红酒，到底好不好！😮…#美容养颜 #葡萄酒 #今夜来一杯微醺酒 #适合女生喝的酒 #红酒 #健康生活',
+				'liked_count': 772,
+				'cover_image_index': 0,
+				'corner_tag_info': [{
+					'text_en': '',
+					'style': 0,
+					'location': -1,
+					'type': 'ubt_sig_token',
+					'icon': '',
+					'text': 'RAEC2QLKIeYTlcAsExNeHdaHL/Z4lnWZYpVDPWphUZZ9j+Ru5J/iEl68wXRXMb4vFTbOxXfbYC6Z5IUS5iQqstyiIQ/6nu1uhB'
+				}, {
+					'type': 'publish_time',
+					'icon': 'http://picasso-static.xiaohongshu.com/fe-platform/e9b67af62f67d9d6cfac936f96ad10a85fdb868e.png',
+					'text': '2024-05-18',
+					'text_en': '2024-05-18',
+					'style': 0,
+					'location': 5
+				}],
+				'extract_text_enabled': 0,
+				'user': {
+					'red_id': '6732656693',
+					'red_official_verify_type': 0,
+					'red_official_verified': false,
+					'track_duration': 0,
+					'followed': false,
+					'nickname': '念微醺',
+					'images': 'https://sns-avatar-qc.xhscdn.com/avatar/1040g2jo310gpa3oq6e5g5ott8b6pgs8dbod8ku8?imageView2/2/w/80/format/jpg',
+					'show_red_official_verify_icon': false,
+					'userid': '63bd42cd000000002600710d'
+				},
+				'geo_info': {
+					'distance': ''
+				},
+				'note_attributes': []
+			}
+    },
+      {
+                "score": 57, 
+                "status": 0, 
+                "sub_comments": [
+                    {
+                        "user": {}, 
+                        "comment_type": 0, 
+                        "note_id": "66472da90000000005006256", 
+                        "score": -4, 
+                        "friend_liked_msg": "", 
+                        "text_language_code": "zh-Hans", 
+                        "content": "喜欢偏甜还是喜欢酸涩感强一些的呢", 
+                        "at_users": [ ], 
+                        "show_type": "common", 
+                        "show_tags": [1], 
+                        "target_comment": {}, 
+                        "id": "6729b4c0000000001b003a28", 
+                        "like_count": 0, 
+                        "liked": false, 
+                        "hidden": false, 
+                        "status": 0, 
+                        "time": 1730786497, 
+                        "biz_label": {}
+                    }
+                ], 
+                "user": {
+                    "images": "https://sns-avatar-qc.xhscdn.com/avatar/5bd3147724952a0001b9804b.jpg?imageView2/2/w/120/format/jpg", 
+                    "red_id": "620372106", 
+                    "level": {
+                        "image": ""
+                    }, 
+                    "additional_tags": { }, 
+                    "ai_agent": false, 
+                    "userid": "5bd313d73a2b6700015ef04c", 
+                    "nickname": "Chachaxxzzz"
+                }, 
+                "track_id": "interaction-service.local", 
+                "friend_liked_msg": "", 
+                "at_users": [ ], 
+                "liked": false, 
+                "text_language_code": "zh-Hans", 
+                "time": 1730261197, 
+                "biz_label": {
+                    "product_review": false, 
+                    "group_invite": "false", 
+                    "rich_text": "unknown"
+                }, 
+                "sub_comment_cursor": "{\"cursor\":\"6729b4c0000000001b003a28\",\"index\":1}", 
+                "content": "有红酒推荐吗？价格不要太高", 
+                "like_count": 2, 
+                "show_tags": [ ], 
+                "show_type": "common", 
+                "comment_type": 0, 
+                "hidden": false, 
+                "sub_comment_count": 10, 
+                "id": "6721b0cd00000000170248d5", 
+                "note_id": "66472da90000000005006256"
+            },
+
+    ];
+    return buckets;
   }
 }

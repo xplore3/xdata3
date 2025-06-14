@@ -25,6 +25,7 @@ import {
 import { mdToPdf } from "md-to-pdf";
 
 import {
+    IntentionHandler,
     getProtocolArray,
     updateProtocolArray,
     handleProtocolsForPrompt,
@@ -294,6 +295,129 @@ export class DirectClient {
         );
 
         this.app.post(
+            "/:agentId/commond",
+            upload.single("file"),
+            async (req: express.Request, res: express.Response) => {
+                const maxNum = 1;
+                if (this.concurrentNum >= maxNum) {
+                    res.json({
+                        user: "Data3",
+                        text: "sever is busy, try latter.",
+                        taskId: "",
+                        action: "NONE",
+                    });
+                    return;
+                }
+                this.concurrentNum++;
+                const agentId = req.params.agentId;
+                const username = req.body.userId ?? "user";
+                const userId = stringToUuid(username);
+                const roomId = stringToUuid("default-data-room-" + username);
+
+                let runtime = this.agents.get(agentId);
+
+                // if runtime is null, look for runtime with the same name
+                if (!runtime) {
+                    runtime = Array.from(this.agents.values()).find(
+                        (a) =>
+                            a.character.name.toLowerCase() ===
+                            agentId.toLowerCase()
+                    );
+                }
+
+                if (!runtime) {
+                    res.status(404).send("Agent not found");
+                    return;
+                }
+
+                await runtime.ensureConnection(
+                    userId,
+                    roomId,
+                    req.body.userName,
+                    req.body.name,
+                    "direct"
+                );
+
+                const originQuestingText = req.body.text;
+                let taskId = req.body.taskId;
+                const origin_input = req.body.origin_input;
+                const messageId = stringToUuid(userId + Date.now().toString());
+
+                const content: Content = {
+                    text: originQuestingText,
+                    intention: {
+                        taskId
+                    },
+                    // attachments,
+                    attachments: [],
+                    source: "direct",
+                    inReplyTo: undefined,
+                };
+
+                const userMessage = {
+                    content,
+                    userId,
+                    roomId,
+                    agentId: runtime.agentId,
+                };
+
+                const memory: Memory = {
+                    id: messageId,
+                    ...userMessage,
+                    agentId: runtime.agentId,
+                    userId,
+                    roomId,
+                    content,
+                    createdAt: Date.now(),
+                };
+
+                await runtime.messageManager.createMemory(memory);
+
+                let state = await runtime.composeState(userMessage, {
+                    agentName: runtime.character.name,
+                });
+
+                const responseStr = await IntentionHandler.handleDataProcess(runtime, memory, origin_input);
+                this.concurrentNum--;
+
+                const parsedContent: Content = {
+                    text: responseStr,
+                    // attachments,
+                    attachments: [],
+                    source: "direct",
+                    inReplyTo: messageId,
+                };
+
+                if (!parsedContent) {
+                    res.status(500).send(
+                        "No response from generateMessageResponse"
+                    );
+                    return;
+                }
+
+                // save response to memory
+                const responseMessage: Memory = {
+                    id: messageId,
+                    ...userMessage,
+                    userId: userId,
+                    content: parsedContent,
+                    embedding: getEmbeddingZeroVector(),
+                    createdAt: Date.now(),
+                };
+
+                await runtime.messageManager.createMemory(responseMessage);
+
+                state = await runtime.updateRecentMessageState(state);
+                res.json({
+                    user: "Data3",
+                    text: responseStr,
+                    taskId,
+                    action: "NONE",
+                });
+            }
+        );
+
+        this.app.post(
             "/:agentId/message",
             upload.single("file"),
             async (req: express.Request, res: express.Response) => {
@@ -422,11 +546,12 @@ export class DirectClient {
                 //     template: messageHandlerTemplate,
                 // });
 
-                const responseStr = await this.handleMessageWithAI(
-                    runtime,
-                    withPreContext,
-                    memory
-                );
+                //const responseStr = await this.handleMessageWithAI(
+                //    runtime,
+                //    withPreContext,
+                //    memory
+                //);
+                const responseStr = await IntentionHandler.handleDataCollect(runtime, memory);
                 this.concurrentNum--;
 
                 // const parsedContent = parseJSONObjectFromText(
