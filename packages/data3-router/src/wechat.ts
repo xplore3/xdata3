@@ -305,16 +305,19 @@ export class WechatHandler {
                         });
 
                         try {
-                            let immResp = "...";
-                            if (firstText.length < 20) {
-                                immResp = await this.generateQuickResponse(runtime, firstText, userId);
+                            const taskId = await this.getCachedData<string>(runtime, userId);
+                            if (!taskId) {
+                                let immResp = "...";
+                                if (firstText.length < 10) {
+                                    immResp = await this.generateQuickResponse(runtime, firstText, userId);
+                                }
+                                else {
+                                    const lang = this.detectLanguage(firstText);
+                                    immResp = this.getFirstResponse(lang);
+                                }
+                                await this.sendMessage(userId,
+                                    decryptedXml.xml.OpenKfId, immResp);
                             }
-                            else {
-                                const lang = this.detectLanguage(firstText);
-                                immResp = this.getFirstResponse(lang);
-                            }
-                            await this.sendMessage(userId,
-                                decryptedXml.xml.OpenKfId, immResp);
                             const questionAfter = await this.generateResponseByData3(
                                 runtime, userId, firstText);
                             await this.sendMessage(userId,
@@ -617,7 +620,12 @@ export class WechatHandler {
 
     private async generateQuickResponse(runtime: IAgentRuntime, text: string, userId: string) {
         try {
-            const prompt = `根据用户的输入内容：【${text}】，快速给出一个同种语言的简短回复，只给出结果就可以`;
+            //const taskId = await this.getCachedData<string>(runtime, userId);
+            //if (taskId && taskId != '') {
+            //    return null;
+            //}
+
+            const prompt = `根据用户的输入内容：【${text}】，快速给出一个同种语言的打招呼类简短回复，不需要进行推理，只给出结果就可以。`;
             let resp = await generateText({
                 runtime,
                 context: await this.client.composePrompt(runtime, prompt, stringToUuid(userId)),
