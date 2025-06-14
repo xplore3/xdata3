@@ -664,15 +664,20 @@ class APIWrapperFactory {
                                     },
                                 }
                             );
+                        } catch(error) { console.log(`note_search get url 1 `, error.message); }
+                        try{
 
-                            if (response.data?.code != 0) {
+                            if (response?.data?.code != 0) {
                                 const url1 = `http://47.117.133.51:30015/api/xiaohongshu/search-note/v2?token=QdQU3VTR&keyword=${keyword}&page=${mPage}&sort=${sort}&noteType=_0&noteTime`;
                                 console.log(
                                     `executeRequest url by params: ${url1}`
                                 );
                                 response = await axios.get(url1);
                             }
-                            if (response.data?.code != 0) {
+                        } catch(error) { console.log(`note_search get url 2 `, error.message); }
+
+                        try{
+                            if (response?.data?.code != 0) {
                                 const url2 = `http://47.120.60.92:8080/api/search?keyword=${keyword}&page=${mPage}&sort=${sort}`;
                                 console.log(
                                     `executeRequest url by params: ${url2}`
@@ -693,7 +698,7 @@ class APIWrapperFactory {
                             }
                         } catch (e) {
                             console.error(
-                                "Failed to request http api, e: ",
+                                "note_search get url 3 ",
                                 e.message
                             );
                             continue;
@@ -953,7 +958,7 @@ class APIWrapperFactory {
                     console.error("Error fetching data:", error.message);
                 }
                 break;
-            case "search_user_list":
+            case "users_search":
                 try {
                     const keyword =
                         obj?.params?.keyword ||

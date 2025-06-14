@@ -27,7 +27,7 @@
                     "description": "The API is querying user's personal infomation(profile/资料) list on 小红书(RedNote).",
                     "input": "Parameters: keyword (search user's name). This 'totalItemCount' field indicates how many data items the user wants to obtain.",
                    "output": "user's personal infomation(profile/资料) array list, (user_id,user_name,user_desc,official_verified,user_sub_title,user_avatar,live_room_id,live_has_goods,)",
-                    "route": "search_user_list",
+                    "route": "users_search",
                     "params": "{'keyword': 'keyword', totalItemCount: 10}",
                     "additional": ""
                 },
