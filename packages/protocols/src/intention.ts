@@ -76,7 +76,7 @@ export class IntentionHandler {
           "request_count": 100,
           "filter_desc": "the description of the data filter"
         }],
-        "intention_options": ["使用数据的意图1", "使用数据的意图2", "others"],
+        "intention_options": ["使用数据的意图1", "使用数据的意图2", "......"],
       }
       输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
       data_action的可选项是各个可用的API列表my_data_source中的关键字，如果不在这个列表里，输出为others
@@ -106,15 +106,19 @@ export class IntentionHandler {
           if (execParam.data_action && execParam.data_action != 'others') {
             const { result, csvfileurl } = await APIWrapperFactory.executeRequest(
               runtime, execParam, message);
-            const filename = taskId + "_data.txt";
-            appendToChatCache(result, filename, (err) => {
-              console.error("Custom error handling:", err);
-            });
+            //const filename = taskId + "_raw_data1.txt";
+            //appendToChatCache(result, filename, (err) => {
+            //  console.error("Custom error handling:", err);
+            //});
           }
         }
         execJson.data_result = "";
         execJson.data_result += getDynamicTail(taskId);
       }
+      else {
+        execJson = response;
+      }
+      execJson.taskId = taskId;
       return execJson;
     } catch (err) {
       console.log(err);
@@ -136,23 +140,23 @@ export class IntentionHandler {
     const prompt = `
       你是一个数据处理专家，能根据输入的多个结构的数据/文件进行加工、处理、分析、预测的专家，能够基于用户的多轮输入，将数据处理成用户需要的结果。
       主要有如下一些情况：
-      (1). 如果用户的需求不是一个数据处理的需求，而是一个数据获取的需求，则给出如下结果：
+      (1). 根据用户要求和附带的数据，如果能够直接给出处理结果，则输出Markdown形式的分析结果。优先以这种情况进行处理。
+      (2). 如果用户的需求不是一个数据处理的需求，而是一个数据获取的需求，则给出如下结果：
         {
           "intention_action": "data_collection",
           "origin_input": "${origin_input}",
           "intention_desc": "${message.content.text}",
           "attachment": "{attachment}",
         }.
-      (2). 如果需求比较模糊，则可以给出可供选择的一些选项，让用户进行二次选择，以明确其需求。这种情况的输出为一个可解析的JSON结果，如下：
+      (3). 如果需求比较模糊，则可以给出可供选择的一些选项，让用户进行二次选择，以明确其需求。这种情况的输出为一个可解析的JSON结果，如下：
         {
           "question_description": "相关的描述",
           "intention_options": ["进一步的意图1", "进一步的意图2", "......"],
           "taskId": "${taskId}"
           ......
         }
-      (3). 如果用户的需求比较复杂，当前的数据无法满足处理的需求，则需要告知用户缺少什么数据导致无法给出理想结果，并给出intention_options让用户决定是否进一步获取数据。输出结构同(2).
-      (4). 如果用户的输入里，既不包含数据获取需求，也没有明确的数据处理意图，也无其他意图，则参考最近的消息，给出相关的意图选项。输出结构同(2).
-      (5). 如果能够直接给出处理结果，则输出问Markdown形式的文字。
+      (4). 如果用户的需求比较复杂，当前的数据无法满足处理的需求，则需要告知用户缺少什么数据导致无法给出理想结果，并给出intention_options让用户决定是否进一步获取数据。输出结构同(3).
+      (5). 如果用户的输入里，既不包含数据获取需求，也没有明确的数据处理意图，也无其他意图，则参考最近的消息，给出相关的意图选项。输出结构同(3).
       -----------------------------
       用户需求：${message.content.text}, 前置描述：${origin_input}.
       待处理数据内容：${attachment}
@@ -439,7 +443,7 @@ export class IntentionHandler {
     );
   }
 
-  static async getTaskAttachment(taskId: string) {
+  static getTaskAttachment(taskId: string) {
     let attachment = readCacheFile(taskId + "_data.txt");
     if (!attachment || attachment.length < 1) {
       attachment = readCacheFile(taskId + "_raw_data.txt");

@@ -295,7 +295,7 @@ export class DirectClient {
         );
 
         this.app.post(
-            "/:agentId/commond",
+            "/:agentId/data_process",
             upload.single("file"),
             async (req: express.Request, res: express.Response) => {
                 const maxNum = 1;

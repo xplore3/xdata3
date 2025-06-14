@@ -40,7 +40,8 @@ class APIWrapperFactory {
         let lastResultLength = -1;
         let resuntNotUpdateNumber = 0;
         let response;
-        switch (obj.route) {
+        let route = obj.route || obj.data_action;
+        switch (route) {
             case "get_user":
                 console.log(`get_user params: ${JSON.stringify(obj)}`);
                 const userId = obj?.params?.userId;
