@@ -35,7 +35,7 @@ class APIWrapperFactory {
         // {"route": "notes_search","params": {"key1": "v1","key2": "v2"}}
         console.log(`executeRequest params: ${JSON.stringify(obj)}`);
         const taskId = message.content.intention?.taskId || "";
-        const totalItemCount = obj?.params?.totalItemCount || 500;
+        const totalItemCount = obj?.params?.totalItemCount || obj?.request_count || 500;
         let result = [];
         let lastResultLength = -1;
         let resuntNotUpdateNumber = 0;
@@ -610,6 +610,11 @@ class APIWrapperFactory {
                         obj?.params?.key1 ||
                         obj?.params?.product ||
                         obj?.params?.query ||
+                        obj?.keyword ||
+                        obj?.keywords ||
+                        obj?.key1 ||
+                        obj?.product ||
+                        obj?.query ||
                         "";
                     const page = obj?.params?.page || 1;
                     // Get more data.
