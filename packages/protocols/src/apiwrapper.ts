@@ -942,7 +942,7 @@ class APIWrapperFactory {
                     console.error("Error fetching data:", error.message);
                 }
                 break;
-            case "users_search":
+            case "search_user_list":
                 try {
                     const keyword = obj?.params?.keyword || "";
                     const maxPageNum = 5;
@@ -996,18 +996,19 @@ class APIWrapperFactory {
                             tempResult = response.data?.data?.users
                                 .filter((user) => user != null)
                                 .map((user) => ({
-                                    id: user.id,
-                                    name: user.name,
-                                    desc: user.desc,
+                                    user_id: user.id,
+                                    user_name: user.name,
+                                    user_desc: user.desc,
                                     official_verified:
                                         user.red_official_verified,
-                                    sub_title: user.sub_title,
-                                    avatar: user.image,
+                                    user_sub_title: user.sub_title,
+                                    user_avatar: user.image,
                                     live_room_id: user.live?.room_id,
                                     live_has_goods: user.live?.has_goods,
                                 }));
                             // Test log case:
-                            // console.log('Sample live object:', response.data.data.users.length);
+                            console.log("tempResult[0]: ", tempResult[0]);
+                            // console.log('users len:', response.data.data.users.length);
                             // console.log("results: ", results[0]);
                         } catch (error) {
                             console.error(error);
