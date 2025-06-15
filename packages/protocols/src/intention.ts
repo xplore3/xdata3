@@ -82,6 +82,7 @@ export class IntentionHandler {
         "intention_options": ["使用数据的意图1", "使用数据的意图2", "......"],
       }
       输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
+      intention_params是一个数组，如果不能通过一种操作获得需要的数据，则需要是多个。
       data_result不要包含API/接口字样，需要使用非开发人员能够理解的语言。
       data_action的可选项是各个可用的API列表my_data_source中的关键字，如果不在这个列表里，输出为others。
       intenton_options是根据用户输入而得出的选项，以用户明确输入的选项为优先，
@@ -499,7 +500,7 @@ export class IntentionHandler {
       //'hot_words: 用以获得近期火热的热词等',
       //'hot_topics: 用以获得近期火热的话题/种类等',
       'notes_comment_by_next_page: 用以通过单个笔记/帖子的ID获取其评论列表',
-      'fetch_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表和评论列表',
+      'fetch_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表，然后再获得这些笔记的评论列表；该操作能获得笔记和评论两种数据',
       'get_note_list: 用以通过单个小红书账号ID获取该账号的笔记/帖子的列表'
     ];
     return sources;
