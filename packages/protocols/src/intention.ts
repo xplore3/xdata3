@@ -107,18 +107,22 @@ export class IntentionHandler {
       }
       const txtfilelist = [];
       const excelfilelist = [];
+      const results = [];
       const taskId = message.content.intention?.taskId || "";
       if (execJson && execJson.intention_params && execJson.intention_params.length > 0) {
         for (const execParam of execJson.intention_params) {
           if (execParam.data_action && execParam.data_action != 'others') {
             const {result, txtfilename, excelfilename} = await APIWrapperFactory.executeRequest(
               runtime, execParam, message);
-              if(txtfilename) {
-                  txtfilelist.push(txtfilename);
-              }
-              if(excelfilename) {
-                  excelfilelist.push(excelfilename);
-              }
+            if (result && result.length > 0) {
+              results.push(result);
+            }
+            if (txtfilename) {
+              txtfilelist.push(txtfilename);
+            }
+            if (excelfilename) {
+              excelfilelist.push(excelfilename);
+            }
             //const filename = taskId + "_raw_data1.txt";
             //appendToChatCache(result, filename, (err) => {
             //  console.error("Custom error handling:", err);
@@ -127,7 +131,13 @@ export class IntentionHandler {
         }
         // execJson.data_result = "";
         // execJson.data_result += getDynamicTail(taskId);
-        execJson.data_result += getDynamicTail(txtfilelist, excelfilelist);
+        if (results.length > 0 && txtfilelist.length > 0) {
+          execJson.data_result += getDynamicTail(txtfilelist, excelfilelist);
+        }
+        else {
+          execJson.data_result = "哎呀，这个数据源我暂时无法获取，你可以稍后重试，或回复【人工】联系工程师帮你添加支持~";
+          execJson.intention_options = [];
+        }
         execJson.taskId = taskId;
       }
       else if (execJson) {
