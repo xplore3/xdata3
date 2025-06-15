@@ -113,8 +113,12 @@ export class IntentionHandler {
           if (execParam.data_action && execParam.data_action != 'others') {
             const {result, txtfilename, excelfilename} = await APIWrapperFactory.executeRequest(
               runtime, execParam, message);
-              txtfilelist.push(txtfilename);
-              excelfilelist.push(excelfilename);
+              if(txtfilename) {
+                  txtfilelist.push(txtfilename);
+              }
+              if(excelfilename) {
+                  excelfilelist.push(excelfilename);
+              }
             //const filename = taskId + "_raw_data1.txt";
             //appendToChatCache(result, filename, (err) => {
             //  console.error("Custom error handling:", err);
