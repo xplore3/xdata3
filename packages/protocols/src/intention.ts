@@ -103,24 +103,29 @@ export class IntentionHandler {
       catch (err) {
         console.log(err);
       }
+      const txtfilelist = [];
+      const excelfilelist = [];
       const taskId = message.content.intention?.taskId || "";
       if (execJson && execJson.intention_params) {
         for (const execParam of execJson.intention_params) {
           if (execParam.data_action && execParam.data_action != 'others') {
-            const { result, csvfileurl } = await APIWrapperFactory.executeRequest(
+            const {result, txtfilename, excelfilename} = await APIWrapperFactory.executeRequest(
               runtime, execParam, message);
+              txtfilelist.push(txtfilename);
+              excelfilelist.push(excelfilename);
             //const filename = taskId + "_raw_data1.txt";
             //appendToChatCache(result, filename, (err) => {
             //  console.error("Custom error handling:", err);
             //});
           }
         }
-        execJson.data_result = "";
-        execJson.data_result += getDynamicTail(taskId);
+        // execJson.data_result = "";
+        // execJson.data_result += getDynamicTail(taskId);
       }
       else {
         execJson = response;
       }
+      execJson.data_result += getDynamicTail(txtfilelist, excelfilelist);
       execJson.taskId = taskId;
       return execJson;
     } catch (err) {

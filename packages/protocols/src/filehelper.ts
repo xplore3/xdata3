@@ -72,36 +72,44 @@ export function updateCacheText(content: string, filename: string, onError?: (er
     });
 }
 
-export function getDynamicTail(taskId: string) {
+export function getDynamicTail(textFileList, excelFileList) {
     const textFilePaths = [];
     const excelFilePaths = [];
-    for (let i = 1; i <= 10; i++) {
-        const filenametxt = taskId + `_raw_data${i}.txt`;
-        const filenamexlsx = taskId + `_raw_data${i}.xlsx`;
+    const prefix = "https://data3.site/media/files/";
 
-        // const filename = 'abc.pdf'; // Test: can also download pdf.
-        const filePathtxt = path.join(
-            process.cwd(), // /root/xdata3/data3-agent/data/Task-111111_report1.txt
-            "files",
-            filenametxt
-        );
-        if (fs.existsSync(filePathtxt)) {
-            //
-            const url = `https://data3.site/media/files/${filenametxt}`;
-            textFilePaths.push(url);
-        }
-        // const filename = 'abc.pdf'; // Test: can also download pdf.
-        const filePathxlsx = path.join(
-            process.cwd(), // /root/xdata3/data3-agent/data/Task-111111_report1.txt
-            "files",
-            filenamexlsx
-        );
-        if (fs.existsSync(filePathxlsx)) {
-            //
-            const url = `https://data3.site/media/files/${filenamexlsx}`;
-            excelFilePaths.push(url);
-        }
+    for (let i = 0; i < textFileList.length; i++) {
+        textFilePaths.push( prefix + textFileList[i]);
     }
+    for (let i = 0; i < excelFileList.length; i++) {
+        excelFilePaths.push( prefix + excelFileList[i]);
+    }
+    // for (let i = 1; i <= 10; i++) {
+    //     const filenametxt = taskId + `_raw_data${i}.txt`;
+    //     const filenamexlsx = taskId + `_raw_data${i}.xlsx`;
+
+    //     // const filename = 'abc.pdf'; // Test: can also download pdf.
+    //     const filePathtxt = path.join(
+    //         process.cwd(), // /root/xdata3/data3-agent/data/Task-111111_report1.txt
+    //         "files",
+    //         filenametxt
+    //     );
+    //     if (fs.existsSync(filePathtxt)) {
+    //         //
+    //         const url = `https://data3.site/media/files/${filenametxt}`;
+    //         textFilePaths.push(url);
+    //     }
+    //     // const filename = 'abc.pdf'; // Test: can also download pdf.
+    //     const filePathxlsx = path.join(
+    //         process.cwd(), // /root/xdata3/data3-agent/data/Task-111111_report1.txt
+    //         "files",
+    //         filenamexlsx
+    //     );
+    //     if (fs.existsSync(filePathxlsx)) {
+    //         //
+    //         const url = `https://data3.site/media/files/${filenamexlsx}`;
+    //         excelFilePaths.push(url);
+    //     }
+    // }
     let dynamicTail = "";
     if (textFilePaths.length > 0 || excelFilePaths.length > 0) {
         dynamicTail += "\n数据下载:";

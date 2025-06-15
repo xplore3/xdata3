@@ -1061,12 +1061,16 @@ class APIWrapperFactory {
         // console.log(`executeRequest result: ${JSON.stringify(result)}`);
         // const csvRes = await APIWrapperFactory.convertToCSV(result);
         let csvfileurl = "";
+        let txtfilename;
+        let excelfilename;
         if (result?.length > 0) {
-            csvfileurl = APIWrapperFactory.excelDataPersist(result, taskId);
+            const {firstUnExistsTxtFilename, firstUnExistsExcelFilename} = APIWrapperFactory.excelDataPersist(result, taskId);
+            txtfilename = firstUnExistsTxtFilename;
+            excelfilename = firstUnExistsExcelFilename;
         }
         console.log(`executeRequest result len: ${result.length}`);
         console.log(`executeRequest csvfileurl: ${csvfileurl}`);
-        return { result, csvfileurl };
+        return { result,  txtfilename, excelfilename};
     }
 
     public static excelDataPersist(result: any, taskId: any) {
@@ -1095,11 +1099,12 @@ class APIWrapperFactory {
         updateCacheText(responseFinal, firstUnExistsTxtFilename, (err) => {
             console.error("Failed to write file:", err);
         });
-        return `\n\n数据下载: 
-\n1. 文本 txt 数据，方便把 URL 复制到 AI 中进行分析。
-    \nhttps://data3.site/media/files/${firstUnExistsTxtFilename}
-\n2. excel 数据，格式优美，方便阅读。
-    \nhttps://data3.site/media/files/${firstUnExistsExcelFilename}`;
+//         return `\n\n数据下载: 
+// \n1. 文本 txt 数据，方便把 URL 复制到 AI 中进行分析。
+//     \nhttps://data3.site/media/files/${firstUnExistsTxtFilename}
+// \n2. excel 数据，格式优美，方便阅读。
+//     \nhttps://data3.site/media/files/${firstUnExistsExcelFilename}`;
+        return {firstUnExistsTxtFilename, firstUnExistsExcelFilename};
         //return `http://97.64.21.158:3333/media/files/${firstUnExistsFilename}`;
     }
 
