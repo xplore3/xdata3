@@ -83,7 +83,7 @@ export class IntentionHandler {
       }
       输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
       data_action的可选项是各个可用的API列表my_data_source中的关键字，如果不在这个列表里，输出为others
-      intenton_options的根据用户输入得出的文字选项，其选项数量可以从1个到5个，其常用示例如下：
+      intenton_options是根据用户输入而得出的选项，以用户明确输入的选项为优先，其数量约为1~5个，其常用示例如下：
       【${intention_examples}】；
       -----------------------------
     `;
@@ -106,7 +106,7 @@ export class IntentionHandler {
       const txtfilelist = [];
       const excelfilelist = [];
       const taskId = message.content.intention?.taskId || "";
-      if (execJson && execJson.intention_params) {
+      if (execJson && execJson.intention_params && execJson.intention_params.length > 0) {
         for (const execParam of execJson.intention_params) {
           if (execParam.data_action && execParam.data_action != 'others') {
             const {result, txtfilename, excelfilename} = await APIWrapperFactory.executeRequest(
@@ -121,11 +121,12 @@ export class IntentionHandler {
         }
         // execJson.data_result = "";
         // execJson.data_result += getDynamicTail(taskId);
+        execJson.data_result += getDynamicTail(txtfilelist, excelfilelist);
       }
       else {
         execJson = response;
       }
-      execJson.data_result += getDynamicTail(txtfilelist, excelfilelist);
+      //execJson.data_result += getDynamicTail(txtfilelist, excelfilelist);
       execJson.taskId = taskId;
       return execJson;
     } catch (err) {
