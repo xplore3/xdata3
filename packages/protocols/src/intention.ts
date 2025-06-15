@@ -122,12 +122,14 @@ export class IntentionHandler {
         // execJson.data_result = "";
         // execJson.data_result += getDynamicTail(taskId);
         execJson.data_result += getDynamicTail(txtfilelist, excelfilelist);
+        execJson.taskId = taskId;
+      }
+      else if (execJson) {
+        execJson.taskId = taskId;
       }
       else {
         execJson = response;
       }
-      //execJson.data_result += getDynamicTail(txtfilelist, excelfilelist);
-      execJson.taskId = taskId;
       return execJson;
     } catch (err) {
       console.log(err);
