@@ -14,6 +14,7 @@ import {
   appendToChatCache,
 } from "./filehelper";
 import APIWrapperFactory from "./apiwrapper";
+import { extractJson } from "./utils"
 
 
 export const dataHandlerTemplate = `
@@ -98,19 +99,7 @@ export class IntentionHandler {
       });
       console.log(response);
       //response = response.replace(/```json/g, "") .replace(/```/g, "");
-      const jsonRegex = /^```(?:json)?\s*([\s\S]*?)^```$/gm;
-      const match = jsonRegex.exec(response);
-      if (!match || !match[1]) {
-        return response;
-      }
-      let execJson = response;
-      try {
-        execJson = JSON.parse(match[1]);
-        console.log(execJson);
-      }
-      catch (err) {
-        console.log(err);
-      }
+      let execJson = extractJson(response);
       const txtfilelist = [];
       const excelfilelist = [];
       const results = [];
@@ -205,19 +194,7 @@ export class IntentionHandler {
       });
       console.log(response);
       //response = response.replace(/```json/g, "") .replace(/```/g, "");
-      const jsonRegex = /^```(?:json)?\s*([\s\S]*?)^```$/gm;
-      const match = jsonRegex.exec(response);
-      if (!match || !match[1]) {
-        return response;
-      }
-      let execJson = null;
-      try {
-        execJson = JSON.parse(match[1]);
-        console.log(execJson);
-      }
-      catch (err) {
-        console.log(err);
-      }
+      let execJson = extractJson(response);
       if (execJson) {
         if (execJson.intention_action && execJson.intention_action === "data_collection") {
           return await IntentionHandler.handleDataCollect(
