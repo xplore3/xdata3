@@ -97,10 +97,15 @@ export class IntentionHandler {
         modelClass: ModelClass.LARGE,
       });
       console.log(response);
-      response = response.replace(/```json/g, "") .replace(/```/g, "");
-      let execJson = null;
+      //response = response.replace(/```json/g, "") .replace(/```/g, "");
+      const jsonRegex = /^```(?:json)?\s*([\s\S]*?)^```$/gm;
+      const match = jsonRegex.exec(response);
+      if (!match || !match[1]) {
+        return response;
+      }
+      let execJson = response;
       try {
-        execJson = JSON.parse(response);
+        execJson = JSON.parse(match[1]);
         console.log(execJson);
       }
       catch (err) {
@@ -199,10 +204,15 @@ export class IntentionHandler {
         modelClass: ModelClass.LARGE,
       });
       console.log(response);
-      response = response.replace(/```json/g, "") .replace(/```/g, "");
+      //response = response.replace(/```json/g, "") .replace(/```/g, "");
+      const jsonRegex = /^```(?:json)?\s*([\s\S]*?)^```$/gm;
+      const match = jsonRegex.exec(response);
+      if (!match || !match[1]) {
+        return response;
+      }
       let execJson = null;
       try {
-        execJson = JSON.parse(response);
+        execJson = JSON.parse(match[1]);
         console.log(execJson);
       }
       catch (err) {
