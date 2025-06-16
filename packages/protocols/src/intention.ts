@@ -36,6 +36,7 @@ About {{agentName}}:
 {{recentMessages}}
 #####################################
 `;
+const TASK_DATA_CACHE_FILE = "_all_data.txt";
 
 export class IntentionHandler {
   runtime: IAgentRuntime = null;
@@ -111,11 +112,15 @@ export class IntentionHandler {
               runtime, execParam, message);
             if (result && result.length > 0) {
               results.push(result);
+              const filename = taskId + TASK_DATA_CACHE_FILE;
+              appendToChatCache(result, filename, (err) => {
+                console.error("Custom error handling:", err);
+              });
             }
             // console.log(`return after, len: ${result.length}, txt: ${txtfilename} , excel: ${excelfilename}`);  
             if (txtfilename) {
-              if(Array.isArray(txtfilename)) {
-                for(const item of txtfilename) {
+              if (Array.isArray(txtfilename)) {
+                for (const item of txtfilename) {
                   if (item)
                   txtfilelist.push(item);
                 }
@@ -124,8 +129,8 @@ export class IntentionHandler {
               }
             }
             if (excelfilename) {
-              if(Array.isArray(excelfilename)) {
-                for(const item of excelfilename) {
+              if (Array.isArray(excelfilename)) {
+                for (const item of excelfilename) {
                   if (item)
                   excelfilelist.push(item);
                 }
@@ -133,10 +138,6 @@ export class IntentionHandler {
                 excelfilelist.push(excelfilename);
               }
             }
-            //const filename = taskId + "_raw_data1.txt";
-            //appendToChatCache(result, filename, (err) => {
-            //  console.error("Custom error handling:", err);
-            //});
           }
         }
         // execJson.data_result = "";
@@ -477,7 +478,7 @@ export class IntentionHandler {
   }
 
   static getTaskAttachment(taskId: string) {
-    let attachment = readCacheFile(taskId + "_data.txt");
+    let attachment = readCacheFile(taskId + TASK_DATA_CACHE_FILE);
     if (!attachment || attachment.length < 1) {
       attachment = readCacheFile(taskId + "_raw_data.txt");
       if (!attachment || attachment.length < 1) {
