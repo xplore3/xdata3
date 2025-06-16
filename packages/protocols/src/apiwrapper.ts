@@ -717,7 +717,7 @@ class APIWrapperFactory {
                             continue;
                         }
 
-                        tempResult = (response.data?.data?.items || []).map(
+                        /*tempResult = (response.data?.data?.items || []).map(
                             (obj) => ({
                                 author: obj?.note?.user?.nickname || "unknown",
                                 collected_count:
@@ -730,7 +730,7 @@ class APIWrapperFactory {
                                 desc: obj?.note?.desc || "",
                                 timestamp: obj?.note?.timestamp || 0,
                             })
-                        ); /*
+                        ); */
                         if (extractPath === null || filterPath === null) {
                             const items = response.data?.data?.items;
                             if (items && items.length > 0) {
@@ -780,11 +780,11 @@ class APIWrapperFactory {
                                     timestamp: obj?.note?.timestamp || 0,
                                 })
                             );
-                        }*/
+                        }
                         console.log(
                             `${JSON.stringify(
                                 tempResult
-                            )}\n------------------------json code---------------------\n`
+                            )}\n------------------------jsonata---------------------\n`
                         );
                         result = result.concat(tempResult);
                         console.log(`executeRequest result: ${result.length}`);
