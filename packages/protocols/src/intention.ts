@@ -52,7 +52,7 @@ export class IntentionHandler {
     runtime: IAgentRuntime,
     message: Memory
   ): Promise<string> {
-    const intention_examples = IntentionHandler.getIntentionExamples();
+    const intention_examples = IntentionHandler.getMyIntentionExamples(message.userId);
     console.log(intention_examples);
     const my_data_platform = IntentionHandler.getMyDataPlatform(message.userId);
     const my_data_source = IntentionHandler.getMyDataSource(message.userId);
@@ -488,13 +488,14 @@ export class IntentionHandler {
       //'hot_words: 用以获得近期火热的热词等',
       //'hot_topics: 用以获得近期火热的话题/种类等',
       'notes_comment_by_next_page: 用以通过单个笔记/帖子的ID获取其评论列表',
-      'fetch_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表，然后再获得这些笔记的评论列表；该操作能获得笔记和评论两种数据',
+      'fetch_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note id列表，然后再获得这些笔记的评论列表；该操作能获得评论这一种数据',
+      'fetch_notes_and_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表，然后再获得这些笔记的评论列表；该操作能获得笔记和评论两种数据',
       'get_note_list: 用以通过单个小红书账号ID获取该账号的笔记/帖子的列表'
     ];
     return sources;
   }
 
-  static getIntentionExamples() {
+  static getMyIntentionExamples(userId: UUID) {
     const intentionNote = [
       '1. 分析这些爆文是怎样的结构',
       '2. 分析这些爆文的标题是怎么写的',
