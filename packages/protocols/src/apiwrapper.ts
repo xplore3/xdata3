@@ -1155,10 +1155,8 @@ class APIWrapperFactory {
                         totalCommentCount
                     );
                     tempResultNotes = tempResultNotes.slice(0, totalItemCount);
-                    result.concat(tempResultNotes);
-                    result.concat(tempResultComments);
                     console.log(
-                        `executeRequest result, after cut.: ${result?.length}`
+                        `executeRequest result, tempResultNotes after cut.: ${tempResultNotes?.length}`
                     );
                 } catch (error) {
                     console.error("Error fetching data:", error.message);
@@ -1201,9 +1199,13 @@ class APIWrapperFactory {
                 console.log(
                     `executeRequest txtfilename: ${txtfilename2} ,  excelfilename: ${excelfilename2} `
                 );
-                const textlist = [txtfilename1, txtfilename2];
-                const excellist = [excelfilename1, excelfilename2];
-                return { result, textlist, excellist };
+                // const {result, txtfilename, excelfilename} = await APIWrapperFactory.executeRequest(
+                const txtfilename = [txtfilename1, txtfilename2];
+                const excelfilename = [excelfilename1, excelfilename2];
+                result = result.concat(tempResultNotes);
+                result = result.concat(tempResultComments);
+                // console.log("return before: " + (JSON.stringify( { result, txtfilename, excelfilename }) ) );
+                return { result, txtfilename, excelfilename };
 
             case "users_search":
                 try {

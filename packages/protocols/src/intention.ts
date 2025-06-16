@@ -112,6 +112,7 @@ export class IntentionHandler {
             if (result && result.length > 0) {
               results.push(result);
             }
+            // console.log(`return after, len: ${result.length}, txt: ${txtfilename} , excel: ${excelfilename}`);  
             if (txtfilename) {
               if(Array.isArray(txtfilename)) {
                 for(const item of txtfilename) {
