@@ -35,7 +35,8 @@ class APIWrapperFactory {
         // {"route": "notes_search","params": {"key1": "v1","key2": "v2"}}
         console.log(`executeRequest params: ${JSON.stringify(obj)}`);
         const taskId = message.content.intention?.taskId || "";
-        const totalItemCount = obj?.params?.totalItemCount || obj?.request_count || 500;
+        const totalItemCount =
+            obj?.params?.totalItemCount || obj?.request_count || 500;
         let result = [];
         let lastResultLength = -1;
         let resuntNotUpdateNumber = 0;
@@ -189,50 +190,53 @@ class APIWrapperFactory {
                             resuntNotUpdateNumber = 0;
                         }
                         lastResultLength = result.length;
-                        try{
-                        response = await axios.post(
-                            "https://gw.newrank.cn/api/xhsv2/nr/app/xh/v2/rank/hotWordHotList",
-                            {
-                                typeV1: "",
-                                typeV2: "",
-                                rankType: "day",
-                                rankDate: getHotDate() || "2025-06-07",
-                                recentType: "",
-                                size: 20,
-                                start: page,
-                                isNew: "",
-                                isBoom: "",
-                                sort: "hot_score",
-                            },
-                            {
-                                headers: {
-                                    Accept: "*/*",
-                                    "Accept-Language":
-                                        "zh-CN,zh;q=0.9,en;q=0.8",
-                                    Connection: "keep-alive",
-                                    Origin: "https://xh.newrank.cn",
-                                    Referer: "https://xh.newrank.cn/",
-                                    "Sec-Fetch-Dest": "empty",
-                                    "Sec-Fetch-Mode": "cors",
-                                    "Sec-Fetch-Site": "same-site",
-                                    "User-Agent":
-                                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
-                                    "content-type": "application/json",
-                                    "n-token":
-                                        "35c430ef650b459ba2b9c1409148d929",
-                                    request_id:
-                                        "c223bbc2a76140a7818271ea7abf1246",
-                                    "sec-ch-ua":
-                                        '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
-                                    "sec-ch-ua-mobile": "?0",
-                                    "sec-ch-ua-platform": '"Windows"',
-                                    Cookie: "tfstk=gTxnMOGrRe7IM6RY9CSIo3eA28gOAJs5kQERwgCr715_wQpyeuVyEQbRvLlBrCjBXeER9XskUIIoMjnxDp9CAglxMvu71SIVH_WUw6rwQgBoJ0tqMp9CVR90-rBed8j7VkJP4QSN7tX54yrPaAbNHTSzYarU7551UgSP8TPa7t6VU95P4AvN1TSPaQSr9NZPi3-6bfTQWZJWjItGKwf2IVZ8VyWUMs9FOurPt9bhSp5g4u-MrwvbL6ubB_sdOLWHNmZCYaYyvG-E_0S2lCxlui0-divMWEQHSXrl6HLMjMKENr99I_Rl4eM7_ddAtESBe8GwIZvyVN8EskvCjttPu3Vn6_LvBH7MgfEMNaYyvG-E_mjrPPzVSxr5QYKaPz_FCOfAijAkA_Y1lLkiIrgC8O6KMADgPW7FCOXiIA44VwW1L8C..; Hm_lvt_a19fd7224d30e3c8a6558dcb38c4beed=1747811125; token=183E6D980ED848C7B8C939C2C66B0C1C; acw_tc=0a472f8317494476720786894e005821b1dc5e91c7ecca2f5be57a5affb102; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22nr_my2b9az6y%22%2C%22first_id%22%3A%2219641461076860-0e9b6d1278a91f-26011c51-2073600-19641461077b29%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTk2NDE0NjEwNzY4NjAtMGU5YjZkMTI3OGE5MWYtMjYwMTFjNTEtMjA3MzYwMC0xOTY0MTQ2MTA3N2IyOSIsIiRpZGVudGl0eV9sb2dpbl9pZCI6Im5yX215MmI5YXo2eSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%24identity_login_id%22%2C%22value%22%3A%22nr_my2b9az6y%22%7D%2C%22%24device_id%22%3A%22196f248066721f-092e6c949d0a9b-26011f51-2073600-196f24806684c8%22%7D; auth_n=nNCldQK3Tdo4VBUZKOgQA9/QaFEzTDkUxVtzG4nSdcCLR2QbtXf8z/4qRrRJcDBz",
+                        try {
+                            response = await axios.post(
+                                "https://gw.newrank.cn/api/xhsv2/nr/app/xh/v2/rank/hotWordHotList",
+                                {
+                                    typeV1: "",
+                                    typeV2: "",
+                                    rankType: "day",
+                                    rankDate: getHotDate() || "2025-06-07",
+                                    recentType: "",
+                                    size: 20,
+                                    start: page,
+                                    isNew: "",
+                                    isBoom: "",
+                                    sort: "hot_score",
                                 },
-                            }
-                        );
-                        }catch (error) {
-                            console.error("Failed to fetch hot words:", error.message);
-                            continue
+                                {
+                                    headers: {
+                                        Accept: "*/*",
+                                        "Accept-Language":
+                                            "zh-CN,zh;q=0.9,en;q=0.8",
+                                        Connection: "keep-alive",
+                                        Origin: "https://xh.newrank.cn",
+                                        Referer: "https://xh.newrank.cn/",
+                                        "Sec-Fetch-Dest": "empty",
+                                        "Sec-Fetch-Mode": "cors",
+                                        "Sec-Fetch-Site": "same-site",
+                                        "User-Agent":
+                                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+                                        "content-type": "application/json",
+                                        "n-token":
+                                            "35c430ef650b459ba2b9c1409148d929",
+                                        request_id:
+                                            "c223bbc2a76140a7818271ea7abf1246",
+                                        "sec-ch-ua":
+                                            '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
+                                        "sec-ch-ua-mobile": "?0",
+                                        "sec-ch-ua-platform": '"Windows"',
+                                        Cookie: "tfstk=gTxnMOGrRe7IM6RY9CSIo3eA28gOAJs5kQERwgCr715_wQpyeuVyEQbRvLlBrCjBXeER9XskUIIoMjnxDp9CAglxMvu71SIVH_WUw6rwQgBoJ0tqMp9CVR90-rBed8j7VkJP4QSN7tX54yrPaAbNHTSzYarU7551UgSP8TPa7t6VU95P4AvN1TSPaQSr9NZPi3-6bfTQWZJWjItGKwf2IVZ8VyWUMs9FOurPt9bhSp5g4u-MrwvbL6ubB_sdOLWHNmZCYaYyvG-E_0S2lCxlui0-divMWEQHSXrl6HLMjMKENr99I_Rl4eM7_ddAtESBe8GwIZvyVN8EskvCjttPu3Vn6_LvBH7MgfEMNaYyvG-E_mjrPPzVSxr5QYKaPz_FCOfAijAkA_Y1lLkiIrgC8O6KMADgPW7FCOXiIA44VwW1L8C..; Hm_lvt_a19fd7224d30e3c8a6558dcb38c4beed=1747811125; token=183E6D980ED848C7B8C939C2C66B0C1C; acw_tc=0a472f8317494476720786894e005821b1dc5e91c7ecca2f5be57a5affb102; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22nr_my2b9az6y%22%2C%22first_id%22%3A%2219641461076860-0e9b6d1278a91f-26011c51-2073600-19641461077b29%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTk2NDE0NjEwNzY4NjAtMGU5YjZkMTI3OGE5MWYtMjYwMTFjNTEtMjA3MzYwMC0xOTY0MTQ2MTA3N2IyOSIsIiRpZGVudGl0eV9sb2dpbl9pZCI6Im5yX215MmI5YXo2eSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%24identity_login_id%22%2C%22value%22%3A%22nr_my2b9az6y%22%7D%2C%22%24device_id%22%3A%22196f248066721f-092e6c949d0a9b-26011f51-2073600-196f24806684c8%22%7D; auth_n=nNCldQK3Tdo4VBUZKOgQA9/QaFEzTDkUxVtzG4nSdcCLR2QbtXf8z/4qRrRJcDBz",
+                                    },
+                                }
+                            );
+                        } catch (error) {
+                            console.error(
+                                "Failed to fetch hot words:",
+                                error.message
+                            );
+                            continue;
                         }
                         const tempresult = (
                             response.data?.data?.list || []
@@ -278,47 +282,50 @@ class APIWrapperFactory {
                         }
                         lastResultLength = result.length;
                         try {
-                        response = await axios.post(
-                            "https://gw.newrank.cn/api/xh/xdnphb/nr/app/xhs/rank/topicRank",
-                            {
-                                type: "\u5168\u90E8",
-                                topicSecondType: "",
-                                dateType: 1,
-                                rankDate: getHotDate() || "2025-06-07",
-                                isBrandTopic: "0",
-                                sort: "interactiveCount",
-                                size: 20,
-                                start: page,
-                            },
-                            {
-                                headers: {
-                                    Accept: "*/*",
-                                    "Accept-Language":
-                                        "zh-CN,zh;q=0.9,en;q=0.8",
-                                    Connection: "keep-alive",
-                                    Origin: "https://xh.newrank.cn",
-                                    Referer: "https://xh.newrank.cn/",
-                                    "Sec-Fetch-Dest": "empty",
-                                    "Sec-Fetch-Mode": "cors",
-                                    "Sec-Fetch-Site": "same-site",
-                                    "User-Agent":
-                                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
-                                    "content-type": "application/json",
-                                    "n-token":
-                                        "35c430ef650b459ba2b9c1409148d929",
-                                    request_id:
-                                        "c223bbc2a76140a7818271ea7abf1246",
-                                    "sec-ch-ua":
-                                        '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
-                                    "sec-ch-ua-mobile": "?0",
-                                    "sec-ch-ua-platform": '"Windows"',
-                                    Cookie: "tfstk=gTxnMOGrRe7IM6RY9CSIo3eA28gOAJs5kQERwgCr715_wQpyeuVyEQbRvLlBrCjBXeER9XskUIIoMjnxDp9CAglxMvu71SIVH_WUw6rwQgBoJ0tqMp9CVR90-rBed8j7VkJP4QSN7tX54yrPaAbNHTSzYarU7551UgSP8TPa7t6VU95P4AvN1TSPaQSr9NZPi3-6bfTQWZJWjItGKwf2IVZ8VyWUMs9FOurPt9bhSp5g4u-MrwvbL6ubB_sdOLWHNmZCYaYyvG-E_0S2lCxlui0-divMWEQHSXrl6HLMjMKENr99I_Rl4eM7_ddAtESBe8GwIZvyVN8EskvCjttPu3Vn6_LvBH7MgfEMNaYyvG-E_mjrPPzVSxr5QYKaPz_FCOfAijAkA_Y1lLkiIrgC8O6KMADgPW7FCOXiIA44VwW1L8C..; Hm_lvt_a19fd7224d30e3c8a6558dcb38c4beed=1747811125; token=183E6D980ED848C7B8C939C2C66B0C1C; acw_tc=0a472f8317494476720786894e005821b1dc5e91c7ecca2f5be57a5affb102; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22nr_my2b9az6y%22%2C%22first_id%22%3A%2219641461076860-0e9b6d1278a91f-26011c51-2073600-19641461077b29%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTk2NDE0NjEwNzY4NjAtMGU5YjZkMTI3OGE5MWYtMjYwMTFjNTEtMjA3MzYwMC0xOTY0MTQ2MTA3N2IyOSIsIiRpZGVudGl0eV9sb2dpbl9pZCI6Im5yX215MmI5YXo2eSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%24identity_login_id%22%2C%22value%22%3A%22nr_my2b9az6y%22%7D%2C%22%24device_id%22%3A%22196f248066721f-092e6c949d0a9b-26011f51-2073600-196f24806684c8%22%7D; auth_n=nNCldQK3Tdo4VBUZKOgQA9/QaFEzTDkUxVtzG4nSdcCLR2QbtXf8z/4qRrRJcDBz",
+                            response = await axios.post(
+                                "https://gw.newrank.cn/api/xh/xdnphb/nr/app/xhs/rank/topicRank",
+                                {
+                                    type: "\u5168\u90E8",
+                                    topicSecondType: "",
+                                    dateType: 1,
+                                    rankDate: getHotDate() || "2025-06-07",
+                                    isBrandTopic: "0",
+                                    sort: "interactiveCount",
+                                    size: 20,
+                                    start: page,
                                 },
-                            }
-                        );
+                                {
+                                    headers: {
+                                        Accept: "*/*",
+                                        "Accept-Language":
+                                            "zh-CN,zh;q=0.9,en;q=0.8",
+                                        Connection: "keep-alive",
+                                        Origin: "https://xh.newrank.cn",
+                                        Referer: "https://xh.newrank.cn/",
+                                        "Sec-Fetch-Dest": "empty",
+                                        "Sec-Fetch-Mode": "cors",
+                                        "Sec-Fetch-Site": "same-site",
+                                        "User-Agent":
+                                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+                                        "content-type": "application/json",
+                                        "n-token":
+                                            "35c430ef650b459ba2b9c1409148d929",
+                                        request_id:
+                                            "c223bbc2a76140a7818271ea7abf1246",
+                                        "sec-ch-ua":
+                                            '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
+                                        "sec-ch-ua-mobile": "?0",
+                                        "sec-ch-ua-platform": '"Windows"',
+                                        Cookie: "tfstk=gTxnMOGrRe7IM6RY9CSIo3eA28gOAJs5kQERwgCr715_wQpyeuVyEQbRvLlBrCjBXeER9XskUIIoMjnxDp9CAglxMvu71SIVH_WUw6rwQgBoJ0tqMp9CVR90-rBed8j7VkJP4QSN7tX54yrPaAbNHTSzYarU7551UgSP8TPa7t6VU95P4AvN1TSPaQSr9NZPi3-6bfTQWZJWjItGKwf2IVZ8VyWUMs9FOurPt9bhSp5g4u-MrwvbL6ubB_sdOLWHNmZCYaYyvG-E_0S2lCxlui0-divMWEQHSXrl6HLMjMKENr99I_Rl4eM7_ddAtESBe8GwIZvyVN8EskvCjttPu3Vn6_LvBH7MgfEMNaYyvG-E_mjrPPzVSxr5QYKaPz_FCOfAijAkA_Y1lLkiIrgC8O6KMADgPW7FCOXiIA44VwW1L8C..; Hm_lvt_a19fd7224d30e3c8a6558dcb38c4beed=1747811125; token=183E6D980ED848C7B8C939C2C66B0C1C; acw_tc=0a472f8317494476720786894e005821b1dc5e91c7ecca2f5be57a5affb102; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22nr_my2b9az6y%22%2C%22first_id%22%3A%2219641461076860-0e9b6d1278a91f-26011c51-2073600-19641461077b29%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTk2NDE0NjEwNzY4NjAtMGU5YjZkMTI3OGE5MWYtMjYwMTFjNTEtMjA3MzYwMC0xOTY0MTQ2MTA3N2IyOSIsIiRpZGVudGl0eV9sb2dpbl9pZCI6Im5yX215MmI5YXo2eSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%24identity_login_id%22%2C%22value%22%3A%22nr_my2b9az6y%22%7D%2C%22%24device_id%22%3A%22196f248066721f-092e6c949d0a9b-26011f51-2073600-196f24806684c8%22%7D; auth_n=nNCldQK3Tdo4VBUZKOgQA9/QaFEzTDkUxVtzG4nSdcCLR2QbtXf8z/4qRrRJcDBz",
+                                    },
+                                }
+                            );
                         } catch (error) {
-                            console.error("Failed to fetch hot topics:", error.message);
-                            continue
+                            console.error(
+                                "Failed to fetch hot topics:",
+                                error.message
+                            );
+                            continue;
                         }
 
                         const tempresult = (
@@ -398,7 +405,7 @@ class APIWrapperFactory {
                         }
                     } catch (error) {
                         console.log(`executeRequest error: ${error.message}`);
-                        continue
+                        continue;
                     }
                     console.log(
                         `executeRequest response: ${JSON.stringify(
@@ -480,7 +487,7 @@ class APIWrapperFactory {
                         if (result.length == lastResultLength) {
                             console.warn("no more data, this time");
                             resuntNotUpdateNumber++;
-                            if(resuntNotUpdateNumber >= 5) {
+                            if (resuntNotUpdateNumber >= 5) {
                                 console.log("no more data");
                                 break;
                             }
@@ -503,33 +510,33 @@ class APIWrapperFactory {
                             break;
                         }
                         try {
-                            
-
-                        const options = {
-                            method: "GET",
-                            url: "https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-user-note-list/v1",
-                            params: {
-                                userId: obj?.params?.userId,
-                                lastCursor: lastCursor,
-                            },
-                            headers: {
-                                "x-rapidapi-key":
-                                    "010987dba4mshacddc04aa8d0269p1136ddjsnfb7887207281",
-                                "x-rapidapi-host":
-                                    "xiaohongshu-all-api.p.rapidapi.com",
-                            },
-                        };
-                        response = await axios.request(options);
-                        if (response.data?.code != 0) {
-                            const urlWithparams = `http://47.120.60.92:8080/api/noteList?userId=${obj?.params?.userId}&lastCursor=${lastCursor}`;
-                            console.log(
-                                `executeRequest urlWithparams: ${urlWithparams}`
-                            );
-                            response = await axios.get(urlWithparams);
-                        }
+                            const options = {
+                                method: "GET",
+                                url: "https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-user-note-list/v1",
+                                params: {
+                                    userId: obj?.params?.userId,
+                                    lastCursor: lastCursor,
+                                },
+                                headers: {
+                                    "x-rapidapi-key":
+                                        "010987dba4mshacddc04aa8d0269p1136ddjsnfb7887207281",
+                                    "x-rapidapi-host":
+                                        "xiaohongshu-all-api.p.rapidapi.com",
+                                },
+                            };
+                            response = await axios.request(options);
+                            if (response.data?.code != 0) {
+                                const urlWithparams = `http://47.120.60.92:8080/api/noteList?userId=${obj?.params?.userId}&lastCursor=${lastCursor}`;
+                                console.log(
+                                    `executeRequest urlWithparams: ${urlWithparams}`
+                                );
+                                response = await axios.get(urlWithparams);
+                            }
                         } catch (error) {
-                            console.log(`executeRequest error: ${error.message}`);
-                            continue
+                            console.log(
+                                `executeRequest error: ${error.message}`
+                            );
+                            continue;
                         }
                         // http://47.120.60.92:8080/api/noteList?userId=66896ebc000000000303084b&lastCursor=
                         console.log(
@@ -634,7 +641,7 @@ class APIWrapperFactory {
                         if (result.length == lastResultLength) {
                             console.warn("no more data, this time");
                             resuntNotUpdateNumber++;
-                            if(resuntNotUpdateNumber >= 5) {
+                            if (resuntNotUpdateNumber >= 5) {
                                 console.log("no more data");
                                 break;
                             }
@@ -664,9 +671,13 @@ class APIWrapperFactory {
                                     },
                                 }
                             );
-                        } catch(error) { console.log(`note_search get url 1 `, error.message); }
-                        try{
-
+                        } catch (error) {
+                            console.log(
+                                `note_search get url 1 `,
+                                error.message
+                            );
+                        }
+                        try {
                             if (response?.data?.code != 0) {
                                 const url1 = `http://47.117.133.51:30015/api/xiaohongshu/search-note/v2?token=QdQU3VTR&keyword=${keyword}&page=${mPage}&sort=${sort}&noteType=_0&noteTime`;
                                 console.log(
@@ -674,9 +685,14 @@ class APIWrapperFactory {
                                 );
                                 response = await axios.get(url1);
                             }
-                        } catch(error) { console.log(`note_search get url 2 `, error.message); }
+                        } catch (error) {
+                            console.log(
+                                `note_search get url 2 `,
+                                error.message
+                            );
+                        }
 
-                        try{
+                        try {
                             if (response?.data?.code != 0) {
                                 const url2 = `http://47.120.60.92:8080/api/search?keyword=${keyword}&page=${mPage}&sort=${sort}`;
                                 console.log(
@@ -697,10 +713,7 @@ class APIWrapperFactory {
                                 break; // You have already turned the last page. Don't turn the pages back any further.
                             }
                         } catch (e) {
-                            console.error(
-                                "note_search get url 3 ",
-                                e.message
-                            );
+                            console.error("note_search get url 3 ", e.message);
                             continue;
                         }
 
@@ -870,17 +883,17 @@ class APIWrapperFactory {
                             allComments.length < totalItemCount &&
                             page <= 10
                         ) {
-                        if (result.length == lastResultLength) {
-                            console.warn("no more data, this time");
-                            resuntNotUpdateNumber++;
-                            if(resuntNotUpdateNumber >= 5) {
-                                console.log("no more data");
-                                break;
+                            if (result.length == lastResultLength) {
+                                console.warn("no more data, this time");
+                                resuntNotUpdateNumber++;
+                                if (resuntNotUpdateNumber >= 5) {
+                                    console.log("no more data");
+                                    break;
+                                }
+                            } else {
+                                resuntNotUpdateNumber = 0;
                             }
-                        } else {
-                            resuntNotUpdateNumber = 0;
-                        }
-                        lastResultLength = result.length;
+                            lastResultLength = result.length;
                             const noteIds = await getNoteIds(keyword, page);
                             if (noteIds.length === 0) {
                                 console.log("no more notes");
@@ -958,6 +971,240 @@ class APIWrapperFactory {
                     console.error("Error fetching data:", error.message);
                 }
                 break;
+            case "fetch_notes_and_comments_by_keyword":
+                let tempResultComments = [];
+                let tempResultNotes = [];
+                try {
+                    const keyword =
+                        obj?.params?.keyword ||
+                        obj?.params?.keywords ||
+                        obj?.params?.key1 ||
+                        obj?.params?.product ||
+                        obj?.params?.query ||
+                        obj?.keyword ||
+                        obj?.keywords ||
+                        obj?.key1 ||
+                        obj?.product ||
+                        obj?.query ||
+                        "";
+                    const totalCommentCount =  obj?.params?.totalCommentCount || totalItemCount * 3;
+                    // totalItemCount
+                    const maxPageNum = 300;
+                    // let tempResultComments = [];
+
+                    async function getNoteIds(
+                        keyword,
+                        page = 1,
+                        sort = "general",
+                        noteType = "_0",
+                        noteTime = "一天内"
+                    ) {
+                        try {
+                            const options = {
+                                method: "GET",
+                                url: "https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/search-note/v2",
+                                params: {
+                                    keyword,
+                                    page: page.toString(),
+                                    sort,
+                                    noteType,
+                                    noteTime,
+                                },
+                                headers: {
+                                    "x-rapidapi-key":
+                                        "010987dba4mshacddc04aa8d0269p1136ddjsnfb7887207281",
+                                    "x-rapidapi-host":
+                                        "xiaohongshu-all-api.p.rapidapi.com",
+                                },
+                            };
+                            const response = await axios.request(options);
+                            const items = response.data?.data?.items;
+                            tempResultNotes = tempResultNotes.concat(items);
+                            return items
+                                .map((item) => item?.note?.id)
+                                .filter(Boolean);
+                        } catch (error) {
+                            console.error(`note search failed: ${error}`);
+                            return [];
+                        }
+                    }
+
+                    async function getComments(noteId) {
+                        try {
+                            const options = {
+                                method: "GET",
+                                url: "https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-note-comment/v2",
+                                params: { noteId },
+                                headers: {
+                                    "x-rapidapi-key":
+                                        "010987dba4mshacddc04aa8d0269p1136ddjsnfb7887207281",
+                                    "x-rapidapi-host":
+                                        "xiaohongshu-all-api.p.rapidapi.com",
+                                },
+                            };
+                            const response = await axios.request(options);
+                            return response.data.data.comments || [];
+                        } catch (error) {
+                            console.error(
+                                `Get comments failed (noteId:${noteId}): ${error}`
+                            );
+                            return [];
+                        }
+                    }
+
+                    async function getCommentsByKeyword(keyword = "热门") {
+                        let page = 1;
+                        let allComments = [];
+                        while (
+                            (tempResultNotes.length < totalItemCount  || allComments.length < totalCommentCount ) &&
+                            page <= maxPageNum
+                        ) {
+                            if (tempResultNotes.length == lastResultLength) {
+                                console.warn("no more data, this time");
+                                resuntNotUpdateNumber++;
+                                if (resuntNotUpdateNumber >= 5) {
+                                    console.log("no more data");
+                                    break;
+                                }
+                            } else {
+                                resuntNotUpdateNumber = 0;
+                            }
+                            lastResultLength = tempResultNotes.length;
+                            const noteIds = await getNoteIds(keyword, page);
+                            if (noteIds.length === 0) {
+                                console.log("no more notes");
+                                break;
+                            }
+
+                            for (const noteId of noteIds) {
+                                const comments = await getComments(noteId);
+                                allComments = [...allComments, ...comments];
+
+                                if (allComments.length >= totalItemCount) {
+                                    allComments = allComments.slice(
+                                        0,
+                                        totalItemCount
+                                    );
+                                    console.log(
+                                        `success fetching ${allComments.length} comments`
+                                    );
+                                    return allComments;
+                                }
+                            }
+                            page++;
+                            await new Promise((resolve) =>
+                                setTimeout(resolve, 100)
+                            );
+                        }
+                        console.log(
+                            `Get ${allComments.length} comments (less than ${totalItemCount})`
+                        );
+                        return allComments;
+                    }
+                    tempResultComments = await getCommentsByKeyword(keyword);
+
+                    function filterComments(comments) {
+                        return comments.map((comment) => {
+                            const filteredComment = {
+                                content: comment?.content || "",
+                                ip_location: comment?.ip_location || "",
+                                time: comment?.time || "",
+                                username: comment?.user?.nickname || "",
+                            };
+
+                            if (
+                                comment.sub_comments &&
+                                comment.sub_comments.length > 0
+                            ) {
+                                filteredComment.sub_comments =
+                                    comment.sub_comments.map((subComment) => ({
+                                        content: subComment?.content || "",
+                                        ip_location:
+                                            subComment?.ip_location || "",
+                                        time: subComment?.time || "",
+                                        username:
+                                            subComment?.user?.nickname || "",
+                                    }));
+                            }
+
+                            return filteredComment;
+                        });
+                    }
+
+                    // const comments = filterComments(
+                    // response.data?.data?.comments || []
+                    // );
+
+                    tempResultNotes = (tempResultNotes || []).map((obj) => ({
+                        author: obj?.note?.user?.nickname || "unknown",
+                        collected_count: obj?.note?.collected_count || 0,
+                        shared_count: obj?.note?.shared_count || 0,
+                        liked_count: obj?.note?.liked_count || 0,
+                        comments_count: obj?.note?.comments_count || 0,
+                        id: obj?.note?.id,
+                        title: obj?.note?.title,
+                        desc: obj?.note?.desc || "",
+                        timestamp: obj?.note?.timestamp || 0,
+                    }));
+
+                    tempResultComments = filterComments(
+                        tempResultComments || []
+                    );
+                    tempResultComments = tempResultComments.slice(
+                        0,
+                        totalCommentCount
+                    );
+                    tempResultNotes = tempResultNotes.slice(0, totalItemCount);
+                    result.concat(tempResultNotes);
+                    result.concat(tempResultComments);
+                    console.log(
+                        `executeRequest result, after cut.: ${result?.length}`
+                    );
+                } catch (error) {
+                    console.error("Error fetching data:", error.message);
+                }
+                let txtfilename1;
+                let excelfilename1;
+                if (tempResultComments?.length > 0) {
+                    const {
+                        firstUnExistsTxtFilename,
+                        firstUnExistsExcelFilename,
+                    } = APIWrapperFactory.excelDataPersist(
+                        tempResultComments,
+                        taskId + "_comments_"
+                    );
+                    txtfilename1 = firstUnExistsTxtFilename;
+                    excelfilename1 = firstUnExistsExcelFilename;
+                }
+                console.log(
+                    `executeRequest comments len: ${tempResultComments.length}`
+                );
+                console.log(
+                    `executeRequest txtfilename: ${txtfilename1} ,  excelfilename: ${excelfilename1} `
+                );
+                let txtfilename2;
+                let excelfilename2;
+                if (tempResultNotes?.length > 0) {
+                    const {
+                        firstUnExistsTxtFilename,
+                        firstUnExistsExcelFilename,
+                    } = APIWrapperFactory.excelDataPersist(
+                        tempResultNotes,
+                        taskId + "_notes_"
+                    );
+                    txtfilename2 = firstUnExistsTxtFilename;
+                    excelfilename2 = firstUnExistsExcelFilename;
+                }
+                console.log(
+                    `executeRequest notes len: ${tempResultNotes.length}`
+                );
+                console.log(
+                    `executeRequest txtfilename: ${txtfilename2} ,  excelfilename: ${excelfilename2} `
+                );
+                const textlist = [txtfilename1, txtfilename2];
+                const excellist = [excelfilename1, excelfilename2];
+                return { result, textlist, excellist };
+
             case "users_search":
                 try {
                     const keyword =
@@ -981,7 +1228,7 @@ class APIWrapperFactory {
                         if (result.length == lastResultLength) {
                             console.warn("no more data, this time");
                             resuntNotUpdateNumber++;
-                            if(resuntNotUpdateNumber >= 5) {
+                            if (resuntNotUpdateNumber >= 5) {
                                 console.log("no more data");
                                 break;
                             }
@@ -1064,13 +1311,14 @@ class APIWrapperFactory {
         let txtfilename;
         let excelfilename;
         if (result?.length > 0) {
-            const {firstUnExistsTxtFilename, firstUnExistsExcelFilename} = APIWrapperFactory.excelDataPersist(result, taskId);
+            const { firstUnExistsTxtFilename, firstUnExistsExcelFilename } =
+                APIWrapperFactory.excelDataPersist(result, taskId);
             txtfilename = firstUnExistsTxtFilename;
             excelfilename = firstUnExistsExcelFilename;
         }
         console.log(`executeRequest result len: ${result.length}`);
         console.log(`executeRequest csvfileurl: ${csvfileurl}`);
-        return { result,  txtfilename, excelfilename};
+        return { result, txtfilename, excelfilename };
     }
 
     public static excelDataPersist(result: any, taskId: any) {

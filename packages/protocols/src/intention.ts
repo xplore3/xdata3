@@ -113,10 +113,24 @@ export class IntentionHandler {
               results.push(result);
             }
             if (txtfilename) {
-              txtfilelist.push(txtfilename);
+              if(Array.isArray(txtfilename)) {
+                for(const item of txtfilename) {
+                  if (item)
+                  txtfilelist.push(item);
+                }
+              } else {
+                txtfilelist.push(txtfilename);
+              }
             }
             if (excelfilename) {
-              excelfilelist.push(excelfilename);
+              if(Array.isArray(excelfilename)) {
+                for(const item of excelfilename) {
+                  if (item)
+                  excelfilelist.push(item);
+                }
+              } else {
+                excelfilelist.push(excelfilename);
+              }
             }
             //const filename = taskId + "_raw_data1.txt";
             //appendToChatCache(result, filename, (err) => {

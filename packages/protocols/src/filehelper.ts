@@ -62,14 +62,11 @@ export function updateCacheText(content: string, filename: string, onError?: (er
         filename
     );
     // file: taskId + "_memory.txt"
-    fs.writeFile(filePath, content, (err) => {
-        if (err) {
-            onError?.(err) || console.error("Failed to write file:", err);
-            return;
-        }
+    fs.writeFileSync(filePath, content);
+    {
         console.log("Content successfully overwritten to file: ", filePath);
         console.log(`======================== ${filename} begin ==================== \n ${content.slice(0, 200)}\n ... \n===================== ${filename} end =======================`);
-    });
+    };
 }
 
 export function getDynamicTail(textFileList, excelFileList) {
