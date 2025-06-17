@@ -51,7 +51,8 @@ export class IntentionHandler {
    */
   static async handleDataCollect(
     runtime: IAgentRuntime,
-    message: Memory
+    message: Memory,
+    existData: string = '',
   ): Promise<string> {
     const intention_examples = IntentionHandler.getMyIntentionExamples(message.userId);
     console.log(intention_examples);
@@ -66,9 +67,10 @@ export class IntentionHandler {
         (3). 如果用户的输入里，既不包含数据获取需求，也没有明确的数据处理意图，也无其他意图，则参考最近的消息，给出相关的意图选项。
         (4). 如果用户的输入跟数据获取或数据处理都没有关系，则参考上下文给出简短回答，且不需要意图选项。
       用户输入：${message.content.text}.
-      可用数据平台：${my_data_platform}
-      可用数据获取API：${my_data_source}
-      各个API的数据结果示例：${my_data_bucket}
+      可用数据平台：${my_data_platform}。
+      可用数据获取API：${my_data_source}。
+      各个API的数据结果示例：${my_data_bucket}。
+      已有数据：${existData}。
       -----------------------------
       你需要输出如下：
       {
@@ -174,16 +176,17 @@ export class IntentionHandler {
     origin_input: string
   ): Promise<string> {
     const taskId = message.content?.intention?.taskId;
+    const userInput = `根据这些数据，${message.content.text}`;
     const attachment = IntentionHandler.getTaskAttachment(taskId);
     const intention_examples = IntentionHandler.getMyIntentionExamples(message.userId);
     const prompt = `
       你是一个数据处理专家，能根据输入的多个结构的数据/文件进行加工、处理、分析、预测的专家，能够基于用户的多轮输入，将数据处理成用户需要的结果。
       主要有如下一些情况：
-      (1). 如果用户的需求不是一个数据处理的需求，而是一个数据获取的需求，则给出如下结果：
+      (1). 如果用户的需求不是一个数据处理的需求，而是一个数据获取的需求（这种情况的概率比较低），则给出如下结果：
         {
           "intention_action": "data_collection",
           "origin_input": "${origin_input}",
-          "intention_desc": "${message.content.text}",
+          "intention_desc": "${userInput}",
           "attachment": "{attachment}",
         }.
       (2). 根据用户要求和附带的数据，进行数据的洞察/剖析/透视/阐释/推演/解构/溯源/思辨/融合；如果能够直接给出处理结果，则输出Markdown形式的分析结果。优先以这种情况进行处理。输出为一个可解析的JSON结果，如下：
@@ -202,12 +205,12 @@ export class IntentionHandler {
         }
       (4). 如果用户的需求比较复杂，当前的数据无法满足处理的需求，则需要告知用户缺少什么数据导致无法给出理想结果，并给出intention_options让用户决定是否进一步获取数据。输出结构同(3).
       (5). 如果用户的输入里，既不包含数据获取需求，也没有明确的数据处理意图，也无其他意图，则参考最近的消息，给出相关的意图选项。输出结构同(3).
-      (6). 如果用户的输入（${message.content.text}）明显与前置描述（${origin_input}）及数据处理无关，则只需给出一个文字回复。
+      (6). 如果用户的输入（${userInput}）明显与前置描述（${origin_input}）及数据处理无关，则只需给出一个文字回复。
       关于(3)(4)(5)中的intention_options，是根据用户输入而得出的选项，以用户明确输入的选项为优先，其次以示例中的选项为优先，
           且结合用户自身的产品和背景（不要有‘报告生成’这样的宽泛选项，不要有‘分析这些笔记’这样的模糊选项，需要是‘分析这些笔记关于***的特征’）,
           其数量约为5~10个，其可参考的示例如下：【${intention_examples}】。
       -----------------------------
-      用户需求：${message.content.text}, 前置描述：${origin_input}.
+      用户需求：${userInput}, 前置描述：${origin_input}.
       待处理数据内容：${attachment}
     `;
     try {
@@ -221,8 +224,9 @@ export class IntentionHandler {
       let execJson = extractJson(response);
       if (execJson) {
         if (execJson.intention_action && execJson.intention_action === "data_collection") {
+          message.content.text = origin_input + "\r\n" + message.content.text;
           return await IntentionHandler.handleDataCollect(
-            runtime, message
+            runtime, message, attachment
           );
         }
         if (execJson.question_description) {
