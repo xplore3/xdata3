@@ -626,6 +626,13 @@ class APIWrapperFactory {
                         obj?.query ||
                         "";
                     const page = obj?.params?.page || 1;
+                    const aiFilterJSONStr = await getAIFilter(message.content.text);
+                    let aiFilterJSONObj = null;
+                    try {
+                        aiFilterJSONObj = JSON.parse(aiFilterJSONStr.replace(/```json/g, "").replace(/```/g, ""));
+                    } catch (error) {
+                        console.log("aiFilterJSONStr: ", aiFilterJSONStr);
+                    }
                     // Get more data.
                     // page 1: get data from 1 to 5.
                     // page 2: get data from 6 to 10.
@@ -733,20 +740,17 @@ class APIWrapperFactory {
                             })
                         );
                         
-                        const filterJSONStr = await getAIFilter(message.content.text);
-                        if (filterJSONStr) {
+                        if (aiFilterJSONObj) {
                             const result0 = [];
-                            //       //response = response.replace(/```json/g, "") .replace(/```/g, "");
-                            const filterObj = JSON.parse(filterJSONStr.replace(/```json/g, "").replace(/```/g, ""));
                             for (const item of tempResult) {
-                                if (item.collected_count >= filterObj.min_collected_count &&
-                                    item.shared_count >= filterObj.min_shared_count &&
-                                    item.liked_count >= filterObj.min_liked_count &&
-                                    item.comments_count >= filterObj.min_comments_count &&
-                                    item.collected_count <= filterObj.max_collected_count &&
-                                    item.shared_count <= filterObj.max_shared_count &&
-                                    item.liked_count <= filterObj.max_liked_count &&
-                                    item.comments_count <= filterObj.max_comments_count) {
+                                if (item.collected_count >= aiFilterJSONObj.min_collected_count &&
+                                    item.shared_count >= aiFilterJSONObj.min_shared_count &&
+                                    item.liked_count >= aiFilterJSONObj.min_liked_count &&
+                                    item.comments_count >= aiFilterJSONObj.min_comments_count &&
+                                    item.collected_count <= aiFilterJSONObj.max_collected_count &&
+                                    item.shared_count <= aiFilterJSONObj.max_shared_count &&
+                                    item.liked_count <= aiFilterJSONObj.max_liked_count &&
+                                    item.comments_count <= aiFilterJSONObj.max_comments_count) {
                                     result0.push(item);
                                 }
                             }
