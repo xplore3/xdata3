@@ -50,7 +50,7 @@ export class TaskHelper {
         }
     }
 
-    static async getTaskOriginInput(runtime: IAgentRuntime, taskId: string) {
+    static async getTaskOriginInput(runtime: IAgentRuntime, taskId: string): Promise<string> {
         try {
             return await this.getCachedData(runtime, TASK_CACHE_KEY + taskId);
         }
@@ -58,6 +58,6 @@ export class TaskHelper {
             console.log(`getTaskOriginInput ${taskId}`);
             console.error(err);
         }
-        return null;
+        return "";
     }
 }
