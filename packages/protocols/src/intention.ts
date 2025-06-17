@@ -191,22 +191,22 @@ export class IntentionHandler {
         }.
       (2). 根据用户要求和附带的数据，进行数据的洞察/剖析/透视/阐释/推演/解构/溯源/思辨/融合；如果能够直接给出处理结果，则输出Markdown形式的分析结果。优先以这种情况进行处理。输出为一个可解析的JSON结果，如下：
         {
-          "question_description": "数据分析结果 和 下一步意图的描述",
+          "analysis_and_question_description": "数据分析结果 和 下一步意图的描述",
           "intention_options": ["进一步的意图1", "进一步的意图2", "......"],
           "taskId": "${taskId}"
-          ......
         }
       (3). 如果需求比较模糊，则可以给出可供选择的一些选项，让用户进行二次选择，以明确其需求。这种情况的输出为一个可解析的JSON结果，如下：
         {
-          "question_description": "相关的描述",
+          "analysis_and_question_description": "相关的描述",
           "intention_options": ["进一步的意图1", "进一步的意图2", "......"],
           "taskId": "${taskId}"
-          ......
         }
       (4). 如果用户的需求比较复杂，当前的数据无法满足处理的需求，则需要告知用户缺少什么数据导致无法给出理想结果，并给出intention_options让用户决定是否进一步获取数据。输出结构同(3).
       (5). 如果用户的输入里，既不包含数据获取需求，也没有明确的数据处理意图，也无其他意图，则参考最近的消息，给出相关的意图选项。输出结构同(3).
       (6). 如果用户的输入（${userInput}）明显与前置描述（${origin_input}）及数据处理无关，则只需给出一个文字回复。
-      关于(3)(4)(5)中的intention_options，是根据用户输入而得出的选项，以用户明确输入的选项为优先，其次以示例中的选项为优先，
+      这里(2)(3)(4)(5)输出的JSON，不需要再加其他JSON字段。
+      关于(2)(3)(4)(5)中的analysis_and_question_description，既包含数据分析结果，也不包含下一步意图的描述。
+      关于(2)(3)(4)(5)中的intention_options，是根据用户输入而得出的选项，以用户明确输入的选项为优先，其次以示例中的选项为优先，
           且结合用户自身的产品和背景（不要有‘报告生成’这样的宽泛选项，不要有‘分析这些笔记’这样的模糊选项，需要是‘分析这些笔记关于***的特征’）,
           其数量约为5~10个，其可参考的示例如下：【${intention_examples}】。
       -----------------------------
@@ -229,7 +229,7 @@ export class IntentionHandler {
             runtime, message, attachment
           );
         }
-        if (execJson.question_description) {
+        if (execJson.analysis_and_question_description) {
           return JSON.stringify(execJson);
         }
       }
