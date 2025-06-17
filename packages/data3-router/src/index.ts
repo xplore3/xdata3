@@ -26,6 +26,7 @@ import { mdToPdf } from "md-to-pdf";
 
 import {
     IntentionHandler,
+    TaskHelper,
     getProtocolArray,
     updateProtocolArray,
     handleProtocolsForPrompt,
@@ -340,7 +341,7 @@ export class DirectClient {
 
                 const originQuestingText = req.body.text;
                 let taskId = req.body.taskId;
-                const origin_input = req.body.origin_input;
+                const origin_input = await TaskHelper.getTaskOriginInput(runtime, taskId);
                 const messageId = stringToUuid(userId + Date.now().toString());
 
                 const content: Content = {
@@ -479,6 +480,7 @@ export class DirectClient {
 
                 if (!taskId) {
                     taskId = generateTaskId();
+                    await TaskHelper.setTaskOriginInput(runtime, taskId, originQuestingText);
                 } else {
                     withPreContext = true;
                 }

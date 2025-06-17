@@ -435,7 +435,7 @@ export class WechatHandler {
 
             const taskId = await this.getCachedData<string>(runtime, userId);
             if (taskId && taskId != '') {
-                const origin_input = await this.getCachedData<string>(runtime, userId + ORIGIN_INPUT_POST);
+                //const origin_input = await this.getCachedData<string>(runtime, userId + ORIGIN_INPUT_POST);
                 const config = {
                     url: 'http://localhost:3333/91edd400-9c4a-0eb5-80ce-9d32973f2c49/data_process',
                     method: 'post',
@@ -446,7 +446,7 @@ export class WechatHandler {
                         taskId,
                         userId,
                         text: input,
-                        origin_input
+                        //origin_input
                     }
                 };
 
@@ -473,7 +473,7 @@ export class WechatHandler {
                 let text = output;
                 if (!options || options.length < 1) {
                     await this.setCachedData(runtime, userId, '');
-                    await this.setCachedData(runtime, userId + ORIGIN_INPUT_POST, '');
+                    //await this.setCachedData(runtime, userId + ORIGIN_INPUT_POST, '');
                 }
                 else {
                     text = `${output}\n\n${options.join('\n')}`;
@@ -481,7 +481,7 @@ export class WechatHandler {
                 return text;
             }
 
-            await this.setCachedData(runtime, userId + ORIGIN_INPUT_POST, input);
+            //await this.setCachedData(runtime, userId + ORIGIN_INPUT_POST, input);
             const config = {
                 url: 'http://localhost:3333/91edd400-9c4a-0eb5-80ce-9d32973f2c49/message',
                 method: 'post',
