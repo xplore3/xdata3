@@ -157,7 +157,11 @@ export class ApiDb {
         request2: 'notes_comment_by_next_page',
       },
     };
-    return apiList[api_desc];
+    const api = apiList[api_desc];
+    if (api && api.execute_depend) {
+      return apiList[api.request1];
+    }
+    return api;
   }
 
   static async getUserDataBucket(userId: UUID) {

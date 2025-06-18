@@ -26,7 +26,7 @@ export class ApiExecution {
   }
 
   static async executeApiChainLoop(runtime: IAgentRuntime, message: Memory, api: JSON | any, totalCount: number): Promise<any> {
-    if (api.execute_depend && api.execute_depend === 'chain_loop') {
+    if (api && api.execute_depend && api.execute_depend === 'chain_loop') {
       const api1 = ApiDb.getApi(api.request1);
       const api2 = ApiDb.getApi(api.request2);
       const userInput = `${message.content.text}`;
