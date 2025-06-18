@@ -1008,6 +1008,7 @@ class APIWrapperFactory {
             case "fetch_notes_and_comments_by_keyword":
                 let tempResultComments = [];
                 let tempResultNotes = [];
+                let filterPath = null;
                 try {
                     const keyword =
                         obj?.params?.keyword ||
@@ -1052,7 +1053,17 @@ class APIWrapperFactory {
                                 },
                             };
                             const response = await axios.request(options);
-                            const items = response.data?.data?.items;
+                            let items = response.data?.data?.items;
+                            if (!items || items.length == 0) {
+                                return [];
+                            }
+                            if (!filterPath) {
+                                filterPath = await IntentionHandler.genAIFilterPath(runtime, message, items[0]);
+                            }
+                            items = JSONPath({
+                                path: filterPath,
+                                json: items,
+                            }) || [];
                             tempResultNotes = tempResultNotes.concat(items);
                             return items
                                 .map((item) => item?.note?.id)
@@ -1094,6 +1105,7 @@ class APIWrapperFactory {
                             page <= maxPageNum
                         ) {
                             if (tempResultNotes.length == lastResultLength) {
+                                filterPath = null;
                                 console.warn("no more data, this time");
                                 resuntNotUpdateNumber++;
                                 if (resuntNotUpdateNumber >= 5) {
