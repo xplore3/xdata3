@@ -20,6 +20,8 @@ import { PromptController } from "./promts";
 
 
 const ORIGIN_INPUT_POST = "_origin_input";
+const TASK_OPTIONS = "_task_options_";
+const TASK_BK_OPTIONS = "_task_backup_options_";
 
 export class WechatHandler {
     constructor(private client: DirectClient) {}
@@ -87,7 +89,7 @@ export class WechatHandler {
     async sendMessage(external_userid: string, kfid: string, content: string) {
         try {
             console.log("sendMessage " + content);
-            if (!content) {
+            if (!content || content.length < 1) {
                 return;
             }
             content = this.truncateString(content, 450, 450);
@@ -280,7 +282,7 @@ export class WechatHandler {
                     const firstMsg = msg.msg_list[index];
                     if (firstMsg.msgtype == 'text') {
                         console.log(firstMsg.text.content);
-                        const firstText = firstMsg.text.content;
+                        let firstText = firstMsg.text.content;
                         const userId = firstMsg.external_userid;
                         // Test for external_userid
                         let userInfo = await this.getExternalUserDetail(userId);
@@ -307,8 +309,18 @@ export class WechatHandler {
                         try {
                             const taskId = await this.getCachedData<string>(runtime, userId);
                             if (!taskId) {
-                                let immResp = "...";
-                                if (firstText.length < 10) {
+                                let immResp = "";
+                                const SINGLE_DIGIT_REGEX = /^[0-9]$/;
+                                if (SINGLE_DIGIT_REGEX.test(firstText)) {
+                                    if (firstText == '0') {
+                                        job.stop();
+                                        firstText = await this.getRealOption(runtime, userId, firstText);
+                                        await this.sendMessage(userId, decryptedXml.xml.OpenKfId, firstText);
+                                        return;
+                                    }
+                                    firstText = await this.getRealOption(runtime, userId, firstText);
+                                }
+                                else if (firstText.length < 10) {
                                     immResp = await this.generateQuickResponse(runtime, firstText, userId);
                                 }
                                 else {
@@ -410,6 +422,25 @@ export class WechatHandler {
         }
     }
 
+    async getRealOption(runtime: IAgentRuntime, userId: string, optionIndex: string) {
+       const taskId = await this.getCachedData<string>(runtime, userId);
+       const options = await this.getCachedData<string[]>(runtime, taskId + TASK_OPTIONS);
+       const bkOptions = await this.getCachedData<string[]>(runtime, taskId + TASK_BK_OPTIONS);
+       console.log(options);
+       try {
+            if (optionIndex == '0') {
+                const newOptions = this.getRandomElements<string>(bkOptions, 3, 5);
+                await this.setCachedData(runtime, taskId + TASK_BK_OPTIONS, newOptions);
+                return `${newOptions.map((item, index) => `(${index + 1}). ${item}`).join('\n')}\n【回复序号执行，回复0刷新选项，其他请输入】`;
+            }
+            return options[parseInt(optionIndex, 10)];
+        }
+        catch (err) {
+            console.log(err);
+        }
+        return optionIndex;
+    }
+
     async generateResponseByData3(runtime: IAgentRuntime, userId: string, input: string) {
         try {
             /*await handleProtocols(runtime, firstMsg.text.content).then(async (resStr) => {
@@ -461,13 +492,13 @@ export class WechatHandler {
                     const json = JSON.parse(response.data?.text);
                     if (json) {
                         options = json.intention_options || json.available_options;
-                        output = json.data_result || json.question_description || json.question_answer;
+                        output = json.data_result || json.question_description || json.analysis_and_question_description;
                     }
                 } catch (err) {
                     console.log(err);
                     const json = response.data?.text;
                     options = json.intention_options || json.available_options;
-                    output = json.data_result || json.question_description || json.question_answer || json;
+                    output = json.data_result || json.question_description || json.analysis_and_question_description || json;
                 }
                 // End of the DataProcess
                 let text = output;
@@ -476,7 +507,10 @@ export class WechatHandler {
                     //await this.setCachedData(runtime, userId + ORIGIN_INPUT_POST, '');
                 }
                 else {
-                    text = `${output}\n\n${options.join('\n')}`;
+                    const showOptions = this.getRandomElements<string>(options, 3, 5);
+                    await this.setCachedData(runtime, taskId + TASK_OPTIONS, showOptions);
+                    await this.setCachedData(runtime, taskId + TASK_BK_OPTIONS, options);
+                    text = `${output}\n\n${showOptions.map((item, index) => `(${index + 1}). ${item}`).join('\n')}\n【回复序号执行，回复0刷新选项，其他请输入】`;
                 }
                 return text;
             }
@@ -502,23 +536,29 @@ export class WechatHandler {
             }
             let options = [];
             let output = "";
+            let newTaskId = "";
             try {
                 const json = JSON.parse(response.data?.text);
                 if (json) {
+                    newTaskId = json.taskId;
                     await this.setCachedData(runtime, userId, json.taskId);
                     options = json.intention_options || json.available_options;
-                    output = json.data_result || json.question_description || json.question_answer;
+                    output = json.data_result || json.question_description || json.analysis_and_question_description;
                 }
             } catch (err) {
                 console.log(err);
                 const json = response.data?.text;
+                newTaskId = json.taskId;
                 await this.setCachedData(runtime, userId, json.taskId);
                 options = json.intention_options || json.available_options;
-                output = json.data_result || json.question_description || json.question_answer || json;
+                output = json.data_result || json.question_description || json.analysis_and_question_description || json;
             }
             let text = output;
             if (options && options.length > 0) {
-                text = `${output}\n\n${options.join('\n')}`;
+                const showOptions = this.getRandomElements<string>(options, 3, 5);
+                await this.setCachedData(runtime, newTaskId + TASK_OPTIONS, showOptions);
+                await this.setCachedData(runtime, taskId + TASK_BK_OPTIONS, options);
+                text = `${output}\n\n${showOptions.map((item, index) => `(${index + 1}). ${item}`).join('\n')}【回复序号执行，回复0刷新选项，其他请输入】`;
             }
             return text;
             //return response.data?.text;
@@ -659,5 +699,19 @@ export class WechatHandler {
         const head = str.substring(0, headLength);
         const tail = str.substring(str.length - tailLength);
         return `${head}${ellipsis}${tail}`;
+    }
+    
+    private getRandomElements<T>(array: T[], min: number, max: number): T[] {
+        if (min < 0 || max < min) throw new Error("Invalid range");
+        if (array.length === 0) return [];
+
+        const effectiveMin = Math.min(min, array.length);
+        const effectiveMax = Math.min(max, array.length);
+
+        const count = Math.floor(Math.random() * (effectiveMax - effectiveMin + 1)) + effectiveMin;
+
+        return [...array]
+            .sort(() => Math.random() - 0.5)
+            .slice(0, count);
     }
 }
