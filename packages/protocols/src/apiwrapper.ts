@@ -8,7 +8,6 @@ import { IntentionHandler } from "./intention";
 import { updateCacheText } from "./filehelper";
 import fs from "fs";
 import path from "path";
-import { getAIFilter } from "./aibydeepseek";
 
 class APIWrapperFactory {
     private static instance: APIWrapperFactory;
@@ -718,7 +717,7 @@ class APIWrapperFactory {
                             continue;
                         }
 
-                        tempResult = (response.data?.data?.items || []).map(
+                        /*tempResult = (response.data?.data?.items || []).map(
                             (obj) => ({
                                 author: obj?.note?.user?.nickname || "unknown",
                                 collected_count:
@@ -731,77 +730,57 @@ class APIWrapperFactory {
                                 desc: obj?.note?.desc || "",
                                 timestamp: obj?.note?.timestamp || 0,
                             })
-                        );
-                        
-                        const filterJSONStr = await getAIFilter(message.content.text);
-                        if (filterJSONStr) {
-                            const result0 = [];
-                            //       //response = response.replace(/```json/g, "") .replace(/```/g, "");
-                            const filterObj = JSON.parse(filterJSONStr.replace(/```json/g, "").replace(/```/g, ""));
-                            for (const item of tempResult) {
-                                if (item.collected_count >= filterObj.min_collected_count &&
-                                    item.shared_count >= filterObj.min_shared_count &&
-                                    item.liked_count >= filterObj.min_liked_count &&
-                                    item.comments_count >= filterObj.min_comments_count &&
-                                    item.collected_count <= filterObj.max_collected_count &&
-                                    item.shared_count <= filterObj.max_shared_count &&
-                                    item.liked_count <= filterObj.max_liked_count &&
-                                    item.comments_count <= filterObj.max_comments_count) {
-                                    result0.push(item);
-                                }
+                        ); */
+                        if (extractPath === null || filterPath === null) {
+                            const items = response.data?.data?.items;
+                            if (items && items.length > 0) {
+                                const mapper =
+                                    await IntentionHandler.genExtractorByJsonata(
+                                        runtime,
+                                        message,
+                                        items[0]
+                                    );
+                                console.log(mapper);
+                                extractPath = mapper.extract;
+                                filterPath = mapper.filter;
                             }
-                            tempResult = result0;
                         }
-                        // if (extractPath === null || filterPath === null) {
-                        //     const items = response.data?.data?.items;
-                        //     if (items && items.length > 0) {
-                        //         const mapper =
-                        //             await IntentionHandler.genExtractorByJsonata(
-                        //                 runtime,
-                        //                 message,
-                        //                 items[0]
-                        //             );
-                        //         console.log(mapper);
-                        //         extractPath = mapper.extract;
-                        //         filterPath = mapper.filter;
-                        //     }
-                        // }
-                        // try {
-                        //     tempResult = JSONPath({
-                        //         path: filterPath,
-                        //         json: response.data?.data?.items,
-                        //     }) || [];
-                        //     console.log(tempResult.length);
-                        //     //tempResult = tempResult.map(item => {
-                        //     //    return eval(extractPath);
-                        //     //});
-                        //     //const extractFunc = new Function(
-                        //     //    "item",
-                        //     //    "return " + extractPath
-                        //     //);
-                        //     //tempResult = tempResult.map((item) =>
-                        //     //    extractFunc(item)
-                        //     //);
-                        //     const expression = jsonata(extractPath);
-                        //     tempResult = await expression.evaluate(tempResult) || [];
-                        // }
-                        // catch (err) {
-                        //     console.log(err);
-                        //     tempResult = (response.data?.data?.items || []).map(
-                        //         (obj) => ({
-                        //             author: obj?.note?.user?.nickname || "unknown",
-                        //             collected_count:
-                        //                 obj?.note?.collected_count || 0,
-                        //             shared_count: obj?.note?.shared_count || 0,
-                        //             liked_count: obj?.note?.liked_count || 0,
-                        //             comments_count: obj?.note?.comments_count || 0,
-                        //             id: obj?.note?.id,
-                        //             title: obj?.note?.title,
-                        //             desc: obj?.note?.desc || "",
-                        //             timestamp: obj?.note?.timestamp || 0,
-                        //         })
-                        //     );
-                        // }
+                        try {
+                            tempResult = JSONPath({
+                                path: filterPath,
+                                json: response.data?.data?.items,
+                            }) || [];
+                            console.log(tempResult.length);
+                            //tempResult = tempResult.map(item => {
+                            //    return eval(extractPath);
+                            //});
+                            //const extractFunc = new Function(
+                            //    "item",
+                            //    "return " + extractPath
+                            //);
+                            //tempResult = tempResult.map((item) =>
+                            //    extractFunc(item)
+                            //);
+                            const expression = jsonata(extractPath);
+                            tempResult = await expression.evaluate(tempResult) || [];
+                        }
+                        catch (err) {
+                            console.log(err);
+                            tempResult = (response.data?.data?.items || []).map(
+                                (obj) => ({
+                                    author: obj?.note?.user?.nickname || "unknown",
+                                    collected_count:
+                                        obj?.note?.collected_count || 0,
+                                    shared_count: obj?.note?.shared_count || 0,
+                                    liked_count: obj?.note?.liked_count || 0,
+                                    comments_count: obj?.note?.comments_count || 0,
+                                    id: obj?.note?.id,
+                                    title: obj?.note?.title,
+                                    desc: obj?.note?.desc || "",
+                                    timestamp: obj?.note?.timestamp || 0,
+                                })
+                            );
+                        }
                         console.log(
                             `${JSON.stringify(
                                 tempResult
