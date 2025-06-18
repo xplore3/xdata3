@@ -18,14 +18,14 @@ export class ApiDb {
 
   static getUserDataSource(userId: UUID) {
     const sources = [
-      'notes_search: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表',
+      'notes_search: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表. Parameters: keyword (search term), sort (popularity_descending or time_descending).',
       'users_search: 用以通过关键字搜索小红书账号，获得账号列表',
       'get_user: 用以通过单个小红书账号ID获取该账号的详情',
       //'hot_words: 用以获得近期火热的热词等',
       //'hot_topics: 用以获得近期火热的话题/种类等',
       'notes_comment_by_next_page: 用以通过单个笔记/帖子的ID获取其评论列表',
       'fetch_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note id列表，然后再获得这些笔记的评论列表；该操作能获得评论这一种数据',
-      'fetch_notes_and_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表，然后再获得这些笔记的评论列表；该操作能获得笔记和评论两种数据',
+      'fetch_notes_and_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表，然后再获得这些笔记的评论列表；该操作能获得笔记和评论两种数据. Parameters: keyword (search term), sort (popularity_descending or time_descending).',
       'get_note_list: 用以通过单个小红书账号ID获取该账号的笔记/帖子的列表'
     ];
     return sources;

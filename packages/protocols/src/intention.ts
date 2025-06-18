@@ -692,6 +692,7 @@ export class IntentionHandler {
         }，这些字段可以是原有字段的组合或转换。其中，id是唯一标识符，author是作者，title是标题，content/desc/description是内容描述。
         extract字段中不要包含'|','||','?','??'这样的运算符，当前JSONata版本不支持，可以在extract使用$exists()。
         主要是结构精简和转换。
+        只做映射，不要对collected_count，shared_count，comments_count，likes_count进行额外的计算。
         你返回的表达式将会插入代码中直接运行，请你一定要直接返回表达式。不要返回其他值，也不要做额外解释。`;
 
     try {
@@ -702,6 +703,7 @@ export class IntentionHandler {
         modelClass: ModelClass.SMALL,
       });
       console.log(` \n ---------------------JSONATA-AI-EXTRA-BEGIN-------------------- \n${response}\n ---------------------JSONATA-AI-EXTRA-END---------------------- `);
+      return response;
     } catch (err) {
       console.log(err);
     }
