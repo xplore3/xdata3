@@ -29,42 +29,6 @@ async function chatWithDeepSeek(prompt) {
     }
 }
 
-export async function getAIFilter(userQuestion: string) {
-    try {
-        const prompt = `你是一个严肃、认真的数据工程师，请你先不用关注用户问题，只针对下面字段结合用户的问题填写下面的值:
-        [用户问题：${userQuestion}]
-        [重要字段:
-        min_collected count未提及时默认0，
-        min_shared_count 未提及时默认0,
-        min_liked_count 未提及时默认0,
-        min_comments count 未提及时默认0,
-        max_collected_count 未提及时默认20000,
-        max_shared_count 未提及时默认20000,
-        max_liked_count 未提及时默认20000,
-        max_comments_count 未提及时默认20000,
-        ]
-请你直接返回 JSON 结果，不要返回其他内容，不要附加解释， JSON 结构如下：
- {
-     "min_collected_count": 0,
-     "min_shared_count": 0,
-     "min_liked_count": 0,
-     "min_comments_count": 0,
-     "max_collected_count": 20000,
-     "max_shared_count": 20000,
-     "max_liked_count": 20000,
-     "max_comments_count": 20000
- }
- `;
-        const filterStr = await chatWithDeepSeek(prompt);
-        console.log(`\n------------------AI-Filter-Begin---------------------\nprompt:${prompt}\nfilterStr:${filterStr}\n------------------AI-Filter--End--------------------`);
-
-        return filterStr;
-    } catch (error) {
-        console.error('Error calling DeepSeek API:', error);
-        return "";
-    }
+export {
+    chatWithDeepSeek
 }
-
-// chatWithDeepSeek(userquestionStr)
-//   .then(response => console.log(response))
-//   .catch(error => console.error(error));

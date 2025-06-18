@@ -8,13 +8,12 @@ import { IntentionHandler } from "./intention";
 import { updateCacheText } from "./filehelper";
 import fs from "fs";
 import path from "path";
-import { getAIFilter } from "./aibydeepseek";
 
 class APIWrapperFactory {
     private static instance: APIWrapperFactory;
     private static cursorMap = new Map<string, any>();
 
-    private constructor() {}
+    private constructor() { }
 
     public static getInstance(): APIWrapperFactory {
         if (!this.instance) {
@@ -173,7 +172,7 @@ class APIWrapperFactory {
                 try {
                     console.log(
                         "Fetching hot words... totalItemCount: " +
-                            totalItemCount
+                        totalItemCount
                     );
                     for (
                         let page = 1;
@@ -253,7 +252,7 @@ class APIWrapperFactory {
 
                     console.log(
                         "Fetched hot words: " +
-                            JSON.stringify(result).slice(0, 100)
+                        JSON.stringify(result).slice(0, 100)
                     );
                 } catch (error) {
                     console.error("Failed to fetch hot words:", error.message);
@@ -264,7 +263,7 @@ class APIWrapperFactory {
                 try {
                     console.log(
                         "Fetching hot topics... totalItemCount: " +
-                            totalItemCount
+                        totalItemCount
                     );
                     for (
                         let page = 1;
@@ -345,7 +344,7 @@ class APIWrapperFactory {
                     }
                     console.log(
                         "my result Fetched hot topics: " +
-                            JSON.stringify(result).slice(0, 100)
+                        JSON.stringify(result).slice(0, 100)
                     );
                 } catch (error) {
                     console.log("Error fetching hot topics:", error.message);
@@ -626,13 +625,6 @@ class APIWrapperFactory {
                         obj?.query ||
                         "";
                     const page = obj?.params?.page || 1;
-                    const aiFilterJSONStr = await getAIFilter(message.content.text);
-                    let aiFilterJSONObj = null;
-                    try {
-                        aiFilterJSONObj = JSON.parse(aiFilterJSONStr.replace(/```json/g, "").replace(/```/g, ""));
-                    } catch (error) {
-                        console.log("aiFilterJSONStr: ", aiFilterJSONStr);
-                    }
                     // Get more data.
                     // page 1: get data from 1 to 5.
                     // page 2: get data from 6 to 10.
@@ -648,6 +640,8 @@ class APIWrapperFactory {
                     ) {
                         if (result.length == lastResultLength) {
                             console.warn("no more data, this time");
+                            extractPath = null;
+                            filterPath = null;
                             resuntNotUpdateNumber++;
                             if (resuntNotUpdateNumber >= 5) {
                                 console.log("no more data");
@@ -724,8 +718,16 @@ class APIWrapperFactory {
                             console.error("note_search get url 3 ", e.message);
                             continue;
                         }
+                        if (response?.data?.code != 0) {
+                            console.error("note_search continue to next loop");
+                            continue;
+                        }
+                        const items = response.data?.data?.items;
+                        if (!items || items.length == 0) {
+                            continue;
+                        }
 
-                        tempResult = (response.data?.data?.items || []).map(
+                        /*tempResult = (response.data?.data?.items || []).map(
                             (obj) => ({
                                 author: obj?.note?.user?.nickname || "unknown",
                                 collected_count:
@@ -738,24 +740,7 @@ class APIWrapperFactory {
                                 desc: obj?.note?.desc || "",
                                 timestamp: obj?.note?.timestamp || 0,
                             })
-                        );
-                        
-                        if (aiFilterJSONObj) {
-                            const result0 = [];
-                            for (const item of tempResult) {
-                                if (item.collected_count >= aiFilterJSONObj.min_collected_count &&
-                                    item.shared_count >= aiFilterJSONObj.min_shared_count &&
-                                    item.liked_count >= aiFilterJSONObj.min_liked_count &&
-                                    item.comments_count >= aiFilterJSONObj.min_comments_count &&
-                                    item.collected_count <= aiFilterJSONObj.max_collected_count &&
-                                    item.shared_count <= aiFilterJSONObj.max_shared_count &&
-                                    item.liked_count <= aiFilterJSONObj.max_liked_count &&
-                                    item.comments_count <= aiFilterJSONObj.max_comments_count) {
-                                    result0.push(item);
-                                }
-                            }
-                            tempResult = result0;
-                        }
+                        ); */
                         // if (extractPath === null || filterPath === null) {
                         //     const items = response.data?.data?.items;
                         //     if (items && items.length > 0) {
@@ -770,42 +755,66 @@ class APIWrapperFactory {
                         //         filterPath = mapper.filter;
                         //     }
                         // }
-                        // try {
-                        //     tempResult = JSONPath({
-                        //         path: filterPath,
-                        //         json: response.data?.data?.items,
-                        //     }) || [];
-                        //     console.log(tempResult.length);
-                        //     //tempResult = tempResult.map(item => {
-                        //     //    return eval(extractPath);
-                        //     //});
-                        //     //const extractFunc = new Function(
-                        //     //    "item",
-                        //     //    "return " + extractPath
-                        //     //);
-                        //     //tempResult = tempResult.map((item) =>
-                        //     //    extractFunc(item)
-                        //     //);
-                        //     const expression = jsonata(extractPath);
-                        //     tempResult = await expression.evaluate(tempResult) || [];
-                        // }
-                        // catch (err) {
-                        //     console.log(err);
-                        //     tempResult = (response.data?.data?.items || []).map(
-                        //         (obj) => ({
-                        //             author: obj?.note?.user?.nickname || "unknown",
-                        //             collected_count:
-                        //                 obj?.note?.collected_count || 0,
-                        //             shared_count: obj?.note?.shared_count || 0,
-                        //             liked_count: obj?.note?.liked_count || 0,
-                        //             comments_count: obj?.note?.comments_count || 0,
-                        //             id: obj?.note?.id,
-                        //             title: obj?.note?.title,
-                        //             desc: obj?.note?.desc || "",
-                        //             timestamp: obj?.note?.timestamp || 0,
-                        //         })
-                        //     );
-                        // }
+                        if (!filterPath) {
+                            filterPath = await IntentionHandler.genAIFilterPath(runtime, message, items[0]);
+                        }
+                        if (!extractPath) {
+                            extractPath = await IntentionHandler.genAIExtraPath(runtime, message, items[0]);
+                        }
+                        try {
+
+                            console.log("notes_search...1...before JSONPath len: " + items.length);
+                            const rresults = response.data?.data?.items;
+                            for (let i = 0; i < rresults.length; i++) {
+                                const note = rresults[i].note;
+                                if(!note) {
+                                    continue;
+                                }
+                                const { liked_count, shared_count, comments_count, collected_count } = note;
+                                console.log(`liked_count: ${liked_count}, shared_count: ${shared_count}, comments_count: ${comments_count}, collected_count: ${collected_count}`);
+                            }
+                            // console.log(`\nnotes_search...2...----------------------------------\nrresults ${JSON.stringify(rresults)} \n------------------------------------`);
+
+                            tempResult = JSONPath({
+                                path: filterPath,
+                                json: response.data?.data?.items,
+                            }) || [];
+                            console.log("notes_search...3...after JSONPath len: " + tempResult.length);
+                            //tempResult = tempResult.map(item => {
+                            //    return eval(extractPath);
+                            //});
+                            //const extractFunc = new Function(
+                            //    "item",
+                            //    "return " + extractPath
+                            //);
+                            //tempResult = tempResult.map((item) =>
+                            //    extractFunc(item)
+                            //);
+                            if (!tempResult || tempResult.length == 0) {
+                                continue;
+                            }
+                            const expression = jsonata(extractPath);
+                            console.log("notes_search...4...after JSONATA len: " + tempResult.length);
+                            tempResult = await expression.evaluate(tempResult) || [];
+                            console.log("notes_search...5...after evaluate len: " + tempResult.length);
+                        }
+                        catch (err) {
+                            console.log(err);
+                            tempResult = (response.data?.data?.items || []).map(
+                                (obj) => ({
+                                    author: obj?.note?.user?.nickname || "unknown",
+                                    collected_count:
+                                        obj?.note?.collected_count || 0,
+                                    shared_count: obj?.note?.shared_count || 0,
+                                    liked_count: obj?.note?.liked_count || 0,
+                                    comments_count: obj?.note?.comments_count || 0,
+                                    id: obj?.note?.id,
+                                    title: obj?.note?.title,
+                                    desc: obj?.note?.desc || "",
+                                    timestamp: obj?.note?.timestamp || 0,
+                                })
+                            );
+                        }
                         console.log(
                             `${JSON.stringify(
                                 tempResult
@@ -1012,7 +1021,7 @@ class APIWrapperFactory {
                         obj?.product ||
                         obj?.query ||
                         "";
-                    const totalCommentCount =  obj?.params?.totalCommentCount || totalItemCount * 3;
+                    const totalCommentCount = obj?.params?.totalCommentCount || totalItemCount * 3;
                     // totalItemCount
                     const maxPageNum = 300;
                     // let tempResultComments = [];
@@ -1081,7 +1090,7 @@ class APIWrapperFactory {
                         let page = 1;
                         let allComments = [];
                         while (
-                            (tempResultNotes.length < totalItemCount  || allComments.length < totalCommentCount ) &&
+                            (tempResultNotes.length < totalItemCount || allComments.length < totalCommentCount) &&
                             page <= maxPageNum
                         ) {
                             if (tempResultNotes.length == lastResultLength) {
@@ -1374,12 +1383,12 @@ class APIWrapperFactory {
         updateCacheText(responseFinal, firstUnExistsTxtFilename, (err) => {
             console.error("Failed to write file:", err);
         });
-//         return `\n\n数据下载: 
-// \n1. 文本 txt 数据，方便把 URL 复制到 AI 中进行分析。
-//     \nhttps://data3.site/media/files/${firstUnExistsTxtFilename}
-// \n2. excel 数据，格式优美，方便阅读。
-//     \nhttps://data3.site/media/files/${firstUnExistsExcelFilename}`;
-        return {firstUnExistsTxtFilename, firstUnExistsExcelFilename};
+        //         return `\n\n数据下载: 
+        // \n1. 文本 txt 数据，方便把 URL 复制到 AI 中进行分析。
+        //     \nhttps://data3.site/media/files/${firstUnExistsTxtFilename}
+        // \n2. excel 数据，格式优美，方便阅读。
+        //     \nhttps://data3.site/media/files/${firstUnExistsExcelFilename}`;
+        return { firstUnExistsTxtFilename, firstUnExistsExcelFilename };
         //return `http://97.64.21.158:3333/media/files/${firstUnExistsFilename}`;
     }
 
