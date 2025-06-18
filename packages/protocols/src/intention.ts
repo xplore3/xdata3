@@ -89,7 +89,7 @@ export class IntentionHandler {
         "intention_options": ["使用数据的意图1", "使用数据的意图2", "......"],
       }
       输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
-      intention_params是一个数组，如果不能通过一种操作获得需要的数据，则需要是多个。
+      intention_params是一个数组，如果不能通过一种操作获得需要的数据，则需要是多个。这里的keyword如果不能明显地从用户输入里获取，则需要结合自己的knowledge和背景。
       data_result不要包含API/接口字样，需要使用非开发人员能够理解的语言。
       data_action的可选项是各个可用的API列表my_data_source中的关键字，如果不在这个列表里，输出为others。
       intention_options是根据用户输入而得出的选项，以用户明确输入的选项为优先，
@@ -270,6 +270,7 @@ export class IntentionHandler {
           "request_count": total count of user request from users input
         }.
       关于query_params字段，需用户所有需求，且输出参数说明中的项，不能有参数说明之外的项。
+      如果query_params的keyword之类的取值不能明显地从用户输入里获取，则需要结合自己的knowledge和背景。
       query_params字段示例如下：【${api.query_params_example}】。
       输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
       -----------------------------
@@ -350,9 +351,9 @@ export class IntentionHandler {
     const attachment = IntentionHandler.getTaskAttachment(taskId);
     const intention_examples = UserKnowledge.getUserIntentionExamples(message.userId);
     const prompt = `
-      你是一个数据处理专家，能根据输入的多个结构的数据/文件进行加工、处理、分析、预测的专家，能够基于用户的多轮输入，将数据处理成用户需要的结果。
+      你是一个严肃的数据处理工程师/数据分析师，能根据输入的多个结构的数据/文件进行加工、处理、分析、预测的专家，能够基于用户的多轮输入，将数据处理成用户需要的结果。
       主要有如下一些情况：
-      (1). 如果用户的需求不是一个数据处理的需求，而是一个数据获取的需求（这种情况的概率比较低），则给出如下结果：
+      (1). 如果用户的需求不是一个数据处理的需求，而是一个数据获取的需求（这种情况的概率比较低），或者当前提供的数据无法有效进行数据分析，则给出如下结果：
         {
           "intention_action": "data_collection",
           "origin_input": "${origin_input}",
@@ -374,6 +375,7 @@ export class IntentionHandler {
       (4). 如果用户的需求比较复杂，当前的数据无法满足处理的需求，则需要告知用户缺少什么数据导致无法给出理想结果，并给出intention_options让用户决定是否进一步获取数据。输出结构同(3).
       (5). 如果用户的输入里，既不包含数据获取需求，也没有明确的数据处理意图，也无其他意图，则参考最近的消息，给出相关的意图选项。输出结构同(3).
       (6). 如果用户的输入（${userInput}）明显与前置描述（${origin_input}）及数据处理无关，则只需给出一个文字回复。
+      (7). 如果用户的输入（{userInput}）与现有数据({attachment})关联不明显，不要强行分析，需要给出类似(2)(3)的结果。
       这里(2)(3)(4)(5)输出的JSON，不需要再加其他JSON字段。
       关于(2)(3)(4)(5)中的analysis_and_question_description，既包含数据分析结果（须以Markdown形式输出），也包含下一步意图的总结性描述，不需要再包含具体意图选项，以免跟intention_options重复。
       关于(2)(3)(4)(5)中的intention_options，是根据用户输入而得出的选项，以用户明确输入的选项为优先，其次以示例中的选项为优先，
