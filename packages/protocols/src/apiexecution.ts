@@ -90,7 +90,7 @@ export class ApiExecution {
         const response = await axios.post(
           api.url as string,
           api.query_params,
-          api.header
+          api.headers
         );
         console.log(response);
       }
@@ -98,7 +98,7 @@ export class ApiExecution {
         const response = await axios.get(
           api.url as string,
           api.query_params,
-          api.header
+          api.headers
         );
         console.log(response);
       }*/
@@ -106,7 +106,7 @@ export class ApiExecution {
         method: api.method,
         url: api.url,
         params: api.query_params,
-        header: api.header
+        headers: api.headers
       }
       let response = null;
       try {
@@ -190,8 +190,8 @@ export class ApiExecution {
         txtfilename = firstUnExistsTxtFilename;
         excelfilename = firstUnExistsExcelFilename;
       }
-      console.log(`executeRequest result len: ${result.length}`);
-      console.log(`executeRequest csvfileurl: ${csvfileurl}`);
+      console.log(`cacheResultData result len: ${result.length}`);
+      console.log(`cacheResultData csvfileurl: ${csvfileurl}`);
       return { result, txtfilename, excelfilename };
     }
     catch (err) {

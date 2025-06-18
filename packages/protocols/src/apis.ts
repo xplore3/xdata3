@@ -36,7 +36,7 @@ export class ApiDb {
       notes_search: {
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/search-note/v2',
         method: 'GET',
-        header: {
+        headers: {
           "x-rapidapi-host": "xiaohongshu-all-api.p.rapidapi.com",
           "x-rapidapi-key": `${process.env.RAPIDAPI_KEY}`,
         },
@@ -63,7 +63,7 @@ export class ApiDb {
       users_search: {
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/search-user/v2',
         method: 'GET',
-        header: {
+        headers: {
           "x-rapidapi-host": "xiaohongshu-all-api.p.rapidapi.com",
           "x-rapidapi-key": `${process.env.RAPIDAPI_KEY}`,
         },
@@ -84,7 +84,7 @@ export class ApiDb {
       get_user: {
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-user/v3',
         method: 'GET',
-        header: {
+        headers: {
           "x-rapidapi-host": "xiaohongshu-all-api.p.rapidapi.com",
           "x-rapidapi-key": `${process.env.RAPIDAPI_KEY}`,
         },
@@ -103,7 +103,7 @@ export class ApiDb {
       notes_comment_by_next_page: {
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-note-comment/v2',
         method: 'GET',
-        header: {
+        headers: {
           "x-rapidapi-host": "xiaohongshu-all-api.p.rapidapi.com",
           "x-rapidapi-key": `${process.env.RAPIDAPI_KEY}`,
         },
@@ -123,7 +123,7 @@ export class ApiDb {
       get_note_list: {
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-user-note-list/v1',
         method: 'GET',
-        header: {
+        headers: {
           "x-rapidapi-host": "xiaohongshu-all-api.p.rapidapi.com",
           "x-rapidapi-key": `${process.env.RAPIDAPI_KEY}`,
         },
