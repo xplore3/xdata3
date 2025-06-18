@@ -461,6 +461,84 @@ export class IntentionHandler {
     };
   }
 
+  static async genAIFilterPath(
+    runtime: IAgentRuntime,
+    message: Memory,
+    inputJson: JSON
+  ) {
+    const filterPathExample = `$.[?(@.note && (@.note.collected_count || 0) >= 40 && (@.note.shared_count || 0) >= 20 && (@.note.comments_count || 0) >= 20 && (@.note.liked_count || 0) >= 40)]`;//mapper.filter;
+
+    const prompt = `
+        这是用户的问题，[USER_QUESTION:${message.content.text}]\r\n
+        需要将给定JSON结构体[DATA_EXAMPLE: ${JSON.stringify([inputJson])}]进行按照条件过滤 filter；
+        filter能给'jsonpath-plus'库(https://github.com/JSONPath-Plus/JSONPath)使用的JSONPath。
+        生成这个表达式：[FILTER_EXAMPLE: ${filterPathExample}]
+        根据指令要求，需要对collected_count/shared_count/comments_count/likes_count的数量进行过滤。
+        - filter添加存在性检查（@.note && ...）, filter只需进行数量的过滤。
+        你返回的表达式将会插入代码中直接运行，请你一定要直接返回表达式。不要返回其他值，也不要做额外解释。`;
+    try {
+      // let response = await chatWithDeepSeek(prompt);
+      let response = await generateText({
+        runtime,
+        context: prompt,
+        modelClass: ModelClass.SMALL,
+      });
+      console.log(` \n ---------------------JSONATA-AI-FILTER-BEGIN-------------------- \n${response}\n ---------------------JSONATA-AI-FILTER-END---------------------- `);
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+    return filterPathExample;
+  }
+
+  static async genAIExtraPath(
+    runtime: IAgentRuntime,
+    message: Memory,
+    inputJson: JSON
+  ) {
+    let extractPathExample = `$map($, function($item) {
+        {   'id': $item.note.id,
+            'author': $item.note.user.nickname,
+            'title': $item.note.title,
+            'description': $item.note.desc,
+            'date': [$item.note.update_time, $item.note.timestamp, 0][0],
+            'tags': $item.note.tag_info.title,
+            'url': $item.note.images_list[0].url,
+            'collected_count': $item.note.collected_count,
+            'shared_count': $item.note.shared_count,
+            'comments_count': $item.note.comments_count,
+            'liked_count': $item.note.liked_count
+        }
+        })`;
+    const prompt = `
+        这是用户的问题，[USER_QUESTION:${message.content.text}]\r\n
+        需要将给定JSON结构体[DATA_EXAMPLE: ${JSON.stringify([inputJson])}]进行按照条件进行字段映射（结构精简和结构转化）；
+        extract能够使用JSONata(https://github.com/jsonata-js/jsonata)的jsonata(extract)进行解析，
+        生成这个表达式：[EXTRACT_EXAMPLE: ${extractPathExample}]
+        转换后的结果需要至少包含这些字段：
+        { 
+          id, author, title, content/desc/description, date/timestamp, url,
+          collected_count, shared_count, comments_count, likes_count
+        }，这些字段可以是原有字段的组合或转换。其中，id是唯一标识符，author是作者，title是标题，content/desc/description是内容描述。
+        extract字段中不要包含'|','||','?','??'这样的运算符，当前JSONata版本不支持，可以在extract使用$exists()。
+        主要是结构精简和转换。
+        你返回的表达式将会插入代码中直接运行，请你一定要直接返回表达式。不要返回其他值，也不要做额外解释。`;
+
+    try {
+      // let response = await chatWithDeepSeek(prompt);
+      let response = await generateText({
+        runtime,
+        context: prompt,
+        modelClass: ModelClass.SMALL,
+      });
+      console.log(` \n ---------------------JSONATA-AI-EXTRA-BEGIN-------------------- \n${response}\n ---------------------JSONATA-AI-EXTRA-END---------------------- `);
+    } catch (err) {
+      console.log(err);
+    }
+    return extractPathExample;
+  }
+
+
   static async composePrompt(
     runtime: IAgentRuntime,
     prompt: string,
