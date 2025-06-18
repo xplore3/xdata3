@@ -316,6 +316,7 @@ export class WechatHandler {
                                         job.stop();
                                         firstText = await this.getRealOption(runtime, userId, firstText);
                                         await this.sendMessage(userId, decryptedXml.xml.OpenKfId, firstText);
+                                        res.send('success');
                                         return;
                                     }
                                     firstText = await this.getRealOption(runtime, userId, firstText);
@@ -558,7 +559,7 @@ export class WechatHandler {
                 const showOptions = this.getRandomElements<string>(options, 3, 5);
                 await this.setCachedData(runtime, newTaskId + TASK_OPTIONS, showOptions);
                 await this.setCachedData(runtime, taskId + TASK_BK_OPTIONS, options);
-                text = `${output}\n\n${showOptions.map((item, index) => `(${index + 1}). ${item}`).join('\n')}【回复序号执行，回复0刷新选项，其他请输入】`;
+                text = `${output}\n\n${showOptions.map((item, index) => `(${index + 1}). ${item}`).join('\n')}\n【回复序号执行，回复0刷新选项，其他请输入】`;
             }
             return text;
             //return response.data?.text;
