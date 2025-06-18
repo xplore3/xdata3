@@ -262,7 +262,7 @@ export class IntentionHandler {
       你是一个Nodejs程序员，能根据用户的请求，可用的API，API文档，生成调用API的URL的调用参数。
       用户的原输入为：${userInput}。
       用户的数据调用描述为：${data_desc}。
-      可用的API参数说明为：${api.query_params_desc}。
+      可用的API参数说明为：${JSON.stringify(api.query_params_desc)}。
       可用的API的文档地址为：${api.docs_link}。
       根据这些输入，需要给出如下结果：
         {

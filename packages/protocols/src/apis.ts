@@ -48,7 +48,13 @@ export class ApiDb {
           noteType: 'Enum: Note type(default: _0), _0: 综合(General), _1: 视频筛选(Video), _2: 图文筛选(Normal), _3:直播筛选(Live)',
           noteTime: '(optional)String, 一天内: 一天内(within one day), 一周内: 一周内(within a week), 半年内: 半年内(Within half a year)'
         },
-        query_params_example: 'keyword=dance&page=1&sort=general&noteType=_0&noteTime=%E4%B8%80%E5%A4%A9%E5%86%85',
+        query_params_example: {
+          keyword: 'dance',
+          page: 1,
+          sort: 'general',
+          noteType: '_0',
+          noteTime: '%E4%B8%80%E5%A4%A9%E5%86%85'
+        },
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_b2edca5d-0e93-4b66-8deb-9653fb71e9b5',
         limit: '',
         price: '',
@@ -66,7 +72,10 @@ export class ApiDb {
           keyword: 'String, keyword for query',
           page: 'number, For multi pages, Default is 1'
         },
-        query_params_example: 'keyword=momo&page=1',
+        query_params_example: {
+          keyword: 'momo',
+          page: 1
+        },
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_fe3e8ab0-8b7b-448c-9f9d-785ba1c8406d',
         limit: '',
         price: '',
@@ -83,7 +92,9 @@ export class ApiDb {
         query_params_desc: {
           userId: 'String, userId for query'
         },
-        query_params_example: 'userId=648c8ada000000001c02b0f2',
+        query_params_example: {
+          userId: '648c8ada000000001c02b0f2'
+        },
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_2dfd1e1c-d9d7-4f86-9a0a-6934a62ea1cd',
         limit: '',
         price: '',
@@ -101,7 +112,9 @@ export class ApiDb {
           noteId: 'String, Note ID for query',
           lastCursor: '(optional)String, Paging parameters, enter previous page datas last comment ID(first page do not need enter).'
         },
-        query_params_example: 'noteId=6683b283000000001f0052bf',
+        query_params_example: {
+          noteId: '6683b283000000001f0052bf'
+        },
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_8836fd68-5f19-4c38-98ff-34280bec06ad',
         limit: '',
         price: '',
@@ -119,7 +132,9 @@ export class ApiDb {
           userId: 'String, User ID for query',
           lastCursor: '(optional)String, Paging parameters, enter previous page datas last note ID(first page do not need enter).'
         },
-        query_params_example: 'userId=648c8ada000000001c02b0f2',
+        query_params_example: {
+          userId: '648c8ada000000001c02b0f2'
+        },
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_677d7a27-13e4-498d-ac34-6f3c2927fb64',
         limit: '',
         price: '',
