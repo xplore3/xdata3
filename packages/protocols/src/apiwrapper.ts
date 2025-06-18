@@ -800,6 +800,8 @@ class APIWrapperFactory {
                         }
                         catch (err) {
                             console.log(err);
+                            mPage--;
+                            continue;
                             tempResult = (response.data?.data?.items || []).map(
                                 (obj) => ({
                                     author: obj?.note?.user?.nickname || "unknown",
