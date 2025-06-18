@@ -130,14 +130,8 @@ export class ApiExecution {
           let items = response.data?.data?.items || [];
           if (extractPath === null || filterPath === null) {
             if (items && items.length > 0) {
-              const mapper = await IntentionHandler.genExtractorByJsonata(
-                runtime,
-                message,
-                items[0]
-              );
-              console.log(mapper);
-              extractPath = mapper.extract;
-              filterPath = mapper.filter;
+              filterPath = await IntentionHandler.genAIFilterPath(runtime, message, items[0]);
+              extractPath = await IntentionHandler.genAIExtraPath(runtime, message, items[0]);
             }
           }
           try {
