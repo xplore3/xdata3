@@ -493,13 +493,13 @@ export class WechatHandler {
                     const json = JSON.parse(response.data?.text);
                     if (json) {
                         options = json.intention_options || json.available_options;
-                        output = json.data_result || json.question_description || json.analysis_and_question_description;
+                        output = (json.process_result + json.option_description) || json.question_description;
                     }
                 } catch (err) {
                     console.log(err);
                     const json = response.data?.text;
                     options = json.intention_options || json.available_options;
-                    output = json.data_result || json.question_description || json.analysis_and_question_description || json;
+                    output = (json.process_result + json.option_description) || json.question_description || json;
                 }
                 // End of the DataProcess
                 let text = output;
@@ -544,7 +544,7 @@ export class WechatHandler {
                     newTaskId = json.taskId;
                     await this.setCachedData(runtime, userId, json.taskId);
                     options = json.intention_options || json.available_options;
-                    output = json.data_result || json.question_description || json.analysis_and_question_description;
+                    output = (json.process_result + json.option_description) || json.question_description;
                 }
             } catch (err) {
                 console.log(err);
@@ -552,7 +552,7 @@ export class WechatHandler {
                 newTaskId = json.taskId;
                 await this.setCachedData(runtime, userId, json.taskId);
                 options = json.intention_options || json.available_options;
-                output = json.data_result || json.question_description || json.analysis_and_question_description || json;
+                output = (json.process_result + json.option_description) || json.question_description || json;
             }
             let text = output;
             if (options && options.length > 0) {

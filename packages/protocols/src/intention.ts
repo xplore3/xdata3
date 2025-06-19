@@ -18,6 +18,7 @@ import { ApiDb } from "./apis";
 import { UserKnowledge } from "./userknowledge";
 import { extractJson } from "./utils"
 import { ApiExecution } from "./apiexecution";
+import { TaskHelper } from "./task";
 
 
 export const dataHandlerTemplate = `
@@ -366,13 +367,15 @@ export class IntentionHandler {
         }.
       (2). 根据用户要求和附带的数据，进行数据的仿写/洞察/剖析/透视/阐释/推演/解构/溯源/思辨/融合；如果能够直接给出处理结果，则输出Markdown形式的分析结果。优先以这种情况进行处理。输出为一个可解析的JSON结果，如下：
         {
-          "analysis_and_question_description": "处理/仿写结果 和 下一步意图的描述",
+          "process_result": "处理/仿写/分析结果",
+          "option_description": "下一步意图的描述",
           "intention_options": ["进一步的意图1", "进一步的意图2", "......"],
           "taskId": "${taskId}"
         }
       (3). 如果需求比较模糊，则可以给出可供选择的一些选项，让用户进行二次选择，以明确其需求。这种情况的输出为一个可解析的JSON结果，如下：
         {
-          "analysis_and_question_description": "相关的描述",
+          "process_result": "无法理解你的需求",
+          "option_description": "相关的描述",
           "intention_options": ["进一步的意图1", "进一步的意图2", "......"],
           "taskId": "${taskId}"
         }
@@ -382,7 +385,8 @@ export class IntentionHandler {
       (7). 如果用户的输入（${userInput}）明显与前置描述（${origin_input}）及数据处理无关，则只需给出一个文字回复。
       (8). 如果用户的输入（{userInput}）与现有数据({attachment})关联不明显，不要强行分析，需要给出类似(2)(3)的结果，其taskId设为空('')。
       这里(2)(3)(5)(6)输出的JSON，不需要再加其他JSON字段。
-      关于(2)(3)(5)(6)中的analysis_and_question_description，既包含数据分析结果（须以Markdown形式输出），也包含下一步意图的总结性描述，不需要再包含具体意图选项，以免跟intention_options重复。
+      关于(2)(3)(5)(6)中的process_result是数据分析/处理/仿写结果（须以Markdown形式输出）。
+      关于(2)(3)(5)(6)中的option_description是下一步意图的总结性描述，不需要再包含具体意图选项，以免跟intention_options重复。
       关于(2)(3)(5)(6)中的intention_options，是根据用户输入而得出的选项，以用户明确输入的选项为优先，其次以示例中的选项为优先，
           且结合用户自身的产品和背景（不要有‘报告生成’这样的宽泛选项，不要有‘分析这些笔记’这样的模糊选项，需要是‘分析这些笔记关于***的特征’）,
           其数量约为5~10个，其可参考的示例如下：【${intention_examples}】。
@@ -404,11 +408,12 @@ export class IntentionHandler {
           message.content.text = origin_input + "\r\n" + message.content.text;
           //Gen new TaskId
           message.content.intention.taskId = this.generateTaskId();
+          await TaskHelper.setTaskOriginInput(runtime, taskId, message.content.text);
           return await IntentionHandler.handleDataCollectAPI(
             runtime, message, attachment
           );
         }
-        if (execJson.analysis_and_question_description) {
+        if (execJson.process_result) {
           return JSON.stringify(execJson);
         }
       }
