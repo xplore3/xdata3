@@ -112,13 +112,13 @@ export function getDynamicTail(textFileList, excelFileList) {
         dynamicTail += "\n数据下载:";
 
         if (textFilePaths.length > 0) {
-            dynamicTail += "\n1. 文本数据（可粘贴至AI分析）:";
-            dynamicTail += `\n${textFilePaths.join("\n")}`;
+            dynamicTail += "\n1. 文本数据（可粘贴至AI分析）:\r\n";
+            dynamicTail += `\n${textFilePaths.join("\r\n")}`;
         }
 
         if (excelFilePaths.length > 0) {
-            dynamicTail += "\n2. Excel数据（格式美观）:";
-            dynamicTail += `\n${excelFilePaths.join("\n")}`;
+            dynamicTail += "\n2. Excel数据（格式美观）:\r\n";
+            dynamicTail += `\n${excelFilePaths.join("\r\n")}`;
         }
 
         dynamicTail += "\n（数据三天后过期）";

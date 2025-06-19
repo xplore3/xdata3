@@ -553,7 +553,7 @@ export class DirectClient {
                 //    withPreContext,
                 //    memory
                 //);
-                const responseStr = await IntentionHandler.handleDataCollect(runtime, memory);
+                const responseStr = await IntentionHandler.handleDataCollectAPI(runtime, memory);
                 this.concurrentNum--;
 
                 // const parsedContent = parseJSONObjectFromText(

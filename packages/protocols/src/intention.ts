@@ -403,7 +403,7 @@ export class IntentionHandler {
           message.content.text = origin_input + "\r\n" + message.content.text;
           //Gen new TaskId
           message.content.intention.taskId = this.generateTaskId();
-          return await IntentionHandler.handleDataCollect(
+          return await IntentionHandler.handleDataCollectAPI(
             runtime, message, attachment
           );
         }
