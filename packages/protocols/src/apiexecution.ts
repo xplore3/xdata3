@@ -68,7 +68,7 @@ export class ApiExecution {
           if (execJson) {
             if (execJson.query_params) {
               api2.query_params = execJson.query_params;
-              await new Promise((resolve) => setTimeout(resolve, 3000));
+              await new Promise((resolve) => setTimeout(resolve, 300));
               const api2Result = await this.executeApi(
                 runtime, message, api2, execJson.request_count
               );
