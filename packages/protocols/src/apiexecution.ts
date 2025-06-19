@@ -14,6 +14,7 @@ import { IntentionHandler } from "./intention";
 import APIWrapperFactory from "./apiwrapper";
 import { ApiDb } from "./apis";
 import { extractJson } from "./utils"
+import { axios_request } from "./httpproxy";
 
 
 const gProxyAgent = new SocksProxyAgent(`socks5://${process.env.GLOBAL_PROXY_AGENT}`);
@@ -140,7 +141,8 @@ export class ApiExecution {
               options.params.page = page;
             }
             console.log(options);
-            response = await axios.request(options);
+            // response = await axios.request(options);
+            response = await axios_request(options);
             console.log(response.data);
           }
           catch (err) {
