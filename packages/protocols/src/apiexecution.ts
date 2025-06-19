@@ -170,8 +170,8 @@ export class ApiExecution {
             try {
               if (extractPath === null || filterPath === null) {
                 if (items && items.length > 0) {
-                  extractPath = await IntentionHandler.genAIExtraPath(runtime, message, items[0]);
                   filterPath = await IntentionHandler.genAIFilterPath(runtime, message, items[0]);
+                  extractPath = await IntentionHandler.genAIExtraPath(runtime, message, items[0]);
                 }
               }
               tempResult = JSONPath({
@@ -194,6 +194,7 @@ export class ApiExecution {
             }
             catch (err) {
               console.log(err);
+              //TODO: 重新生成filterPath/extractPath
             }
           }
           else {

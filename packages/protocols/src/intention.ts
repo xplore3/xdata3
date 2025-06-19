@@ -642,7 +642,8 @@ export class IntentionHandler {
   static async genAIFilterPath(
     runtime: IAgentRuntime,
     message: Memory,
-    inputJson: JSON
+    inputJson: JSON,
+    exception: string = ''
   ) {
     let timestamp = "1734566400";
     const prompttime = `你当前的任务是从用户的问题中计算出合适的时间戳。
@@ -674,7 +675,7 @@ export class IntentionHandler {
       console.log("timestamp error:", err.message);
     }
 
-    const filterPathExample = `$.[?(@.note && (@.note.collected_count || 0) >= 40 && (@.note.shared_count || 0) >= 20 && (@.note.comments_count || 0) >= 20 && (@.note.liked_count || 0) >= 40) && (@.note.timestamp || 2524579200) >= ${timestamp})]`;
+    const filterPathExample = `$.[?(@.note && (@.note.collected_count || 0) >= 40 && (@.note.shared_count || 0) >= 20 && (@.note.comments_count || 0) >= 20 && (@.note.liked_count || 0) >= 40 && (@.note.timestamp || 2524579200) >= ${timestamp})]`;
 
     const prompt = `
         这是用户的问题，[USER_QUESTION:${message.content.text}]\r\n
@@ -694,7 +695,7 @@ export class IntentionHandler {
         context: prompt,
         modelClass: ModelClass.LARGE,
       });
-      console.log(` \n ---------------------JSONATA-AI-FILTER-BEGIN-------------------- \n${response}\n ---------------------JSONATA-AI-FILTER-END---------------------- `);
+      console.log(` \n ---------------------JSONPATH-AI-FILTER-BEGIN-------------------- \n${response}\n ---------------------JSONATA-AI-FILTER-END---------------------- `);
       return response;
     } catch (err) {
       console.log(err);
@@ -705,7 +706,8 @@ export class IntentionHandler {
   static async genAIExtraPath(
     runtime: IAgentRuntime,
     message: Memory,
-    inputJson: JSON
+    inputJson: JSON,
+    exception: string = ''
   ) {
     let extractPathExample = `$map($, function($item) {
         {   'id': $item.note.id,
@@ -727,7 +729,7 @@ export class IntentionHandler {
         extract能够使用JSONata(https://github.com/jsonata-js/jsonata)的jsonata(extract)进行解析，
         生成这个表达式：[EXTRACT_EXAMPLE: ${extractPathExample}]
         转换后的结果需要至少包含这些字段：
-        { 
+        {
           id, author, title, content/desc/description, date/timestamp, url,
           collected_count, shared_count, comments_count, likes_count
         }，这些字段可以是原有字段的组合或转换。其中，id是唯一标识符，author是作者，title是标题，content/desc/description是内容描述。
