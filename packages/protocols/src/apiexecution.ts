@@ -161,8 +161,8 @@ export class ApiExecution {
             try {
               if (extractPath === null || filterPath === null) {
                 if (items && items.length > 0) {
-                  filterPath = await IntentionHandler.genAIFilterPath(runtime, message, items[0]);
                   extractPath = await IntentionHandler.genAIExtraPath(runtime, message, items[0]);
+                  filterPath = await IntentionHandler.genAIFilterPath(runtime, message, items[0]);
                 }
               }
               tempResult = JSONPath({

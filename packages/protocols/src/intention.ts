@@ -641,13 +641,16 @@ export class IntentionHandler {
     message: Memory,
     inputJson: JSON
   ) {
-    const filterPathExample = `$.[?(@.note && (@.note.collected_count || 0) >= 40 && (@.note.shared_count || 0) >= 20 && (@.note.comments_count || 0) >= 20 && (@.note.liked_count || 0) >= 40)]`;//mapper.filter;
+    const filterPathExample = `$.[?(@.note && (@.note.collected_count || 0) >= 40 && (@.note.shared_count || 0) >= 20 && (@.note.comments_count || 0) >= 20 && (@.note.liked_count || 0) >= 40) && (@.note.timestamp || 2524579200) >= 1734566400)]`;
 
     const prompt = `
         这是用户的问题，[USER_QUESTION:${message.content.text}]\r\n
+        今天的时间戳是（秒级）：${Math.floor(Date.now() / 1000)}；
         需要将给定JSON结构体[DATA_EXAMPLE: ${JSON.stringify([inputJson])}]进行按照条件过滤 filter；
         filter能给'jsonpath-plus'库(https://github.com/JSONPath-Plus/JSONPath)使用的JSONPath。
         生成这个表达式：[FILTER_EXAMPLE: ${filterPathExample}]
+        根据用户的问题，判断是否需要筛选时间，注意这里的时间戳是秒级别的。
+        如果用户需要筛选时间，请你认真思考时间戳，或者使用相关工具或者编程来生成准确的时间戳。
         根据指令要求，需要对collected_count/shared_count/comments_count/likes_count的数量进行过滤。
         - filter添加存在性检查（@.note && ...）, filter只需进行数量的过滤。
         你返回的表达式将会插入代码中直接运行，请你一定要直接返回表达式。不要返回其他值，也不要做额外解释。`;
@@ -656,7 +659,7 @@ export class IntentionHandler {
       let response = await generateText({
         runtime,
         context: prompt,
-        modelClass: ModelClass.SMALL,
+        modelClass: ModelClass.LARGE,
       });
       console.log(` \n ---------------------JSONATA-AI-FILTER-BEGIN-------------------- \n${response}\n ---------------------JSONATA-AI-FILTER-END---------------------- `);
       return response;
@@ -676,7 +679,7 @@ export class IntentionHandler {
             'author': $item.note.user.nickname,
             'title': $item.note.title,
             'description': $item.note.desc,
-            'date': [$item.note.update_time, $item.note.timestamp, 0][0],
+            'date': [$item.note.timestamp, 0][0],
             'tags': $item.note.tag_info.title,
             'url': $item.note.images_list[0].url,
             'collected_count': $item.note.collected_count,
@@ -697,7 +700,9 @@ export class IntentionHandler {
         }，这些字段可以是原有字段的组合或转换。其中，id是唯一标识符，author是作者，title是标题，content/desc/description是内容描述。
         extract字段中不要包含'|','||','?','??'这样的运算符，当前JSONata版本不支持，可以在extract使用$exists()。
         主要是结构精简和转换。
-        只做映射，不要对collected_count，shared_count，comments_count，likes_count进行额外的计算。
+        只做映射，不要对collected_count，shared_count，comments_count，likes_count，date 等进行额外的筛选。
+        只做映射，不要筛选。
+        只做映射，原来是几条数据，映射后还是几条数据。
         你返回的表达式将会插入代码中直接运行，请你一定要直接返回表达式。不要返回其他值，也不要做额外解释。`;
 
     try {
@@ -705,7 +710,7 @@ export class IntentionHandler {
       let response = await generateText({
         runtime,
         context: prompt,
-        modelClass: ModelClass.SMALL,
+        modelClass: ModelClass.LARGE,
       });
       console.log(` \n ---------------------JSONATA-AI-EXTRA-BEGIN-------------------- \n${response}\n ---------------------JSONATA-AI-EXTRA-END---------------------- `);
       return response;
