@@ -101,6 +101,7 @@ export class ApiExecution {
 
   static async executeApi(runtime: IAgentRuntime, message: Memory, api: JSON | any, totalCount: number): Promise<any> {
     let result = [];
+    console.log(`executeApi ${totalCount}`);
     try {
       /*if (api.method == 'POST') {
         const response = await axios.post(
@@ -198,8 +199,8 @@ export class ApiExecution {
           else {
             tempResult = [response.data?.data];
           }
-          console.log(`${JSON.stringify(tempResult)}
-            \n------------------------jsonata---------------------\n`);
+          //console.log(`${JSON.stringify(tempResult)}
+          //  \n------------------------jsonata---------------------\n`);
           result = result.concat(tempResult);
           console.log(`executeApi result: ${result.length}`);
           
@@ -208,7 +209,7 @@ export class ApiExecution {
           );
         }
         result?.slice(0, totalCount);
-        console.log(`executeApi result : ${result?.length}`);
+        console.log(`executeApi final length : ${result?.length}`);
       }
       catch (err) {
         console.log(err);
