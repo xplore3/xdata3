@@ -63,6 +63,7 @@ export class ApiExecution {
           if (execJson) {
             if (execJson.query_params) {
               api2.query_params = execJson.query_params;
+              await new Promise((resolve) => setTimeout(resolve, 3000));
               const api2Result = await this.executeApi(
                 runtime, message, api2, execJson.request_count
               );
@@ -81,10 +82,10 @@ export class ApiExecution {
         = APIWrapperFactory.excelDataPersist(result, taskId + api1.name);
       const { firstUnExistsTxtFilename: txt2, firstUnExistsExcelFilename: excel2 }
         = APIWrapperFactory.excelDataPersist(result2, taskId + api2.name);
-      //return { JSON.stringify(result) + JSON.stringify(result2),
-      //    [txt1 as string, txt2],
-      //    [excel1 as string, excel2] };
-      return this.cacheResultData(result2, taskId);
+      return { result: `${JSON.stringify(result)}\n${JSON.stringify(result2)}`,
+          txtfilename: [txt1, txt2],
+          excelfilename: [excel1, excel2] };
+      //return this.cacheResultData(result2, taskId);
       //return cacheText + this.cacheResultData(result2, taskId);
       // TODO
     }

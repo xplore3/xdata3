@@ -228,7 +228,8 @@ export class IntentionHandler {
           if (execParam.data_action && execParam.data_action != 'others') {
             const dataResponse = await this.handleDataCollectInputParam(runtime, message,
               execParam.data_result, execParam.data_action);
-            execJson.data_result += dataResponse;
+            // TODO
+            execJson.data_result = dataResponse;
           }
         }
         execJson.taskId = taskId;
@@ -326,7 +327,7 @@ export class IntentionHandler {
             return getDynamicTail(txtfilelist, excelfilelist);
           }
           else {
-            return "哎呀，这个数据【data_desc】我暂时无法获取，你可以稍后重试，或回复【人工】联系工程师帮你添加支持~";
+            return `哎呀，这个数据【${api.name}】我暂时无法获取，你可以稍后重试，或回复【人工】联系工程师帮你添加支持~`;
           }
         }
       }
