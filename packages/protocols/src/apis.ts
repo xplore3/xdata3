@@ -159,7 +159,7 @@ export class ApiDb {
     };
     const api = apiList[api_desc];
     if (api && api.execute_depend) {
-      return apiList[api.request1];
+      return { ...apiList[api.request1], ...api };
     }
     return api;
   }

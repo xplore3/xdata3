@@ -29,6 +29,7 @@ export class ApiExecution {
     if (api && api.execute_depend && api.execute_depend === 'chain_loop') {
       const api1 = ApiDb.getApi(api.request1);
       const api2 = ApiDb.getApi(api.request2);
+      api1.query_params = api.query_params;
       const userInput = `${message.content.text}`;
       const result = await this.executeApi(runtime, message, api1, totalCount);
       const result2 = [];
