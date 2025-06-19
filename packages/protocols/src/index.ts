@@ -1219,16 +1219,16 @@ function getDynamicTail(taskId: string) {
         dynamicTail += "\n数据下载:";
 
         if (textFilePaths.length > 0) {
-            dynamicTail += "\n1. 文本数据（可粘贴至AI分析）:\r\n";
-            dynamicTail += `\n${textFilePaths.join("\r\n")}`;
+            dynamicTail += "\r\n(1). 文本数据（可粘贴至AI分析）:";
+            dynamicTail += `\r\n${textFilePaths.join("\r\n")}`;
         }
 
         if (excelFilePaths.length > 0) {
-            dynamicTail += "\n2. Excel数据（格式美观）:\r\n";
-            dynamicTail += `\n${excelFilePaths.join("\r\n")}`;
+            dynamicTail += "\r\n(2). Excel数据（格式美观）:\r\n";
+            dynamicTail += `\r\n${excelFilePaths.join("\r\n")}`;
         }
 
-        dynamicTail += "\n（数据三天后过期）";
+        dynamicTail += "\r\n（数据三天后过期）";
     }
     if (textFilePaths.length > 0 || excelFilePaths.length > 0) {
         return dynamicTail;
