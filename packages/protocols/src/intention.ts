@@ -45,7 +45,7 @@ export class IntentionHandler {
   runtime: IAgentRuntime = null;
   message: Memory = null;
 
-  constructor() {}
+  constructor() { }
 
   /**
    * 
@@ -113,7 +113,7 @@ export class IntentionHandler {
       if (execJson && execJson.intention_params && execJson.intention_params.length > 0) {
         for (const execParam of execJson.intention_params) {
           if (execParam.data_action && execParam.data_action != 'others') {
-            const {result, txtfilename, excelfilename} = await APIWrapperFactory.executeRequest(
+            const { result, txtfilename, excelfilename } = await APIWrapperFactory.executeRequest(
               runtime, execParam, message);
             if (result && result.length > 0) {
               results.push(result);
@@ -127,7 +127,7 @@ export class IntentionHandler {
               if (Array.isArray(txtfilename)) {
                 for (const item of txtfilename) {
                   if (item)
-                  txtfilelist.push(item);
+                    txtfilelist.push(item);
                 }
               } else {
                 txtfilelist.push(txtfilename);
@@ -137,7 +137,7 @@ export class IntentionHandler {
               if (Array.isArray(excelfilename)) {
                 for (const item of excelfilename) {
                   if (item)
-                  excelfilelist.push(item);
+                    excelfilelist.push(item);
                 }
               } else {
                 excelfilelist.push(excelfilename);
@@ -292,7 +292,7 @@ export class IntentionHandler {
       if (execJson) {
         if (execJson.query_params) {
           api.query_params = execJson.query_params;
-          const {result, txtfilename, excelfilename} = await ApiExecution.executeApiChainLoop(
+          const { result, txtfilename, excelfilename } = await ApiExecution.executeApiChainLoop(
             runtime, message, api, execJson.request_count
           );
           if (result && result.length > 0) {
@@ -426,7 +426,7 @@ export class IntentionHandler {
     runtime: IAgentRuntime,
     message: Memory,
     inputJson: JSON
-  ): Promise<{extract: string, filter: string}> {
+  ): Promise<{ extract: string, filter: string }> {
     const prompt = `
         根据给定指令：“${message.content.text}”\r\n，将给定JSON结构体：“${JSON.stringify([inputJson])}”进行结构转换或精简；
         生成这个表达式：{extract: string, filter: string}，其中extract用以字段映射，filter用以筛选过滤。
@@ -497,7 +497,7 @@ export class IntentionHandler {
           else {
             response = JSON.parse(response);
           }
-          return {extract: json.extract, filter: json.filter};
+          return { extract: json.extract, filter: json.filter };
         }
         catch (e) {
           console.error("Failed again to parse response:", e);
@@ -533,7 +533,7 @@ export class IntentionHandler {
     runtime: IAgentRuntime,
     message: Memory,
     inputJson: JSON
-  ): Promise<{extract: string, filter: string}> {
+  ): Promise<{ extract: string, filter: string }> {
     const prompt = `
         根据给定指令：“${message.content.text}”\r\n，将给定JSON结构体：“${JSON.stringify([inputJson])}”进行结构转换或精简；
         生成这个表达式：{extract: string, filter: string}，其中extract用以字段映射，filter用以筛选过滤。
@@ -608,7 +608,7 @@ export class IntentionHandler {
           else {
             response = JSON.parse(response);
           }
-          return {extract: json.extract, filter: json.filter};
+          return { extract: json.extract, filter: json.filter };
         }
         catch (e) {
           console.error("Failed again to parse response:", e);
@@ -644,7 +644,37 @@ export class IntentionHandler {
     message: Memory,
     inputJson: JSON
   ) {
-    const filterPathExample = `$.[?(@.note && (@.note.collected_count || 0) >= 40 && (@.note.shared_count || 0) >= 20 && (@.note.comments_count || 0) >= 20 && (@.note.liked_count || 0) >= 40) && (@.note.timestamp || 2524579200) >= 1734566400)]`;
+    let timestamp = "1734566400";
+    const prompttime = `你当前的任务是从用户的问题中计算出合适的时间戳。
+    注意，你当前要处理的工作只是计算时间戳，请你算的精准一下。
+    如果用户的问题没有提及时间，请你直接返回：no_time。
+    如果用户的问题中提及时间，请你计算出开始的时间戳。比如：用户提及查询三周以内的数据，那么时间戳应该是三周前的时间。
+    你先根据当前的时间，减去三周的时间，得到三周前的时间。
+    今天的时间戳是（秒级）：[TODAY_TIMESTAMP: ${Math.floor(Date.now() / 1000)}]。
+    这是用户的问题，[USER_QUESTION:${message.content.text}]\r\n.
+    请你计算好之后直接返回开始的时间戳，或者返回 no_time。
+    请你按照思路来计算时间戳，不要直接返回时间戳。
+    为了方便我提取时间戳，请你先输出思考过程，最后输出时间戳，时间戳使用[]包裹, 比如[1734566400]或者[no_time。]。
+    `;
+    try {
+      const response = await generateText({
+        runtime,
+        context: prompttime,
+        modelClass: ModelClass.LARGE,
+      });
+      console.log("timestamp response:", response);
+      const timestr = response.split('[')[1].split(']')[0];
+      console.log("timestamp timestr:", timestr);
+      if (!timestr?.includes("no_time")) {
+        if (isUnixTimestamp(timestr)) {
+          timestamp = timestr;
+        }
+      }
+    } catch (err) {
+      console.log("timestamp error:", err.message);
+    }
+
+    const filterPathExample = `$.[?(@.note && (@.note.collected_count || 0) >= 40 && (@.note.shared_count || 0) >= 20 && (@.note.comments_count || 0) >= 20 && (@.note.liked_count || 0) >= 40) && (@.note.timestamp || 2524579200) >= ${timestamp})]`;
 
     const prompt = `
         这是用户的问题，[USER_QUESTION:${message.content.text}]\r\n
@@ -774,3 +804,26 @@ export class IntentionHandler {
     return `TASK-${timestamp}-${seq}`;
   }
 }
+
+
+function isUnixTimestamp(str) {
+  if (typeof str !== "string" || str.length !== 10) {
+    return false;
+  }
+
+  if (!/^\d+$/.test(str)) {
+    return false;
+  }
+
+  const timestamp = parseInt(str, 10);
+  const minTimestamp = 0; // 1970-01-01
+  const maxTimestamp = 4102444800; // 2100-01-01
+
+  if (timestamp < minTimestamp || timestamp > maxTimestamp) {
+    return false;
+  }
+
+  const date = new Date(timestamp * 1000);
+  return !isNaN(date.getTime());
+}
+
