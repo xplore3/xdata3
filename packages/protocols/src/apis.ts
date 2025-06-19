@@ -34,6 +34,7 @@ export class ApiDb {
   static getApi(api_desc: string) {
     const apiList = {
       notes_search: {
+        name: 'notes',
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/search-note/v2',
         method: 'GET',
         headers: {
@@ -62,6 +63,7 @@ export class ApiDb {
         note: ''
       },
       users_search: {
+        name: 'users',
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/search-user/v2',
         method: 'GET',
         headers: {
@@ -84,6 +86,7 @@ export class ApiDb {
         note: ''
       },
       get_user: {
+        name: 'user',
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-user/v3',
         method: 'GET',
         headers: {
@@ -104,6 +107,7 @@ export class ApiDb {
         note: ''
       },
       notes_comment_by_next_page: {
+        name: 'comments',
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-note-comment/v2',
         method: 'GET',
         headers: {
@@ -125,6 +129,7 @@ export class ApiDb {
         note: ''
       },
       get_note_list: {
+        name: 'user_notes',
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-user-note-list/v1',
         method: 'GET',
         headers: {
