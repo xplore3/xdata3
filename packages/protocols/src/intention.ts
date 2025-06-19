@@ -188,9 +188,10 @@ export class IntentionHandler {
         (2). 如果用户的输入里，不包含数据获取的内容，则将这些内容进行拆解，找到其中的意图选项，输出出来。
         (3). 如果用户的输入里，既不包含数据获取需求，也没有明确的数据处理意图，也无其他意图，则参考最近的消息，给出相关的意图选项。
         (4). 如果用户的输入跟数据获取或数据处理都没有关系，则参考上下文给出简短回答，且不需要意图选项。
+        (5). 如果用户需要获取的数据在可用数据源里不存在（比如热词/热榜/热文等），则data_result须提示用户不存在这些数据，稍后会提供，请用户耐心等待；intention_params和intention_options为空。
       用户输入：${message.content.text}.
       可用数据平台：${my_data_platform}。
-      可用数据获取API：${my_data_source}。
+      可用数据源/数据获取API：${my_data_source}。
       已有数据：${existData}。
       -----------------------------
       你需要输出如下：
@@ -354,7 +355,7 @@ export class IntentionHandler {
     const attachment = IntentionHandler.getTaskAttachment(taskId);
     const intention_examples = UserKnowledge.getUserIntentionExamples(message.userId);
     const prompt = `
-      你是一个严肃的数据处理工程师/数据分析师，能根据输入的多个结构的数据/文件进行加工、处理、分析、预测的专家，能够基于用户的多轮输入，将数据处理成用户需要的结果。
+      你是一个严肃的线上运营专员/数据处理工程师/数据分析师，能根据输入的多个结构的数据/文件进行加工、处理、分析、预测、仿写的专家，能够基于用户的多轮输入，将数据处理成用户需要的结果。
       主要有如下一些情况：
       (1). 如果用户的需求不是一个数据处理的需求，而是一个数据获取的需求（这种情况的概率比较低），或者当前提供的数据无法有效进行数据分析，则给出如下结果：
         {
@@ -363,9 +364,9 @@ export class IntentionHandler {
           "intention_desc": "${userInput}",
           "attachment": "{attachment}",
         }.
-      (2). 根据用户要求和附带的数据，进行数据的洞察/剖析/透视/阐释/推演/解构/溯源/思辨/融合；如果能够直接给出处理结果，则输出Markdown形式的分析结果。优先以这种情况进行处理。输出为一个可解析的JSON结果，如下：
+      (2). 根据用户要求和附带的数据，进行数据的仿写/洞察/剖析/透视/阐释/推演/解构/溯源/思辨/融合；如果能够直接给出处理结果，则输出Markdown形式的分析结果。优先以这种情况进行处理。输出为一个可解析的JSON结果，如下：
         {
-          "analysis_and_question_description": "数据分析结果 和 下一步意图的描述",
+          "analysis_and_question_description": "处理/仿写结果 和 下一步意图的描述",
           "intention_options": ["进一步的意图1", "进一步的意图2", "......"],
           "taskId": "${taskId}"
         }
