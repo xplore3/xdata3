@@ -654,6 +654,9 @@ importers:
       pdfkit:
         specifier: 0.17.1
         version: 0.17.1
+      socks-proxy-agent:
+        specifier: ^8.0.5
+        version: 8.0.5
       whatwg-url:
         specifier: 7.1.0
         version: 7.1.0

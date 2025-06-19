@@ -25,6 +25,7 @@
         "jsonata": "2.0.6",
         "jsonpath-plus": "^10.3.0",
         "md-to-pdf": "^5.2.4",
+        "socks-proxy-agent": "^8.0.5",
         "pdfkit": "0.17.1",
         "exceljs": "^4.4.0",
         "socks-proxy-agent": "^8.0.5",
