@@ -37,9 +37,9 @@ export class ApiExecution {
         const prompt = `
           你是一个Nodejs程序员，能根据用户的请求，可用的API，API文档，生成调用API的URL的调用参数。
           用户的原需求为：${userInput}。
-          调用参数的取值内容范围为：${item}。
-          可用的API参数说明为：${JSON.stringify(api.query_params_desc)}。
-          可用的API的文档地址为：${api.docs_link}。
+          调用参数的取值内容来源为：${JSON.stringify(item)}。
+          可用的API参数说明为：${JSON.stringify(api2.query_params_desc)}。
+          可用的API的文档地址为：${api2.docs_link}。
           根据这些输入，需要给出如下结果：
           {
             "query_params": "json of params",
@@ -47,7 +47,7 @@ export class ApiExecution {
           }.
           关于query_params字段，需满足用户所有需求，且输出参数说明中的项，不能有参数说明之外的项；不是数组，仅仅是一个JSON对象。
           如果query_params的keyword之类的取值不能明显地从用户输入里获取，则需要结合自己的knowledge和背景。
-          query_params字段示例如下：【${JSON.stringify(api.query_params_example)}】。
+          query_params字段示例如下：【${JSON.stringify(api2.query_params_example)}】。
           输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
           -----------------------------
         `;
@@ -125,6 +125,7 @@ export class ApiExecution {
             if (options.params.page) {
               options.params.page = page;
             }
+            console.log(options);
             response = await axios.request(options);
             console.log(response.data);
           }
@@ -140,35 +141,45 @@ export class ApiExecution {
             continue;
           }
           let tempResult = [];
-          // TODO: The response items should be compatiable
-          let items = response.data?.data?.items || [];
-          if (extractPath === null || filterPath === null) {
-            if (items && items.length > 0) {
-              filterPath = await IntentionHandler.genAIFilterPath(runtime, message, items[0]);
-              extractPath = await IntentionHandler.genAIExtraPath(runtime, message, items[0]);
+          // TODO: The response items should be compatible
+          let items = response.data?.data?.items
+              || response.data?.data?.comments
+              || response.data?.data?.users
+              || response.data?.data?.notes
+              || response.data?.data?.list
+              || [];
+          if (api.filter) {
+            try {
+              if (extractPath === null || filterPath === null) {
+                if (items && items.length > 0) {
+                  filterPath = await IntentionHandler.genAIFilterPath(runtime, message, items[0]);
+                  extractPath = await IntentionHandler.genAIExtraPath(runtime, message, items[0]);
+                }
+              }
+              tempResult = JSONPath({
+                path: filterPath,
+                json: items,
+              }) || [];
+              console.log(tempResult.length);
+              //tempResult = tempResult.map(item => {
+              //    return eval(extractPath);
+              //});
+              //const extractFunc = new Function(
+              //    "item",
+              //    "return " + extractPath
+              //);
+              //tempResult = tempResult.map((item) =>
+              //    extractFunc(item)
+              //);
+              const expression = jsonata(extractPath);
+              tempResult = await expression.evaluate(tempResult) || [];
+            }
+            catch (err) {
+              console.log(err);
             }
           }
-          try {
-            tempResult = JSONPath({
-              path: filterPath,
-              json: items,
-            }) || [];
-            console.log(tempResult.length);
-            //tempResult = tempResult.map(item => {
-            //    return eval(extractPath);
-            //});
-            //const extractFunc = new Function(
-            //    "item",
-            //    "return " + extractPath
-            //);
-            //tempResult = tempResult.map((item) =>
-            //    extractFunc(item)
-            //);
-            const expression = jsonata(extractPath);
-            tempResult = await expression.evaluate(tempResult) || [];
-          }
-          catch (err) {
-            console.log(err);
+          else {
+            tempResult = [response.data?.data];
           }
           console.log(`${JSON.stringify(tempResult)}
             \n------------------------jsonata---------------------\n`);
