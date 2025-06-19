@@ -119,6 +119,10 @@ export class ApiExecution {
           if (execCount++ > MAX_TRY_COUNT) { break; }
 
           try {
+            // TODO: WORKAROUND of page
+            if (options.params.page) {
+              options.params.page = page;
+            }
             response = await axios.request(options);
             console.log(response.data);
           }
