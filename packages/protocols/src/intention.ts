@@ -229,7 +229,7 @@ export class IntentionHandler {
             const dataResponse = await this.handleDataCollectInputParam(runtime, message,
               execParam.data_result, execParam.data_action);
             // TODO
-            execJson.data_result = dataResponse;
+            execJson.data_result += "\n" + dataResponse + "\n";
           }
         }
         execJson.taskId = taskId;
