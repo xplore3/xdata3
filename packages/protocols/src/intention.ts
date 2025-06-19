@@ -267,11 +267,12 @@ export class IntentionHandler {
       可用的API的文档地址为：${api.docs_link}。
       根据这些输入，需要给出如下结果：
         {
-          "query_params": "json of params",
+          "query_params": {json of params},
           "request_count": total count of user request from users input
         }.
       关于query_params字段，需满足用户所有需求，且输出参数说明中的项，不能有参数说明之外的项；不是数组，仅仅是一个JSON对象。
       如果query_params的keyword之类的取值不能明显地从用户输入里获取，则需要结合自己的knowledge和背景。
+      query_params须是一个JSON对象，不能是字符串等。
       query_params字段示例如下：【${JSON.stringify(api.query_params_example)}】。
       输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
       -----------------------------
@@ -400,6 +401,8 @@ export class IntentionHandler {
       if (execJson) {
         if (execJson.intention_action && execJson.intention_action === "data_collection") {
           message.content.text = origin_input + "\r\n" + message.content.text;
+          //Gen new TaskId
+          message.content.intention.taskId = this.generateTaskId();
           return await IntentionHandler.handleDataCollect(
             runtime, message, attachment
           );
@@ -761,5 +764,13 @@ export class IntentionHandler {
       }
     }
     return attachment;
+  }
+
+  static generateTaskId() {
+    const timestamp = Date.now().toString(36);
+    const seq = Math.floor(Math.random() * 1000)
+      .toString(36)
+      .padStart(4, "0");
+    return `TASK-${timestamp}-${seq}`;
   }
 }
