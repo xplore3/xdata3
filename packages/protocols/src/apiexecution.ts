@@ -73,7 +73,7 @@ export class ApiExecution {
                 runtime, message, api2, execJson.request_count
               );
               if (api2Result) {
-                result2.push(api2Result);
+                result2.push(JSON.stringify(api2Result));
               }
             }
           }
