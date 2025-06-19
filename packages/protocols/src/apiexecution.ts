@@ -129,6 +129,8 @@ export class ApiExecution {
           }
           catch (err) {
             console.log(`axios.request error ${err.message}`);
+            await new Promise((resolve) => setTimeout(resolve, 1000 + 1000 * execCount));
+            continue;
           }
           // TODO: The response check should be compatible
           if (response.status != 200 || response?.data?.code != 0) {
