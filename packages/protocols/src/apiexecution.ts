@@ -2,6 +2,7 @@
 import axios from "axios";
 import jsonata from "jsonata";
 import { JSONPath } from "jsonpath-plus";
+import { SocksProxyAgent } from 'socks-proxy-agent';
 
 import {
   Memory,
@@ -14,6 +15,8 @@ import APIWrapperFactory from "./apiwrapper";
 import { ApiDb } from "./apis";
 import { extractJson } from "./utils"
 
+
+const gProxyAgent = new SocksProxyAgent(`socks5://${process.env.GLOBAL_PROXY_AGENT}`);
 
 export class ApiExecution {
 
@@ -117,7 +120,9 @@ export class ApiExecution {
         method: api.method,
         url: api.url,
         params: api.query_params,
-        headers: api.headers
+        headers: api.headers,
+        httpAgent: gProxyAgent,
+        httpsAgent: gProxyAgent
       }
       let response = null;
       try {
