@@ -197,7 +197,7 @@ export class ApiExecution {
             }
           }
           else {
-            tempResult = [response.data?.data];
+            tempResult = [JSON.stringify(response.data?.data)];
           }
           //console.log(`${JSON.stringify(tempResult)}
           //  \n------------------------jsonata---------------------\n`);
