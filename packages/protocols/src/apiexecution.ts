@@ -118,11 +118,17 @@ export class ApiExecution {
         for (let page = 1; page <= MAX_PAGES && result.length < totalCount; page++) {
           if (execCount++ > MAX_TRY_COUNT) { break; }
 
-          response = await axios.request(options);
-          console.log(response);
-          // TODO: The response check should be compatiable
-          if (response?.data?.code != 0) {
+          try {
+            response = await axios.request(options);
+            console.log(response.data);
+          }
+          catch (err) {
+            console.log(`axios.request error ${err.message}`);
+          }
+          // TODO: The response check should be compatible
+          if (response.status != 200 || response?.data?.code != 0) {
             console.log(response);
+            await new Promise((resolve) => setTimeout(resolve, 1000 + 1000 * execCount));
             continue;
           }
           let tempResult = [];
