@@ -187,6 +187,7 @@ export class ApiExecution {
               tempResult = JSONPath({
                 path: filterPath,
                 json: items,
+                sandbox: { parseInt }
               }) || [];
               console.log(tempResult.length);
               //tempResult = tempResult.map(item => {

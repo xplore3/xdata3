@@ -85,52 +85,6 @@ export class ApiDb {
         price: '',
         note: ''
       },
-      notes_search: {
-        id: '',
-        backup: '',
-        type: 'social-media',
-        platform: 'rednote',
-        description: '',
-        name: 'notes',
-        url: 'https://api.tikhub.io/api/v1/xiaohongshu/web_v2/fetch_search_notes',
-        method: 'GET',
-        headers: {
-          "Authorization": `Bearer ${process.env.TIKHUB_API_KEY}`,
-        },
-        query_params: {},
-        query_params_desc: {
-          keywords: 'String, keyword for query',
-          page: 'number, For multi pages, Default is 1',
-          sort: 'Enum: Sort(default:general), general: 综合(Default), popularity_descending: 最热(Hot), time_descending: 最新(New)',
-          noteType: 'Enum: Note type(default: 0), 0: 综合(General), 1: 视频筛选(Video), 2: 图文筛选(Normal)'
-        },
-        query_params_example: {
-          keywords: 'dance',
-          page: 1,
-          sort: 'general',
-          noteType: '0'
-        },
-        docs_link: 'https://docs.tikhub.io/268383320e0',
-        filter: true,
-        flattener: `$map($, function($item) {
-          {
-            'id': $item.id,
-            'userid': $item.note_card.user.user_id,
-            'author': $item.note_card.user.nick_name,
-            'display_title': $item.note_card.display_title,
-            'type': $item.note_card.type,
-            'date': $item.note_card.corner_tag_info[0].text,
-            'url': $item.note_card.cover.url_default,
-            'collected_count': $item.note_card.interact_info.collected_count,
-            'shared_count': $item.note_card.interact_info.shared_count,
-            'comment_count': $item.note_card.interact_info.comment_count,
-            'liked_count': $item.note_card.interact_info.liked_count
-          }
-        })`,
-        limit: '',
-        price: '',
-        note: ''
-      },
       users_search: {
         id: '',
         backup: '',
@@ -198,7 +152,7 @@ export class ApiDb {
         price: '',
         note: ''
       },
-      notes_comment_by_next_page: {
+      notes_comment_by_next_page_0: {
         id: '',
         backup: '',
         type: 'social-media',
@@ -319,6 +273,102 @@ export class ApiDb {
         request1: 'notes_search',
         // The Second Request
         request2: 'notes_comment_by_next_page',
+      },
+      notes_search: {
+        id: '',
+        backup: '',
+        type: 'social-media',
+        platform: 'rednote',
+        description: '',
+        name: 'notes',
+        url: 'https://api.tikhub.io/api/v1/xiaohongshu/web_v2/fetch_search_notes',
+        method: 'GET',
+        headers: {
+          "Authorization": `Bearer ${process.env.TIKHUB_API_KEY}`,
+        },
+        query_params: {},
+        query_params_desc: {
+          keywords: 'String, keyword for query',
+          page: 'number, For multi pages, Default is 1',
+          sort: 'Enum: Sort(default:general), general: 综合(Default), popularity_descending: 最热(Hot), time_descending: 最新(New)',
+          noteType: 'Enum: Note type(default: 0), 0: 综合(General), 1: 视频筛选(Video), 2: 图文筛选(Normal)'
+        },
+        query_params_example: {
+          keywords: 'dance',
+          page: 1,
+          sort: 'general',
+          noteType: '0'
+        },
+        docs_link: 'https://docs.tikhub.io/268383320e0',
+        filter: true,
+        flattener: `$map($, function($item) {
+          {
+            'id': $item.id,
+            'userid': $item.note_card.user.user_id,
+            'author': $item.note_card.user.nick_name,
+            'display_title': $item.note_card.display_title,
+            'type': $item.note_card.type,
+            'date': $item.note_card.corner_tag_info[0].text,
+            'url': $item.note_card.cover.url_default,
+            'collected_count': $item.note_card.interact_info.collected_count,
+            'shared_count': $item.note_card.interact_info.shared_count,
+            'comment_count': $item.note_card.interact_info.comment_count,
+            'liked_count': $item.note_card.interact_info.liked_count
+          }
+        })`,
+        limit: '',
+        price: '',
+        note: ''
+      },
+      notes_comment_by_next_page: {
+        id: '',
+        backup: '',
+        type: 'social-media',
+        platform: 'rednote',
+        description: '',
+        name: 'comments',
+        url: 'https://api.tikhub.io/api/v1/xiaohongshu/web_v2/fetch_note_comments',
+        method: 'GET',
+        headers: {
+          "Authorization": `Bearer ${process.env.TIKHUB_API_KEY}`,
+        },
+        query_params: {},
+        query_params_desc: {
+          note_id: 'String, Note ID for query',
+          cursor: '(optional)String, Paging parameters, enter previous page datas last comment ID(first page do not need enter).'
+        },
+        query_params_example: {
+          note_id: '6683b283000000001f0052bf'
+        },
+        docs_link: 'https://docs.tikhub.io/268383322e0',
+        filter: false,
+        flattener: `$map($, function($item) {
+          {
+            'id': $item.id,
+            'note_id': $item.note_id,
+            'userid': $item.user.userid,
+            'username': $item.user.nickname,
+            'content': $item.content,
+            'like_count': $item.like_count,
+            'sub_comment_count': $item.sub_comment_count,
+            'show_type': $item.show_type,
+            'comment_type': $item.comment_type,
+            'time': $item.time,
+            'sub_comments': $map($item.sub_comments, function($sc) {
+              {
+                'id': $sc.id,
+                'content': $sc.content,
+                'like_count': $sc.like_count,
+                'username': $sc.user.nickname,
+                'userid': $sc.user.userid,
+                'time': $sc.time
+              }
+            })
+          }
+        })`,
+        limit: '',
+        price: '',
+        note: ''
       },
     };
     const api = apiList[api_desc];
