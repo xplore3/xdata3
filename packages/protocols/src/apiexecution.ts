@@ -173,6 +173,7 @@ export class ApiExecution {
               || response.data?.data?.users
               || response.data?.data?.notes
               || response.data?.data?.list
+              || response.data?.data
               || [];
           if (api.filter) {
             try {
@@ -206,7 +207,20 @@ export class ApiExecution {
             }
           }
           else {
-            tempResult = [JSON.stringify(response.data?.data)];
+            try {
+              if (extractPath === null) {
+                if (items && items.length > 0) {
+                  extractPath = await IntentionHandler.flatJsonObject(runtime, message, items[0]);
+                }
+              }
+              const expression = jsonata(extractPath);
+              tempResult = await expression.evaluate(items) || [];
+            }
+            catch (err) {
+              console.log(err);
+              tempResult = [JSON.stringify(items)];
+              //TODO: 重新生成extractPath
+            }
           }
           //console.log(`${JSON.stringify(tempResult)}
           //  \n------------------------jsonata---------------------\n`);

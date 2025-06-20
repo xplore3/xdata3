@@ -760,6 +760,58 @@ export class IntentionHandler {
     return extractPathExample;
   }
 
+  static async flatJsonObject(
+    runtime: IAgentRuntime,
+    message: Memory,
+    inputJson: JSON,
+    exception: string = ''
+  ) {
+    let flatExample = `
+      $map($, function($item) {
+        {
+          'id': $item.id,
+          'username': $item.user.nickname,
+          'content': $item.content,
+          'sub_content_0': $item.sub_comments[0].content,
+          'sub_content_1': $item.sub_comments[1].content,
+          'sub_like_count_0': $item.sub_comments[0].like_count,
+          'sub_like_count_1': $item.sub_comments[1].like_count,
+          'like_count': $item.like_count,
+          'time': $item.time,
+          'ip_location': $item.ip_location,
+        }
+      })`;
+    const prompt = `
+        这是用户的问题，[USER_QUESTION:${message.content.text}]\r\n
+        需要将给定JSON结构体[DATA_EXAMPLE: ${JSON.stringify([inputJson])}]进行按照条件进行字段映射（结构精简和结构转化）；
+        Flat能够使用JSONata(https://github.com/jsonata-js/jsonata)的jsonata(flat)进行解析，
+        生成这个表达式：[EXTRACT_EXAMPLE: ${flatExample}]
+        转换后的结果需要至少包含这些字段：
+        {
+          id, time, content, ......
+        }，这些字段可以是原有字段的组合或转换。其中，id是唯一标识符，content/desc/description是内容。
+        flat字段中不要包含'|','||','?','??'这样的运算符，当前JSONata版本不支持，可以在flat使用$exists()。
+        主要是结构精简和转换。只做映射，不要筛选。
+        只做映射，原来是几条数据，映射后还是几条数据。
+        你返回的表达式将会插入如下代码: {
+          const expression = jsonata(flat);
+          result = await expression.evaluate(inputJson);
+        }中直接运行，这里的result是一个只有一级元素的JSON对象；一定要直接返回表达式。不要返回其他值，也不要做额外解释。
+    `;
+
+    try {
+      let response = await generateText({
+        runtime,
+        context: prompt,
+        modelClass: ModelClass.LARGE,
+      });
+      console.log(`\n${response}\n`);
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+    return flatExample;
+  }
 
   static async composePrompt(
     runtime: IAgentRuntime,
