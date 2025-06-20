@@ -198,8 +198,14 @@ export class ApiExecution {
               //tempResult = tempResult.map((item) =>
               //    extractFunc(item)
               //);
-              const expression = jsonata(extractPath);
-              tempResult = await expression.evaluate(tempResult) || [];
+              if (api.flattener != '') {
+                const expression = jsonata(api.flattener);
+                tempResult = await expression.evaluate(items) || [];
+              }
+              else {
+                const expression = jsonata(extractPath);
+                tempResult = await expression.evaluate(items) || [];
+              }
             }
             catch (err) {
               console.log(err);
@@ -208,14 +214,16 @@ export class ApiExecution {
           }
           else {
             try {
-              /*if (extractPath === null) {
-                if (items && items.length > 0) {
-                  extractPath = await IntentionHandler.flatJsonObject(runtime, message, items[0]);
-                }
+              if (api.flattener != '') {
+                const expression = jsonata(api.flattener);
+                tempResult = await expression.evaluate(items) || [];
+                tempResult = tempResult.map(item => {
+                  if (item.sub_comments) {
+                    item.sub_comments = JSON.stringify(item.sub_comments);
+                  }
+                })
               }
-              const expression = jsonata(extractPath);
-              tempResult = await expression.evaluate(items) || [];*/
-              if (Array.isArray(items)) {
+              /*if (Array.isArray(items)) {
                 tempResult = items.map(item => {
                   const tempItem = IntentionHandler.flattenJSON(item);
                   console.log(tempItem);
@@ -224,7 +232,7 @@ export class ApiExecution {
               }
               else {
                 tempResult = [IntentionHandler.flattenJSON(items)];
-              }
+              }*/
             }
             catch (err) {
               console.log(err);
@@ -232,8 +240,8 @@ export class ApiExecution {
               //TODO: 重新生成extractPath
             }
           }
-          console.log(`${JSON.stringify(tempResult)}
-            \n------------------------jsonata---------------------\n`);
+          //console.log(`${JSON.stringify(tempResult)}
+          //  \n------------------------jsonata---------------------\n`);
           result = result.concat(tempResult);
           console.log(`executeApi result: ${result.length}`);
           

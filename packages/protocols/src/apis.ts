@@ -18,11 +18,12 @@ export class ApiDb {
 
   static getUserDataSource(userId: UUID) {
     const sources = [
-      'notes_search: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表. Parameters: keyword (search term), sort (popularity_descending or time_descending).',
-      'users_search: 用以通过关键字搜索小红书账号，获得账号列表',
-      'get_user: 用以通过单个小红书账号ID获取该账号的详情',
       //'hot_words: 用以获得近期火热的热词等',
       //'hot_topics: 用以获得近期火热的话题/种类等',
+      'notes_search: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表. Parameters: keyword (search term), sort (popularity_descending or time_descending).',
+      //'note_detail: 通过noteid获取单个笔记/帖子/note的详情',
+      'users_search: 用以通过关键字搜索小红书账号，获得账号列表',
+      'get_user: 用以通过单个小红书账号ID获取该账号的详情',
       'notes_comment_by_next_page: 用以通过单个笔记/帖子的ID获取其评论列表',
       'fetch_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note id列表，然后再获得这些笔记的评论列表；该操作能获得评论这一种数据',
       'fetch_notes_and_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表，然后再获得这些笔记的评论列表；该操作能获得笔记和评论两种数据. Parameters: keyword (search term), sort (popularity_descending or time_descending).',
@@ -56,8 +57,24 @@ export class ApiDb {
           noteType: '_0',
           noteTime: '%E4%B8%80%E5%A4%A9%E5%86%85'
         },
-        filter: true,
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_b2edca5d-0e93-4b66-8deb-9653fb71e9b5',
+        filter: true,
+        flattener: `$map($, function($item) {
+          {
+            'id': $item.note.id,
+            'author': $item.note.user.nickname,
+            'title': $item.note.title,
+            'display_title': $item.note.abstract_show,
+            'desc': $item.note.desc,
+            'date': [$item.note.timestamp, 0][0],
+            'tags': $item.note.tag_info.title,
+            'url': $item.note.images_list[0].url,
+            'collected_count': $item.note.collected_count,
+            'shared_count': $item.note.shared_count,
+            'comments_count': $item.note.comments_count,
+            'liked_count': $item.note.liked_count
+          }
+        })`,
         limit: '',
         price: '',
         note: ''
@@ -79,8 +96,20 @@ export class ApiDb {
           keyword: 'momo',
           page: 1
         },
-        filter: true,
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_fe3e8ab0-8b7b-448c-9f9d-785ba1c8406d',
+        filter: true,
+        flattener: `$map($, function($item) {
+          {
+            'id': $item.id,
+            'name': $item.name,
+            'desc': $item.desc,
+            'sub_title': $item.sub_title,
+            'official_verified': $item.official_verified,
+            'image': $item.image,
+            'room_id': $item.live.room_id,
+            'has_goods': $item.live.has_goods
+          }
+        })`,
         limit: '',
         price: '',
         note: ''
@@ -100,8 +129,9 @@ export class ApiDb {
         query_params_example: {
           userId: '648c8ada000000001c02b0f2'
         },
-        filter: false,
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_2dfd1e1c-d9d7-4f86-9a0a-6934a62ea1cd',
+        filter: false,
+        flattener: '',
         limit: '',
         price: '',
         note: ''
@@ -119,11 +149,37 @@ export class ApiDb {
           noteId: 'String, Note ID for query',
           lastCursor: '(optional)String, Paging parameters, enter previous page datas last comment ID(first page do not need enter).'
         },
-        filter: false,
         query_params_example: {
           noteId: '6683b283000000001f0052bf'
         },
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_8836fd68-5f19-4c38-98ff-34280bec06ad',
+        filter: false,
+        flattener: `$map($, function($item) {
+          {
+            'id': $item.id,
+            'note_id': $item.note_id,
+            'userid': $item.user.userid,
+            'username': $item.user.nickname,
+            'content': $item.content,
+            'like_count': $item.like_count,
+            'sub_comment_count': $item.sub_comment_count,
+            'show_type': $item.show_type,
+            'comment_type': $item.comment_type,
+            'time': $item.time,
+            'ip_location': $item.ip_location,
+            'sub_comments': $map($item.sub_comments, function($sc) {
+              {
+                'id': $sc.id,
+                'content': $sc.content,
+                'like_count': $sc.like_count,
+                'username': $sc.user.nickname,
+                'userid': $sc.user.userid,
+                'time': $sc.time,
+                'ip_location': $sc.ip_location
+              }
+            })
+          }
+        })`,
         limit: '',
         price: '',
         note: ''
@@ -144,8 +200,22 @@ export class ApiDb {
         query_params_example: {
           userId: '648c8ada000000001c02b0f2'
         },
-        filter: false,
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_677d7a27-13e4-498d-ac34-6f3c2927fb64',
+        filter: false,
+        flattener: `$map($, function($item) {
+          {
+            'id': $item.id,
+            'author': $item.user.nickname,
+            'title': $item.title,
+            'display_title': $item.display_title,
+            'desc': $item.desc,
+            'date': $item.create_time,
+            'collected_count': $item.collected_count,
+            'shared_count': $item.share_count,
+            'comments_count': $item.comments_count,
+            'liked_count': $item.likes
+          }
+        })`,
         limit: '',
         price: '',
         note: ''

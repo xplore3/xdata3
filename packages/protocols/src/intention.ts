@@ -699,7 +699,7 @@ export class IntentionHandler {
         context: prompt,
         modelClass: ModelClass.LARGE,
       });
-      console.log(` \n ---------------------JSONPATH-AI-FILTER-BEGIN-------------------- \n${response}\n ---------------------JSONATA-AI-FILTER-END---------------------- `);
+      console.log(` \n ---------------------JSONPATH-AI-FILTER-BEGIN-------------------- \n${response}\n ---------------------JSONPATH-AI-FILTER-END---------------------- `);
       return response;
     } catch (err) {
       console.log(err);
@@ -769,15 +769,23 @@ export class IntentionHandler {
       $map($, function($item) {
         {
           'id': $item.id,
+          'userid': $item.user.userid,
           'username': $item.user.nickname,
           'content': $item.content,
-          'sub_content_0': $item.sub_comments[0].content,
-          'sub_content_1': $item.sub_comments[1].content,
-          'sub_like_count_0': $item.sub_comments[0].like_count,
-          'sub_like_count_1': $item.sub_comments[1].like_count,
           'like_count': $item.like_count,
           'time': $item.time,
           'ip_location': $item.ip_location,
+          'sub_comments': $map($item.sub_comments, function($sc) {
+            {
+              'id': $sc.id,
+              'content': $sc.content,
+              'like_count': $sc.like_count,
+              'username': $sc.user.nickname,
+              'userid': $sc.user.userid,
+              'time': $sc.time,
+              'ip_location': $sc.ip_location
+            }
+          })
         }
       })`;
     const prompt = `
