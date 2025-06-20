@@ -78,19 +78,18 @@ export class IntentionHandler {
       -----------------------------
       你需要输出如下：
       {
-        "intention_params": [
-        {
+        "intention_params": {
           "data_source": "rednote",
           "data_action": "notes_search",
           "keyword": "search key",
           "request_count": 100,
           "filter_desc": "the description of the data filter"
-        }],
+        },
         "data_result": "简短回答",
         "intention_options": ["使用数据的意图1", "使用数据的意图2", "......"],
       }
       输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
-      intention_params是一个数组，如果不能通过一种操作获得需要的数据，则需要是多个。这里的keyword如果不能明显地从用户输入里获取，则需要结合自己的knowledge和背景。
+      intention_params的keyword如果不能明显地从用户输入里获取，则需要结合自己的knowledge和背景。
       data_result不要包含API/接口字样，需要使用非开发人员能够理解的语言。
       data_action的可选项是各个可用的API列表my_data_source中的关键字，如果不在这个列表里，输出为others。
       intention_options是根据用户输入而得出的选项，以用户明确输入的选项为优先，
@@ -111,8 +110,9 @@ export class IntentionHandler {
       const excelfilelist = [];
       const results = [];
       const taskId = message.content.intention?.taskId || "";
-      if (execJson && execJson.intention_params && execJson.intention_params.length > 0) {
-        for (const execParam of execJson.intention_params) {
+      if (execJson && execJson.intention_params) {
+        let execParam = execJson.intention_params;
+        {
           if (execParam.data_action && execParam.data_action != 'others') {
             const { result, txtfilename, excelfilename } = await APIWrapperFactory.executeRequest(
               runtime, execParam, message);
@@ -197,18 +197,16 @@ export class IntentionHandler {
       -----------------------------
       你需要输出如下：
       {
-        "intention_params": [
-        {
+        "intention_params": {
           "data_source": "rednote",
           "data_action": "notes_search",
           "request_count": 100,
           "filter_desc": "the description of the data filter"
-        }],
+        },
         "data_result": "简短回答",
         "intention_options": ["使用数据的意图1", "使用数据的意图2", "......"],
       }
       输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
-      intention_params是一个数组，如果不能通过一种操作获得需要的数据，则需要是多个。
       data_result不要包含API/接口字样，需要使用非开发人员能够理解的语言。
       data_action的可选项是各个可用的API列表my_data_source中的关键字，如果不在这个列表里，输出为others。
       intention_options是根据用户输入而得出的选项，以用户明确输入的选项为优先，
@@ -225,8 +223,9 @@ export class IntentionHandler {
       console.log(response);
       let execJson = extractJson(response);
       const taskId = message.content.intention?.taskId || "";
-      if (execJson && execJson.intention_params && execJson.intention_params.length > 0) {
-        for (const execParam of execJson.intention_params) {
+      if (execJson && execJson.intention_params) {
+        let execParam = execJson.intention_params;
+        {
           if (execParam.data_action && execParam.data_action != 'others') {
             const dataResponse = await this.handleDataCollectInputParam(runtime, message,
               execParam.data_result, execParam.data_action);
@@ -796,7 +795,7 @@ export class IntentionHandler {
         你返回的表达式将会插入如下代码: {
           const expression = jsonata(flat);
           result = await expression.evaluate(inputJson);
-        }中直接运行，这里的result是一个只有一级元素的JSON对象；一定要直接返回表达式。不要返回其他值，也不要做额外解释。
+        }中直接运行，这里的result是一个只有单层元素的FlatJSON对象；一定要直接返回表达式。不要返回其他值，也不要做额外解释。
     `;
 
     try {

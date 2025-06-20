@@ -217,7 +217,9 @@ export class ApiExecution {
               tempResult = await expression.evaluate(items) || [];*/
               if (Array.isArray(items)) {
                 tempResult = items.map(item => {
-                  return IntentionHandler.flattenJSON(item);
+                  const tempItem = IntentionHandler.flattenJSON(item);
+                  console.log(tempItem);
+                  return tempItem;
                 })
               }
               else {
