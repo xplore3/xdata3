@@ -224,6 +224,7 @@ export class ApiExecution {
                   if (item.sub_comments) {
                     item.sub_comments = JSON.stringify(item.sub_comments);
                   }
+                  return item;
                 })
               }
               /*if (Array.isArray(items)) {
