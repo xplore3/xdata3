@@ -681,15 +681,17 @@ export class IntentionHandler {
     }
 
     const filterPathExample = `$.[?(@.note && (@.note.collected_count || 0) >= 40 && (@.note.shared_count || 0) >= 20 && (@.note.comments_count || 0) >= 20 && (@.note.liked_count || 0) >= 40 && (@.note.timestamp || 2524579200) >= ${timestamp})]`;
+    const filterPathExample1 = `$.[?(@.note_card && (@.note_card.interact_info.liked_count && parseInt(@.note_card.interact_info.liked_count) > 10))]`;
 
     const prompt = `
         这是用户的问题，[USER_QUESTION:${message.content.text}]\r\n
-        需要将给定JSON结构体[DATA_EXAMPLE: ${JSON.stringify([inputJson])}]进行按照条件过滤 filter；
+        需要将给定JSON结构体[DATA_SOURCE: ${JSON.stringify([inputJson])}]进行按照条件过滤 filter；
         filter能给'jsonpath-plus'库(https://github.com/JSONPath-Plus/JSONPath)使用的JSONPath。
-        生成这个表达式：[FILTER_EXAMPLE: ${filterPathExample}]
+        生成这个表达式：[FILTER_EXAMPLE: ${filterPathExample}]或者[FILTER_EXAMPLE1: ${filterPathExample1}]
         根据指令要求，需要对collected_count/shared_count/comments_count/likes_count的数量进行过滤。
-        用户要求的时间戳 [timestamp: ${timestamp}] ,这是在之前的步骤中计算好的, 不需要再做转化，填入表达式中即可 。
+        用户要求的时间戳 [timestamp: ${timestamp}], 这是在之前的步骤中计算好的, 不需要再做转化，填入表达式中即可 。
         - filter添加存在性检查（@.note && ...）, filter只需进行数量的过滤。
+        如果用户的输入DATA中不包含timestamp（publish_time这样的不是），则忽略时间过滤。
         你返回的表达式将会插入代码中直接运行，请你一定要直接返回表达式。不要返回其他值，也不要做额外解释。`;
     try {
       console.log("timestamp prompt: ", timestamp);

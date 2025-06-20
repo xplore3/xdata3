@@ -159,7 +159,7 @@ export class ApiExecution {
             continue;
           }
           // TODO: The response check should be compatible
-          if (response.status != 200 || response?.data?.code != 0) {
+          if (response.status != 200) {
             console.log(response);
             if (failedCount++ > MAX_FAILED_COUNT) {
               break;
