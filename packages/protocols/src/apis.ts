@@ -188,7 +188,7 @@ export class ApiDb {
             'comment_type': $item.comment_type,
             'time': $item.time,
             'ip_location': $item.ip_location,
-            'sub_comments': $map($item.sub_comments, function($sc) {
+            'sub_comments': [$map($item.sub_comments, function($sc) {
               {
                 'id': $sc.id,
                 'content': $sc.content,
@@ -198,7 +198,7 @@ export class ApiDb {
                 'time': $sc.time,
                 'ip_location': $sc.ip_location
               }
-            })
+            }), 'empty'][0]
           }
         })`,
         limit: '',
@@ -354,7 +354,7 @@ export class ApiDb {
             'show_type': $item.show_type,
             'comment_type': $item.comment_type,
             'time': $item.time,
-            'sub_comments': $map($item.sub_comments, function($sc) {
+            'sub_comments': [$map($item.sub_comments, function($sc) {
               {
                 'id': $sc.id,
                 'content': $sc.content,
@@ -363,7 +363,7 @@ export class ApiDb {
                 'userid': $sc.user.userid,
                 'time': $sc.time
               }
-            })
+            }), 'empty'][0]
           }
         })`,
         limit: '',

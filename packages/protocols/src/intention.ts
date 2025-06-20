@@ -777,7 +777,7 @@ export class IntentionHandler {
           'like_count': $item.like_count,
           'time': $item.time,
           'ip_location': $item.ip_location,
-          'sub_comments': $map($item.sub_comments, function($sc) {
+          'sub_comments': [$map($item.sub_comments, function($sc) {
             {
               'id': $sc.id,
               'content': $sc.content,
@@ -787,7 +787,7 @@ export class IntentionHandler {
               'time': $sc.time,
               'ip_location': $sc.ip_location
             }
-          })
+          }), 'empty'][0]
         }
       })`;
     const prompt = `
