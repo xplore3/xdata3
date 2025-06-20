@@ -685,16 +685,15 @@ export class IntentionHandler {
 
     const prompt = `
         这是用户的问题，[USER_QUESTION:${message.content.text}]\r\n
-        今天的时间戳是（秒级）：${Math.floor(Date.now() / 1000)}；
         需要将给定JSON结构体[DATA_EXAMPLE: ${JSON.stringify([inputJson])}]进行按照条件过滤 filter；
         filter能给'jsonpath-plus'库(https://github.com/JSONPath-Plus/JSONPath)使用的JSONPath。
         生成这个表达式：[FILTER_EXAMPLE: ${filterPathExample}]
-        根据用户的问题，判断是否需要筛选时间，注意这里的时间戳是秒级别的。
-        如果用户需要筛选时间，请你认真思考时间戳，或者使用相关工具或者编程来生成准确的时间戳。
         根据指令要求，需要对collected_count/shared_count/comments_count/likes_count的数量进行过滤。
+        用户要求的时间戳 [timestamp: ${timestamp}] ,这是在之前的步骤中计算好的, 不需要再做转化，填入表达式中即可 。
         - filter添加存在性检查（@.note && ...）, filter只需进行数量的过滤。
         你返回的表达式将会插入代码中直接运行，请你一定要直接返回表达式。不要返回其他值，也不要做额外解释。`;
     try {
+      console.log("timestamp prompt: ", timestamp);
       // let response = await chatWithDeepSeek(prompt);
       let response = await generateText({
         runtime,
