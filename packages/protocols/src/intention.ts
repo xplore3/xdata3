@@ -813,6 +813,37 @@ export class IntentionHandler {
     return flatExample;
   }
 
+  static flattenJSON(obj: any,
+    prefix = '',
+    result: Record<string, any> = {}
+  ): Record<string, any> {
+    if (typeof obj !== 'object' || obj === null) {
+      result[prefix] = obj;
+      return result;
+    }
+
+    const isArray = Array.isArray(obj);
+
+    for (const key in obj) {
+      if (!obj.hasOwnProperty(key)) continue;
+
+      const value = obj[key];
+      const newKey = isArray
+        ? `${prefix}[${key}]`
+        : prefix
+          ? `${prefix}.${key}`
+          : key;
+
+      if (typeof value === 'object' && value !== null) {
+        this.flattenJSON(value, newKey, result);
+      } else {
+        result[newKey] = value;
+      }
+    }
+
+    return result;
+  }
+
   static async composePrompt(
     runtime: IAgentRuntime,
     prompt: string,

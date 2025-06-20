@@ -208,13 +208,21 @@ export class ApiExecution {
           }
           else {
             try {
-              if (extractPath === null) {
+              /*if (extractPath === null) {
                 if (items && items.length > 0) {
                   extractPath = await IntentionHandler.flatJsonObject(runtime, message, items[0]);
                 }
               }
               const expression = jsonata(extractPath);
-              tempResult = await expression.evaluate(items) || [];
+              tempResult = await expression.evaluate(items) || [];*/
+              if (Array.isArray(items)) {
+                tempResult = items.map(item => {
+                  return IntentionHandler.flattenJSON(item);
+                })
+              }
+              else {
+                tempResult = [IntentionHandler.flattenJSON(items)];
+              }
             }
             catch (err) {
               console.log(err);
@@ -222,8 +230,8 @@ export class ApiExecution {
               //TODO: 重新生成extractPath
             }
           }
-          //console.log(`${JSON.stringify(tempResult)}
-          //  \n------------------------jsonata---------------------\n`);
+          console.log(`${JSON.stringify(tempResult)}
+            \n------------------------jsonata---------------------\n`);
           result = result.concat(tempResult);
           console.log(`executeApi result: ${result.length}`);
           
