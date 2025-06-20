@@ -202,11 +202,11 @@ export class ApiExecution {
               //);
               if (api.flattener != '') {
                 const expression = jsonata(api.flattener);
-                tempResult = await expression.evaluate(items) || [];
+                tempResult = await expression.evaluate(tempResult) || [];
               }
               else {
                 const expression = jsonata(extractPath);
-                tempResult = await expression.evaluate(items) || [];
+                tempResult = await expression.evaluate(tempResult) || [];
               }
             }
             catch (err) {
@@ -246,12 +246,16 @@ export class ApiExecution {
           //  \n------------------------jsonata---------------------\n`);
           result = result.concat(tempResult);
           console.log(`executeApi result: ${result.length}`);
+
+          if (!(options.params.page)) {
+            break; // no loop for un-pages
+          }
           
           await new Promise((resolve) =>
             setTimeout(resolve, 100)
           );
         }
-        result?.slice(0, totalCount);
+        result = result?.slice(0, totalCount);
         console.log(`executeApi final length : ${result?.length}`);
       }
       catch (err) {
