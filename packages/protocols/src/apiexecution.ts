@@ -68,7 +68,7 @@ export class ApiExecution {
           if (execJson) {
             if (execJson.query_params) {
               api2.query_params = execJson.query_params;
-              await new Promise((resolve) => setTimeout(resolve, 300));
+              await new Promise((resolve) => setTimeout(resolve, 100));
               const api2Result = await this.executeApi(
                 runtime, message, api2, execJson.request_count
               );
@@ -131,7 +131,9 @@ export class ApiExecution {
       try {
         const MAX_PAGES = 100;
         const MAX_TRY_COUNT = 100;
+        const MAX_FAILED_COUNT = 10;
         let execCount = 0;
+        let failedCount = 0;
         let extractPath: string = null;
         let filterPath: string = null;
         for (let page = 1; page <= MAX_PAGES && result.length < totalCount; page++) {
@@ -149,12 +151,18 @@ export class ApiExecution {
           }
           catch (err) {
             console.log(`axios.request error ${err.message}`);
+            if (failedCount++ > MAX_FAILED_COUNT) {
+              break;
+            }
             await new Promise((resolve) => setTimeout(resolve, 1000 + 1000 * execCount));
             continue;
           }
           // TODO: The response check should be compatible
           if (response.status != 200 || response?.data?.code != 0) {
             console.log(response);
+            if (failedCount++ > MAX_FAILED_COUNT) {
+              break;
+            }
             await new Promise((resolve) => setTimeout(resolve, 1000 + 1000 * execCount));
             continue;
           }

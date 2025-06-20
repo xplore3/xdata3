@@ -302,14 +302,13 @@ export class DirectClient {
                 const maxNum = 1;
                 if (this.concurrentNum >= maxNum) {
                     res.json({
-                        user: "Data3",
-                        text: "sever is busy, try latter.",
+                        user: "agent",
+                        text: "系统正在处理，有些繁忙，请稍后再试~~",
                         taskId: "",
                         action: "NONE",
                     });
                     return;
                 }
-                this.concurrentNum++;
                 const agentId = req.params.agentId;
                 const username = req.body.userId ?? "user";
                 const userId = stringToUuid(username);
@@ -330,6 +329,7 @@ export class DirectClient {
                     res.status(404).send("Agent not found");
                     return;
                 }
+                this.concurrentNum++;
 
                 await runtime.ensureConnection(
                     userId,
@@ -426,14 +426,13 @@ export class DirectClient {
                 const maxNum = 1;
                 if (this.concurrentNum >= maxNum) {
                     res.json({
-                        user: "Data3",
-                        text: "sever is busy, try latter.",
+                        user: "agent",
+                        text: "系统正在处理，有些繁忙，请稍后再试~~",
                         taskId: "",
                         action: "NONE",
                     });
                     return;
                 }
-                this.concurrentNum++;
                 const agentId = req.params.agentId;
                 const username = req.body.userId ?? "user";
                 // const roomId = stringToUuid(
@@ -457,6 +456,7 @@ export class DirectClient {
                     res.status(404).send("Agent not found");
                     return;
                 }
+                this.concurrentNum++;
 
                 await runtime.ensureConnection(
                     userId,
