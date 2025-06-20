@@ -41,20 +41,21 @@ export class ApiExecution {
         const prompt = `
           你是一个Nodejs程序员，能根据用户的请求，可用的API，API文档，生成调用API的URL的调用参数。
           用户的原需求为：${userInput}。
-          调用参数的取值内容来源为：${JSON.stringify(item)}。
+          调用参数的取值内容来源为PARAM_SOURCE：${JSON.stringify(item)}。
+          API能力说明：${api2.description}。
           可用的API参数说明为：${JSON.stringify(api2.query_params_desc)}。
           可用的API的文档地址为：${api2.docs_link}。
           根据这些输入，需要给出如下结果：
           {
             "query_params": {json of params},
-            "request_count": 1
+            "request_count": count from PARAM_SOURCE
           }.
           关于query_params字段，需满足用户所有需求，且输出参数说明中的项，不能有参数说明之外的项；不是数组，仅仅是一个JSON对象。
           query_params中的关键字的取值需要严格从指定来源${JSON.stringify(item)}中获取，不能有之外的值，不能生成值。
           query_params须是一个JSON对象，不能是字符串等。
           query_params字段示例如下：【${JSON.stringify(api2.query_params_example)}】。
           输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
-          这里的request_count一般情况下都是1。
+          这里的request_count的值取决于PARAM_SOURCE中的说明，比如如果comments_count有10个，则对应的comment接口结果数量就是10个。
           -----------------------------
         `;
         try {
