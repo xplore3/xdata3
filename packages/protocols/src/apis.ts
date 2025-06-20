@@ -34,7 +34,12 @@ export class ApiDb {
 
   static getApi(api_desc: string) {
     const apiList = {
-      notes_search: {
+      notes_search_0: {
+        id: '',
+        backup: 'notes_search_1',
+        type: 'social-media',
+        platform: 'rednote',
+        description: '',
         name: 'notes',
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/search-note/v2',
         method: 'GET',
@@ -67,6 +72,7 @@ export class ApiDb {
             'display_title': $item.note.abstract_show,
             'desc': $item.note.desc,
             'date': [$item.note.timestamp, 0][0],
+            'type': $item.note.type,
             'tags': $item.note.tag_info.title,
             'url': $item.note.images_list[0].url,
             'collected_count': $item.note.collected_count,
@@ -79,7 +85,58 @@ export class ApiDb {
         price: '',
         note: ''
       },
+      notes_search: {
+        id: '',
+        backup: '',
+        type: 'social-media',
+        platform: 'rednote',
+        description: '',
+        name: 'notes',
+        url: 'https://api.tikhub.io/api/v1/xiaohongshu/web_v2/fetch_search_notes',
+        method: 'GET',
+        headers: {
+          "Authorization": `Bearer ${process.env.TIKHUB_API_KEY}`,
+        },
+        query_params: {},
+        query_params_desc: {
+          keywords: 'String, keyword for query',
+          page: 'number, For multi pages, Default is 1',
+          sort: 'Enum: Sort(default:general), general: 综合(Default), popularity_descending: 最热(Hot), time_descending: 最新(New)',
+          noteType: 'Enum: Note type(default: 0), 0: 综合(General), 1: 视频筛选(Video), 2: 图文筛选(Normal)'
+        },
+        query_params_example: {
+          keywords: 'dance',
+          page: 1,
+          sort: 'general',
+          noteType: '0'
+        },
+        docs_link: 'https://docs.tikhub.io/268383320e0',
+        filter: true,
+        flattener: `$map($, function($item) {
+          {
+            'id': $item.id,
+            'userid': $item.note_card.user.user_id,
+            'author': $item.note_card.user.nick_name,
+            'display_title': $item.note_card.display_title,
+            'type': $item.note_card.type,
+            'date': $item.note_card.corner_tag_info[0].text,
+            'url': $item.note_card.cover.url_default,
+            'collected_count': $item.note_card.interact_info.collected_count,
+            'shared_count': $item.note_card.interact_info.shared_count,
+            'comment_count': $item.note_card.interact_info.comment_count,
+            'liked_count': $item.note_card.interact_info.liked_count
+          }
+        })`,
+        limit: '',
+        price: '',
+        note: ''
+      },
       users_search: {
+        id: '',
+        backup: '',
+        type: 'social-media',
+        platform: 'rednote',
+        description: '',
         name: 'users',
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/search-user/v2',
         method: 'GET',
@@ -115,6 +172,11 @@ export class ApiDb {
         note: ''
       },
       get_user: {
+        id: '',
+        backup: '',
+        type: 'social-media',
+        platform: 'rednote',
+        description: '',
         name: 'user',
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-user/v3',
         method: 'GET',
@@ -137,6 +199,11 @@ export class ApiDb {
         note: ''
       },
       notes_comment_by_next_page: {
+        id: '',
+        backup: '',
+        type: 'social-media',
+        platform: 'rednote',
+        description: '',
         name: 'comments',
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-note-comment/v2',
         method: 'GET',
@@ -185,6 +252,11 @@ export class ApiDb {
         note: ''
       },
       get_note_list: {
+        id: '',
+        backup: '',
+        type: 'social-media',
+        platform: 'rednote',
+        description: '',
         name: 'user_notes',
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-user-note-list/v1',
         method: 'GET',
@@ -221,6 +293,12 @@ export class ApiDb {
         note: ''
       },
       fetch_comments_by_keyword: {
+        id: '',
+        backup: '',
+        type: 'social-media',
+        platform: 'rednote',
+        description: '',
+        name: 'user_notes',
         // Excute Data Dependency
         execute_depend: 'chain_loop', // ['chain', 'chain_loop']
         // The First Request
@@ -229,6 +307,12 @@ export class ApiDb {
         request2: 'notes_comment_by_next_page',
       },
       fetch_notes_and_comments_by_keyword: {
+        id: '',
+        backup: '',
+        type: 'social-media',
+        platform: 'rednote',
+        description: '',
+        name: 'user_notes',
         // Excute Data Dependency
         execute_depend: 'chain_loop', // ['chain', 'chain_loop']
         // The First Request
