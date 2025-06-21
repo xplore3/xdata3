@@ -298,14 +298,14 @@ export class ApiDb {
         query_params_desc: {
           keywords: 'String, keyword for query',
           page: 'number, For multi pages, Default is 1',
-          sort: 'Enum: Sort(default:general), general: 综合(Default), popularity_descending: 最热(Hot), time_descending: 最新(New)',
-          noteType: 'Enum: Note type(default: 0), 0: 综合(General), 1: 视频筛选(Video), 2: 图文筛选(Normal)'
+          sort_type: 'Enum: Sort(default:general), general: 综合(Default), popularity_descending: 最热(Hot), time_descending: 最新(New)',
+          note_type: 'Enum: Note type(default: 0), 0: 综合(General), 1: 视频筛选(Video), 2: 图文筛选(Normal)'
         },
         query_params_example: {
           keywords: 'dance',
           page: 1,
-          sort: 'general',
-          noteType: '0'
+          sort_type: 'general',
+          note_type: '0'
         },
         docs_link: 'https://docs.tikhub.io/268383320e0',
         filter: true,
