@@ -158,7 +158,11 @@ export class ApiExecution {
             }
             if (err.status == 503 && api.backup && api.backup != "") {
               const apiBackup = ApiDb.getApi(api.backup);
-              return await this.executeApi(runtime, message, apiBackup, totalCount);
+              const newParams = await this.getApiBackupQueryParam(runtime, message, apiBackup);
+              if (newParams) {
+                apiBackup.query_params = newParams;
+                return await this.executeApi(runtime, message, apiBackup, totalCount);
+              }
             }
             await new Promise((resolve) => setTimeout(resolve, 1000 + 1000 * execCount));
             continue;
@@ -273,6 +277,48 @@ export class ApiExecution {
       console.error(err);
     }
     return result;
+  }
+
+  static async getApiBackupQueryParam(runtime: IAgentRuntime, message: Memory, api: JSON | any): Promise<any> {
+    console.log(`getApiBackupQueryParam`);
+    const userInput = `${message.content.text}`;
+    const prompt = `
+      你是一个Nodejs程序员，能根据用户的请求，可用的API，API文档，生成调用API的URL的调用参数。
+      用户的原输入为：${userInput}。
+      可用的API参数说明为：${JSON.stringify(api.query_params_desc)}。
+      可用的API的文档地址为：${api.docs_link}。
+      根据这些输入，需要给出如下结果：
+        {
+          "query_params": {json of params},
+          "request_count": total count of user request from users input
+        }.
+      关于query_params字段，需满足用户所有需求，且输出参数说明中的项，不能有参数说明之外的项；不是数组，仅仅是一个JSON对象。
+      如果query_params的keyword之类的取值不能明显地从用户输入里获取，则需要结合自己的knowledge和背景。
+      query_params须是一个JSON对象，不能是字符串等。
+      query_params字段示例如下：【${JSON.stringify(api.query_params_example)}】。
+      输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
+      -----------------------------
+    `;
+    try {
+      let response = await generateText({
+        runtime,
+        context: await IntentionHandler.composePrompt(runtime, prompt, message.userId),
+        modelClass: ModelClass.LARGE,
+      });
+      console.log(response);
+      let execJson = extractJson(response);
+      if (execJson) {
+        if (execJson.query_params) {
+          return execJson.query_params;
+        }
+      }
+      return null;
+    }
+    catch (err) {
+      console.log(`getApiBackupQueryParam ${api}`);
+      console.error(err);
+    }
+    return null;
   }
 
   public static cacheResultData(result: string[], taskId: string) {
