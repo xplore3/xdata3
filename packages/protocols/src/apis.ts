@@ -359,17 +359,19 @@ export class ApiDb {
         filter: true,
         flattener: `$map($, function($item) {
           {
-            'id': $item.id,
-            'userid': $item.note_card.user.user_id,
-            'author': $item.note_card.user.nick_name,
-            'display_title': $item.note_card.display_title,
-            'type': $item.note_card.type,
-            'date': $item.note_card.corner_tag_info[0].text,
-            'url': $item.note_card.cover.url_default,
-            'collected_count': $item.note_card.interact_info.collected_count,
-            'shared_count': $item.note_card.interact_info.shared_count,
-            'comment_count': $item.note_card.interact_info.comment_count,
-            'liked_count': $item.note_card.interact_info.liked_count
+            'id': $item.note.id,
+            'author': $item.note.user.nickname,
+            'title': $item.note.title,
+            'display_title': $item.note.abstract_show,
+            'desc': $item.note.desc,
+            'date': [$item.note.timestamp, 0][0],
+            'type': $item.note.type,
+            'tags': $item.note.tag_info.title,
+            'url': $item.note.images_list[0].url,
+            'collected_count': $item.note.collected_count,
+            'shared_count': $item.note.shared_count,
+            'comments_count': $item.note.comments_count,
+            'liked_count': $item.note.liked_count
           }
         })`,
         limit: '',
