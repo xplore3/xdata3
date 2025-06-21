@@ -146,13 +146,14 @@ export class ApiExecution {
             if (options.params.page) {
               options.params.page = page;
             }
-            console.log(options);
+            console.log(options.url);
+            console.log(options.params);
             response = await axios.request(options);
             //response = await axios_request(options);
             console.log(response.data);
           }
           catch (err) {
-            console.log(`axios.request error ${err.message}`);
+            console.log(`axios.request ${err.status} error ${err.message}`);
             if (failedCount++ > MAX_FAILED_COUNT) {
               break;
             }
