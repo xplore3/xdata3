@@ -186,6 +186,9 @@ export class ApiExecution {
               || response.data?.data?.list
               || response.data?.data
               || [];
+          if (items) {
+            console.log(items[0]);
+          }
           if (api.filter) {
             try {
               if (extractPath === null || filterPath === null) {

@@ -283,7 +283,7 @@ export class ApiDb {
       },
       notes_search_1: {
         id: 'notes_search_1',
-        backup: '',
+        backup: 'notes_search_2',
         priority: 1,
         type: 'social-media',
         platform: 'rednote',
@@ -308,6 +308,54 @@ export class ApiDb {
           note_type: '0'
         },
         docs_link: 'https://docs.tikhub.io/268383320e0',
+        filter: true,
+        flattener: `$map($, function($item) {
+          {
+            'id': $item.id,
+            'userid': $item.note_card.user.user_id,
+            'author': $item.note_card.user.nick_name,
+            'display_title': $item.note_card.display_title,
+            'type': $item.note_card.type,
+            'date': $item.note_card.corner_tag_info[0].text,
+            'url': $item.note_card.cover.url_default,
+            'collected_count': $item.note_card.interact_info.collected_count,
+            'shared_count': $item.note_card.interact_info.shared_count,
+            'comment_count': $item.note_card.interact_info.comment_count,
+            'liked_count': $item.note_card.interact_info.liked_count
+          }
+        })`,
+        limit: '',
+        price: '',
+        note: ''
+      },
+      notes_search_2: {
+        id: 'notes_search_2',
+        backup: '',
+        priority: 2,
+        type: 'social-media',
+        platform: 'rednote',
+        description: '用以通过关键字搜索小红书笔记/帖子/note，获得note列表',
+        name: 'notes',
+        url: 'https://api.tikhub.io/api/v1/xiaohongshu/app/search_notes',
+        method: 'GET',
+        headers: {
+          "Authorization": `Bearer ${process.env.TIKHUB_API_KEY}`,
+        },
+        query_params: {},
+        query_params_desc: {
+          keywords: 'String, keyword for query',
+          page: 'number, For multi pages, Default is 1',
+          sort_type: 'Enum: Sort(default:general), general: 综合(Default), popularity_descending: 最热(Hot), time_descending: 最新(New)',
+          filter_note_type: 'Enum: Note type(default: 0), 0: 综合(General), 1: 视频筛选(Video), 2: 图文筛选(Normal)',
+          filter_note_time: '(optional)String, 一天内: 一天内(within one day), 一周内: 一周内(within a week), 半年内: 半年内(Within half a year)'
+        },
+        query_params_example: {
+          keywords: 'dance',
+          page: 1,
+          sort_type: 'general',
+          filter_note_type: '0'
+        },
+        docs_link: 'https://docs.tikhub.io/310965843e0',
         filter: true,
         flattener: `$map($, function($item) {
           {
