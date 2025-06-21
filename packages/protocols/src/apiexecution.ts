@@ -157,7 +157,7 @@ export class ApiExecution {
             if (failedCount++ > MAX_FAILED_COUNT) {
               break;
             }
-            if (err.status == 503 && api.backup && api.backup != "") {
+            if ((err.status == 503 || err.status == 400) && api.backup && api.backup != "") {
               const apiBackup = ApiDb.getApi(api.backup);
               const newParams = await this.getApiBackupQueryParam(runtime, message, apiBackup);
               if (newParams) {
