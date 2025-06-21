@@ -558,7 +558,7 @@ export class WechatHandler {
             if (options && options.length > 0) {
                 const showOptions = this.getRandomElements<string>(options, 3, 5);
                 await this.setCachedData(runtime, newTaskId + TASK_OPTIONS, showOptions);
-                await this.setCachedData(runtime, taskId + TASK_BK_OPTIONS, options);
+                await this.setCachedData(runtime, newTaskId + TASK_BK_OPTIONS, options);
                 text = `${output}\n\n${showOptions.map((item, index) => `(${index + 1}). ${item}`).join('\n')}\n【回复序号执行，回复0刷新选项，其他请输入】`;
             }
             return text;

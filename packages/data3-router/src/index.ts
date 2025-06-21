@@ -299,7 +299,7 @@ export class DirectClient {
             "/:agentId/data_process",
             upload.single("file"),
             async (req: express.Request, res: express.Response) => {
-                const maxNum = 1;
+                const maxNum = 10;
                 if (this.concurrentNum >= maxNum) {
                     res.json({
                         user: "agent",
@@ -423,7 +423,7 @@ export class DirectClient {
             "/:agentId/message",
             upload.single("file"),
             async (req: express.Request, res: express.Response) => {
-                const maxNum = 1;
+                const maxNum = 10;
                 if (this.concurrentNum >= maxNum) {
                     res.json({
                         user: "agent",

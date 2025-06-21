@@ -188,7 +188,7 @@ export class ApiExecution {
               || response.data?.data
               || [];
           if (items) {
-            console.log(items[0]);
+            console.log(`Response items: ${items.length}`);
           }
           if (api.filter) {
             try {
