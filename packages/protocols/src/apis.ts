@@ -34,9 +34,10 @@ export class ApiDb {
 
   static getApi(api_desc: string) {
     const apiList = {
-      notes_search_0: {
-        id: '',
+      notes_search: {
+        id: 'notes_search',
         backup: 'notes_search_1',
+        priority: 0,
         type: 'social-media',
         platform: 'rednote',
         description: '用以通过关键字搜索小红书笔记/帖子/note，获得note列表',
@@ -86,11 +87,12 @@ export class ApiDb {
         note: ''
       },
       users_search: {
-        id: '',
-        backup: '',
+        id: 'users_search',
+        backup: 'users_search_1',
+        priority: 0,
         type: 'social-media',
         platform: 'rednote',
-        description: '',
+        description: '用以通过关键字搜索小红书账号，获得账号列表',
         name: 'users',
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/search-user/v2',
         method: 'GET',
@@ -126,11 +128,12 @@ export class ApiDb {
         note: ''
       },
       get_user: {
-        id: '',
+        id: 'get_user',
         backup: '',
+        priority: 0,
         type: 'social-media',
         platform: 'rednote',
-        description: '',
+        description: '用以通过单个小红书账号ID获取该账号的详情',
         name: 'user',
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-user/v3',
         method: 'GET',
@@ -152,9 +155,10 @@ export class ApiDb {
         price: '',
         note: ''
       },
-      notes_comment_by_next_page_0: {
-        id: '',
-        backup: '',
+      notes_comment_by_next_page: {
+        id: 'notes_comment_by_next_page',
+        backup: 'notes_comment_by_next_page_1',
+        priority: 0,
         type: 'social-media',
         platform: 'rednote',
         description: '用以通过单个笔记/帖子的ID获取其评论列表',
@@ -206,11 +210,12 @@ export class ApiDb {
         note: ''
       },
       get_note_list: {
-        id: '',
+        id: 'get_note_list',
         backup: '',
+        priority: 0,
         type: 'social-media',
         platform: 'rednote',
-        description: '',
+        description: '用以通过单个小红书账号ID获取该账号的笔记/帖子的列表',
         name: 'user_notes',
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-user-note-list/v1',
         method: 'GET',
@@ -247,11 +252,12 @@ export class ApiDb {
         note: ''
       },
       fetch_comments_by_keyword: {
-        id: '',
+        id: 'fetch_comments_by_keyword',
         backup: '',
+        priority: 0,
         type: 'social-media',
         platform: 'rednote',
-        description: '',
+        description: '用以通过关键字搜索小红书笔记/帖子/note，获得note id列表，然后再获得这些笔记的评论列表；该操作能获得评论这一种数据',
         name: 'user_notes',
         // Excute Data Dependency
         execute_depend: 'chain_loop', // ['chain', 'chain_loop']
@@ -261,11 +267,12 @@ export class ApiDb {
         request2: 'notes_comment_by_next_page',
       },
       fetch_notes_and_comments_by_keyword: {
-        id: '',
+        id: 'fetch_notes_and_comments_by_keyword',
         backup: '',
+        priority: 0,
         type: 'social-media',
         platform: 'rednote',
-        description: '',
+        description: '用以通过关键字搜索小红书笔记/帖子/note，获得note列表，然后再获得这些笔记的评论列表；该操作能获得笔记和评论两种数据. Parameters: keyword (search term), sort (popularity_descending or time_descending).',
         name: 'user_notes',
         // Excute Data Dependency
         execute_depend: 'chain_loop', // ['chain', 'chain_loop']
@@ -274,12 +281,13 @@ export class ApiDb {
         // The Second Request
         request2: 'notes_comment_by_next_page',
       },
-      notes_search: {
-        id: '',
+      notes_search_1: {
+        id: 'notes_search_1',
         backup: '',
+        priority: 1,
         type: 'social-media',
         platform: 'rednote',
-        description: '',
+        description: '用以通过关键字搜索小红书笔记/帖子/note，获得note列表',
         name: 'notes',
         url: 'https://api.tikhub.io/api/v1/xiaohongshu/web_v2/fetch_search_notes',
         method: 'GET',
@@ -320,9 +328,10 @@ export class ApiDb {
         price: '',
         note: ''
       },
-      notes_comment_by_next_page: {
-        id: '',
+      notes_comment_by_next_page_1: {
+        id: 'notes_comment_by_next_page_1',
         backup: '',
+        priority: 1,
         type: 'social-media',
         platform: 'rednote',
         description: '用以通过单个笔记/帖子的ID获取其评论列表',

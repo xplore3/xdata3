@@ -2,7 +2,7 @@
 import axios from "axios";
 import jsonata from "jsonata";
 import { JSONPath } from "jsonpath-plus";
-//import { SocksProxyAgent } from 'socks-proxy-agent';
+import { SocksProxyAgent } from 'socks-proxy-agent';
 
 import {
   Memory,
@@ -17,7 +17,7 @@ import { extractJson } from "./utils"
 import { axios_request } from "./httpproxy";
 
 
-//const gProxyAgent = new SocksProxyAgent(`socks5://${process.env.GLOBAL_PROXY_AGENT}`);
+const gProxyAgent = new SocksProxyAgent(`socks5://${process.env.GLOBAL_PROXY_AGENT}`);
 
 export class ApiExecution {
 
@@ -126,8 +126,8 @@ export class ApiExecution {
         url: api.url,
         params: api.query_params,
         headers: api.headers,
-        //httpAgent: gProxyAgent,
-        //httpsAgent: gProxyAgent
+        httpAgent: gProxyAgent,
+        httpsAgent: gProxyAgent
       }
       let response = null;
       try {
@@ -147,14 +147,18 @@ export class ApiExecution {
               options.params.page = page;
             }
             console.log(options);
-            // response = await axios.request(options);
-            response = await axios_request(options);
+            response = await axios.request(options);
+            //response = await axios_request(options);
             console.log(response.data);
           }
           catch (err) {
             console.log(`axios.request error ${err.message}`);
             if (failedCount++ > MAX_FAILED_COUNT) {
               break;
+            }
+            if (err.status == 503 && api.backup && api.backup != "") {
+              const apiBackup = ApiDb.getApi(api.backup);
+              return await this.executeApi(runtime, message, apiBackup, totalCount);
             }
             await new Promise((resolve) => setTimeout(resolve, 1000 + 1000 * execCount));
             continue;
