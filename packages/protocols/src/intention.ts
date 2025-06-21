@@ -892,6 +892,10 @@ export class IntentionHandler {
         }
       }
     }
+    if (attachment.length > 50 * 1024) {
+      console.log(`Data Attachment too large ${attachment.length}`);
+      attachment = attachment.slice(0, 50 * 1024);
+    }
     return attachment;
   }
 

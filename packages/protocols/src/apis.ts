@@ -65,6 +65,7 @@ export class ApiDb {
         },
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_b2edca5d-0e93-4b66-8deb-9653fb71e9b5',
         filter: true,
+        data_path: `$.data.data.items`,
         flattener: `$map($, function($item) {
           {
             'id': $item.note.id,
@@ -111,6 +112,7 @@ export class ApiDb {
         },
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_fe3e8ab0-8b7b-448c-9f9d-785ba1c8406d',
         filter: true,
+        data_path: `$.data.data.users`,
         flattener: `$map($, function($item) {
           {
             'id': $item.id,
@@ -150,6 +152,7 @@ export class ApiDb {
         },
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_2dfd1e1c-d9d7-4f86-9a0a-6934a62ea1cd',
         filter: false,
+        data_path: `$.data.data`,
         flattener: '',
         limit: '',
         price: '',
@@ -179,6 +182,7 @@ export class ApiDb {
         },
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_8836fd68-5f19-4c38-98ff-34280bec06ad',
         filter: false,
+        data_path: `$.data.data.comments`,
         flattener: `$map($, function($item) {
           {
             'id': $item.id,
@@ -233,6 +237,7 @@ export class ApiDb {
         },
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_677d7a27-13e4-498d-ac34-6f3c2927fb64',
         filter: false,
+        data_path: `$.data.data.notes`,
         flattener: `$map($, function($item) {
           {
             'id': $item.id,
@@ -309,6 +314,7 @@ export class ApiDb {
         },
         docs_link: 'https://docs.tikhub.io/268383320e0',
         filter: true,
+        data_path: `$.data.data.items`,
         flattener: `$map($, function($item) {
           {
             'id': $item.id,
@@ -357,6 +363,7 @@ export class ApiDb {
         },
         docs_link: 'https://docs.tikhub.io/310965843e0',
         filter: true,
+        data_path: `$.data.data.data.items`,
         flattener: `$map($, function($item) {
           {
             'id': $item.note.id,
@@ -401,6 +408,7 @@ export class ApiDb {
         },
         docs_link: 'https://docs.tikhub.io/268383322e0',
         filter: false,
+        data_path: `$.data.data.comments`,
         flattener: `$map($, function($item) {
           {
             'id': $item.id,

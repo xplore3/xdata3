@@ -124,7 +124,7 @@ export class WechatHandler {
 
     async syncMessage(msg_token: string, kfid: string) {
         try {
-            console.log("syncMessage " + msg_token);
+            //console.log("syncMessage " + msg_token);
             const token = await this.getAccessToken();
             const msg = {
                 cursor: this.cursor,
@@ -135,7 +135,7 @@ export class WechatHandler {
             };
             const resp = await axios.post(`https://qyapi.weixin.qq.com/cgi-bin/kf/sync_msg?access_token=${token}`, msg);
             //console.log(resp);
-            console.log("syncMessage " + resp.data.errmsg);
+            //console.log("syncMessage " + resp.data.errmsg);
             if (resp.data.errcode !== 0) {
                 throw new Error(`syncMessage failed: ${resp.data.errmsg}`);
             }
@@ -269,7 +269,7 @@ export class WechatHandler {
                 const decrypted = decrypt(process.env.WECHAT_ENCODING_AESKEY, encryptMsg)
                 const decryptedXml = await xml2js.parseStringPromise(decrypted.message, { explicitArray: false })
                 //const msg = decryptedXml.xml
-                console.log(decryptedXml.xml);
+                //console.log(decryptedXml.xml);
                 if (decryptedXml.xml.Token == null || decryptedXml.xml.Token == undefined) {
                     console.error('[WecomListener] Invalid message format:', decryptedXml.xml);
                     res.status(400).send('Invalid message format');
@@ -281,7 +281,7 @@ export class WechatHandler {
                     const index = msg.msg_list.length - 1;
                     const firstMsg = msg.msg_list[index];
                     if (firstMsg.msgtype == 'text') {
-                        console.log(firstMsg.text.content);
+                        console.log(`Recv text: 【${firstMsg.text.content}】`);
                         let firstText = firstMsg.text.content;
                         const userId = firstMsg.external_userid;
                         // Test for external_userid
@@ -428,13 +428,14 @@ export class WechatHandler {
        const options = await this.getCachedData<string[]>(runtime, taskId + TASK_OPTIONS);
        const bkOptions = await this.getCachedData<string[]>(runtime, taskId + TASK_BK_OPTIONS);
        console.log(options);
+       console.log(bkOptions);
        try {
             if (optionIndex == '0') {
                 const newOptions = this.getRandomElements<string>(bkOptions, 3, 5);
                 await this.setCachedData(runtime, taskId + TASK_BK_OPTIONS, newOptions);
                 return `${newOptions.map((item, index) => `(${index + 1}). ${item}`).join('\n')}\n【回复序号执行，回复0刷新选项，其他请输入】`;
             }
-            return options[parseInt(optionIndex, 10)];
+            return options[parseInt(optionIndex, 10) - 1];
         }
         catch (err) {
             console.log(err);
