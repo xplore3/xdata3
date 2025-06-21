@@ -343,14 +343,14 @@ export class ApiDb {
         },
         query_params: {},
         query_params_desc: {
-          keywords: 'String, keyword for query',
+          keyword: 'String, keyword for query',
           page: 'number, For multi pages, Default is 1',
           sort_type: 'Enum: Sort(default:general), general: 综合(Default), popularity_descending: 最热(Hot), time_descending: 最新(New)',
           filter_note_type: 'Enum: Note type(default: 0), 0: 综合(General), 1: 视频筛选(Video), 2: 图文筛选(Normal)',
           filter_note_time: '(optional)String, 一天内: 一天内(within one day), 一周内: 一周内(within a week), 半年内: 半年内(Within half a year)'
         },
         query_params_example: {
-          keywords: 'dance',
+          keyword: 'dance',
           page: 1,
           sort_type: 'general',
           filter_note_type: '0'
