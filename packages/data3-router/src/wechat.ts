@@ -308,7 +308,7 @@ export class WechatHandler {
 
                         try {
                             const taskId = await this.getCachedData<string>(runtime, userId);
-                            if (!taskId) {
+                            if (taskId && taskId != '') {
                                 let immResp = "";
                                 const SINGLE_DIGIT_REGEX = /^[0-9]$/;
                                 if (SINGLE_DIGIT_REGEX.test(firstText)) {
