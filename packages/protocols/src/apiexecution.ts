@@ -180,6 +180,7 @@ export class ApiExecution {
           let tempResult = [];
           // TODO: The response items should be compatible
           let items = response.data?.data?.items
+              || response.data?.data?.data?.items
               || response.data?.data?.comments
               || response.data?.data?.users
               || response.data?.data?.notes
