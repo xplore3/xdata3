@@ -17,26 +17,6 @@ import { TaskHelper } from "./task";
 import { UserKnowledge } from "./userknowledge";
 
 
-export const dataHandlerTemplate = `
-##
-Some additional information about the task:
-#####################################
-# Knowledge
-{{knowledge}}
-
-# Task: Generate dialog and actions for the character {{agentName}}.
-About {{agentName}}:
-{{bio}}
-{{lore}}
-
-{{providers}}
-
-{{attachments}}
-
-{{recentMessages}}
-#####################################
-`;
-
 export class IntentionHandler {
   runtime: IAgentRuntime = null;
   message: Memory = null;

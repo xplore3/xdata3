@@ -10,6 +10,26 @@ import {
 } from "@data3os/agentcontext";
 
 
+export const dataHandlerTemplate = `
+##
+Some additional information about the task:
+#####################################
+# Knowledge
+{{knowledge}}
+
+# Task: Generate dialog and actions for the character {{agentName}}.
+About {{agentName}}:
+{{bio}}
+{{lore}}
+
+{{providers}}
+
+{{attachments}}
+
+{{recentMessages}}
+#####################################
+`;
+
 export class UserKnowledge {
 
   constructor() {}

@@ -97,7 +97,7 @@ export class TaskHelper {
   }
 
   static getTaskAttachment(taskId: string) {
-    let attachment = readCacheFile(taskId + TASK_DATA_CACHE_FILE);
+    let attachment = readCacheFile(taskId + this.TASK_DATA_CACHE_FILE);
     if (!attachment || attachment.length < 1) {
       attachment = readCacheFile(taskId + "_raw_data.txt");
       if (!attachment || attachment.length < 1) {
