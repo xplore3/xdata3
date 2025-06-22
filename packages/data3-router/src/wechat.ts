@@ -13,11 +13,11 @@ import {
     createAccountByExternalData,
 } from "@data3os/agentcontext";
 import {
+    extractJson,
     handleProtocols,
 } from "data3-protocols";
 import cron from "node-cron";
 import { PromptController } from "./promts";
-import { extractJson } from "./utils"
 
 
 const ORIGIN_INPUT_POST = "_origin_input";
