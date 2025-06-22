@@ -57,7 +57,7 @@ export class IntentionHandler {
           "data_source": "rednote",
           "data_action": "notes_search",
           "keyword": "search key",
-          "request_count": 100,
+          "request_count": 10, 不要超过100
           "filter_desc": "the description of the data filter"
         },
         "data_result": "简短回答",
@@ -268,8 +268,9 @@ export class IntentionHandler {
       if (execJson) {
         if (execJson.query_params) {
           api.query_params = execJson.query_params;
+          const execCount = execJson.request_count <= 100 ? execJson.request_count : 100;
           const { result, txtfilename, excelfilename } = await ApiExecution.executeApiChainLoop(
-            runtime, message, api, execJson.request_count
+            runtime, message, api, execCount
           );
           if (result && result.length > 0) {
             results.push(result);

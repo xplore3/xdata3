@@ -50,7 +50,7 @@ export class ApiExecution {
           根据这些输入，需要给出如下结果：
           {
             "query_params": {json of params},
-            "request_count": count from PARAM_SOURCE
+            "request_count": count from PARAM_SOURCE, 不要超过100
           }.
           关于query_params字段，需满足用户所有需求，且输出参数说明中的项，不能有参数说明之外的项；不是数组，仅仅是一个JSON对象。
           query_params中的关键字的取值需要严格从指定来源${JSON.stringify(item)}中获取，不能有之外的值，不能生成值。
@@ -72,9 +72,10 @@ export class ApiExecution {
           if (execJson) {
             if (execJson.query_params) {
               api2.query_params = execJson.query_params;
+              const execCount = execJson.request_count <= 100 ? execJson.request_count : 100;
               await new Promise((resolve) => setTimeout(resolve, 100));
               const api2Result = await this.executeApi(
-                runtime, message, api2, execJson.request_count
+                runtime, message, api2, execCount
               );
               if (api2Result) {
                 result2.push(...api2Result);
@@ -325,7 +326,7 @@ export class ApiExecution {
       根据这些输入，需要给出如下结果：
         {
           "query_params": {json of params},
-          "request_count": total count of user request from users input
+          "request_count": total count of user request from users input, 不要超过100
         }.
       关于query_params字段，需满足用户所有需求，且输出参数说明中的项，不能有参数说明之外的项；不是数组，仅仅是一个JSON对象。
       如果query_params的keyword之类的取值不能明显地从用户输入里获取，则需要结合自己的knowledge和背景。
