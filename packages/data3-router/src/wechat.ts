@@ -17,6 +17,7 @@ import {
 } from "data3-protocols";
 import cron from "node-cron";
 import { PromptController } from "./promts";
+import { extractJson } from "./utils"
 
 
 const ORIGIN_INPUT_POST = "_origin_input";
@@ -321,12 +322,15 @@ export class WechatHandler {
                                     }
                                     firstText = await this.getRealOption(runtime, userId, firstText);
                                 }
-                                else if (firstText.length < 10) {
-                                    immResp = await this.generateQuickResponse(runtime, firstText, userId);
-                                }
                                 else {
-                                    const lang = this.detectLanguage(firstText);
-                                    immResp = this.getFirstResponse(lang);
+                                    const quickJson = await this.generateQuickResponse(runtime, firstText, userId);
+                                    if (quickJson && quickJson.quick) {
+                                        immResp = quickJson.response;
+                                    }
+                                    else {
+                                        const lang = this.detectLanguage(firstText);
+                                        immResp = this.getFirstResponse(lang);
+                                    }
                                 }
                                 await this.sendMessage(userId,
                                     decryptedXml.xml.OpenKfId, immResp);
@@ -673,20 +677,25 @@ export class WechatHandler {
             //    return null;
             //}
 
-            const prompt = `根据用户的输入内容：【${text}】，快速给出一个同种语言的打招呼类简短回复，不需要进行推理，只给出结果就可以。`;
+            const prompt = `根据用户的输入内容：【${text}】，判断这个内容是不是仅仅是一个打招呼的内容，请返回一个如下JSON：
+            {
+              'quick': true or false,
+              'response': '一个同种语言的打招呼类简短回复'
+            }.
+            如果用户输入是一个打招呼类的，则quick为true，否则为false。
+            在response字段，可以概率性的附上【"\n\n回复‘模板’获取常用提示词模板"】。
+            输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析，不需要包含其他内容。`;
             let resp = await generateText({
                 runtime,
                 context: await this.client.composePrompt(runtime, prompt, stringToUuid(userId)),
                 modelClass: ModelClass.SMALL,
             });
 
-            const now = Date.now();
-            if (now % 3 == 1) {
-                return resp + "\n\n回复‘模板’获取常用提示词模板";
+            let json = extractJson(resp);
+            if (json) {
+              return json;
             }
-            else {
-                return resp;
-            }
+            return resp;
         } catch (err) {
             console.log(err);
         }
