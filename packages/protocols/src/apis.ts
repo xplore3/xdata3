@@ -18,8 +18,8 @@ export class ApiDb {
 
   static getUserDataSource(userId: UUID) {
     const sources = [
-      //'hot_words: 用以获得近期火热的热词等',
-      //'hot_topics: 用以获得近期火热的话题/种类等',
+      'hot_words: 用以获得近期火热的热词等',
+      'topic_rank: 用以获得近期火热的话题/种类等',
       'notes_search: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表. Parameters: keyword (search term), sort (popularity_descending or time_descending).',
       //'note_detail: 通过noteid获取单个笔记/帖子/note的详情',
       'users_search: 用以通过关键字搜索小红书账号，获得账号列表',
@@ -64,6 +64,8 @@ export class ApiDb {
           noteTime: '%E4%B8%80%E5%A4%A9%E5%86%85'
         },
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_b2edca5d-0e93-4b66-8deb-9653fb71e9b5',
+        could_cached: false,
+        cached_expired: 3600000 * 24,
         filter: true,
         data_path: `$.data.data.items`,
         flattener: `$map($, function($item) {
@@ -111,6 +113,8 @@ export class ApiDb {
           page: 1
         },
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_fe3e8ab0-8b7b-448c-9f9d-785ba1c8406d',
+        could_cached: false,
+        cached_expired: 3600000 * 24,
         filter: true,
         data_path: `$.data.data.users`,
         flattener: `$map($, function($item) {
@@ -151,6 +155,8 @@ export class ApiDb {
           userId: '648c8ada000000001c02b0f2'
         },
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_2dfd1e1c-d9d7-4f86-9a0a-6934a62ea1cd',
+        could_cached: false,
+        cached_expired: 3600000 * 24,
         filter: false,
         data_path: `$.data.data`,
         flattener: '',
@@ -181,6 +187,8 @@ export class ApiDb {
           noteId: '6683b283000000001f0052bf'
         },
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_8836fd68-5f19-4c38-98ff-34280bec06ad',
+        could_cached: false,
+        cached_expired: 3600000 * 24,
         filter: false,
         data_path: `$.data.data.comments`,
         flattener: `$map($, function($item) {
@@ -236,6 +244,8 @@ export class ApiDb {
           userId: '648c8ada000000001c02b0f2'
         },
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_677d7a27-13e4-498d-ac34-6f3c2927fb64',
+        could_cached: false,
+        cached_expired: 3600000 * 24,
         filter: false,
         data_path: `$.data.data.notes`,
         flattener: `$map($, function($item) {
@@ -313,6 +323,8 @@ export class ApiDb {
           note_type: '0'
         },
         docs_link: 'https://docs.tikhub.io/268383320e0',
+        could_cached: false,
+        cached_expired: 3600000 * 24,
         filter: true,
         data_path: `$.data.data.items`,
         flattener: `$map($, function($item) {
@@ -362,6 +374,8 @@ export class ApiDb {
           filter_note_type: '0'
         },
         docs_link: 'https://docs.tikhub.io/310965843e0',
+        could_cached: false,
+        cached_expired: 3600000 * 24,
         filter: true,
         data_path: `$.data.data.data.items`,
         flattener: `$map($, function($item) {
@@ -407,6 +421,8 @@ export class ApiDb {
           note_id: '6683b283000000001f0052bf'
         },
         docs_link: 'https://docs.tikhub.io/268383322e0',
+        could_cached: false,
+        cached_expired: 3600000 * 24,
         filter: false,
         data_path: `$.data.data.comments`,
         flattener: `$map($, function($item) {
@@ -433,6 +449,129 @@ export class ApiDb {
             }), 'empty'][0]
           }
         })`,
+        limit: '',
+        price: '',
+        note: ''
+      },
+      hot_words: {
+        id: 'hot_words',
+        backup: '',
+        priority: 0,
+        type: 'social-media',
+        platform: 'rednote',
+        description: '用以获得近期火热的热词等',
+        name: 'hot_words',
+        url: 'https://gw.newrank.cn/api/xhsv2/nr/app/xh/v2/rank/hotWordHotLis',
+        method: 'GET',
+        headers: {
+          Accept: "*/*",
+          "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+          Connection: "keep-alive",
+          Origin: "https://xh.newrank.cn",
+          Referer: "https://xh.newrank.cn/",
+          "Sec-Fetch-Dest": "empty",
+          "Sec-Fetch-Mode": "cors",
+          "Sec-Fetch-Site": "same-site",
+          "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+          "content-type": "application/json",
+          "n-token": "35c430ef650b459ba2b9c1409148d929",
+          request_id: "c223bbc2a76140a7818271ea7abf1246",
+          "sec-ch-ua": '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": '"Windows"',
+          Cookie: "tfstk=gTxnMOGrRe7IM6RY9CSIo3eA28gOAJs5kQERwgCr715_wQpyeuVyEQbRvLlBrCjBXeER9XskUIIoMjnxDp9CAglxMvu71SIVH_WUw6rwQgBoJ0tqMp9CVR90-rBed8j7VkJP4QSN7tX54yrPaAbNHTSzYarU7551UgSP8TPa7t6VU95P4AvN1TSPaQSr9NZPi3-6bfTQWZJWjItGKwf2IVZ8VyWUMs9FOurPt9bhSp5g4u-MrwvbL6ubB_sdOLWHNmZCYaYyvG-E_0S2lCxlui0-divMWEQHSXrl6HLMjMKENr99I_Rl4eM7_ddAtESBe8GwIZvyVN8EskvCjttPu3Vn6_LvBH7MgfEMNaYyvG-E_mjrPPzVSxr5QYKaPz_FCOfAijAkA_Y1lLkiIrgC8O6KMADgPW7FCOXiIA44VwW1L8C..; Hm_lvt_a19fd7224d30e3c8a6558dcb38c4beed=1747811125; token=183E6D980ED848C7B8C939C2C66B0C1C; acw_tc=0a472f8317494476720786894e005821b1dc5e91c7ecca2f5be57a5affb102; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22nr_my2b9az6y%22%2C%22first_id%22%3A%2219641461076860-0e9b6d1278a91f-26011c51-2073600-19641461077b29%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTk2NDE0NjEwNzY4NjAtMGU5YjZkMTI3OGE5MWYtMjYwMTFjNTEtMjA3MzYwMC0xOTY0MTQ2MTA3N2IyOSIsIiRpZGVudGl0eV9sb2dpbl9pZCI6Im5yX215MmI5YXo2eSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%24identity_login_id%22%2C%22value%22%3A%22nr_my2b9az6y%22%7D%2C%22%24device_id%22%3A%22196f248066721f-092e6c949d0a9b-26011f51-2073600-196f24806684c8%22%7D; auth_n=nNCldQK3Tdo4VBUZKOgQA9/QaFEzTDkUxVtzG4nSdcCLR2QbtXf8z/4qRrRJcDBz",
+        },
+        query_params: {},
+        query_params_desc: {
+          typeV1: "",
+          typeV2: "",
+          rankType: "day",
+          rankDate: "Date of today: e.g. 2025-06-20",
+          recentType: "",
+          size: 20,
+          start: 1,
+          isNew: "",
+          isBoom: "",
+          sort: "hot_score"
+        },
+        query_params_example: {
+          typeV1: "",
+          typeV2: "",
+          rankType: "day",
+          rankDate: "2025-06-20",
+          recentType: "",
+          size: 20,
+          start: 1,
+          isNew: "",
+          isBoom: "",
+          sort: "hot_score"
+        },
+        docs_link: '',
+        could_cached: true,
+        cached_expired: 3600000 * 24 * 7,
+        filter: false,
+        data_path: `$.data.data.list`,
+        flattener: ``,
+        limit: '',
+        price: '',
+        note: ''
+      },
+      topic_rank: {
+        id: 'topic_rank',
+        backup: '',
+        priority: 0,
+        type: 'social-media',
+        platform: 'rednote',
+        description: '用以获得近期火热的话题/种类等',
+        name: 'topic_rank',
+        url: 'https://gw.newrank.cn/api/xh/xdnphb/nr/app/xhs/rank/topicRank',
+        method: 'GET',
+        headers: {
+          Accept: "*/*",
+          "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+          Connection: "keep-alive",
+          Origin: "https://xh.newrank.cn",
+          Referer: "https://xh.newrank.cn/",
+          "Sec-Fetch-Dest": "empty",
+          "Sec-Fetch-Mode": "cors",
+          "Sec-Fetch-Site": "same-site",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+          "content-type": "application/json",
+          "n-token": "35c430ef650b459ba2b9c1409148d929",
+          request_id: "c223bbc2a76140a7818271ea7abf1246",
+          "sec-ch-ua": '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": '"Windows"',
+          Cookie: "tfstk=gTxnMOGrRe7IM6RY9CSIo3eA28gOAJs5kQERwgCr715_wQpyeuVyEQbRvLlBrCjBXeER9XskUIIoMjnxDp9CAglxMvu71SIVH_WUw6rwQgBoJ0tqMp9CVR90-rBed8j7VkJP4QSN7tX54yrPaAbNHTSzYarU7551UgSP8TPa7t6VU95P4AvN1TSPaQSr9NZPi3-6bfTQWZJWjItGKwf2IVZ8VyWUMs9FOurPt9bhSp5g4u-MrwvbL6ubB_sdOLWHNmZCYaYyvG-E_0S2lCxlui0-divMWEQHSXrl6HLMjMKENr99I_Rl4eM7_ddAtESBe8GwIZvyVN8EskvCjttPu3Vn6_LvBH7MgfEMNaYyvG-E_mjrPPzVSxr5QYKaPz_FCOfAijAkA_Y1lLkiIrgC8O6KMADgPW7FCOXiIA44VwW1L8C..; Hm_lvt_a19fd7224d30e3c8a6558dcb38c4beed=1747811125; token=183E6D980ED848C7B8C939C2C66B0C1C; acw_tc=0a472f8317494476720786894e005821b1dc5e91c7ecca2f5be57a5affb102; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22nr_my2b9az6y%22%2C%22first_id%22%3A%2219641461076860-0e9b6d1278a91f-26011c51-2073600-19641461077b29%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTk2NDE0NjEwNzY4NjAtMGU5YjZkMTI3OGE5MWYtMjYwMTFjNTEtMjA3MzYwMC0xOTY0MTQ2MTA3N2IyOSIsIiRpZGVudGl0eV9sb2dpbl9pZCI6Im5yX215MmI5YXo2eSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%24identity_login_id%22%2C%22value%22%3A%22nr_my2b9az6y%22%7D%2C%22%24device_id%22%3A%22196f248066721f-092e6c949d0a9b-26011f51-2073600-196f24806684c8%22%7D; auth_n=nNCldQK3Tdo4VBUZKOgQA9/QaFEzTDkUxVtzG4nSdcCLR2QbtXf8z/4qRrRJcDBz",
+        },
+        query_params: {},
+        query_params_desc: {
+          type: "\u5168\u90E8",
+          topicSecondType: "",
+          dateType: 1,
+          rankDate: "Date of today: e.g. 2025-06-20",
+          isBrandTopic: "0",
+          sort: "interactiveCount",
+          size: 20,
+          start: 1,
+        },
+        query_params_example: {
+          type: "\u5168\u90E8",
+          topicSecondType: "",
+          dateType: 1,
+          rankDate: "2025-06-20",
+          isBrandTopic: "0",
+          sort: "interactiveCount",
+          size: 20,
+          start: 1,
+        },
+        docs_link: '',
+        could_cached: true,
+        cached_expired: 3600000 * 24 * 7,
+        filter: false,
+        data_path: `$.data.data.list`,
+        flattener: ``,
         limit: '',
         price: '',
         note: ''

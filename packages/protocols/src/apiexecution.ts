@@ -16,6 +16,7 @@ import { ApiDb } from "./apis";
 import { extractJson } from "./utils"
 import { axios_request } from "./httpproxy";
 import { UserKnowledge } from "./userknowledge";
+import { DataCache } from "./cache";
 
 
 const gProxyAgent = new SocksProxyAgent(`socks5://${process.env.GLOBAL_PROXY_AGENT}`);
@@ -141,6 +142,8 @@ export class ApiExecution {
         let filterPath: string = null;
         for (let page = 1; page <= MAX_PAGES && result.length < totalCount; page++) {
           if (execCount++ > MAX_TRY_COUNT) { break; }
+          let items = [];
+          let readCache = false;
 
           try {
             // TODO: WORKAROUND of page
@@ -168,22 +171,41 @@ export class ApiExecution {
                 break;
               }
             }
-            await new Promise((resolve) => setTimeout(resolve, 1000 + 1000 * execCount));
-            continue;
-          }
-          // TODO: The response check should be compatible
-          if (response.status != 200) {
-            console.log(response);
-            if (failedCount++ > MAX_FAILED_COUNT) {
-              break;
+            if (api.could_cached) {
+              let cache = await DataCache.getApiCacheData(runtime, api.id);
+              try {
+                cache = await JSON.parse(cache);
+                if (cache) {
+                  items.push(...cache);
+                  readCache = true;
+                }
+                else {
+                  continue;
+                }
+              }
+              catch (err) {
+                continue;
+              }
             }
-            await new Promise((resolve) => setTimeout(resolve, 1000 + 1000 * execCount));
-            continue;
+            else {
+              await new Promise((resolve) => setTimeout(resolve, 1000 + 1000 * execCount));
+              continue;
+            }
           }
           let tempResult = [];
-          // TODO: The response items should be compatible
-          // TODP: Use of api.data_path
-          let items = response.data?.data?.items
+          if (!readCache) {
+            // TODO: The response check should be compatible
+            if (response.status != 200) {
+              console.log(response);
+              if (failedCount++ > MAX_FAILED_COUNT) {
+                break;
+              }
+              await new Promise((resolve) => setTimeout(resolve, 1000 + 1000 * execCount));
+              continue;
+            }
+            // TODO: The response items should be compatible
+            // TODP: Use of api.data_path
+            items = response.data?.data?.items
               || response.data?.data?.data?.items
               || response.data?.data?.comments
               || response.data?.data?.users
@@ -191,6 +213,10 @@ export class ApiExecution {
               || response.data?.data?.list
               || response.data?.data
               || [];
+            if (api.could_cached) {
+              await DataCache.setApiCacheData(runtime, api.id, JSON.stringify(items));
+            }
+          }
           if (items) {
             console.log(`Response items: ${items.length}`);
           }
