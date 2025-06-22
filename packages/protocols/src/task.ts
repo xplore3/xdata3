@@ -16,10 +16,10 @@ import { UserKnowledge } from "./userknowledge";
 
 const TASK_ORIGIN_INPUT_CACHE_KEY = "_task_cache_";
 const TASK_OPTION_CACHE_KEY = "_task_option_cache_";
-const TASK_DATA_CACHE_FILE = "_all_data.txt";
 
 export class TaskHelper {
   //userId: string = null;
+  static TASK_DATA_CACHE_FILE = "_all_data.txt";
 
   private static async readFromCache<T>(runtime: IAgentRuntime, key: string): Promise<T | null> {
     const cached = await runtime.cacheManager.get<T>(key);

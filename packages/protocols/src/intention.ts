@@ -113,7 +113,7 @@ export class IntentionHandler {
               runtime, execParam, message);
             if (result && result.length > 0) {
               results.push(result);
-              const filename = taskId + TASK_DATA_CACHE_FILE;
+              const filename = taskId + TaskHelper.TASK_DATA_CACHE_FILE;
               appendToChatCache(JSON.stringify(result), filename, (err) => {
                 console.error("Custom error handling:", err);
               });
@@ -293,7 +293,7 @@ export class IntentionHandler {
           );
           if (result && result.length > 0) {
             results.push(result);
-            const filename = taskId + TASK_DATA_CACHE_FILE;
+            const filename = taskId + TaskHelper.TASK_DATA_CACHE_FILE;
             appendToChatCache(JSON.stringify(result), filename, (err) => {
               console.error("Custom error handling:", err);
             });
