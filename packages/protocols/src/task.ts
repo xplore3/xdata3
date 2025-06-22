@@ -1,63 +1,160 @@
 import {
-    type IAgentRuntime
+  ModelClass,
+  Memory,
+  UUID,
+  composeContext,
+  generateText,
+  stringToUuid,
+  type IAgentRuntime,
 } from "@data3os/agentcontext";
+import {
+  getDynamicTail,
+  readCacheFile,
+  appendToChatCache,
+} from "./filehelper";
+import { UserKnowledge } from "./userknowledge";
 
-const TASK_CACHE_KEY = "_task_cache_";
+const TASK_ORIGIN_INPUT_CACHE_KEY = "_task_cache_";
+const TASK_OPTION_CACHE_KEY = "_task_option_cache_";
+const TASK_DATA_CACHE_FILE = "_all_data.txt";
 
 export class TaskHelper {
-    //userId: string = null;
+  //userId: string = null;
 
-    private static async readFromCache<T>(runtime: IAgentRuntime, key: string): Promise<T | null> {
-        const cached = await runtime.cacheManager.get<T>(key);
-        return cached;
+  private static async readFromCache<T>(runtime: IAgentRuntime, key: string): Promise<T | null> {
+    const cached = await runtime.cacheManager.get<T>(key);
+    return cached;
+  }
+
+  private static async writeToCache<T>(runtime: IAgentRuntime, key: string, data: T): Promise<void> {
+    try {
+      await runtime.cacheManager.set(key,
+        data,
+        {
+          expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
+        }
+      );
+    }
+    catch (err) {
+      console.log(`writeToCache key ${key}`);
+      console.error(err);
+    }
+  }
+
+  private static async getCachedData<T>(runtime: IAgentRuntime, key: string): Promise<T | null> {
+    const fileCachedData = await this.readFromCache<T>(runtime, key);
+    if (fileCachedData) {
+      return fileCachedData;
     }
 
-    private static async writeToCache<T>(runtime: IAgentRuntime, key: string, data: T): Promise<void> {
-        try {
-            await runtime.cacheManager.set(key,
-                data,
-                {
-                    expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
-                }
-            );
-        }
-        catch (err) {
-            console.log(`writeToCache key ${key}`);
-            console.error(err);
-        }
-    }
+    return null;
+  }
 
-    private static async getCachedData<T>(runtime: IAgentRuntime, key: string): Promise<T | null> {
-        const fileCachedData = await this.readFromCache<T>(runtime, key);
-        if (fileCachedData) {
-            return fileCachedData;
-        }
+  private static async setCachedData<T>(runtime: IAgentRuntime, cacheKey: string, data: T): Promise<void> {
+    await this.writeToCache(runtime, cacheKey, data);
+  }
 
-        return null;
+  static async setTaskOriginInput(runtime: IAgentRuntime, taskId: string, data: string) {
+    try {
+      await this.setCachedData(runtime, TASK_ORIGIN_INPUT_CACHE_KEY + taskId, data);
     }
+    catch (err) {
+      console.log(`setTaskOriginInput ${taskId}`);
+      console.error(err);
+    }
+  }
 
-    private static async setCachedData<T>(runtime: IAgentRuntime, cacheKey: string, data: T): Promise<void> {
-        await this.writeToCache(runtime, cacheKey, data);
+  static async getTaskOriginInput(runtime: IAgentRuntime, taskId: string): Promise<string> {
+    try {
+      return await this.getCachedData(runtime, TASK_ORIGIN_INPUT_CACHE_KEY + taskId);
     }
+    catch (err) {
+      console.log(`getTaskOriginInput ${taskId}`);
+      console.error(err);
+    }
+    return "";
+  }
 
-    static async setTaskOriginInput(runtime: IAgentRuntime, taskId: string, data: string) {
-        try {
-            await this.setCachedData(runtime, TASK_CACHE_KEY + taskId, data);
-        }
-        catch (err) {
-            console.log(`setTaskOriginInput ${taskId}`);
-            console.error(err);
-        }
+  static async setTaskOption(runtime: IAgentRuntime, taskId: string, data: string) {
+    try {
+      await this.setCachedData(runtime, TASK_OPTION_CACHE_KEY + taskId, data);
     }
+    catch (err) {
+      console.log(`setTaskOption ${taskId}`);
+      console.error(err);
+    }
+  }
 
-    static async getTaskOriginInput(runtime: IAgentRuntime, taskId: string): Promise<string> {
-        try {
-            return await this.getCachedData(runtime, TASK_CACHE_KEY + taskId);
-        }
-        catch (err) {
-            console.log(`getTaskOriginInput ${taskId}`);
-            console.error(err);
-        }
-        return "";
+  static async getTaskOption(runtime: IAgentRuntime, taskId: string): Promise<string> {
+    try {
+      return await this.getCachedData(runtime, TASK_OPTION_CACHE_KEY + taskId);
     }
+    catch (err) {
+      console.log(`getTaskOption ${taskId}`);
+      console.error(err);
+    }
+    return "";
+  }
+
+  static getTaskAttachment(taskId: string) {
+    let attachment = readCacheFile(taskId + TASK_DATA_CACHE_FILE);
+    if (!attachment || attachment.length < 1) {
+      attachment = readCacheFile(taskId + "_raw_data.txt");
+      if (!attachment || attachment.length < 1) {
+        attachment = readCacheFile(taskId + "_raw_data1.txt");
+        if (attachment) {
+          attachment = attachment + readCacheFile(taskId + "_raw_data2.txt");
+        }
+      }
+    }
+    if (attachment.length > 50 * 1024) {
+      console.log(`Data Attachment too large ${attachment.length}`);
+      attachment = attachment.slice(0, 50 * 1024);
+    }
+    return attachment;
+  }
+
+  static generateTaskId() {
+    const timestamp = Date.now().toString(36);
+    const seq = Math.floor(Math.random() * 1000)
+      .toString(36)
+      .padStart(4, "0");
+    return `TASK-${timestamp}-${seq}`;
+  }
+
+  static async checkNewTask(runtime: IAgentRuntime, message: Memory, taskId: string): Promise<any> {
+    console.log(`checkNewTask ${taskId}`);
+    const userInput = `${message.content.text}`;
+    const firstInput = this.getTaskOriginInput(runtime, taskId);
+    const firstOption = this.getTaskOption(runtime, taskId);
+    const attachment = this.getTaskAttachment(taskId);
+    const prompt = `
+      你是运营专员/运营数据处理工程师，现在请根据用户的两个输入，判断这两个需求的是否有是同一个数据任务。
+      同一个数据任务是指其目标、所用数据、相关处理动作都是一致的。
+      用户的第一个需求为：${firstInput}。
+      第一个需求的额外输入：${firstOption}。
+      第一个需求相关联的数据为：${attachment}
+      用户的第二个需求为：${userInput}。
+      如果第二个需求跟第一个需求（及其额外输入和关联数据）同一个数据任务则返回true，否则返回false。
+      只需要输出须true或false，不需要其他内容。
+      -----------------------------
+    `;
+    try {
+      let response = await generateText({
+        runtime,
+        context: await UserKnowledge.composePrompt(runtime, prompt, message.userId),
+        modelClass: ModelClass.LARGE,
+      });
+      console.log(response);
+      if (response == 'true') {
+        return true;
+      }
+      return response;
+    }
+    catch (err) {
+      console.log(`checkNewTask err ${err.message}`);
+      console.error(err);
+    }
+    return false;
+  }
 }

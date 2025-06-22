@@ -1,7 +1,11 @@
 // API Tabls.ts
 import {
+  ModelClass,
+  Memory,
   UUID,
+  composeContext,
   generateText,
+  stringToUuid,
   type IAgentRuntime,
 } from "@data3os/agentcontext";
 
@@ -73,5 +77,33 @@ export class UserKnowledge {
       '15. 根据我的产品和预算情况【****】生成打招呼的内容'
     ];
     return `笔记类：[${intentionNote.join(", ")}], 评论类：[${intentionComment.join(", ")}], 达人类：[${intentionUser.join(", ")}]`;
+  }
+
+  static async composePrompt(
+    runtime: IAgentRuntime,
+    prompt: string,
+    userId: UUID
+  ): Promise<string> {
+    const roomId = stringToUuid("default-data-room-" + userId);
+    if (!runtime) {
+      throw new Error("Agent not found");
+    }
+    const userMessage = {
+      content: { text: prompt },
+      userId,
+      roomId,
+      agentId: runtime.agentId,
+    };
+    console.log("userMessage: ", userMessage, userId);
+
+    return (
+      prompt +
+      composeContext({
+        state: await runtime.composeState(userMessage, {
+          agentName: runtime.character.name,
+        }),
+        template: dataHandlerTemplate,
+      })
+    );
   }
 }

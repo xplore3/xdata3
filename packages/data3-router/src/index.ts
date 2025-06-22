@@ -343,7 +343,7 @@ export class DirectClient {
                 let taskId = req.body.taskId;
                 const origin_input = await TaskHelper.getTaskOriginInput(runtime, taskId);
                 const messageId = stringToUuid(userId + Date.now().toString());
-                console.log(`DataProcess ${taskId}, ${originQuestingText} ${origin_input}`)
+                console.log(`DataProcess ${taskId}, ${originQuestingText} ${origin_input}`);
 
                 const content: Content = {
                     text: originQuestingText,
@@ -379,7 +379,22 @@ export class DirectClient {
                     agentName: runtime.character.name,
                 });
 
-                const responseStr = await IntentionHandler.handleDataProcess(runtime, memory, origin_input);
+                let newTask = false;
+                if (taskId) {
+                    newTask = await TaskHelper.checkNewTask(runtime, memory, taskId);
+                    if (newTask) {
+                        taskId = await TaskHelper.generateTaskId();
+                        memory.content.intention.taskId = taskId;
+                    }
+                }
+                let responseStr = null;
+                if (newTask) {
+                    responseStr = await IntentionHandler.handleDataCollectAPI(runtime, memory);
+                }
+                else {
+                    await TaskHelper.setTaskOption(runtime, taskId, originQuestingText);
+                    responseStr = await IntentionHandler.handleDataProcess(runtime, memory, origin_input);
+                }
                 this.concurrentNum--;
 
                 const parsedContent: Content = {
@@ -470,17 +485,17 @@ export class DirectClient {
                 let taskId = req.body.taskId;
                 // TODO 1: Assign task ID based on load balancing.
                 // TODO 2: Verify the task ID.
-                function generateTaskId() {
+                /*function generateTaskId() {
                     const timestamp = Date.now().toString(36);
                     const seq = Math.floor(Math.random() * 1000)
                         .toString(36)
                         .padStart(4, "0");
                     return `TASK-${timestamp}-${seq}`;
-                }
+                }*/
                 let withPreContext = false;
 
                 if (!taskId) {
-                    taskId = generateTaskId();
+                    taskId = TaskHelper.generateTaskId();
                     await TaskHelper.setTaskOriginInput(runtime, taskId, originQuestingText);
                 } else {
                     withPreContext = true;

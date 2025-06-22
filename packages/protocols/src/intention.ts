@@ -2,23 +2,19 @@
 import {
   ModelClass,
   Memory,
-  UUID,
-  composeContext,
   generateText,
-  stringToUuid,
   type IAgentRuntime,
 } from "@data3os/agentcontext";
 import {
   getDynamicTail,
-  readCacheFile,
   appendToChatCache,
 } from "./filehelper";
 import APIWrapperFactory from "./apiwrapper";
 import { ApiDb } from "./apis";
-import { UserKnowledge } from "./userknowledge";
 import { extractJson } from "./utils"
 import { ApiExecution } from "./apiexecution";
 import { TaskHelper } from "./task";
+import { UserKnowledge } from "./userknowledge";
 
 
 export const dataHandlerTemplate = `
@@ -40,7 +36,6 @@ About {{agentName}}:
 {{recentMessages}}
 #####################################
 `;
-const TASK_DATA_CACHE_FILE = "_all_data.txt";
 
 export class IntentionHandler {
   runtime: IAgentRuntime = null;
@@ -100,7 +95,7 @@ export class IntentionHandler {
     try {
       let response = await generateText({
         runtime,
-        context: await IntentionHandler.composePrompt(runtime, prompt, message.userId),
+        context: await UserKnowledge.composePrompt(runtime, prompt, message.userId),
         modelClass: ModelClass.LARGE,
       });
       console.log(response);
@@ -217,7 +212,7 @@ export class IntentionHandler {
     try {
       let response = await generateText({
         runtime,
-        context: await IntentionHandler.composePrompt(runtime, prompt, message.userId),
+        context: await UserKnowledge.composePrompt(runtime, prompt, message.userId),
         modelClass: ModelClass.LARGE,
       });
       console.log(response);
@@ -281,7 +276,7 @@ export class IntentionHandler {
     try {
       let response = await generateText({
         runtime,
-        context: await IntentionHandler.composePrompt(runtime, prompt, message.userId),
+        context: await UserKnowledge.composePrompt(runtime, prompt, message.userId),
         modelClass: ModelClass.LARGE,
       });
       console.log(response);
@@ -352,7 +347,7 @@ export class IntentionHandler {
     const taskId = message.content?.intention?.taskId;
     const userInput = `根据已有数据，${message.content.text}`;
     const my_data_source = ApiDb.getUserDataSource(message.userId);
-    const attachment = IntentionHandler.getTaskAttachment(taskId);
+    const attachment = TaskHelper.getTaskAttachment(taskId);
     const intention_examples = UserKnowledge.getUserIntentionExamples(message.userId);
     const prompt = `
       你是一个严肃的线上运营专员/数据处理工程师/数据分析师，能根据输入的多个结构的数据/文件进行加工、处理、分析、预测、仿写的专家，能够基于用户的多轮输入，将数据处理成用户需要的结果。
@@ -396,7 +391,7 @@ export class IntentionHandler {
     try {
       let response = await generateText({
         runtime,
-        context: await IntentionHandler.composePrompt(runtime, prompt, message.userId),
+        context: await UserKnowledge.composePrompt(runtime, prompt, message.userId),
         modelClass: ModelClass.LARGE,
       });
       console.log(response);
@@ -406,7 +401,7 @@ export class IntentionHandler {
         if (execJson.intention_action && execJson.intention_action === "data_collection") {
           message.content.text = origin_input + "\r\n" + message.content.text;
           //Gen new TaskId
-          message.content.intention.taskId = this.generateTaskId();
+          message.content.intention.taskId = TaskHelper.generateTaskId();
           await TaskHelper.setTaskOriginInput(runtime, taskId, message.content.text);
           return await IntentionHandler.handleDataCollectAPI(
             runtime, message, attachment
@@ -851,60 +846,6 @@ export class IntentionHandler {
     }
 
     return result;
-  }
-
-  static async composePrompt(
-    runtime: IAgentRuntime,
-    prompt: string,
-    userId: UUID
-  ): Promise<string> {
-    const roomId = stringToUuid("default-data-room-" + userId);
-    if (!runtime) {
-      throw new Error("Agent not found");
-    }
-    const userMessage = {
-      content: { text: prompt },
-      userId,
-      roomId,
-      agentId: runtime.agentId,
-    };
-    console.log("userMessage: ", userMessage, userId);
-
-    return (
-      prompt +
-      composeContext({
-        state: await runtime.composeState(userMessage, {
-          agentName: runtime.character.name,
-        }),
-        template: dataHandlerTemplate,
-      })
-    );
-  }
-
-  static getTaskAttachment(taskId: string) {
-    let attachment = readCacheFile(taskId + TASK_DATA_CACHE_FILE);
-    if (!attachment || attachment.length < 1) {
-      attachment = readCacheFile(taskId + "_raw_data.txt");
-      if (!attachment || attachment.length < 1) {
-        attachment = readCacheFile(taskId + "_raw_data1.txt");
-        if (attachment) {
-          attachment = attachment + readCacheFile(taskId + "_raw_data2.txt");
-        }
-      }
-    }
-    if (attachment.length > 50 * 1024) {
-      console.log(`Data Attachment too large ${attachment.length}`);
-      attachment = attachment.slice(0, 50 * 1024);
-    }
-    return attachment;
-  }
-
-  static generateTaskId() {
-    const timestamp = Date.now().toString(36);
-    const seq = Math.floor(Math.random() * 1000)
-      .toString(36)
-      .padStart(4, "0");
-    return `TASK-${timestamp}-${seq}`;
   }
 }
 

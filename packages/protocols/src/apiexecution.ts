@@ -15,6 +15,7 @@ import APIWrapperFactory from "./apiwrapper";
 import { ApiDb } from "./apis";
 import { extractJson } from "./utils"
 import { axios_request } from "./httpproxy";
+import { UserKnowledge } from "./userknowledge";
 
 
 const gProxyAgent = new SocksProxyAgent(`socks5://${process.env.GLOBAL_PROXY_AGENT}`);
@@ -310,7 +311,7 @@ export class ApiExecution {
     try {
       let response = await generateText({
         runtime,
-        context: await IntentionHandler.composePrompt(runtime, prompt, message.userId),
+        context: await UserKnowledge.composePrompt(runtime, prompt, message.userId),
         modelClass: ModelClass.LARGE,
       });
       console.log(response);
