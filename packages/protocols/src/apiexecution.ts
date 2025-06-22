@@ -162,7 +162,9 @@ export class ApiExecution {
               const newParams = await this.getApiBackupQueryParam(runtime, message, apiBackup);
               if (newParams) {
                 apiBackup.query_params = newParams;
-                return await this.executeApi(runtime, message, apiBackup, totalCount);
+                const bkResult = await this.executeApi(runtime, message, apiBackup, totalCount);
+                result.concat(bkResult);
+                break;
               }
             }
             await new Promise((resolve) => setTimeout(resolve, 1000 + 1000 * execCount));
