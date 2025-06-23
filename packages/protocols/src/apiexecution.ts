@@ -128,6 +128,7 @@ export class ApiExecution {
         method: api.method,
         url: api.url,
         params: api.query_params,
+        data: api.query_params,
         body: JSON.stringify(api.query_params),
         headers: api.headers,
         httpAgent: gProxyAgent,
