@@ -302,7 +302,8 @@ export class IntentionHandler {
           }
           //console.log(result);
           if (results.length > 0 && txtfilelist.length > 0) {
-            return getDynamicTail(txtfilelist, excelfilelist);
+            const summary = await this.dataSummary(runtime, message, results[0]);
+            return summary + "\r\n\r\n" + getDynamicTail(txtfilelist, excelfilelist);
           }
           else {
             return `哎呀，这个数据【${api.name}】我暂时无法获取，你可以稍后重试，或回复【人工】联系工程师帮你添加支持~`;
@@ -392,6 +393,34 @@ export class IntentionHandler {
           return JSON.stringify(execJson);
         }
       }
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  /**
+   * 
+   * @param {string} 
+   * @returns {Promise<string>[]} 
+   */
+  static async dataSummary(
+    runtime: IAgentRuntime,
+    message: Memory,
+    data: string
+  ): Promise<string> {
+    const prompt = `
+      根据已有数据DATA_TO_PROCESS:${data}和用户指令USER_INSTRUCT:${message.content.text}进行数据处理或简要总结。
+      如果用户指令USER_INSTRUCT要求进行分析处理，则给出分析结果；
+      如果用户指令USER_INSTRUCT没有要求进行分析处理，则只需给出数据总结。
+    `;
+    try {
+      let response = await generateText({
+        runtime,
+        context: await UserKnowledge.composePrompt(runtime, prompt, message.userId),
+        modelClass: ModelClass.LARGE,
+      });
+      console.log(response);
       return response;
     } catch (err) {
       console.log(err);
