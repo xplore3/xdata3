@@ -4,6 +4,9 @@ import {
     knowledge,
     stringToUuid,
 } from "@data3os/agentcontext";
+import {
+    UserKnowledge,
+} from "data3-protocols";
 import express from "express";
 
 export class PromptController {
@@ -67,6 +70,7 @@ export class PromptController {
         if (runtime) {
             try {
                 const userId = stringToUuid(req.body.userId ?? "user");
+                await UserKnowledge.setUserKnowledge(runtime, userId, req.body.knowledges);
                 for (const item of req.body.knowledges) {
                     await knowledge.set(runtime, {
                         id: stringToUuid(item),

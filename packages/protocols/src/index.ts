@@ -15,6 +15,7 @@ import { PdfHelper } from "./pdfhelper";
 import { KeyWordGenerator } from "./keywords";
 import { IntentionHandler } from "./intention";
 import { TaskHelper } from "./task";
+import { UserKnowledge } from "./userknowledge";
 import { extractJson } from "./utils"
 //import { fileURLToPath } from 'url';
 
@@ -1237,4 +1238,4 @@ function getDynamicTail(taskId: string) {
     return "获取数据源失败，请稍后再尝试";
 }
 
-export { IntentionHandler, TaskHelper, extractJson };
+export { IntentionHandler, TaskHelper, UserKnowledge, extractJson };

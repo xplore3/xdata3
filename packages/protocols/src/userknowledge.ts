@@ -30,9 +30,65 @@ About {{agentName}}:
 #####################################
 `;
 
+const USER_KNOWLEDGE_CACHE = "_user_knowleage_on_id_";
+
 export class UserKnowledge {
 
   constructor() {}
+
+  private static async readFromCache<T>(runtime: IAgentRuntime, key: string): Promise<T | null> {
+    const cached = await runtime.cacheManager.get<T>(key);
+    return cached;
+  }
+
+  private static async writeToCache<T>(runtime: IAgentRuntime, key: string, data: T): Promise<void> {
+    try {
+      await runtime.cacheManager.set(key,
+        data,
+        {
+          expires: 0, // long time
+        }
+      );
+    }
+    catch (err) {
+      console.log(`writeToCache key ${key}`);
+      console.error(err);
+    }
+  }
+
+  private static async getCachedData<T>(runtime: IAgentRuntime, key: string): Promise<T | null> {
+    const fileCachedData = await this.readFromCache<T>(runtime, key);
+    if (fileCachedData) {
+      return fileCachedData;
+    }
+
+    return null;
+  }
+
+  private static async setCachedData<T>(runtime: IAgentRuntime, cacheKey: string, data: T): Promise<void> {
+    await this.writeToCache(runtime, cacheKey, data);
+  }
+
+  static async setUserKnowledge(runtime: IAgentRuntime, userId: string, data: string) {
+    try {
+      await this.setCachedData(runtime, USER_KNOWLEDGE_CACHE + userId, data);
+    }
+    catch (err) {
+      console.log(`setUserKnowledge ${userId}`);
+      console.error(err);
+    }
+  }
+
+  static async getUserKnowledge(runtime: IAgentRuntime, userId: string): Promise<string> {
+    try {
+      return await this.getCachedData(runtime, USER_KNOWLEDGE_CACHE + userId);
+    }
+    catch (err) {
+      console.log(`getUserKnowledge ${userId}`);
+      console.error(err);
+    }
+    return "";
+  }
 
   // Get User Intentions By UserId
   static getUserIntentionExamples(userId: UUID) {

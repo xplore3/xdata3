@@ -235,12 +235,14 @@ export class IntentionHandler {
   ): Promise<string> {
     const userInput = `${message.content.text}`;
     const api = ApiDb.getApi(api_desc);
+    const userProfile = await UserKnowledge.getUserKnowledge(runtime, message.userId);
     const prompt = `
       你是一个Nodejs程序员，能根据用户的请求，可用的API，API文档，生成调用API的URL的调用参数。
       用户的原输入为：${userInput}。
       用户的数据调用描述为：${data_desc}。
       可用的API参数说明为：${JSON.stringify(api.query_params_desc)}。
       可用的API的文档地址为：${api.docs_link}。
+      用户相关的产品、业务及背景为：${userProfile}。
       根据这些输入，需要给出如下结果：
         {
           "query_params": {json of params},
@@ -331,6 +333,7 @@ export class IntentionHandler {
     const my_data_source = ApiDb.getUserDataSource(message.userId);
     const attachment = TaskHelper.getTaskAttachment(taskId);
     const intention_examples = UserKnowledge.getUserIntentionExamples(message.userId);
+    const userProfile = await UserKnowledge.getUserKnowledge(runtime, message.userId);
     const prompt = `
       你是一个严肃的线上运营专员/数据处理工程师/数据分析师，能根据输入的多个结构的数据/文件进行加工、处理、分析、预测、仿写的专家，能够基于用户的多轮输入，将数据处理成用户需要的结果。
       主要有如下一些情况：
@@ -367,8 +370,9 @@ export class IntentionHandler {
           且结合用户自身的产品和背景（不要有‘报告生成’这样的宽泛选项，不要有‘分析这些笔记’这样的模糊选项，需要是‘分析这些笔记关于***的特征’）,
           其数量约为5~10个，其可参考的示例如下：【${intention_examples}】。
       -----------------------------
-      用户需求：${userInput}, 前置描述：${origin_input}.
-      待处理数据内容：${attachment}
+      用户需求：${userInput}, 前置描述：${origin_input}。
+      待处理数据内容：${attachment}。
+      用户相关的产品、业务及背景为：${userProfile}。
     `;
     try {
       let response = await generateText({
