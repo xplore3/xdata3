@@ -115,7 +115,7 @@ export class ApiDb {
         docs_link: 'https://rapidapi.com/dataapiman/api/xiaohongshu-all-api/playground/apiendpoint_fe3e8ab0-8b7b-448c-9f9d-785ba1c8406d',
         could_cached: false,
         cached_expired: 3600000 * 24,
-        filter: true,
+        filter: false,
         data_path: `$.data.data.users`,
         flattener: `$map($, function($item) {
           {
