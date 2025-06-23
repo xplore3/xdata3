@@ -52,7 +52,7 @@ export class ApiExecution {
             "query_params": {json of params},
             "request_count": count from PARAM_SOURCE, 不要超过100
           }.
-          关于query_params字段，需满足用户所有需求，且输出参数说明中的项，不能有参数说明之外的项；不是数组，仅仅是一个JSON对象。
+          关于query_params字段，需满足用户需求，且查询参数不能有参数说明之外的项；不要额外加字段；不是数组，仅仅是一个JSON对象。
           query_params中的关键字的取值需要严格从指定来源${JSON.stringify(item)}中获取，不能有之外的值，不能生成值。
           query_params须是一个JSON对象，不能是字符串等。
           query_params字段示例如下：【${JSON.stringify(api2.query_params_example)}】。
