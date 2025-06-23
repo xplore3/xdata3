@@ -461,8 +461,8 @@ export class ApiDb {
         platform: 'rednote',
         description: '用以获得近期火热的热词等',
         name: 'hot_words',
-        url: 'https://gw.newrank.cn/api/xhsv2/nr/app/xh/v2/rank/hotWordHotLis',
-        method: 'GET',
+        url: 'https://gw.newrank.cn/api/xhsv2/nr/app/xh/v2/rank/hotWordHotList',
+        method: 'POST',
         headers: {
           Accept: "*/*",
           "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
@@ -526,7 +526,7 @@ export class ApiDb {
         description: '用以获得近期火热的话题/种类等',
         name: 'topic_rank',
         url: 'https://gw.newrank.cn/api/xh/xdnphb/nr/app/xhs/rank/topicRank',
-        method: 'GET',
+        method: 'POST',
         headers: {
           Accept: "*/*",
           "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",

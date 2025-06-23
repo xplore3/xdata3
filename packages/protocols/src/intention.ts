@@ -164,7 +164,7 @@ export class IntentionHandler {
         (2). 如果用户的输入里，不包含数据获取的内容，则将这些内容进行拆解，找到其中的意图选项，输出出来。
         (3). 如果用户的输入里，既不包含数据获取需求，也没有明确的数据处理意图，也无其他意图，则参考最近的消息，给出相关的意图选项。
         (4). 如果用户的输入跟数据获取或数据处理都没有关系，则参考上下文给出简短回答，且不需要意图选项。
-        (5). 如果用户需要获取的数据在可用数据源里不存在（比如热词/热榜/热文等），则data_result须提示用户不存在这些数据，稍后会提供，请用户耐心等待；intention_params和intention_options为空。
+        (5). 如果用户需要获取的数据在可用数据源${my_data_platform}及${my_data_source}里不存在，则data_result须提示用户不存在这些数据，稍后会提供，请用户耐心等待；intention_params和intention_options为空。
       用户输入：${message.content.text}.
       可用数据平台：${my_data_platform}。
       可用数据源/数据获取API：${my_data_source}。
