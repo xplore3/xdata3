@@ -613,7 +613,21 @@ export class ApiDb {
         query_params: {},
         query_params_desc: {
           activeId: "B5F3D1C1BF084B508CEBED4543B5F3D1",
-          baseReq: "",
+          baseReq: {
+            "isMCN": "",
+            "gender": "",
+            "redUserLevelName": "",
+            "newShowCityInfo": "",
+            "newShowCityIpInfo": "",
+            "userAttribute": [],
+            "mostType": "",
+            "identifySign": "",
+            "follow": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "lastCreateTime": ""
+          },
           batchId: "",
           batchName: "",
           contentTags: [],
@@ -648,7 +662,21 @@ export class ApiDb {
         },
         query_params_example: {
           activeId: "B5F3D1C1BF084B508CEBED4543B5F3D1",
-          baseReq: "",
+          baseReq: {
+            "isMCN": "",
+            "gender": "",
+            "redUserLevelName": "",
+            "newShowCityInfo": "",
+            "newShowCityIpInfo": "",
+            "userAttribute": [],
+            "mostType": "",
+            "identifySign": "",
+            "follow": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "lastCreateTime": ""
+          },
           batchId: "",
           batchName: "",
           contentTags: [],
