@@ -302,7 +302,7 @@ export class IntentionHandler {
           }
           //console.log(result);
           if (results.length > 0 && txtfilelist.length > 0) {
-            const summary = await this.dataSummary(runtime, message, results[0]);
+            const summary = await this.dataSummary(runtime, message, JSON.stringify(results[0]));
             return summary + "\r\n\r\n" + getDynamicTail(txtfilelist, excelfilelist);
           }
           else {
