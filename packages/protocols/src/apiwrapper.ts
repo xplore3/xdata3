@@ -8,6 +8,7 @@ import { IntentionHandler } from "./intention";
 import { updateCacheText } from "./filehelper";
 import fs from "fs";
 import path from "path";
+import { chatWithDeepSeek } from "./aibydeepseek";
 
 class APIWrapperFactory {
     private static instance: APIWrapperFactory;
@@ -1392,8 +1393,23 @@ class APIWrapperFactory {
                 break;
             }
         }
-        this.exportToExcel(result, filePath);
-        const responseFinal = this.convertToCSV(result);
+        const headers = Object.keys(result[0]);
+        chatWithDeepSeek(`翻译下面字段为中文，要求按照数组返回。[原数组:${headers}], 返回格式样例:["id", "作者", "标题"]`).then((res) => {
+            console.log("chatWithDeepSeek headers: ", headers);
+            console.log("chatWithDeepSeek response: ", res);
+
+            const match = res.match(/\[(.*?)\]/);
+            let headerArr = [];
+            if (match) {
+                headerArr = JSON.parse(match[0]);
+                console.log("len:", headerArr.length);
+            }
+            if (headerArr.length != headers.length) {
+                headerArr = headers;
+            }
+
+        this.exportToExcel(headerArr, result, filePath);
+        const responseFinal = this.convertToCSV(headerArr, result);
         updateCacheText(responseFinal, firstUnExistsTxtFilename, (err) => {
             console.error("Failed to write file:", err);
         });
@@ -1402,17 +1418,20 @@ class APIWrapperFactory {
         //     \nhttps://data3.site/media/files/${firstUnExistsTxtFilename}
         // \n2. excel 数据，格式优美，方便阅读。
         //     \nhttps://data3.site/media/files/${firstUnExistsExcelFilename}`;
+        }).catch((err) => {
+            console.error("chatWithDeepSeek error: ", err);
+        });
         return { firstUnExistsTxtFilename, firstUnExistsExcelFilename };
-        //return `http://97.64.21.158:3333/media/files/${firstUnExistsFilename}`;
     }
 
-    public static exportToExcel(data, filePath) {
+    public static exportToExcel(headerStrArr, data, filePath) {
         try {
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet("Data");
             const headers = Object.keys(data[0]);
+            let headindex = 0;
             worksheet.columns = headers.map((header) => ({
-                header,
+                header: headerStrArr[headindex++],
                 key: header,
                 width: 20,
             }));
@@ -1428,7 +1447,7 @@ class APIWrapperFactory {
         }
     }
 
-    public static convertToCSV(data) {
+    public static convertToCSV(headerStrArr, data) {
         const fields = null;
         const delimiter = ",";
         const includeHeader = true;
@@ -1485,7 +1504,7 @@ class APIWrapperFactory {
                     .join(delimiter);
 
             let csv = includeHeader
-                ? fieldNames.map(escapeField).join(delimiter) + "\n"
+                ? headerStrArr.map(escapeField).join(delimiter) + "\n"
                 : "";
 
             return csv + data.map(buildRow).join("\n");
