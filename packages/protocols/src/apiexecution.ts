@@ -129,7 +129,7 @@ export class ApiExecution {
         url: api.url,
         params: api.query_params,
         data: api.query_params,
-        body: JSON.stringify(api.query_params),
+        //body: JSON.stringify(api.query_params),
         headers: api.headers,
         httpAgent: gProxyAgent,
         httpsAgent: gProxyAgent
@@ -272,6 +272,9 @@ export class ApiExecution {
                   }
                   return item;
                 })
+              }
+              else {
+                tempResult = items;
               }
               /*if (Array.isArray(items)) {
                 tempResult = items.map(item => {
