@@ -250,6 +250,7 @@ export class IntentionHandler {
         }.
       关于query_params字段，需满足用户所有需求，且输出参数说明中的项，不能有参数说明之外的项；不是数组，仅仅是一个JSON对象。
       如果query_params的keyword之类的取值不能明显地从用户输入里获取，则需要结合自己的knowledge和背景。
+      query_params中的搜索关键词不能太长，不能超过3个词语。
       query_params须是一个JSON对象，不能是字符串等。
       query_params字段示例如下：【${JSON.stringify(api.query_params_example)}】。
       输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
