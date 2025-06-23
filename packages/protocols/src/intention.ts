@@ -175,7 +175,7 @@ export class IntentionHandler {
         "intention_params": {
           "data_source": "rednote",
           "data_action": "notes_search",
-          "request_count": 100,
+          "request_count": 10,
           "filter_desc": "the description of the data filter"
         },
         "data_result": "简短回答",
@@ -244,7 +244,7 @@ export class IntentionHandler {
       根据这些输入，需要给出如下结果：
         {
           "query_params": {json of params},
-          "request_count": total count of user request from users input
+          "request_count": total count of user request from users input, default is 10
         }.
       关于query_params字段，需满足用户所有需求，且输出参数说明中的项，不能有参数说明之外的项；不是数组，仅仅是一个JSON对象。
       如果query_params的keyword之类的取值不能明显地从用户输入里获取，则需要结合自己的knowledge和背景。

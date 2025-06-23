@@ -18,8 +18,8 @@ export class ApiDb {
 
   static getUserDataSource(userId: UUID) {
     const sources = [
-      'hot_words: 用以获得近期火热的热词等',
-      'topic_rank: 用以获得近期火热的话题/种类等',
+      'hot_words: 用以获得近期火热的热词/热搜词等',
+      //'topic_rank: 用以获得近期流行的话题/Tag等',
       'notes_search: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表. Parameters: keyword (search term), sort (popularity_descending or time_descending).',
       //'note_detail: 通过noteid获取单个笔记/帖子/note的详情',
       'users_search: 用以通过关键字搜索小红书账号，获得账号列表',
@@ -459,7 +459,7 @@ export class ApiDb {
         priority: 0,
         type: 'social-media',
         platform: 'rednote',
-        description: '用以获得近期火热的热词等',
+        description: '用以获得近期火热的热词/热搜词等',
         name: 'hot_words',
         url: 'https://gw.newrank.cn/api/xhsv2/nr/app/xh/v2/rank/hotWordHotList',
         method: 'POST',
@@ -523,7 +523,7 @@ export class ApiDb {
         priority: 0,
         type: 'social-media',
         platform: 'rednote',
-        description: '用以获得近期火热的话题/种类等',
+        description: '用以获得近期流行的话题/Tag等',
         name: 'topic_rank',
         url: 'https://gw.newrank.cn/api/xh/xdnphb/nr/app/xhs/rank/topicRank',
         method: 'POST',
