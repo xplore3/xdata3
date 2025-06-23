@@ -313,6 +313,7 @@ export class DirectClient {
                 const username = req.body.userId ?? "user";
                 const userId = stringToUuid(username);
                 const roomId = stringToUuid("default-data-room-" + username);
+                const fromOptions = req.body.fromOptions;
 
                 let runtime = this.agents.get(agentId);
 
@@ -380,15 +381,16 @@ export class DirectClient {
                 });
 
                 let newTask = false;
-                if (taskId) {
+                if (taskId && !fromOptions) {
                     newTask = await TaskHelper.checkNewTask(runtime, memory, taskId);
-                    if (newTask) {
-                        taskId = await TaskHelper.generateTaskId();
-                        memory.content.intention.taskId = taskId;
-                    }
+                }
+                else if (!taskId) {
+                    newTask = true;
                 }
                 let responseStr = null;
                 if (newTask) {
+                    taskId = await TaskHelper.generateTaskId();
+                    memory.content.intention.taskId = taskId;
                     responseStr = await IntentionHandler.handleDataCollectAPI(runtime, memory);
                 }
                 else {

@@ -97,21 +97,27 @@ export class TaskHelper {
   }
 
   static getTaskAttachment(taskId: string) {
-    let attachment = readCacheFile(taskId + this.TASK_DATA_CACHE_FILE);
-    if (!attachment || attachment.length < 1) {
-      attachment = readCacheFile(taskId + "_raw_data.txt");
+    try {
+      let attachment = readCacheFile(taskId + this.TASK_DATA_CACHE_FILE);
       if (!attachment || attachment.length < 1) {
-        attachment = readCacheFile(taskId + "_raw_data1.txt");
-        if (attachment) {
-          attachment = attachment + readCacheFile(taskId + "_raw_data2.txt");
+        attachment = readCacheFile(taskId + "_raw_data.txt");
+        if (!attachment || attachment.length < 1) {
+          attachment = readCacheFile(taskId + "_raw_data1.txt");
+          if (attachment) {
+            attachment = attachment + readCacheFile(taskId + "_raw_data2.txt");
+          }
         }
       }
+      if (attachment && attachment.length > 50 * 1024) {
+        console.log(`Data Attachment too large ${attachment.length}`);
+        attachment = attachment.slice(0, 50 * 1024);
+      }
+      return attachment;
     }
-    if (attachment.length > 50 * 1024) {
-      console.log(`Data Attachment too large ${attachment.length}`);
-      attachment = attachment.slice(0, 50 * 1024);
+    catch (err) {
+      console.log(err);
     }
-    return attachment;
+    return '';
   }
 
   static generateTaskId() {
@@ -125,8 +131,8 @@ export class TaskHelper {
   static async checkNewTask(runtime: IAgentRuntime, message: Memory, taskId: string): Promise<any> {
     console.log(`checkNewTask ${taskId}`);
     const userInput = `${message.content.text}`;
-    const firstInput = this.getTaskOriginInput(runtime, taskId);
-    const firstOption = this.getTaskOption(runtime, taskId);
+    const firstInput = await this.getTaskOriginInput(runtime, taskId);
+    const firstOption = await this.getTaskOption(runtime, taskId);
     const attachment = this.getTaskAttachment(taskId);
     const prompt = `
       你是运营专员/运营数据处理工程师，现在请根据用户的两个输入，判断这两个需求的是否有是同一个数据任务。
