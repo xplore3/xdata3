@@ -633,7 +633,95 @@ export class ApiDb {
           contentTags: [],
           custom: {must: [], should: [], mustNot: []},
           cycle: "30d",
-          dataReq: {videoPrice: {fixedRange: "", customizeRange: ""}, picturePrice: {fixedRange: "", customizeRange: ""}},
+          dataReq: {
+            "videoPrice": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "picturePrice": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "videoCpe": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "pictureCpe": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "videoCpm": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "pictureCpm": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "fans": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "likeCollect": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "index": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "avgLikedCountSeven": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "avgLikedCountThirty": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "avgLikedCountSixty": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "avgLikedCountNinety": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "likeCollectPercent": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "boomPercent": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "avgOnlineCountAllThirty": {
+              "customizeRange": ""
+            },
+            "avgOnlineCountMaxThirty": {
+              "customizeRange": ""
+            },
+            "avgLikeCountThirty": {
+              "customizeRange": ""
+            },
+            "avgUserFansAddThirty": {
+              "customizeRange": ""
+            },
+            "avgSalesVolumeThirty": {
+              "customizeRange": ""
+            },
+            "avgSalesMoneyThirty": {
+              "customizeRange": ""
+            },
+            "avgGoodsCountThirty": {
+              "customizeRange": ""
+            },
+            "avgGoodsPriceThirty": {
+              "customizeRange": ""
+            },
+            "sumBusinessNotePriceThirty": {
+              "customizeRange": ""
+            }
+          },
           fansReq: {
             distribute: "0, or 1, or empty",
             province: "省级地域，如北京，须是北京，而不是北京市，只写一个",
@@ -682,7 +770,95 @@ export class ApiDb {
           contentTags: [],
           custom: {must: [], should: [], mustNot: []},
           cycle: "30d",
-          dataReq: {videoPrice: {fixedRange: "", customizeRange: ""}, picturePrice: {fixedRange: "", customizeRange: ""}},
+          dataReq: {
+            "videoPrice": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "picturePrice": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "videoCpe": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "pictureCpe": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "videoCpm": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "pictureCpm": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "fans": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "likeCollect": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "index": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "avgLikedCountSeven": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "avgLikedCountThirty": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "avgLikedCountSixty": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "avgLikedCountNinety": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "likeCollectPercent": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "boomPercent": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "avgOnlineCountAllThirty": {
+              "customizeRange": ""
+            },
+            "avgOnlineCountMaxThirty": {
+              "customizeRange": ""
+            },
+            "avgLikeCountThirty": {
+              "customizeRange": ""
+            },
+            "avgUserFansAddThirty": {
+              "customizeRange": ""
+            },
+            "avgSalesVolumeThirty": {
+              "customizeRange": ""
+            },
+            "avgSalesMoneyThirty": {
+              "customizeRange": ""
+            },
+            "avgGoodsCountThirty": {
+              "customizeRange": ""
+            },
+            "avgGoodsPriceThirty": {
+              "customizeRange": ""
+            },
+            "sumBusinessNotePriceThirty": {
+              "customizeRange": ""
+            }
+          },
           fansReq: {
             distribute: "",
             province: "北京",
