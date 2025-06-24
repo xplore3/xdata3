@@ -216,6 +216,7 @@ export class ApiExecution {
               || response.data?.data?.notes
               || response.data?.data?.list
               || response.data?.data
+              || response.data
               || [];
             if (api.could_cached) {
               await DataCache.setApiCacheData(runtime, api.id, JSON.stringify(items));

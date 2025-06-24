@@ -20,7 +20,7 @@ async function get(
     }
 
     const processed = preprocess(message.content.text);
-    data3Logger.log("Knowledge query:", {
+    data3Logger.debug("Knowledge query:", {
         original: message.content.text,
         processed,
         length: processed?.length,
