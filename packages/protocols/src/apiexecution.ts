@@ -223,7 +223,7 @@ export class ApiExecution {
             }
           }
           if (items) {
-            console.log(`Response items: ${items.length}`);
+            console.log(`Response items: ${items.length || items}`);
           }
           if (api.filter) {
             try {
