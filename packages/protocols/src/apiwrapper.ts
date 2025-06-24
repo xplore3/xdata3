@@ -1376,6 +1376,10 @@ class APIWrapperFactory {
         const responceStr = "";
         let firstUnExistsTxtFilename = "";
         let firstUnExistsExcelFilename = "";
+        if (!result?.length || !result[0]) {
+            console.error("No data to export to Excel or CSV.");
+            return { firstUnExistsTxtFilename : "", firstUnExistsExcelFilename : "" };
+        }
 
         let filePath;
         for (let i = 1; i <= 10; i++) {
