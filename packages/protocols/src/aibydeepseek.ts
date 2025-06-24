@@ -25,7 +25,8 @@ async function chatWithDeepSeek(prompt) {
         return response.data.choices[0].message.content;
     } catch (error) {
         console.error('Error calling DeepSeek API:', error);
-        throw error;
+        // throw error;
+        return `[]`;
     }
 }
 

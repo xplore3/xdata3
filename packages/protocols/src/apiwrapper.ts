@@ -1394,7 +1394,7 @@ class APIWrapperFactory {
             }
         }
         const headers = Object.keys(result[0]);
-        chatWithDeepSeek(`翻译下面字段为中文，要求按照数组返回。[原数组:${headers}], 返回格式样例:["id", "作者", "标题"]`).then((res) => {
+        chatWithDeepSeek(`翻译下面字段为中文，要求按照数组返回。[原数组:${JSON.stringify(headers)}], 返回格式样例:["id", "作者", "标题"]`).then((res) => {
             console.log("chatWithDeepSeek headers: ", headers);
             console.log("chatWithDeepSeek response: ", res);
 
