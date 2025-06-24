@@ -1376,6 +1376,52 @@ class APIWrapperFactory {
         const responceStr = "";
         let firstUnExistsTxtFilename = "";
         let firstUnExistsExcelFilename = "";
+        if (!result?.length || !result[0]) {
+            console.error("No data to export to Excel or CSV.");
+            return { firstUnExistsTxtFilename : "", firstUnExistsExcelFilename : "" };
+        }
+        function isValidTimestamp(timestamp) {
+            if (typeof timestamp !== 'number' && typeof timestamp !== 'string') {
+                return false;
+            }
+            const ts = Number(timestamp);
+            if (isNaN(ts)) {
+                return false;
+            }
+            if (!Number.isInteger(ts)) {
+                return false;
+            }
+            const tsLength = ts.toString().length;
+            if (tsLength === 10) {
+                return ts > 946684800 && ts < 32503680000;
+            } else if (tsLength === 13) {
+                return ts > 946684800000 && ts < 32503680000000;
+            }
+            return false;
+        }
+
+        if (result && Array.isArray(result)) {
+            result = result
+                .filter(item => item != null)
+                .map(item => {
+                    const timestamp = item?.date;
+                    const dateObj = isValidTimestamp(timestamp)
+                        ? new Date(
+                            timestamp.toString().length === 10
+                                ? Number(timestamp) * 1000
+                                : Number(timestamp)
+                        ).toLocaleDateString('zh-CN')
+                        : item.date;
+
+                    return {
+                        ...item,
+                        date: dateObj
+                    };
+                });
+        } else {
+            console.error("Invalid result:", result);
+            result = [];
+        }
 
         let filePath;
         for (let i = 1; i <= 10; i++) {
@@ -1394,7 +1440,7 @@ class APIWrapperFactory {
             }
         }
         const headers = Object.keys(result[0]);
-        chatWithDeepSeek(`翻译下面字段为中文，要求按照数组返回。[原数组:${headers}], 返回格式样例:["id", "作者", "标题"]`).then((res) => {
+        chatWithDeepSeek(`翻译下面字段为中文，要求按照数组返回。[原数组:${JSON.stringify(headers)}], 返回格式样例:["id", "作者", "标题"]`).then((res) => {
             console.log("chatWithDeepSeek headers: ", headers);
             console.log("chatWithDeepSeek response: ", res);
 
