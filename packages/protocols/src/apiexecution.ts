@@ -128,12 +128,14 @@ export class ApiExecution {
       const options = {
         method: api.method,
         url: api.url,
-        params: api.query_params,
         data: api.query_params,
         //body: JSON.stringify(api.query_params),
         headers: api.headers,
         httpAgent: gProxyAgent,
         httpsAgent: gProxyAgent
+      }
+      if (api.method === 'GET' || api.method === 'get') {
+        options.params = api.query_params;
       }
       let response = null;
       try {
@@ -151,7 +153,7 @@ export class ApiExecution {
 
           try {
             // TODO: WORKAROUND of page
-            if (options.params.page) {
+            if (options.params?.page) {
               options.params.page = page;
             }
             console.log(options.url);
@@ -300,7 +302,7 @@ export class ApiExecution {
           result = result.concat(tempResult);
           console.log(`executeApi result: ${result.length}`);
 
-          if (!(options.params.page)) {
+          if (!(options.params?.page)) {
             break; // no loop for un-pages
           }
           
