@@ -702,6 +702,7 @@ export class IntentionHandler {
         用户要求的时间戳 [timestamp: ${timestamp}], 这是在之前的步骤中计算好的, 不需要再做转化，填入表达式中即可 。
         - filter添加存在性检查（@.note && ...）, filter只需进行数量的过滤。
         如果用户的输入DATA中不包含timestamp（publish_time这样的不是），则忽略时间过滤。
+        对于filter的一些基本惯例是：点赞量阈值默认100，高互动阈值是500；评论数阈值默认0，高互动阈值是100；收藏数阈值默认0，热帖收藏量阈值是100。
         你返回的表达式将会插入代码中直接运行，请你一定要直接返回表达式。不要返回其他值，也不要做额外解释。`;
     try {
       console.log("timestamp prompt: ", timestamp);
