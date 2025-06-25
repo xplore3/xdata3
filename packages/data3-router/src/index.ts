@@ -361,6 +361,7 @@ export class DirectClient {
                 const userId = stringToUuid(username);
                 const roomId = stringToUuid("default-data-room-" + username);
                 const fromOptions = req.body.fromOptions;
+                const taskWaitMode = req.body.taskWaitMode;
 
                 let runtime = this.agents.get(agentId);
 
@@ -438,11 +439,35 @@ export class DirectClient {
                 if (newTask) {
                     taskId = await TaskHelper.generateTaskId();
                     memory.content.intention.taskId = taskId;
-                    responseStr = await IntentionHandler.handleDataCollectAPI(runtime, memory);
+                    if (!taskWaitMode) {
+                        setTimeout(async () => {
+                            try {
+                                await IntentionHandler.handleDataCollectAPI(runtime, memory);
+                            } catch (err) {
+                                console.error('Background error ', err);
+                            }
+                        }, 10);
+                        responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
+                    }
+                    else {
+                        responseStr = await IntentionHandler.handleDataCollectAPI(runtime, memory);
+                    }
                 }
                 else {
                     await TaskHelper.setTaskOption(runtime, taskId, originQuestingText);
-                    responseStr = await IntentionHandler.handleDataProcess(runtime, memory, origin_input);
+                    if (!taskWaitMode) {
+                        setTimeout(async () => {
+                            try {
+                                await IntentionHandler.handleDataProcess(runtime, memory, origin_input);
+                            } catch (err) {
+                                console.error('Background error ', err);
+                            }
+                        }, 10);
+                        responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
+                    }
+                    else {
+                        responseStr = await IntentionHandler.handleDataProcess(runtime, memory, origin_input);
+                    }
                 }
                 this.concurrentNum--;
 
@@ -499,6 +524,7 @@ export class DirectClient {
                 }
                 const agentId = req.params.agentId;
                 const username = req.body.userId ?? "user";
+                const taskWaitMode = req.body.taskWaitMode;
                 // const roomId = stringToUuid(
                 //    req.body.roomId ?? "default-room-" + agentId
                 // );
@@ -618,7 +644,19 @@ export class DirectClient {
                 //    withPreContext,
                 //    memory
                 //);
-                const responseStr = await IntentionHandler.handleDataCollectAPI(runtime, memory);
+                let responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
+                if (!taskWaitMode) {
+                    setTimeout(async () => {
+                        try {
+                            await IntentionHandler.handleDataCollectAPI(runtime, memory);
+                        } catch (err) {
+                            console.error('Background error ', err);
+                        }
+                    }, 10);
+                }
+                else {
+                    responseStr = await IntentionHandler.handleDataCollectAPI(runtime, memory);
+                }
                 this.concurrentNum--;
 
                 // const parsedContent = parseJSONObjectFromText(
@@ -1074,9 +1112,10 @@ export class DirectClient {
                     return;
                 }
                 try {
-                    const status = await runtime.cacheManager.get(
-                        req.query.taskId + "_memory_by_step"
-                    );
+                    //const status = await runtime.cacheManager.get(
+                    //    req.query.taskId + "_memory_by_step"
+                    //);
+                    const status = await TaskHelper.getTaskStatus(runtime, req.query.taskId);
                     res.json({ task_status: status });
                     return;
                 } catch (err) {

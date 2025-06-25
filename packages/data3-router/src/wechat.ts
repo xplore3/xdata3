@@ -13,6 +13,7 @@ import {
     createAccountByExternalData,
 } from "@data3os/agentcontext";
 import {
+    TaskHelper,
     extractJson,
     handleProtocols,
 } from "data3-protocols";
@@ -412,14 +413,19 @@ export class WechatHandler {
             if (userId && openKfId) {
                 const taskId = await this.getCachedData<string>(runtime, userId);
                 if (taskId) {
-                    let status = await runtime.cacheManager.get(taskId + "_memory_by_step");
+                    //let status = await runtime.cacheManager.get(taskId + "_memory_by_step");
+                    let status = await TaskHelper.getTaskStatus(runtime, taskId);
                     console.log(taskId + ", " + status);
                     try {
-                        const match = status.match(/current_step:\s*(\d+)/);
-                        const step = match ? parseInt(match[1], 10) : null;
-                        status = `Step ${step} ...`;
+                        //const match = status.match(/current_step:\s*(\d+)/);
+                        //const step = match ? parseInt(match[1], 10) : null;
+                        //status = `Step ${step} ...`;
+                        const json = JSON.parse(status.task_status);
+                        if (json) {
+                            status = json.text;
+                        }
                     } catch (error) {
-                        status = '......';
+                        status = status.task_status;
                     }
                     await this.sendMessage(userId, openKfId, status);
                 }
@@ -486,6 +492,7 @@ export class WechatHandler {
                         taskId,
                         userId,
                         text: input,
+                        taskWaitMode: true,
                         fromOptions
                         //origin_input
                     }
@@ -535,7 +542,8 @@ export class WechatHandler {
                 data: {
                     taskId,
                     userId,
-                    text: input
+                    text: input,
+                    taskWaitMode: true,
                 }
             };
 

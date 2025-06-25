@@ -203,6 +203,7 @@ export class IntentionHandler {
         let execParam = execJson.intention_params;
         {
           if (execParam.data_action && execParam.data_action != 'others') {
+            await TaskHelper.setTaskStatus(runtime, taskId, execParam.data_result);
             const dataResponse = await this.handleDataCollectInputParam(runtime, message,
               execParam.data_result, execParam.data_action);
             // TODO
@@ -217,6 +218,7 @@ export class IntentionHandler {
       else {
         execJson = response;
       }
+      await TaskHelper.setTaskStatus(runtime, taskId, execJson, true);
       return execJson;
     } catch (err) {
       console.log(err);
@@ -397,9 +399,11 @@ export class IntentionHandler {
           );
         }
         if (execJson.process_result) {
+          await TaskHelper.setTaskStatus(runtime, taskId, JSON.stringify(execJson), true);
           return JSON.stringify(execJson);
         }
       }
+      await TaskHelper.setTaskStatus(runtime, taskId, response, true);
       return response;
     } catch (err) {
       console.log(err);

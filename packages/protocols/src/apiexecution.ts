@@ -17,6 +17,7 @@ import { extractJson } from "./utils"
 import { axios_request } from "./httpproxy";
 import { UserKnowledge } from "./userknowledge";
 import { DataCache } from "./cache";
+import { TaskHelper } from "./task";
 
 
 const gProxyAgent = new SocksProxyAgent(`socks5://${process.env.GLOBAL_PROXY_AGENT}`);
@@ -361,6 +362,8 @@ export class ApiExecution {
         console.log(`executeApi active length : ${result?.length}`);
         result = result?.slice(0, totalCount);
         console.log(`executeApi final length : ${result?.length}`);
+        const taskId = message.content?.intention?.taskId;
+        await TaskHelper.setTaskStatus(runtime, taskId, `已获取【${api.name}】数据：${result?.length}/${totalCount}`);
       }
       catch (err) {
         console.log(err);

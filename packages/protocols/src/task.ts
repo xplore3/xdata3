@@ -16,6 +16,7 @@ import { UserKnowledge } from "./userknowledge";
 
 const TASK_ORIGIN_INPUT_CACHE_KEY = "_task_cache_";
 const TASK_OPTION_CACHE_KEY = "_task_option_cache_";
+const TASK_STATUS_KEY = "_task_status_cache_";
 
 export class TaskHelper {
   //userId: string = null;
@@ -91,6 +92,31 @@ export class TaskHelper {
     }
     catch (err) {
       console.log(`getTaskOption ${taskId}`);
+      console.error(err);
+    }
+    return "";
+  }
+
+  static async setTaskStatus(runtime: IAgentRuntime, taskId: string, text: string, completed: boolean = false) {
+    try {
+      if (!taskId) {
+        return;
+      }
+      const cache = { completed, text };
+      await this.setCachedData(runtime, TASK_STATUS_KEY + taskId, JSON.stringify(cache));
+    }
+    catch (err) {
+      console.log(`setTaskStatus ${taskId}`);
+      console.error(err);
+    }
+  }
+
+  static async getTaskStatus(runtime: IAgentRuntime, taskId: string): Promise<string> {
+    try {
+      return await this.getCachedData(runtime, TASK_STATUS_KEY + taskId);
+    }
+    catch (err) {
+      console.log(`getTaskStatus ${taskId}`);
       console.error(err);
     }
     return "";
