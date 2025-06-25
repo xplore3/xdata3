@@ -177,6 +177,7 @@ export class ApiExecution {
             }
             if ((err.status == 503 || err.status == 400) && api.backup && api.backup != "") {
               const apiBackup = ApiDb.getApi(api.backup);
+                apiBackup.query_params = api.query_params;
               const newParams = await this.getApiBackupQueryParam(runtime, message, apiBackup);
               if (newParams) {
                 apiBackup.query_params = newParams;
@@ -377,6 +378,7 @@ export class ApiExecution {
       你是一个Nodejs程序员，能根据用户的请求，可用的API，API文档，生成调用API的URL的调用参数。
       用户的原输入为：${userInput}。
       可用的API参数说明为：${JSON.stringify(api.query_params_desc)}。
+      调用参数的取值参考来源为PARAM_SOURCE：${JSON.stringify(api.query_params)}。
       可用的API的文档地址为：${api.docs_link}。
       用户相关的产品、业务及背景为：${userProfile}。
       根据这些输入，需要给出如下结果：
