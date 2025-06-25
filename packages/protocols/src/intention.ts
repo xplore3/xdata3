@@ -179,11 +179,11 @@ export class IntentionHandler {
           "request_count": 10,
           "filter_desc": "the description of the data filter"
         },
-        "data_result": "简短回答",
+        "data_result": "简短任务描述，不是结果描述",
         "intention_options": ["使用数据的意图1", "使用数据的意图2", "......"],
       }
       输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
-      data_result不要包含API/接口字样，需要使用非开发人员能够理解的语言。
+      data_result不要包含API/接口字样，需要使用非开发人员能够理解的语言，只是任务描述，不是数据结果。
       data_action的可选项是各个可用的API列表my_data_source中的关键字，如果不在这个列表里，输出为others。
       intention_options是根据用户输入而得出的选项，以用户明确输入的选项为优先，
           且结合用户自身的产品和背景（不要有‘搜索小红书笔记’这样的选项，需要是‘搜索小红书关于***的笔记’），
@@ -206,7 +206,7 @@ export class IntentionHandler {
             const dataResponse = await this.handleDataCollectInputParam(runtime, message,
               execParam.data_result, execParam.data_action);
             // TODO
-            execJson.data_result += "\n" + dataResponse + "\n";
+            execJson.data_result += "\r\n\r\n" + dataResponse + "\n";
           }
         }
         execJson.taskId = taskId;
@@ -310,7 +310,7 @@ export class IntentionHandler {
             return summary + "\r\n\r\n" + getDynamicTail(txtfilelist, excelfilelist);
           }
           else {
-            return `哎呀，这个数据【${api.name}】我暂时无法获取，你可以稍后重试，或回复【人工】联系工程师帮你添加支持~`;
+            return `哎呀，这个数据暂时无法获取，你可以稍后重试，或回复【人工】联系工程师进行支持~`;
           }
         }
       }
