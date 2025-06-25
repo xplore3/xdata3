@@ -299,9 +299,10 @@ export class WechatHandler {
 
                         // checkResp
                         let checkCount = 0;
-                        const job = cron.schedule("*/2 * * * *", async () => {
+                        const job = cron.schedule("*/3 * * * *", async () => {
                             console.log(`Wechat check at ${new Date().toISOString()}`);
-                            if (checkCount++ > 2) {
+                            if (checkCount++ > 1) {
+                                job.stop();
                                 return;
                             }
                             await this.checkTaskStatus(runtime, userId, decryptedXml.xml.OpenKfId);
