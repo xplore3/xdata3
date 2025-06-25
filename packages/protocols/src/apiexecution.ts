@@ -88,17 +88,25 @@ export class ApiExecution {
           console.log(err);
         }
       }
-      const taskId = message.content?.intention?.taskId;
-      const { firstUnExistsTxtFilename: txt1, firstUnExistsExcelFilename: excel1 }
-        = APIWrapperFactory.excelDataPersist(result, taskId + api1.name);
-      const { firstUnExistsTxtFilename: txt2, firstUnExistsExcelFilename: excel2 }
-        = APIWrapperFactory.excelDataPersist(result2, taskId + api2.name);
-      return { result: `${JSON.stringify(result)}\n${JSON.stringify(result2)}`,
-          txtfilename: [txt1, txt2],
-          excelfilename: [excel1, excel2] };
-      //return this.cacheResultData(result2, taskId);
-      //return cacheText + this.cacheResultData(result2, taskId);
-      // TODO
+      try {
+        const taskId = message.content?.intention?.taskId;
+        const { firstUnExistsTxtFilename: txt1, firstUnExistsExcelFilename: excel1 }
+          = APIWrapperFactory.excelDataPersist(result, taskId + api1.name);
+        const { firstUnExistsTxtFilename: txt2, firstUnExistsExcelFilename: excel2 }
+          = APIWrapperFactory.excelDataPersist(result2, taskId + api2.name);
+        return { result: `${JSON.stringify(result)}\n${JSON.stringify(result2)}`,
+            txtfilename: [txt1, txt2],
+            excelfilename: [excel1, excel2] };
+        //return this.cacheResultData(result2, taskId);
+        //return cacheText + this.cacheResultData(result2, taskId);
+        // TODO
+      }
+      catch (err) {
+        console.error(err);
+        return { result: `${JSON.stringify(result)}\n${JSON.stringify(result2)}`,
+            txtfilename: [],
+            excelfilename: [] };
+      }
     }
     else {
       return await this.executeApiAndGetResult(runtime, message, api, totalCount);

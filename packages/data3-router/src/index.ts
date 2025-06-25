@@ -49,6 +49,7 @@ import { createVerifiableLogApiRouter } from "./verifiable-log-api.ts";
 import { WechatHandler } from "./wechat.ts";
 import { PromptController } from "./promts.ts";
 import { fileURLToPath } from "url";
+import { exceptionHandler, parseToken } from "./auth.ts";
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -175,11 +176,57 @@ export class DirectClient {
     public loadCharacterTryPath: Function; // Store loadCharacterTryPath functor
     public jsonToCharacter: Function; // Store jsonToCharacter functor
     public concurrentNum: number;
+    private onlineUsers = new Map();
 
     constructor() {
         data3Logger.log("DirectClient constructor");
         this.concurrentNum = 0;
         this.app = express();
+        this.app.use(exceptionHandler);
+        const ONLINE_THRESHOLD = 24 * 60 * 60 * 1000;
+        this.app.use((req, res, next) => {
+            // const userIP = req.ip;
+            const userIP = req.headers["x-real-ip"];
+            if (userIP) {
+                const now = Date.now();
+                for (const [uIP, lastActiveTime] of this.onlineUsers) {
+                    if (now - lastActiveTime > ONLINE_THRESHOLD) {
+                        this.onlineUsers.delete(uIP);
+                    }
+                }
+                this.onlineUsers.set(userIP, now);
+                console.log(
+                    `APM time ${new Date(now).toLocaleString()}, current online users: ${this.onlineUsers.size} user ip ${userIP}`
+                );
+            }
+            next();
+        });
+        this.app.use((req, res, next) => {
+            const start = Date.now();
+            // TODO: verify token for security
+            // if (!this.validateToken(req)) {
+            //     res.status(401).json({
+            //         code: 401,
+            //         message: "Token is invalid or expired",
+            //     });
+            //     return;
+            // }
+            res.on("finish", () => {
+                const duration = Date.now() - start;
+                if (duration > 1000) {
+                    // this is not a error, but a highly warning
+                    console.error(
+                        `APM Method: ${req.method}, API: ${req.url} - time: ${duration} ms`
+                    );
+                } else {
+                    console.log(
+                        `APM Method: ${req.method}, API: ${req.url} - time: ${duration} ms`
+                    );
+                }
+            });
+            next();
+        });
+
         this.app.use(cors());
         this.app.use((req, res, next) => {
             // const userIP = req.ip;
