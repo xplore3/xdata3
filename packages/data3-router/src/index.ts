@@ -430,7 +430,7 @@ export class DirectClient {
 
                 let newTask = false;
                 if (taskId && !fromOptions) {
-                    newTask = await TaskHelper.checkNewTask(runtime, memory, taskId);
+                    newTask = !(await TaskHelper.checkNewTask(runtime, memory, taskId));
                 }
                 else if (!taskId) {
                     newTask = true;
