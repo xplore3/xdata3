@@ -309,6 +309,7 @@ export class WechatHandler {
                         });
 
                         try {
+                            let fromOptions = false;
                             const taskId = await this.getCachedData<string>(runtime, userId);
                             if (taskId && taskId != '') {
                                 let immResp = "";
@@ -322,6 +323,7 @@ export class WechatHandler {
                                         return;
                                     }
                                     firstText = await this.getRealOption(runtime, userId, firstText);
+                                    fromOptions = true;
                                 }
                                 else {
                                     const quickJson = await this.generateQuickResponse(runtime, firstText, userId);
@@ -337,7 +339,7 @@ export class WechatHandler {
                                     decryptedXml.xml.OpenKfId, immResp);
                             }
                             const questionAfter = await this.generateResponseByData3(
-                                runtime, userId, firstText);
+                                runtime, userId, firstText, fromOptions);
                             await this.sendMessage(userId,
                                 decryptedXml.xml.OpenKfId, questionAfter);
                         }
@@ -437,7 +439,7 @@ export class WechatHandler {
        try {
             if (optionIndex == '0') {
                 const newOptions = this.getRandomElements<string>(bkOptions, 3, 5);
-                await this.setCachedData(runtime, taskId + TASK_BK_OPTIONS, newOptions);
+                await this.setCachedData(runtime, taskId + TASK_OPTIONS, newOptions);
                 return `${newOptions.map((item, index) => `(${index + 1}). ${item}`).join('\n')}\n【回复序号执行，回复0刷新选项，其他请输入】`;
             }
             return options[parseInt(optionIndex, 10) - 1];
@@ -448,7 +450,7 @@ export class WechatHandler {
         return optionIndex;
     }
 
-    async generateResponseByData3(runtime: IAgentRuntime, userId: string, input: string) {
+    async generateResponseByData3(runtime: IAgentRuntime, userId: string, input: string, fromOptions: boolean) {
         try {
             /*await handleProtocols(runtime, firstMsg.text.content).then(async (resStr) => {
                 console.log(resStr);
@@ -484,6 +486,7 @@ export class WechatHandler {
                         taskId,
                         userId,
                         text: input,
+                        fromOptions
                         //origin_input
                     }
                 };
