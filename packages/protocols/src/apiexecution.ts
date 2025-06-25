@@ -218,6 +218,7 @@ export class ApiExecution {
                   path: api.data_path,
                   json: response
                 });
+                items = items[0];
                 //console.log(`JSONPath ${items}`);
               }
               catch (err) {
