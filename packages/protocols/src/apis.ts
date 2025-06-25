@@ -46,7 +46,7 @@ export class ApiDb {
         type: 'social-media',
         platform: 'rednote',
         description: '用以通过关键字搜索小红书笔记/帖子/note，获得note列表',
-        name: '笔记/帖子',
+        name: '笔记帖子',
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/search-note/v2',
         method: 'GET',
         headers: {
@@ -103,7 +103,7 @@ export class ApiDb {
         type: 'social-media',
         platform: 'rednote',
         description: '用以通过关键字搜索小红书账号，获得账号列表',
-        name: '账号/达人',
+        name: '账号达人',
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/search-user/v2',
         method: 'GET',
         headers: {
@@ -147,7 +147,7 @@ export class ApiDb {
         type: 'social-media',
         platform: 'rednote',
         description: '用以通过单个小红书账号ID获取该账号的详情',
-        name: '账号/达人详情',
+        name: '账号详情',
         url: 'https://xiaohongshu-all-api.p.rapidapi.com/api/xiaohongshu/get-user/v3',
         method: 'GET',
         headers: {
@@ -286,7 +286,7 @@ export class ApiDb {
         type: 'social-media',
         platform: 'rednote',
         description: '用以通过关键字搜索小红书笔记/帖子/note，获得note id列表，然后再获得这些笔记的评论列表；该操作能获得评论这一种数据；如果用户没有明确要求取出评论，则不要选此选项。',
-        name: '获取用户帖子和评论',
+        name: '帖子和评论',
         // Excute Data Dependency
         execute_depend: 'chain_loop', // ['chain', 'chain_loop']
         // The First Request
@@ -301,7 +301,7 @@ export class ApiDb {
         type: 'social-media',
         platform: 'rednote',
         description: '用以通过关键字搜索小红书笔记/帖子/note，获得note列表，然后再获得这些笔记的评论列表；该操作能获得笔记和评论两种数据；如果用户没有明确要求取出评论，则不要选此选项。',
-        name: '获取帖子和评论',
+        name: '帖子和评论',
         // Excute Data Dependency
         execute_depend: 'chain_loop', // ['chain', 'chain_loop']
         // The First Request
@@ -316,7 +316,7 @@ export class ApiDb {
         type: 'social-media',
         platform: 'rednote',
         description: '用以通过关键字搜索小红书笔记/帖子/note，获得note列表',
-        name: '笔记/帖子',
+        name: '笔记帖子',
         url: 'https://api.tikhub.io/api/v1/xiaohongshu/web_v2/fetch_search_notes',
         method: 'GET',
         headers: {
@@ -368,7 +368,7 @@ export class ApiDb {
         type: 'social-media',
         platform: 'rednote',
         description: '用以通过关键字搜索小红书笔记/帖子/note，获得note列表',
-        name: '笔记/帖子',
+        name: '笔记帖子',
         url: 'https://api.tikhub.io/api/v1/xiaohongshu/app/search_notes',
         method: 'GET',
         headers: {
@@ -479,7 +479,7 @@ export class ApiDb {
         type: 'social-media',
         platform: 'rednote',
         description: '用以获得近期火热的热词/热搜词等',
-        name: '热词/热搜',
+        name: '热词热搜',
         url: 'https://gw.newrank.cn/api/xhsv2/nr/app/xh/v2/rank/hotWordHotList',
         method: 'POST',
         headers: {
@@ -545,7 +545,7 @@ export class ApiDb {
         type: 'social-media',
         platform: 'rednote',
         description: '用以获得近期流行的话题/Tag等',
-        name: '话题/Tag/榜单',
+        name: '话题Tag榜单',
         url: 'https://gw.newrank.cn/api/xh/xdnphb/nr/app/xhs/rank/topicRank',
         method: 'POST',
         headers: {
@@ -606,7 +606,7 @@ export class ApiDb {
         type: 'social-media',
         platform: 'rednote',
         description: '根据关键字搜索红人的基本画像，包括其基础信息、内容特征、粉丝画像、商业指标等',
-        name: '达人搜索',
+        name: '达人列表',
         url: 'https://gw.newrank.cn/api/xh/xdnphb/nr/app/xhs/red/user/search',
         method: 'POST',
         headers: {
