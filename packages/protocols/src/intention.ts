@@ -15,6 +15,7 @@ import { extractJson } from "./utils"
 import { ApiExecution } from "./apiexecution";
 import { TaskHelper } from "./task";
 import { UserKnowledge } from "./userknowledge";
+import { chatWithDeepSeek } from "./aibydeepseek";
 
 
 export class IntentionHandler {
@@ -673,11 +674,12 @@ export class IntentionHandler {
     为了方便我提取时间戳，请你先输出思考过程，最后输出时间戳，时间戳使用[]包裹, 比如[1734566400]或者[no_time。]。
     `;
     try {
-      const response = await generateText({
-        runtime,
-        context: prompttime,
-        modelClass: ModelClass.LARGE,
-      });
+      // const response = await generateText({
+      //   runtime,
+      //   context: prompttime,
+      //   modelClass: ModelClass.LARGE,
+      // });
+      const response = await chatWithDeepSeek(prompttime);
       console.log("timestamp response:", response);
       const timestr = response.split('[')[1].split(']')[0];
       console.log("timestamp timestr:", timestr);
