@@ -1117,7 +1117,7 @@ export class DirectClient {
                     //);
                     const taskId = req.query.taskId;
                     if (taskId) {
-                        const status = await TaskHelper.getTaskStatus(runtime, taskId);
+                        const status = await TaskHelper.getTaskStatus(runtime, taskId as string);
                         res.json({ task_status: status });
                     }
                     else {
