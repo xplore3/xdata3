@@ -1115,8 +1115,14 @@ export class DirectClient {
                     //const status = await runtime.cacheManager.get(
                     //    req.query.taskId + "_memory_by_step"
                     //);
-                    const status = await TaskHelper.getTaskStatus(runtime, req.query.taskId);
-                    res.json({ task_status: status });
+                    const taskId = req.query.taskId;
+                    if (taskId) {
+                        const status = await TaskHelper.getTaskStatus(runtime, taskId);
+                        res.json({ task_status: status });
+                    }
+                    else {
+                        res.status(400).send("Params error.");
+                    }
                     return;
                 } catch (err) {
                     console.error(err);
