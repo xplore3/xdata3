@@ -420,6 +420,7 @@ export class IntentionHandler {
       根据已有数据DATA_TO_PROCESS:${data}和用户指令USER_INSTRUCT:${message.content.text}进行数据处理或简要总结。
       如果用户指令USER_INSTRUCT要求进行分析处理，则给出分析结果；
       如果用户指令USER_INSTRUCT没有要求进行分析处理，则只需给出数据总结。
+      如果已有数据中有一些用户的隐私数据，比如姓名/学校/住址/电话/邮箱/社媒账户等，需要进行隐藏或去除，不要泄露个人隐私。
     `;
     try {
       let response = await generateText({
