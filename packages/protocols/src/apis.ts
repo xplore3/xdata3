@@ -25,13 +25,13 @@ export class ApiDb {
       'industry_rank: 根据领域/频道获取红人榜单，包括其基础信息、粉丝/点赞/收藏数量、指数等',
       'koc_imitate: 优秀内容对标，根据我的产品、业务和背景等搜索到合适的对标网红KOC；该操作能获得KOC列表和其内容列表两类数据',
       'koc_evaluate: 达人合作评估，根据给定的达人网红KOC账号信息，找到其详细画像，对其进行合作评估；该操作能获得KOC画像和其内容列表两类数据',
-      'notes_search: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表. Parameters: keyword (search term), sort (popularity_descending or time_descending).',
+      'notes_search: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表；',
       //'note_detail: 通过noteid获取单个笔记/帖子/note的详情',
       'users_search: 用以通过关键字搜索小红书账号，获得账号列表',
       'get_user: 用以通过单个小红书账号ID获取该账号的详情',
       'notes_comment_by_next_page: 用以通过单个笔记/帖子的ID获取其评论列表',
-      'fetch_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note id列表，然后再获得这些笔记的评论列表；该操作能获得评论这一种数据',
-      'fetch_notes_and_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表，然后再获得这些笔记的评论列表；该操作能获得笔记和评论两种数据. Parameters: keyword (search term), sort (popularity_descending or time_descending).',
+      'fetch_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note id列表，然后再获得这些笔记的评论列表；该操作能获得评论这一种数据；如果用户没有明确要求取出评论，则不要选此选项。',
+      'fetch_notes_and_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表，然后再获得这些笔记的评论列表；该操作能获得笔记和评论两种数据；如果用户没有明确要求取出评论，则不要选此选项。',
       'get_note_list: 用以通过单个小红书账号ID获取该账号的笔记/帖子的列表'
     ];
     return sources;
@@ -285,7 +285,7 @@ export class ApiDb {
         priority: 0,
         type: 'social-media',
         platform: 'rednote',
-        description: '用以通过关键字搜索小红书笔记/帖子/note，获得note id列表，然后再获得这些笔记的评论列表；该操作能获得评论这一种数据',
+        description: '用以通过关键字搜索小红书笔记/帖子/note，获得note id列表，然后再获得这些笔记的评论列表；该操作能获得评论这一种数据；如果用户没有明确要求取出评论，则不要选此选项。',
         name: '获取用户帖子和评论',
         // Excute Data Dependency
         execute_depend: 'chain_loop', // ['chain', 'chain_loop']
@@ -300,7 +300,7 @@ export class ApiDb {
         priority: 0,
         type: 'social-media',
         platform: 'rednote',
-        description: '用以通过关键字搜索小红书笔记/帖子/note，获得note列表，然后再获得这些笔记的评论列表；该操作能获得笔记和评论两种数据. Parameters: keyword (search term), sort (popularity_descending or time_descending).',
+        description: '用以通过关键字搜索小红书笔记/帖子/note，获得note列表，然后再获得这些笔记的评论列表；该操作能获得笔记和评论两种数据；如果用户没有明确要求取出评论，则不要选此选项。',
         name: '获取帖子和评论',
         // Excute Data Dependency
         execute_depend: 'chain_loop', // ['chain', 'chain_loop']
