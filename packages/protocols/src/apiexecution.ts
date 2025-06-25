@@ -183,7 +183,7 @@ export class ApiExecution {
                 apiBackup.query_params = newParams;
                 const bkResult = await this.executeApi(runtime, message, apiBackup, totalCount);
                 console.log(`executeApi bkResult: ${bkResult.length}`);
-                result.concat(bkResult);
+                result = result.concat(bkResult);
                 console.log(`executeApi add bk: ${result.length}`);
                 break;
               }
