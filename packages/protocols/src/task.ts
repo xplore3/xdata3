@@ -181,6 +181,9 @@ export class TaskHelper {
       if (response == 'true') {
         return true;
       }
+      else if (response == 'false') {
+        return false;
+      }
       return response;
     }
     catch (err) {
