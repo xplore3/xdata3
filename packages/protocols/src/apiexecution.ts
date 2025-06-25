@@ -245,7 +245,7 @@ export class ApiExecution {
           if (items) {
             console.log(`Response items: ${items.length || items}`);
             // WORKAROUND
-            if (api.id == 'hot_words' && items.length <= 3) {
+            if ((api.id === 'hot_words' || api.id === 'topic_rank') && items.length <= 3) {
               let cache = await DataCache.getApiCacheData(runtime, api.id);
               try {
                 cache = await JSON.parse(cache);
