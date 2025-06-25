@@ -447,7 +447,8 @@ export class DirectClient {
                                 console.error('Background error ', err);
                             }
                         }, 10);
-                        responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
+                        //responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
+                        responseStr = await TaskHelper.quickResponse(runtime, memory);
                     }
                     else {
                         responseStr = await IntentionHandler.handleDataCollectAPI(runtime, memory);
@@ -463,7 +464,8 @@ export class DirectClient {
                                 console.error('Background error ', err);
                             }
                         }, 10);
-                        responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
+                        //responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
+                        responseStr = await TaskHelper.quickResponse(runtime, memory);
                     }
                     else {
                         responseStr = await IntentionHandler.handleDataProcess(runtime, memory, origin_input);
@@ -653,6 +655,7 @@ export class DirectClient {
                             console.error('Background error ', err);
                         }
                     }, 10);
+                    responseStr = await TaskHelper.quickResponse(runtime, memory);
                 }
                 else {
                     responseStr = await IntentionHandler.handleDataCollectAPI(runtime, memory);

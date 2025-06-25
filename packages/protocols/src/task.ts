@@ -184,10 +184,32 @@ export class TaskHelper {
       else if (response == 'false') {
         return false;
       }
-      return response;
+      return false;
     }
     catch (err) {
       console.log(`checkNewTask err ${err.message}`);
+      console.error(err);
+    }
+    return false;
+  }
+
+  static async quickResponse(runtime: IAgentRuntime, message: Memory, taskId: string): Promise<any> {
+    console.log(`quickResponse ${taskId}`);
+    const userInput = `${message.content.text}`;
+    const prompt = `
+      根据输入给出一个简短回复：${userInput}。
+    `;
+    try {
+      let response = await generateText({
+        runtime,
+        context: prompt,
+        modelClass: ModelClass.LARGE,
+      });
+      console.log(response);
+      return response;
+    }
+    catch (err) {
+      console.log(`quickResponse err ${err.message}`);
       console.error(err);
     }
     return false;
