@@ -156,7 +156,7 @@ export class ApiDb {
         },
         query_params: {},
         query_params_desc: {
-          userId: 'String, userId for query'
+          userId: 'String, userId for query; 格式需参考query_params_example中的格式，不是输入的关键字'
         },
         query_params_example: {
           userId: '648c8ada000000001c02b0f2'
@@ -189,7 +189,7 @@ export class ApiDb {
         },
         query_params: {},
         query_params_desc: {
-          noteId: 'String, Note ID for query',
+          noteId: 'String, Note ID for query; 格式需参考query_params_example中的格式，不是输入的关键字',
           lastCursor: '(optional)String, Paging parameters, enter previous page datas last comment ID(first page do not need enter).'
         },
         query_params_example: {
@@ -248,7 +248,7 @@ export class ApiDb {
         },
         query_params: {},
         query_params_desc: {
-          userId: 'String, User ID for query',
+          userId: 'String, User ID for query; 格式需参考query_params_example中的格式，不是输入的关键字',
           lastCursor: '(optional)String, Paging parameters, enter previous page datas last note ID(first page do not need enter).'
         },
         query_params_example: {
@@ -431,7 +431,7 @@ export class ApiDb {
         },
         query_params: {},
         query_params_desc: {
-          note_id: 'String, Note ID for query',
+          note_id: 'String, Note ID for query; 格式需参考query_params_example中的格式，不是输入的关键字',
           cursor: '(optional)String, Paging parameters, enter previous page datas last comment ID(first page do not need enter).'
         },
         query_params_example: {
@@ -1003,7 +1003,7 @@ export class ApiDb {
         },
         query_params: {},
         query_params_desc: {
-          rid: "UserId of the account, e.g. 6204d8f30000000021022ff2"
+          rid: "UserId of the account, e.g. 6204d8f30000000021022ff2; 格式需参考query_params_example中的格式，不是输入的关键字"
         },
         query_params_example: {
           rid: "6204d8f30000000021022ff2"
