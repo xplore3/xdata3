@@ -211,15 +211,32 @@ export class ApiExecution {
             }
             // TODO: The response items should be compatible
             // TODP: Use of api.data_path
-            items = response.data?.data?.items
-              || response.data?.data?.data?.items
-              || response.data?.data?.comments
-              || response.data?.data?.users
-              || response.data?.data?.notes
-              || response.data?.data?.list
-              || response.data?.data
-              || response.data
-              || [];
+            if (api.data_path != '') {
+              try {
+                console.log(`JSONPath ${api.data_path}`);
+                items = JSONPath({
+                  path: api.data_path,
+                  json: response
+                });
+                //console.log(`JSONPath ${items}`);
+              }
+              catch (err) {
+                console.log(err);
+                items = response;
+              }
+            }
+            else {
+              items = response.data?.data?.items
+                || response.data?.data?.data?.items
+                || response.data?.data?.comments
+                || response.data?.data?.users
+                || response.data?.data?.notes
+                || response.data?.data?.list
+                || response.data?.data
+                || response.data
+                || response
+                || [];
+            }
             if (api.could_cached) {
               await DataCache.setApiCacheData(runtime, api.id, JSON.stringify(items));
             }

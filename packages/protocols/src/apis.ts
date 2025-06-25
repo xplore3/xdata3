@@ -92,6 +92,8 @@ export class ApiDb {
         })`,
         limit: '',
         price: '',
+        dev: '',
+        verification: '',
         note: ''
       },
       users_search: {
@@ -167,6 +169,8 @@ export class ApiDb {
         flattener: '',
         limit: '',
         price: '',
+        dev: '',
+        verification: '',
         note: ''
       },
       notes_comment_by_next_page: {
@@ -224,6 +228,8 @@ export class ApiDb {
         })`,
         limit: '',
         price: '',
+        dev: '',
+        verification: '',
         note: ''
       },
       get_note_list: {
@@ -269,6 +275,8 @@ export class ApiDb {
         })`,
         limit: '',
         price: '',
+        dev: '',
+        verification: '',
         note: ''
       },
       fetch_comments_by_keyword: {
@@ -349,6 +357,8 @@ export class ApiDb {
         })`,
         limit: '',
         price: '',
+        dev: '',
+        verification: '',
         note: ''
       },
       notes_search_2: {
@@ -402,6 +412,8 @@ export class ApiDb {
         })`,
         limit: '',
         price: '',
+        dev: '',
+        verification: '',
         note: ''
       },
       notes_comment_by_next_page_1: {
@@ -456,6 +468,8 @@ export class ApiDb {
         })`,
         limit: '',
         price: '',
+        dev: '',
+        verification: '',
         note: ''
       },
       hot_words: {
@@ -520,6 +534,8 @@ export class ApiDb {
         flattener: ``,
         limit: '',
         price: '',
+        dev: '',
+        verification: '',
         note: ''
       },
       topic_rank: {
@@ -579,6 +595,8 @@ export class ApiDb {
         flattener: ``,
         limit: '',
         price: '',
+        dev: '',
+        verification: '',
         note: ''
       },
       koc_search: {
@@ -890,6 +908,8 @@ export class ApiDb {
         flattener: ``,
         limit: '',
         price: '',
+        dev: '',
+        verification: '',
         note: ''
       },
       industry_rank: {
@@ -948,6 +968,8 @@ export class ApiDb {
         flattener: ``,
         limit: '',
         price: '',
+        dev: '',
+        verification: '',
         note: ''
       },
       koc_image: {
@@ -994,6 +1016,8 @@ export class ApiDb {
         flattener: ``,
         limit: '',
         price: '',
+        dev: '',
+        verification: '',
         note: ''
       },
       koc_imitate: {
