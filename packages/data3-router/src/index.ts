@@ -449,6 +449,7 @@ export class DirectClient {
                         }, 10);
                         //responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
                         responseStr = await TaskHelper.quickResponse(runtime, memory);
+                        responseStr += `\r\n\r\n任务【${taskId}】已开始执行，请耐心等待`;
                     }
                     else {
                         responseStr = await IntentionHandler.handleDataCollectAPI(runtime, memory);
@@ -466,6 +467,7 @@ export class DirectClient {
                         }, 10);
                         //responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
                         responseStr = await TaskHelper.quickResponse(runtime, memory);
+                        responseStr += `\r\n\r\n任务【${taskId}】已开始执行，请耐心等待`;
                     }
                     else {
                         responseStr = await IntentionHandler.handleDataProcess(runtime, memory, origin_input);
@@ -646,7 +648,7 @@ export class DirectClient {
                 //    withPreContext,
                 //    memory
                 //);
-                let responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
+                let responseStr = `收到啦，任务【${taskId}】已开始执行，请耐心等待`;
                 if (!taskWaitMode) {
                     setTimeout(async () => {
                         try {
@@ -656,6 +658,7 @@ export class DirectClient {
                         }
                     }, 10);
                     responseStr = await TaskHelper.quickResponse(runtime, memory);
+                    responseStr += `\r\n\r\n任务【${taskId}】已开始执行，请耐心等待`;
                 }
                 else {
                     responseStr = await IntentionHandler.handleDataCollectAPI(runtime, memory);

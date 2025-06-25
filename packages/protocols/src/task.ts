@@ -193,8 +193,8 @@ export class TaskHelper {
     return false;
   }
 
-  static async quickResponse(runtime: IAgentRuntime, message: Memory, taskId: string): Promise<any> {
-    console.log(`quickResponse ${taskId}`);
+  static async quickResponse(runtime: IAgentRuntime, message: Memory): Promise<any> {
+    console.log(`quickResponse`);
     const userInput = `${message.content.text}`;
     const prompt = `
       根据输入给出一个简短回复：${userInput}。
