@@ -239,7 +239,10 @@ export class ApiExecution {
                 || [];
             }
             if (api.could_cached) {
-              await DataCache.setApiCacheData(runtime, api.id, JSON.stringify(items));
+              // WORKAROUND
+              if (items.length > 3) {
+                await DataCache.setApiCacheData(runtime, api.id, JSON.stringify(items));
+              }
             }
           }
           if (items) {
@@ -248,12 +251,17 @@ export class ApiExecution {
             if ((api.id === 'hot_words' || api.id === 'topic_rank') && items.length <= 3) {
               let cache = await DataCache.getApiCacheData(runtime, api.id);
               try {
+                if (typeof cache === 'object' && cache !== null) {
+                  items = [...cache];
+                }
                 cache = await JSON.parse(cache);
                 if (cache) {
                   items = [...cache];
                 }
               }
-              catch(err) {}
+              catch(err) {
+                console.log(err);
+              }
             }
           }
           if (api.filter) {
