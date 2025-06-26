@@ -446,6 +446,7 @@ export class DirectClient {
                             await TaskHelper.setTaskStatus(runtime, taskId, '', true);
                         }
                         else {
+                            await TaskHelper.setTaskStatus(runtime, taskId, quickJson.response, false);
                             setTimeout(async () => {
                                 try {
                                     await IntentionHandler.handleDataCollectAPI(runtime, memory);
@@ -470,7 +471,8 @@ export class DirectClient {
                             await TaskHelper.setTaskStatus(runtime, taskId, '', true);
                         }
                         else {
-                                setTimeout(async () => {
+                            await TaskHelper.setTaskStatus(runtime, taskId, quickJson.response, false);
+                            setTimeout(async () => {
                                 try {
                                     await IntentionHandler.handleDataProcess(runtime, memory, origin_input);
                                 } catch (err) {
@@ -668,6 +670,7 @@ export class DirectClient {
                         await TaskHelper.setTaskStatus(runtime, taskId, '', true);
                     }
                     else {
+                        await TaskHelper.setTaskStatus(runtime, taskId, quickJson.response, false);
                         responseStr = quickJson.response + `\r\n\r\n任务【${taskId}】已开始执行，请耐心等待`;
                         setTimeout(async () => {
                             try {
