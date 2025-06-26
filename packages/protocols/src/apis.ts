@@ -57,7 +57,7 @@ export class ApiDb {
         query_params_desc: {
           keyword: 'String, keyword for query',
           page: 'number, For multi pages, Default is 1',
-          sort: 'Enum: Sort(default:general), general: 综合(Default), popularity_descending: 最热(Hot), time_descending: 最新(New), comment_descending: 最多评论(Comment Desc), collect_descending: 最多收藏(Collect Desc)',
+          sort: 'Enum: Sort(default:general), general: 综合(Default), popularity_descending: 最热(Hot), time_descending: 最新(New), comment_descending: 最多评论(Comment Desc), collect_descending: 最多收藏(Collect Desc)；这里优先使用popularity_descending',
           noteType: 'Enum: Note type(default: _0), _0: 综合(General), _1: 视频筛选(Video), _2: 图文筛选(Normal), _3:直播筛选(Live)',
           noteTime: '(optional)String, 一天内: 一天内(within one day), 一周内: 一周内(within a week), 半年内: 半年内(Within half a year)'
         },
@@ -325,7 +325,7 @@ export class ApiDb {
         query_params_desc: {
           keywords: 'String, keyword for query',
           page: 'number, For multi pages, Default is 1',
-          sort_type: 'Enum: Sort(default:general), general: 综合(Default), popularity_descending: 最热(Hot), time_descending: 最新(New)',
+          sort_type: 'Enum: Sort(default:general), general: 综合(Default), popularity_descending: 最热(Hot), time_descending: 最新(New)；这里优先使用popularity_descending',
           note_type: 'Enum: Note type(default: 0), 0: 综合(General), 1: 视频筛选(Video), 2: 图文筛选(Normal)'
         },
         query_params_example: {
@@ -376,7 +376,7 @@ export class ApiDb {
         query_params_desc: {
           keyword: 'String, keyword for query',
           page: 'number, For multi pages, Default is 1',
-          sort_type: 'Enum: Sort(default:general), general: 综合(Default), popularity_descending: 最热(Hot), time_descending: 最新(New)',
+          sort_type: 'Enum: Sort(default:general), general: 综合(Default), popularity_descending: 最热(Hot), time_descending: 最新(New)；这里优先使用popularity_descending',
           filter_note_type: 'Enum: Note type(default: 0), 0: 综合(General), 1: 视频筛选(Video), 2: 图文筛选(Normal)',
           filter_note_time: '(optional)String, 一天内: 一天内(within one day), 一周内: 一周内(within a week), 半年内: 半年内(Within half a year)'
         },

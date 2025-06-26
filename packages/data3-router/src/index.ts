@@ -455,7 +455,7 @@ export class DirectClient {
                                 }
                             }, 10);
                             //responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
-                            responseStr = quickJson.response + `\r\n\r\n任务【${taskId}】已开始执行，请耐心等待`;
+                            responseStr = quickJson.response + `\r\n\r\n任务【${taskId}】已开始执行，预计需要几分钟，请耐心等待`;
                         }
                     }
                     else {
@@ -480,7 +480,7 @@ export class DirectClient {
                                 }
                             }, 10);
                             //responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
-                            responseStr = quickJson.response + `\r\n\r\n任务【${taskId}】已开始执行，请耐心等待`;
+                            responseStr = quickJson.response + `\r\n\r\n任务【${taskId}】已开始执行，预计需要几分钟，请耐心等待`;
                         }
                     }
                     else {
@@ -662,7 +662,7 @@ export class DirectClient {
                 //    withPreContext,
                 //    memory
                 //);
-                let responseStr = `收到啦，任务【${taskId}】已开始执行，请耐心等待`;
+                let responseStr = `收到啦，任务【${taskId}】已开始执行，预计需要几分钟，请耐心等待`;
                 if (!taskWaitMode) {
                     const quickJson = await TaskHelper.quickResponse(runtime, memory);
                     if (quickJson && quickJson.quick) {
@@ -671,7 +671,7 @@ export class DirectClient {
                     }
                     else {
                         await TaskHelper.setTaskStatus(runtime, taskId, quickJson.response, false);
-                        responseStr = quickJson.response + `\r\n\r\n任务【${taskId}】已开始执行，请耐心等待`;
+                        responseStr = quickJson.response + `\r\n\r\n任务【${taskId}】已开始执行，预计需要几分钟，请耐心等待`;
                         setTimeout(async () => {
                             try {
                                 await IntentionHandler.handleDataCollectAPI(runtime, memory);
