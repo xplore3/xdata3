@@ -295,7 +295,7 @@ export class IntentionHandler {
           }
         }
       }
-      return response;
+      return execJson;
     } catch (err) {
       console.log(err);
     }

@@ -394,7 +394,7 @@ export class ApiExecution {
       根据这些输入，需要给出如下结果：
         {
           "query_params": {json of params},
-          "request_count": total count of user request from users input, default is 10, 不要超过100
+          "request_count": 取出的内容的数量，从用户的原输入和参考来源PARAM_SOURCE中提取，默认是10, 不要超过100
         }.
       关于query_params字段，需满足用户所有需求，且输出参数说明中的项，不能有参数说明之外的项；不是数组，仅仅是一个JSON对象。
       如果query_params的keyword之类的取值不能明显地从用户输入里获取，则需要结合自己的knowledge和背景。
@@ -403,7 +403,7 @@ export class ApiExecution {
       query_params中的搜索关键词不能太长，一般为用户的产品，不需要带品牌名称，一般是一个词语，不能超过2个词语。
       query_params字段示例如下：【${JSON.stringify(api.query_params_example)}】。
       输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
-      这里的request_count的值取决于PARAM_SOURCE中的说明，比如如果comments_count有10个，则对应的comment接口结果数量就是10个。
+      这里的request_count的值取决于用户的原输入和PARAM_SOURCE中的说明，比如如果comments_count有10个，则对应的comment接口结果数量就是10个。
       -----------------------------
     `;
     try {
