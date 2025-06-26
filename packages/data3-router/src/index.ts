@@ -443,7 +443,7 @@ export class DirectClient {
                         const quickJson = await TaskHelper.quickResponse(runtime, memory);
                         if (quickJson && quickJson.quick) {
                             responseStr = quickJson.response;
-                            await TaskHelper.setTaskStatus(runtime, taskId, '回复‘模板’获取常用提示词模板', true);
+                            await TaskHelper.setTaskStatus(runtime, taskId, '', true);
                         }
                         else {
                             setTimeout(async () => {
@@ -467,7 +467,7 @@ export class DirectClient {
                         const quickJson = await TaskHelper.quickResponse(runtime, memory);
                         if (quickJson && quickJson.quick) {
                             responseStr = quickJson.response;
-                            await TaskHelper.setTaskStatus(runtime, taskId, '回复‘模板’获取常用提示词模板', true);
+                            await TaskHelper.setTaskStatus(runtime, taskId, '', true);
                         }
                         else {
                                 setTimeout(async () => {
@@ -665,7 +665,7 @@ export class DirectClient {
                     const quickJson = await TaskHelper.quickResponse(runtime, memory);
                     if (quickJson && quickJson.quick) {
                         responseStr = quickJson.response;
-                        await TaskHelper.setTaskStatus(runtime, taskId, '回复‘模板’获取常用提示词模板', true);
+                        await TaskHelper.setTaskStatus(runtime, taskId, '', true);
                     }
                     else {
                         responseStr = quickJson.response + `\r\n\r\n任务【${taskId}】已开始执行，请耐心等待`;
