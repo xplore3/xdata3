@@ -440,16 +440,21 @@ export class DirectClient {
                     taskId = await TaskHelper.generateTaskId();
                     memory.content.intention.taskId = taskId;
                     if (!taskWaitMode) {
-                        setTimeout(async () => {
-                            try {
-                                await IntentionHandler.handleDataCollectAPI(runtime, memory);
-                            } catch (err) {
-                                console.error('Background error ', err);
-                            }
-                        }, 10);
-                        //responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
-                        responseStr = await TaskHelper.quickResponse(runtime, memory);
-                        responseStr += `\r\n\r\n任务【${taskId}】已开始执行，请耐心等待`;
+                        const quickJson = await TaskHelper.quickResponse(runtime, memory);
+                        if (quickJson && quickJson.quick) {
+                            responseStr = quickJson.response;
+                        }
+                        else {
+                            setTimeout(async () => {
+                                try {
+                                    await IntentionHandler.handleDataCollectAPI(runtime, memory);
+                                } catch (err) {
+                                    console.error('Background error ', err);
+                                }
+                            }, 10);
+                            //responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
+                            responseStr = quickJson.response + `\r\n\r\n任务【${taskId}】已开始执行，请耐心等待`;
+                        }
                     }
                     else {
                         responseStr = await IntentionHandler.handleDataCollectAPI(runtime, memory);
@@ -458,16 +463,21 @@ export class DirectClient {
                 else {
                     await TaskHelper.setTaskOption(runtime, taskId, originQuestingText);
                     if (!taskWaitMode) {
-                        setTimeout(async () => {
-                            try {
-                                await IntentionHandler.handleDataProcess(runtime, memory, origin_input);
-                            } catch (err) {
-                                console.error('Background error ', err);
-                            }
-                        }, 10);
-                        //responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
-                        responseStr = await TaskHelper.quickResponse(runtime, memory);
-                        responseStr += `\r\n\r\n任务【${taskId}】已开始执行，请耐心等待`;
+                        const quickJson = await TaskHelper.quickResponse(runtime, memory);
+                        if (quickJson && quickJson.quick) {
+                            responseStr = quickJson.response;
+                        }
+                        else {
+                                setTimeout(async () => {
+                                try {
+                                    await IntentionHandler.handleDataProcess(runtime, memory, origin_input);
+                                } catch (err) {
+                                    console.error('Background error ', err);
+                                }
+                            }, 10);
+                            //responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
+                            responseStr = quickJson.response + `\r\n\r\n任务【${taskId}】已开始执行，请耐心等待`;
+                        }
                     }
                     else {
                         responseStr = await IntentionHandler.handleDataProcess(runtime, memory, origin_input);
@@ -650,15 +660,20 @@ export class DirectClient {
                 //);
                 let responseStr = `收到啦，任务【${taskId}】已开始执行，请耐心等待`;
                 if (!taskWaitMode) {
-                    setTimeout(async () => {
-                        try {
-                            await IntentionHandler.handleDataCollectAPI(runtime, memory);
-                        } catch (err) {
-                            console.error('Background error ', err);
-                        }
-                    }, 10);
-                    responseStr = await TaskHelper.quickResponse(runtime, memory);
-                    responseStr += `\r\n\r\n任务【${taskId}】已开始执行，请耐心等待`;
+                    const quickJson = await TaskHelper.quickResponse(runtime, memory);
+                    if (quickJson && quickJson.quick) {
+                        responseStr = quickJson.response;
+                    }
+                    else {
+                        responseStr = quickJson.response + `\r\n\r\n任务【${taskId}】已开始执行，请耐心等待`;
+                        setTimeout(async () => {
+                            try {
+                                await IntentionHandler.handleDataCollectAPI(runtime, memory);
+                            } catch (err) {
+                                console.error('Background error ', err);
+                            }
+                        }, 10);
+                    }
                 }
                 else {
                     responseStr = await IntentionHandler.handleDataCollectAPI(runtime, memory);

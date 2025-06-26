@@ -327,7 +327,7 @@ export class WechatHandler {
                                     fromOptions = true;
                                 }
                                 else {
-                                    const quickJson = await this.generateQuickResponse(runtime, firstText, userId);
+                                    const quickJson = await TaskHelper.quickResponse(runtime, firstText, userId);
                                     if (quickJson && quickJson.quick) {
                                         immResp = quickJson.response;
                                     }
@@ -682,7 +682,7 @@ export class WechatHandler {
         }
     }
 
-    private async generateQuickResponse(runtime: IAgentRuntime, text: string, userId: string) {
+    /*private async generateQuickResponse(runtime: IAgentRuntime, text: string, userId: string) {
         try {
             //const taskId = await this.getCachedData<string>(runtime, userId);
             //if (taskId && taskId != '') {
@@ -730,7 +730,7 @@ export class WechatHandler {
         } catch (err) {
             console.log(err);
         }
-    }
+    }*/
 
     private truncateString(str: string, headLength: number,
         tailLength: number, ellipsis: string = "\r\n\r\n...... ......\r\n\r\n"): string {

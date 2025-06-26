@@ -13,6 +13,7 @@ import {
   appendToChatCache,
 } from "./filehelper";
 import { UserKnowledge } from "./userknowledge";
+import { extractJson } from "./utils"
 
 const TASK_ORIGIN_INPUT_CACHE_KEY = "_task_cache_";
 const TASK_OPTION_CACHE_KEY = "_task_option_cache_";
@@ -194,24 +195,47 @@ export class TaskHelper {
   }
 
   static async quickResponse(runtime: IAgentRuntime, message: Memory): Promise<any> {
-    console.log(`quickResponse`);
-    const userInput = `${message.content.text}`;
-    const prompt = `
-      根据输入给出一个简短回复：${userInput}。
-    `;
     try {
-      let response = await generateText({
+      const prompt = `根据用户的输入内容：【${message.content.text}】，判断这个内容是不是仅仅是一个打招呼的内容，请返回一个如下JSON：
+        {
+          'quick': true or false,
+          'response': '一个同种语言的打招呼类简短回复'
+        }.
+        输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析，不需要包含其他内容。
+        如果用户输入是一个打招呼类的，则quick为true，否则为false。
+        response字段是一个简短回复，可以概率性的附上如下数组内容中的一项：
+        [
+          "\n\n回复‘模板’获取常用提示词模板",
+          "\r\n你好，我是TrendMuse —— 基于自然语言驱动的数据洞察与内容执行助手",
+          "\r\n你只需说出需求，我将自动获取社交媒体及短视频数据，输出：
+            \r\n1. **--高热趋势内容分析📈**
+              \n2. **--竞品账号策略解构📚**
+              \n3. **--用户评论兴趣提炼🚀**
+              \n4. **--达人合作建议🤖**
+              \n5. **--可直接发布的内容文案与评论模版📚**
+          \n等任意社媒运营需求.…",
+          "\r\n为了更好的实现数据获取和数据处理的功能效果，输入内容须是如下格式：
+          \r\n🚩【平台】【时间期限】【关键词】【数量】【过滤条件】【排序相关】
+          \r\n如：
+          \r\n🚩帮我找一下【抖音】上【一周内】关于【足球】的【100条】内容，要求【点赞数】大于【1000】",
+          "......",
+          "",
+          "🤖"
+        ]
+      `;
+      let resp = await generateText({
         runtime,
         context: prompt,
-        modelClass: ModelClass.LARGE,
+        modelClass: ModelClass.SMALL,
       });
-      console.log(response);
-      return response;
+
+      let json = extractJson(resp);
+      if (json) {
+        return json;
+      }
+      return resp;
+    } catch (err) {
+      console.log(err);
     }
-    catch (err) {
-      console.log(`quickResponse err ${err.message}`);
-      console.error(err);
-    }
-    return false;
   }
 }
