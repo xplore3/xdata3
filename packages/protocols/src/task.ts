@@ -165,7 +165,7 @@ export class TaskHelper {
       你是运营专员/运营数据处理工程师，现在请根据用户的两个输入，判断这两个需求的是否有是同一个数据任务。
       同一个数据任务是指其目标、所用数据、相关处理动作都是一致的。
       用户的第一个需求为：${firstInput}。
-      第一个需求的额外输入：${firstOption}。
+      第一个需求的关联输入：${firstOption}。
       第一个需求相关联的数据为：${attachment}
       用户的第二个需求为：${userInput}。
       如果第二个需求跟第一个需求（及其额外输入和关联数据）同一个数据任务则返回true，否则返回false。
@@ -229,6 +229,7 @@ export class TaskHelper {
           "🤖"
         ]
       `;
+      console.log(prompt);
       let resp = await generateText({
         runtime,
         context: prompt,
