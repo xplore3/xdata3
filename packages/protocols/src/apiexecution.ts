@@ -109,6 +109,31 @@ export class ApiExecution {
             excelfilename: [] };
       }
     }
+    else if (api && api.execute_depend && api.execute_depend === 'chain') {
+      const api1 = ApiDb.getApi(api.request1);
+      const api2 = ApiDb.getApi(api.request2);
+      api1.query_params = api.query_params;
+      api2.query_params = api.query_params;
+      const result = await this.executeApi(runtime, message, api1, totalCount);
+      const result2 = await this.executeApi(runtime, message, api2, totalCount);;
+
+      try {
+        const taskId = message.content?.intention?.taskId;
+        const { firstUnExistsTxtFilename: txt1, firstUnExistsExcelFilename: excel1 }
+          = APIWrapperFactory.excelDataPersist(result, taskId + api1.name);
+        const { firstUnExistsTxtFilename: txt2, firstUnExistsExcelFilename: excel2 }
+          = APIWrapperFactory.excelDataPersist(result2, taskId + api2.name);
+        return { result: `${JSON.stringify(result)}\n${JSON.stringify(result2)}`,
+            txtfilename: [txt1, txt2],
+            excelfilename: [excel1, excel2] };
+      }
+      catch (err) {
+        console.error(err);
+        return { result: `${JSON.stringify(result)}\n${JSON.stringify(result2)}`,
+            txtfilename: [],
+            excelfilename: [] };
+      }
+    }
     else {
       return await this.executeApiAndGetResult(runtime, message, api, totalCount);
     }

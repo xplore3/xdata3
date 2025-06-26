@@ -23,7 +23,8 @@ export class ApiDb {
       'koc_search: 根据关键字搜索红人的基本画像，包括其基础信息、内容特征、粉丝画像、商业指标等',
       'koc_image: 根据ID获取KOC的详细画像，包括其账号概览、粉丝分析、笔记分析、投放分析、品牌推广、品类分析、直播分析等',
       'industry_rank: 根据领域/频道获取红人榜单，包括其基础信息、粉丝/点赞/收藏数量、指数等',
-      'koc_imitate: 优秀内容对标，根据我的产品、业务和背景等搜索到合适的对标网红KOC；该操作能获得KOC列表和其内容列表两类数据',
+      'top_trend: 读取小红书等平台的热词/热搜词，以及热门话题/Tag',
+      'koc_imitate: 优秀账号对标，根据我的产品、业务和背景等搜索到合适的对标网红KOC；该操作能获得KOC列表和其内容列表两类数据',
       'koc_evaluate: 达人合作评估，根据给定的达人网红KOC账号信息，找到其详细画像，对其进行合作评估；该操作能获得KOC画像和其内容列表两类数据',
       'notes_search: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表；',
       //'note_detail: 通过noteid获取单个笔记/帖子/note的详情',
@@ -233,7 +234,7 @@ export class ApiDb {
       },
       get_note_list: {
         id: 'get_note_list',
-        backup: '',
+        backup: 'get_note_list1',
         priority: 0,
         type: 'social-media',
         platform: 'rednote',
@@ -469,6 +470,52 @@ export class ApiDb {
         verification: '',
         note: ''
       },
+      get_note_list1: {
+        id: 'get_note_list1',
+        backup: '',
+        priority: 0,
+        type: 'social-media',
+        platform: 'rednote',
+        description: '用以通过单个小红书账号ID获取该账号的笔记/帖子的列表',
+        name: 'notes',
+        url: 'https://api.tikhub.io/api/v1/xiaohongshu/web_v2/fetch_home_notes',
+        method: 'GET',
+        headers: {
+          "Authorization": `Bearer ${process.env.TIKHUB_API_KEY}`,
+        },
+        query_params: {},
+        query_params_desc: {
+          user_id: 'String, User ID for query; 格式需参考query_params_example中的格式，不是输入的关键字',
+          cursor: '(optional)String, Paging parameters, enter previous page datas last note ID(first page do not need enter).'
+        },
+        query_params_example: {
+          user_id: '648c8ada000000001c02b0f2'
+        },
+        docs_link: 'https://api.tikhub.io/#/Xiaohongshu-Web-V2-API/fetch_home_notes_api_v1_xiaohongshu_web_v2_fetch_home_notes_get',
+        could_cached: false,
+        cached_expired: 3600000 * 24,
+        filter: false,
+        data_path: `$.data.data.notes`,
+        flattener: `$map($, function($item) {
+          {
+            'id': $item.id,
+            'author': $item.user.nickname,
+            'title': $item.title,
+            'display_title': $item.display_title,
+            'desc': $item.desc,
+            'date': $item.create_time,
+            'collected_count': $item.collected_count,
+            'shared_count': $item.share_count,
+            'comments_count': $item.comments_count,
+            'liked_count': $item.likes
+          }
+        })`,
+        limit: '',
+        price: '',
+        dev: '',
+        verification: '',
+        note: ''
+      },
       hot_words: {
         id: 'hot_words',
         backup: '',
@@ -505,7 +552,7 @@ export class ApiDb {
           rankType: "day",
           rankDate: "Date of 2 days ago: e.g. 2025-06-20",
           recentType: "",
-          size: 20,
+          size: 30,
           start: 1,
           isNew: "",
           isBoom: "",
@@ -517,7 +564,7 @@ export class ApiDb {
           rankType: "day",
           rankDate: "2025-06-20",
           recentType: "",
-          size: 20,
+          size: 30,
           start: 1,
           isNew: "",
           isBoom: "",
@@ -571,7 +618,7 @@ export class ApiDb {
           rankDate: "Date of 2 days ago: e.g. 2025-06-20",
           isBrandTopic: "0",
           sort: "interactiveCount",
-          size: 20,
+          size: 30,
           start: 1,
         },
         query_params_example: {
@@ -581,7 +628,7 @@ export class ApiDb {
           rankDate: "2025-06-20",
           isBrandTopic: "0",
           sort: "interactiveCount",
-          size: 20,
+          size: 30,
           start: 1,
         },
         docs_link: '',
@@ -1017,13 +1064,28 @@ export class ApiDb {
         verification: '',
         note: ''
       },
+      top_trend: {
+        id: 'top_trend',
+        backup: '',
+        priority: 0,
+        type: 'social-media',
+        platform: 'rednote',
+        description: '读取小红书等平台的热词/热搜词，以及热门话题/Tag',
+        name: 'toptrend',
+        // Excute Data Dependency
+        execute_depend: 'chain', // ['chain', 'chain_loop']
+        // The First Request
+        request1: 'hot_words',
+        // The Second Request
+        request2: 'topic_rank',
+      },
       koc_imitate: {
         id: 'koc_imitate',
         backup: '',
         priority: 0,
         type: 'social-media',
         platform: 'rednote',
-        description: '优秀内容对标，根据我的产品、业务和背景等搜索到合适的对标网红KOC；该操作能获得KOC列表和其内容列表两类数据',
+        description: '优秀账号对标，根据我的产品、业务和背景等搜索到合适的对标网红KOC；该操作能获得KOC列表和其内容列表两类数据',
         name: 'KocAnalysis',
         // Excute Data Dependency
         execute_depend: 'chain_loop', // ['chain', 'chain_loop']
