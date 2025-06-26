@@ -207,7 +207,8 @@ export class TaskHelper {
           'response': '一个同种语言的打招呼类简短回复'
         }.
         输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析，不需要包含其他内容。
-        如果用户输入是一个打招呼类的，并且输入与关联选项也没有关系，则quick为true，否则为false。
+        如果用户输入仅是一个打招呼类的，用户输入与关联选项也没有关系，
+        且用户输入也不是一个有关的数据获取或数据处理类请求，则quick为true，否则为false。
         response字段是一个简短回复，可以概率性的附上如下数组内容中的一项：
         [
           "\n\n回复‘模板’获取常用提示词模板",
@@ -231,7 +232,7 @@ export class TaskHelper {
       let resp = await generateText({
         runtime,
         context: prompt,
-        modelClass: ModelClass.MEDIUM,
+        modelClass: ModelClass.LARGE,
       });
       console.log(resp);
 
