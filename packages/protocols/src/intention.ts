@@ -214,6 +214,9 @@ export class IntentionHandler {
       }
       else if (execJson) {
         execJson.taskId = taskId;
+        if (execJson.intention_options) {
+          await TaskHelper.setTaskOption(runtime, taskId, execJson.intention_options);
+        }
       }
       else {
         execJson = response;
@@ -389,6 +392,9 @@ export class IntentionHandler {
       //response = response.replace(/```json/g, "") .replace(/```/g, "");
       let execJson = extractJson(response);
       if (execJson) {
+        if (execJson.intention_options) {
+          await TaskHelper.setTaskOption(runtime, taskId, execJson.intention_options);
+        }
         if (execJson.intention_action && execJson.intention_action === "data_collection") {
           message.content.text = origin_input + "\r\n" + message.content.text;
           //Gen new TaskId

@@ -463,7 +463,7 @@ export class DirectClient {
                     }
                 }
                 else {
-                    await TaskHelper.setTaskOption(runtime, taskId, originQuestingText);
+                    await TaskHelper.setTaskOriginInput(runtime, taskId, originQuestingText);
                     if (!taskWaitMode) {
                         const quickJson = await TaskHelper.quickResponse(runtime, memory);
                         if (quickJson && quickJson.quick) {
