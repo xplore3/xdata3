@@ -18,8 +18,8 @@ export class ApiDb {
 
   static getUserDataSource(userId: UUID) {
     const sources = [
-      'hot_words: 用以获得近期火热的热词/热搜词等',
-      'topic_rank: 用以获得近期流行的话题/Tag等',
+      //'hot_words: 用以获得近期火热的热词/热搜词等',
+      //'topic_rank: 用以获得近期流行的话题/Tag等',
       'koc_search: 根据关键字搜索红人的基本画像，包括其基础信息、内容特征、粉丝画像、商业指标等',
       'koc_image: 根据ID获取KOC的详细画像，包括其账号概览、粉丝分析、笔记分析、投放分析、品牌推广、品类分析、直播分析等',
       'industry_rank: 根据领域/频道获取红人榜单，包括其基础信息、粉丝/点赞/收藏数量、指数等',
