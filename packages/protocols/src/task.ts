@@ -196,13 +196,18 @@ export class TaskHelper {
 
   static async quickResponse(runtime: IAgentRuntime, message: Memory): Promise<any> {
     try {
-      const prompt = `根据用户的输入内容：【${message.content.text}】，判断这个内容是不是仅仅是一个打招呼的内容，请返回一个如下JSON：
+      const taskId = message.content?.intention?.taskId;
+      console.log(`quickResponse ${taskId}`);
+      const options = await this.getTaskOption(runtime, taskId);
+      const prompt = `根据用户的输入内容：【${message.content.text}】，
+        和之前所提供的关联选项：【${options}】；
+        判断这个内容是不是仅仅是一个打招呼的内容，请返回一个如下JSON：
         {
           'quick': true or false,
           'response': '一个同种语言的打招呼类简短回复'
         }.
         输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析，不需要包含其他内容。
-        如果用户输入是一个打招呼类的，则quick为true，否则为false。
+        如果用户输入是一个打招呼类的，并且输入与关联选项也没有关系，则quick为true，否则为false。
         response字段是一个简短回复，可以概率性的附上如下数组内容中的一项：
         [
           "\n\n回复‘模板’获取常用提示词模板",
@@ -226,8 +231,9 @@ export class TaskHelper {
       let resp = await generateText({
         runtime,
         context: prompt,
-        modelClass: ModelClass.SMALL,
+        modelClass: ModelClass.MEDIUM,
       });
+      console.log(resp);
 
       let json = extractJson(resp);
       if (json) {
