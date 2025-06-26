@@ -200,6 +200,9 @@ export class IntentionHandler {
       let execJson = extractJson(response);
       const taskId = message.content.intention?.taskId || "";
       if (execJson && execJson.intention_params) {
+        if (execJson.intention_options) {
+          await TaskHelper.setTaskOption(runtime, taskId, execJson.intention_options);
+        }
         let execParam = execJson.intention_params;
         {
           if (execParam.data_action && execParam.data_action != 'others') {
