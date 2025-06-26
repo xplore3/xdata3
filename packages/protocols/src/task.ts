@@ -79,6 +79,7 @@ export class TaskHelper {
 
   static async setTaskOption(runtime: IAgentRuntime, taskId: string, data: string) {
     try {
+      console.log(`setTaskOption ${taskId},  ${data}`);
       await this.setCachedData(runtime, TASK_OPTION_CACHE_KEY + taskId, data);
     }
     catch (err) {
@@ -89,6 +90,7 @@ export class TaskHelper {
 
   static async getTaskOption(runtime: IAgentRuntime, taskId: string): Promise<string> {
     try {
+      console.log(`getTaskOption ${taskId}`);
       return await this.getCachedData(runtime, TASK_OPTION_CACHE_KEY + taskId);
     }
     catch (err) {
