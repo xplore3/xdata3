@@ -376,6 +376,7 @@ export class IntentionHandler {
           //Gen new TaskId
           message.content.intention.taskId = TaskHelper.generateTaskId();
           await TaskHelper.setTaskOriginInput(runtime, taskId, message.content.text);
+          await TaskHelper.setTaskStatus(runtime, taskId, JSON.stringify({taskId: message.content.intention.taskId}));
           return await IntentionHandler.handleDataCollectAPI(
             runtime, message, attachment
           );
