@@ -22,7 +22,7 @@ export class ApiDb {
       //'topic_rank: 用以获得近期流行的话题/Tag等',
       'koc_search: 根据账号关键字搜索红人/KOC/账号的基本画像，包括其基础信息、内容特征、粉丝画像、商业指标等',
       'koc_image: 根据ID获取KOC的详细画像，包括其账号概览、粉丝分析、笔记分析、投放分析、品牌推广、品类分析、直播分析等',
-      'industry_rank: 根据领域/频道/分类获取红人榜单，包括其基础信息、粉丝/点赞/收藏数量、指数等',
+      //'industry_rank: 根据领域/频道/分类获取红人榜单，包括其基础信息、粉丝/点赞/收藏数量、指数等',
       'top_trend: 读取小红书等平台的热词/热搜词，以及热门话题/Tag',
       'koc_imitate: 优秀账号对标，根据我的产品、业务和背景等搜索到合适的对标网红KOC；该操作能获得KOC列表和其内容列表两类数据',
       'koc_evaluate: 达人合作评估，根据给定的达人网红KOC账号信息，找到其详细画像，对其进行合作评估；该操作能获得KOC画像和其内容列表两类数据',
@@ -993,7 +993,7 @@ export class ApiDb {
           start: 1,
           'subType.first': "Same as type",
           'subType.second': "",
-          type: "Search keyword: 领域/频道, such as 美妆",
+          type: "Search keyword: 领域/频道/分类, 可选范围为：【美妆，美容个护，鞋包潮玩，穿搭打扮，美食，母婴育儿，旅游出行，家居家装，教育，生活，运动健身，兴趣爱好，影视综，婚嫁，摄影摄像，萌宠，情感星座，科技互联网，资讯，健康养生，科学科普，职场，交通工具，其他，全部】",
         },
         query_params_example: {
           dateType: "3",
