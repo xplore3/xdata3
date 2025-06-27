@@ -23,7 +23,7 @@ export class ApiDb {
       'koc_search: 根据账号关键字搜索红人/KOC/账号的基本画像，包括其基础信息、内容特征、粉丝画像、商业指标等',
       'koc_image: 根据ID获取KOC的详细画像，包括其账号概览、粉丝分析、笔记分析、投放分析、品牌推广、品类分析、直播分析等',
       //'industry_rank: 根据领域/频道/分类获取红人榜单，包括其基础信息、粉丝/点赞/收藏数量、指数等',
-      'top_trend: 读取小红书等平台的热词/热搜词，以及热门话题/Tag',
+      'top_trend: 读取小红书等平台的热词/热搜词，以及热门话题/Tag；仅用以热词热搜热门话题Tag，如果用户要找内容/笔记/帖子等不适合此选项',
       'koc_imitate: 优秀账号对标，根据我的产品、业务和背景等搜索到合适的对标网红KOC；该操作能获得KOC列表和其内容列表两类数据',
       'koc_evaluate: 达人合作评估，根据给定的达人网红KOC账号信息，找到其详细画像，对其进行合作评估；该操作能获得KOC画像和其内容列表两类数据',
       'notes_search: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表；',
@@ -367,7 +367,7 @@ export class ApiDb {
       },
       notes_search_2: {
         id: 'notes_search_2',
-        backup: '',
+        backup: 'notes_search_3',
         priority: 2,
         type: 'social-media',
         platform: 'rednote',
@@ -411,6 +411,207 @@ export class ApiDb {
             'shared_count': $item.note.shared_count,
             'comments_count': $item.note.comments_count,
             'liked_count': $item.note.liked_count
+          }
+        })`,
+        limit: '',
+        price: '',
+        dev: '',
+        verification: '',
+        output: '',
+        note: ''
+      },
+      notes_search_3: {
+        id: 'notes_search_3',
+        backup: '',
+        priority: 3,
+        type: 'social-media',
+        platform: 'rednote',
+        description: '用以通过关键字搜索小红书笔记/帖子/note，获得note列表',
+        name: 'notes',
+        url: 'https://gw.newrank.cn/api/xh/xdnphb/nr/app/xhs/note/search',
+        method: 'GET',
+        headers: 
+          Accept: "*/*",
+          "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+          Connection: "keep-alive",
+          Origin: "https://xh.newrank.cn",
+          Referer: "https://xh.newrank.cn/",
+          "Sec-Fetch-Dest": "empty",
+          "Sec-Fetch-Mode": "cors",
+          "Sec-Fetch-Site": "same-site",
+          "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+          "content-type": "application/json",
+          "n-token": "35c430ef650b459ba2b9c1409148d929",
+          request_id: "e651f806eda645969f420770d8f7767d",
+          "sec-ch-ua": '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": '"Windows"',
+          Cookie: "sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22nr_51qcmvw2q%22%2C%22first_id%22%3A%2219584847d74e3-083464dad8bd598-26011a51-960000-19584847d751430%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_utm_source%22%3A%22baidu%22%2C%22%24latest_utm_medium%22%3A%22cpc%22%2C%22%24latest_utm_campaign%22%3A%22%E6%96%B0%E7%BA%A2SEM%22%2C%22%24latest_utm_term%22%3A%22%E6%96%B0%E7%BA%A2%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTk1ODQ4NDdkNzRlMy0wODM0NjRkYWQ4YmQ1OTgtMjYwMTFhNTEtOTYwMDAwLTE5NTg0ODQ3ZDc1MTQzMCIsIiRpZGVudGl0eV9sb2dpbl9pZCI6Im5yXzUxcWNtdncycSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%24identity_login_id%22%2C%22value%22%3A%22nr_51qcmvw2q%22%7D%2C%22%24device_id%22%3A%22196c2a9c80ad59-0b34bec0dc40558-26011f51-960000-196c2a9c80b1567%22%7D; tfstk=gdjjwkjHsjcj5D-tCE2rVraQ6Ex_T8rEhA9OKOnqBnKA5c6dQ-YNgOd15QBI0Z8wDR119sTN1O2DBCCO1C74zkWcnhxTT1ZUYt21i13GchhNenvaSAxf2kWcnYHj6J78YAZ-Y2tv61LvyQpHwcnA6Fh8FdpZMVnA68wWQppxDdnvybpMChdO6he5eQv9XKC9XAZsNLVXNtwq1ive1-wACQitXg97sBBXJLvlVhLX9GASXOsWhEOdHMMXeOvR4gTezAPW29bPMLtQcXvfy9tvCG2K5CT1m391rSgVOsvOeU14QVv55OIHmHMTDTtXGeI1wvn59T6O8UszpkxXDIQwmOkQgTsfgtj5QA3Jcn7WRitLxjdNz9s6CGVgV66OKNL5fjsyGDRBL50sFem6FBy7FV0gFByrqNzQqJ8vEL-UF8gHjEpkFBy7FV0MkLvoz8wS-hf..; token=ED3E49C60ABD45F5BDD8084F377C2158; Hm_lvt_a19fd7224d30e3c8a6558dcb38c4beed=1748232589,1748616498,1750370567,1750633396; acw_tc=1a0c399b17510231665212799e0071ce8392a600627de72adc94258c311970; auth_n=9kCvQOR0mS5PMn1Nms/ogCnua4rl1L0Pw17pPUxB8uJKEfiKhluZeLM/PSOpqsVU",
+        },
+        query_params: {},
+        query_params_desc: {
+          baseInfoRequest: {
+            "type": "",
+            "createTime": "30d",
+            "contentTags": [],
+            "noteType": ""
+          },
+          custom: {must: [], should: [], mustNot: []},
+          endTime: "",
+          filterIncomplete: 0,
+          high: {
+            "isMcn": "",
+            "authorGender": "",
+            "userAttribute": [],
+            "fan": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "likedCollectedCountRange": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "interactiveCountRange": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "likedCountRange": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "collectedCountRange": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "commentsCountRange": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "sharedCountRange": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "predReadnumRange": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "province": "",
+            "city": ""
+          },
+          input: {
+            "keyword": "String, keyword for query, 如三伏贴",
+            "type": [
+              "title",
+              "topic",
+              "content",
+              "tag",
+              "name",
+              "categoryName",
+              "seedBrandName"
+            ]
+          },
+          size: 20,
+          sort: "likedCount",
+          source: {
+            "type": "",
+            "keyword": ""
+          },
+          start: 1,
+          startTime: "",
+          time: "30d"
+        },
+        query_params_example: {
+          baseInfoRequest: {
+            "type": "",
+            "createTime": "30d",
+            "contentTags": [],
+            "noteType": ""
+          },
+          custom: {must: [], should: [], mustNot: []},
+          endTime: "",
+          filterIncomplete: 0,
+          high: {
+            "isMcn": "",
+            "authorGender": "",
+            "userAttribute": [],
+            "fan": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "likedCollectedCountRange": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "interactiveCountRange": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "likedCountRange": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "collectedCountRange": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "commentsCountRange": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "sharedCountRange": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "predReadnumRange": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "province": "",
+            "city": ""
+          },
+          input: {
+            "keyword": "三伏贴",
+            "type": [
+              "title",
+              "topic",
+              "content",
+              "tag",
+              "name",
+              "categoryName",
+              "seedBrandName"
+            ]
+          },
+          size: 20,
+          sort: "likedCount",
+          source: {
+            "type": "",
+            "keyword": ""
+          },
+          start: 1,
+          startTime: "",
+          time: "30d"
+        },
+        docs_link: 'https://docs.tikhub.io/310965843e0',
+        could_cached: false,
+        cached_expired: 3600000 * 24,
+        filter: true,
+        data_path: `$.data.data.list`,
+        flattener: `$map($, function($item) {
+          {
+            'id': $item.id,
+            'author': $item.user.nickname,
+            'title': $item.title,
+            'desc': $item.desc,
+            'url': $item.url,
+            'date': $item.createTime,
+            'type': $item.type,
+            'topics': $item.topics,
+            'collected_count': $item.collectedCount,
+            'shared_count': $item.sharedCount,
+            'comments_count': $item.commentsCount,
+            'liked_count': $item.likedCount,
+            'read_count': $item.readCount
           }
         })`,
         limit: '',
@@ -479,8 +680,8 @@ export class ApiDb {
       },
       get_note_list1: {
         id: 'get_note_list1',
-        backup: '',
-        priority: 0,
+        backup: 'get_note_list_app',
+        priority: 1,
         type: 'social-media',
         platform: 'rednote',
         description: '用以通过单个小红书账号ID获取该账号的笔记/帖子的列表',
@@ -499,6 +700,53 @@ export class ApiDb {
           user_id: '648c8ada000000001c02b0f2'
         },
         docs_link: 'https://api.tikhub.io/#/Xiaohongshu-Web-V2-API/fetch_home_notes_api_v1_xiaohongshu_web_v2_fetch_home_notes_get',
+        could_cached: false,
+        cached_expired: 3600000 * 24,
+        filter: false,
+        data_path: `$.data.data.notes`,
+        flattener: `$map($, function($item) {
+          {
+            'id': $item.note_id,
+            'author': $item.user.nickname,
+            'title': $item.title,
+            'display_title': $item.display_title,
+            'userid': $item.user.user_id,
+            'type': $item.type,
+            'collected_count': $item.interact_info.collected_count,
+            'shared_count': $item.interact_info.shared_count,
+            'comment_count': $item.interact_info.comment_count,
+            'liked_count': $item.interact_info.liked_count
+          }
+        })`,
+        limit: '',
+        price: '',
+        dev: '',
+        verification: '',
+        output: '',
+        note: ''
+      },
+      get_note_list_app: {
+        id: 'get_note_list_app',
+        backup: '',
+        priority: 2,
+        type: 'social-media',
+        platform: 'rednote',
+        description: '用以通过单个小红书账号ID获取该账号的笔记/帖子的列表',
+        name: 'notes',
+        url: 'https://api.tikhub.io/api/v1/xiaohongshu/web_v2/fetch_home_notes_app',
+        method: 'GET',
+        headers: {
+          "Authorization": `Bearer ${process.env.TIKHUB_API_KEY}`,
+        },
+        query_params: {},
+        query_params_desc: {
+          user_id: 'String, User ID for query; 格式需参考query_params_example中的格式，不是输入的关键字',
+          cursor: '(optional)String, Paging parameters, enter previous page datas last note ID(first page do not need enter).'
+        },
+        query_params_example: {
+          user_id: '648c8ada000000001c02b0f2'
+        },
+        docs_link: 'https://api.tikhub.io/#/Xiaohongshu-Web-V2-API/fetch_home_notes_app_api_v1_xiaohongshu_web_v2_fetch_home_notes_app_get',
         could_cached: false,
         cached_expired: 3600000 * 24,
         filter: false,
@@ -613,11 +861,11 @@ export class ApiDb {
           "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
           "content-type": "application/json",
           "n-token": "35c430ef650b459ba2b9c1409148d929",
-          request_id: "1a171ae59462463583c22d375f9ac538",
+          request_id: "a69f527e9750488a80ec35053f6ee3f7",
           "sec-ch-ua": '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
           "sec-ch-ua-mobile": "?0",
           "sec-ch-ua-platform": '"Windows"',
-          Cookie: "sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22nr_51qcmvw2q%22%2C%22first_id%22%3A%2219584847d74e3-083464dad8bd598-26011a51-960000-19584847d751430%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_utm_source%22%3A%22baidu%22%2C%22%24latest_utm_medium%22%3A%22cpc%22%2C%22%24latest_utm_campaign%22%3A%22%E6%96%B0%E7%BA%A2SEM%22%2C%22%24latest_utm_term%22%3A%22%E6%96%B0%E7%BA%A2%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTk1ODQ4NDdkNzRlMy0wODM0NjRkYWQ4YmQ1OTgtMjYwMTFhNTEtOTYwMDAwLTE5NTg0ODQ3ZDc1MTQzMCIsIiRpZGVudGl0eV9sb2dpbl9pZCI6Im5yXzUxcWNtdncycSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%24identity_login_id%22%2C%22value%22%3A%22nr_51qcmvw2q%22%7D%2C%22%24device_id%22%3A%22196c2a9c80ad59-0b34bec0dc40558-26011f51-960000-196c2a9c80b1567%22%7D; tfstk=gdjjwkjHsjcj5D-tCE2rVraQ6Ex_T8rEhA9OKOnqBnKA5c6dQ-YNgOd15QBI0Z8wDR119sTN1O2DBCCO1C74zkWcnhxTT1ZUYt21i13GchhNenvaSAxf2kWcnYHj6J78YAZ-Y2tv61LvyQpHwcnA6Fh8FdpZMVnA68wWQppxDdnvybpMChdO6he5eQv9XKC9XAZsNLVXNtwq1ive1-wACQitXg97sBBXJLvlVhLX9GASXOsWhEOdHMMXeOvR4gTezAPW29bPMLtQcXvfy9tvCG2K5CT1m391rSgVOsvOeU14QVv55OIHmHMTDTtXGeI1wvn59T6O8UszpkxXDIQwmOkQgTsfgtj5QA3Jcn7WRitLxjdNz9s6CGVgV66OKNL5fjsyGDRBL50sFem6FBy7FV0gFByrqNzQqJ8vEL-UF8gHjEpkFBy7FV0MkLvoz8wS-hf..; token=ED3E49C60ABD45F5BDD8084F377C2158; Hm_lvt_a19fd7224d30e3c8a6558dcb38c4beed=1748232589,1748616498,1750370567,1750633396; acw_tc=0a47314717509101764217962e0082f92cc256acdfea91b77aa9cba53201d4; auth_n=9kCvQOR0mS5PMn1Nms/ogCnua4rl1L0Pw17pPUxB8uIE/lKXUzoEEKWz1iQcnERC",
+          Cookie: "sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22nr_51qcmvw2q%22%2C%22first_id%22%3A%2219584847d74e3-083464dad8bd598-26011a51-960000-19584847d751430%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_utm_source%22%3A%22baidu%22%2C%22%24latest_utm_medium%22%3A%22cpc%22%2C%22%24latest_utm_campaign%22%3A%22%E6%96%B0%E7%BA%A2SEM%22%2C%22%24latest_utm_term%22%3A%22%E6%96%B0%E7%BA%A2%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTk1ODQ4NDdkNzRlMy0wODM0NjRkYWQ4YmQ1OTgtMjYwMTFhNTEtOTYwMDAwLTE5NTg0ODQ3ZDc1MTQzMCIsIiRpZGVudGl0eV9sb2dpbl9pZCI6Im5yXzUxcWNtdncycSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%24identity_login_id%22%2C%22value%22%3A%22nr_51qcmvw2q%22%7D%2C%22%24device_id%22%3A%22196c2a9c80ad59-0b34bec0dc40558-26011f51-960000-196c2a9c80b1567%22%7D; tfstk=gdjjwkjHsjcj5D-tCE2rVraQ6Ex_T8rEhA9OKOnqBnKA5c6dQ-YNgOd15QBI0Z8wDR119sTN1O2DBCCO1C74zkWcnhxTT1ZUYt21i13GchhNenvaSAxf2kWcnYHj6J78YAZ-Y2tv61LvyQpHwcnA6Fh8FdpZMVnA68wWQppxDdnvybpMChdO6he5eQv9XKC9XAZsNLVXNtwq1ive1-wACQitXg97sBBXJLvlVhLX9GASXOsWhEOdHMMXeOvR4gTezAPW29bPMLtQcXvfy9tvCG2K5CT1m391rSgVOsvOeU14QVv55OIHmHMTDTtXGeI1wvn59T6O8UszpkxXDIQwmOkQgTsfgtj5QA3Jcn7WRitLxjdNz9s6CGVgV66OKNL5fjsyGDRBL50sFem6FBy7FV0gFByrqNzQqJ8vEL-UF8gHjEpkFBy7FV0MkLvoz8wS-hf..; token=ED3E49C60ABD45F5BDD8084F377C2158; Hm_lvt_a19fd7224d30e3c8a6558dcb38c4beed=1748232589,1748616498,1750370567,1750633396; acw_tc=1a0c399b17510231665212799e0071ce8392a600627de72adc94258c311970; auth_n=9kCvQOR0mS5PMn1Nms/ogCnua4rl1L0Pw17pPUxB8uJKEfiKhluZeLM/PSOpqsVU",
         },
         query_params: {},
         query_params_desc: {
@@ -1083,7 +1331,7 @@ export class ApiDb {
         priority: 0,
         type: 'social-media',
         platform: 'rednote',
-        description: '读取小红书等平台的热词/热搜词，以及热门话题/Tag',
+        description: '读取小红书等平台的热词/热搜词，以及热门话题/Tag；仅用以热词热搜热门话题Tag，如果用户要找内容/笔记/帖子等不适合此选项',
         name: 'toptrend',
         // Excute Data Dependency
         execute_depend: 'chain', // ['chain', 'chain_loop']

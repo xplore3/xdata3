@@ -13,7 +13,7 @@ import {
   appendToChatCache,
 } from "./filehelper";
 import { UserKnowledge } from "./userknowledge";
-import { extractJson } from "./utils"
+import { extractJson } from "./utils";
 
 const TASK_ORIGIN_INPUT_CACHE_KEY = "_task_cache_";
 const TASK_OPTION_CACHE_KEY = "_task_option_cache_";
@@ -200,9 +200,11 @@ export class TaskHelper {
     try {
       const taskId = message.content?.intention?.taskId;
       console.log(`quickResponse ${taskId}`);
+      const intention_examples = UserKnowledge.getUserIntentionExamples(message.userId);
       const options = await this.getTaskOption(runtime, taskId);
       const prompt = `根据用户的输入内容：【${message.content.text}】，
         和之前所提供的关联选项：【${options}】；
+        可参考的关联选项示例如下：【${intention_examples}】。
         判断这个内容是不是仅仅是一个打招呼的内容，请返回一个如下JSON：
         {
           'quick': true or false,
@@ -211,6 +213,7 @@ export class TaskHelper {
         输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析，不需要包含其他内容。
         如果用户输入仅是一个打招呼类的，用户输入与关联选项也没有关系，
         且用户输入也不是一个有关的数据获取或数据处理类请求，则quick为true，否则为false。
+        如果用户输入包含了一些数据类对象（如笔记/帖子/评论/达人/账号/商品/KOC等），则quick大概率为false。
         response字段是一个简短回复，可以概率性的附上如下数组内容中的一项：
         [
           "\n\n回复‘模板’获取常用提示词模板",
