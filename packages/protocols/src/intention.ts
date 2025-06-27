@@ -320,7 +320,7 @@ export class IntentionHandler {
     const prompt = `
       你是一个严肃的线上运营专员/数据处理工程师/数据分析师，能根据输入的多个结构的数据/文件进行加工、处理、分析、预测、仿写的专家，能够基于用户的多轮输入，将数据处理成用户需要的结果。
       主要有如下一些情况：
-      (1). 如果用户的需求不是一个数据处理的需求，而是一个数据获取的需求（这种情况的概率比较低），或者当前提供的数据无法有效进行数据分析，则给出如下结果：
+      (1). 如果用户的需求不是一个数据处理的需求，而是一个数据获取的需求（这种情况的概率比较低），或者当前提供的数据无法有效进行数据分析或数据量无法满足用户的需求，则给出如下结果：
         {
           "intention_action": "data_collection",
           "origin_input": "${origin_input}",
@@ -681,8 +681,8 @@ export class IntentionHandler {
       console.log("timestamp error:", err.message);
     }
 
-    const filterPathExample = `$.[?(@.note && (@.note.collected_count || 0) >= 40 && (@.note.shared_count || 0) >= 20 && (@.note.comments_count || 0) >= 20 && (@.note.liked_count || 0) >= 40 && (@.note.timestamp || 2524579200) >= ${timestamp})]`;
-    const filterPathExample1 = `$.[?(@.note_card && (@.note_card.interact_info.liked_count && parseInt(@.note_card.interact_info.liked_count) > 10))]`;
+    const filterPathExample = `$.[?(@.note && (@.note.collected_count || 0) >= 0 && (@.note.shared_count || 0) >= 0 && (@.note.comments_count || 0) >= 0 && (@.note.liked_count || 0) >= 1 && (@.note.timestamp || 2524579200) >= ${timestamp})]`;
+    const filterPathExample1 = `$.[?(@.note_card && (@.note_card.interact_info.liked_count && parseInt(@.note_card.interact_info.liked_count) > 1))]`;
 
     const prompt = `
         这是用户的问题，[USER_QUESTION:${message.content.text}]\r\n

@@ -430,7 +430,7 @@ export class ApiDb {
         name: 'notes',
         url: 'https://gw.newrank.cn/api/xh/xdnphb/nr/app/xhs/note/search',
         method: 'GET',
-        headers: 
+        headers: {
           Accept: "*/*",
           "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
           Connection: "keep-alive",
