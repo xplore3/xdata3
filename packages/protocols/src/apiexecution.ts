@@ -262,7 +262,7 @@ export class ApiExecution {
           }
           if (items) {
             console.log(`Response items: ${items.length || items}`);
-            console.log(items);
+            //console.log(items);
             // WORKAROUND
             if ((api.id === 'hot_words' || api.id === 'topic_rank') && items.length <= 3) {
               let cache = await DataCache.getApiCacheData(runtime, api.id);
@@ -327,7 +327,7 @@ export class ApiExecution {
                   if (item.sub_comments) {
                     item.sub_comments = JSON.stringify(item.sub_comments);
                   }
-                  console.log(item);
+                  //console.log(item);
                   return item;
                 })
               }

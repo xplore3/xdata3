@@ -94,6 +94,7 @@ export class ApiDb {
         price: '',
         dev: '',
         verification: '',
+        output: '',
         note: ''
       },
       users_search: {
@@ -171,6 +172,7 @@ export class ApiDb {
         price: '',
         dev: '',
         verification: '',
+        output: '',
         note: ''
       },
       notes_comment_by_next_page: {
@@ -230,6 +232,7 @@ export class ApiDb {
         price: '',
         dev: '',
         verification: '',
+        output: '',
         note: ''
       },
       get_note_list: {
@@ -277,6 +280,7 @@ export class ApiDb {
         price: '',
         dev: '',
         verification: '',
+        output: '',
         note: ''
       },
       fetch_comments_by_keyword: {
@@ -358,6 +362,7 @@ export class ApiDb {
         price: '',
         dev: '',
         verification: '',
+        output: '',
         note: ''
       },
       notes_search_2: {
@@ -412,6 +417,7 @@ export class ApiDb {
         price: '',
         dev: '',
         verification: '',
+        output: '',
         note: ''
       },
       notes_comment_by_next_page_1: {
@@ -468,6 +474,7 @@ export class ApiDb {
         price: '',
         dev: '',
         verification: '',
+        output: '',
         note: ''
       },
       get_note_list1: {
@@ -498,22 +505,23 @@ export class ApiDb {
         data_path: `$.data.data.notes`,
         flattener: `$map($, function($item) {
           {
-            'id': $item.id,
+            'id': $item.note_id,
             'author': $item.user.nickname,
             'title': $item.title,
             'display_title': $item.display_title,
-            'desc': $item.desc,
-            'date': $item.create_time,
-            'collected_count': $item.collected_count,
-            'shared_count': $item.share_count,
-            'comments_count': $item.comments_count,
-            'liked_count': $item.likes
+            'userid': $item.user.user_id,
+            'type': $item.type,
+            'collected_count': $item.interact_info.collected_count,
+            'shared_count': $item.interact_info.shared_count,
+            'comment_count': $item.interact_info.comment_count,
+            'liked_count': $item.interact_info.liked_count
           }
         })`,
         limit: '',
         price: '',
         dev: '',
         verification: '',
+        output: '',
         note: ''
       },
       hot_words: {
@@ -580,6 +588,7 @@ export class ApiDb {
         price: '',
         dev: '',
         verification: '',
+        output: '',
         note: ''
       },
       topic_rank: {
@@ -641,6 +650,7 @@ export class ApiDb {
         price: '',
         dev: '',
         verification: '',
+        output: '',
         note: ''
       },
       koc_search: {
@@ -954,6 +964,7 @@ export class ApiDb {
         price: '',
         dev: '',
         verification: '',
+        output: '',
         note: ''
       },
       industry_rank: {
@@ -1014,6 +1025,7 @@ export class ApiDb {
         price: '',
         dev: '',
         verification: '',
+        output: '',
         note: ''
       },
       koc_image: {
@@ -1062,6 +1074,7 @@ export class ApiDb {
         price: '',
         dev: '',
         verification: '',
+        output: '',
         note: ''
       },
       top_trend: {
