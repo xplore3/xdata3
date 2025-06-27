@@ -54,7 +54,7 @@ export class PromptController {
         if (runtime) {
             try {
                 const prompts = await PromptController.getPromptTemplates();
-                const output: string = prompts.map((line, i) => `(${i + 1}). ${line}`).join('\n\n');
+                const output: string = prompts.map((line) => ` ${line}`).join('\n\n');
                 res.send(output);
             } catch (err) {
                 console.error('[PromptController] Error handling template:', err)
@@ -130,7 +130,7 @@ export class PromptController {
     }
 
     static async getPromptTemplates() {
-        const prompts = [
+        const prompts0 = [
             '--  帮忙找一下关于【******】的最火/最热帖子',
             '--  请找一下【小红书】上【一周内】关于【******】的【100条】内容，要求【点赞数】大于【1000】',
             '--  帮我找一下【******】相关的最新帖子，并附带相关评论',
@@ -155,6 +155,22 @@ export class PromptController {
             '-- 请根据【******】这样的内容风格搜索适合合作的潜在合作达人',
             '-- 【******】这个账号最近一个月都发了什么内容'
         ];
+        const prompts = [
+            '🔍 查关键词/帖子/评论/账号',
+            '① 请找一下关于【小众香薰...】的最火/最热帖子（**默认取100天内的10条帖子，按热度排序）',
+            '② 请找一下【一周内/30天内/...】关于【小众香薰...】的【100条】内容，要求【点赞数】大于【300】，【收藏数】大于【500】',
+            '③ 请找一下【泡泡玛特...】相关的最新帖子，要求【评论数】大于【500】，并附带相关评论',
+            '④ 请整理一下这个帖子的评论：**附帖子链接',
+            '⑤ 请整理一下这个【账号/达人/KOC】的详细信息：**附主页链接',
+            '⑥ 请分析一下这个【账号/达人/KOC】的帖子类型：**附主页链接',
+            '⑦ 请找一下这个【账号/达人/KOC】发布的最近一个月内的帖子：**附主页链接',
+            '📌 其它请求',
+            '① 有没有冷门但涨势快的话题（假定以发布时间在一周内，以评论/收藏/点赞都大于1000为准）',
+            '② 关于今年【夏天/冬天...】穿搭的流行风格有什么，请找出【20条】【评论】最高的帖子',
+            '③ 有哪些和我的产品相关的新热点/热门帖子（以评论/收藏/点赞中一项大于1000为准）',
+            '④ 请基于我的品牌知识库，搜集适合合作的潜在合作达人',
+            '🚩Ps：请记得在右上角个人主页，完善你的品牌知识库哦😊~'
+        ]
         return prompts;
     }
 }
