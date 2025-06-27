@@ -71,7 +71,7 @@ export class PromptController {
             try {
                 const userId = stringToUuid(req.body.userId ?? "user");
                 await UserKnowledge.setUserKnowledge(runtime, userId, req.body.knowledges);
-                for (const item of req.body.knowledges) {
+                /*for (const item of req.body.knowledges) {
                     await knowledge.set(runtime, {
                         id: stringToUuid(item),
                         userId: userId,
@@ -79,7 +79,7 @@ export class PromptController {
                             text: item,
                         },
                     });
-                }
+                }*/
                 res.send('success');
             } catch (err) {
                 console.error('[PromptController] Error handling addknowledge:', err)
