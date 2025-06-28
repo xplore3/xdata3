@@ -728,6 +728,7 @@ export class IntentionHandler {
         根据指令要求，需要对collected_count/shared_count/comments_count/likes_count的数量进行过滤。
         用户要求的时间戳 [timestamp: ${timestamp}], 这是在之前的步骤中计算好的, 不需要再做转化，填入表达式中即可 。
         - filter添加存在性检查（@.note && ...）, filter只需进行数量的过滤。
+        filter中不要使用new Date() 或Date.parse()，当前版本不支持。
         如果用户的输入DATA中不包含timestamp（publish_time这样的不是），则忽略时间过滤。
         你返回的表达式将会插入代码中直接运行，请你一定要直接返回表达式。不要返回其他值，也不要做额外解释。`;
     try {
