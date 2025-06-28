@@ -235,9 +235,9 @@ export class ApiDb {
         output: '',
         note: ''
       },
-      get_note_list: {
-        id: 'get_note_list',
-        backup: 'get_note_list1',
+      get_note_list_1: {
+        id: 'get_note_list_1',
+        backup: 'get_note_list2',
         priority: 0,
         type: 'social-media',
         platform: 'rednote',
@@ -684,9 +684,9 @@ export class ApiDb {
         output: '',
         note: ''
       },
-      get_note_list1: {
-        id: 'get_note_list1',
-        backup: 'get_note_list2',
+      get_note_list: {
+        id: 'get_note_list',
+        backup: 'get_note_list_1',
         priority: 1,
         type: 'social-media',
         platform: 'rednote',
@@ -722,7 +722,7 @@ export class ApiDb {
           "featureType": "",
           "isHideDelete": "0",
           "isCooperate": "",
-          "title": "默认为空，无须填写",
+          "title": "保持为空，不要填写此项",
           "size": 20,
           "start": 1,
           "time": "30d",

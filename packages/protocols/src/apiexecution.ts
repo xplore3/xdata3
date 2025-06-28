@@ -388,6 +388,9 @@ export class ApiExecution {
               if (api.flattener != '') {
                 const expression = jsonata(api.flattener);
                 tempResult = await expression.evaluate(items) || [];
+                if (items && items.length == 1) {
+                  console.log(tempResult);
+                }
                 tempResult = tempResult.map(item => {
                   if (item.sub_comments) {
                     item.sub_comments = JSON.stringify(item.sub_comments);
