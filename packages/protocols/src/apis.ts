@@ -24,7 +24,7 @@ export class ApiDb {
       'koc_image: 根据ID获取KOC的详细画像，包括其账号概览、粉丝分析、笔记分析、投放分析、品牌推广、品类分析、直播分析等',
       //'industry_rank: 根据领域/频道/分类获取红人榜单，包括其基础信息、粉丝/点赞/收藏数量、指数等',
       'top_trend: 读取小红书等平台的热词/热搜词，以及热门话题/Tag；仅用以热词热搜热门话题Tag，如果用户要找内容/笔记/帖子等不适合此选项',
-      'koc_imitate: 优秀账号对标，根据我的产品、业务和背景等搜索到合适的对标网红KOC；该操作能获得KOC列表和其内容列表两类数据',
+      'koc_imitate: 优秀账号对标，根据我的产品、业务和背景等搜索到合适的对标网红KOC，及其热门笔记；该操作能获得KOC列表和其内容列表两类数据',
       'koc_evaluate: 达人合作评估，根据给定的达人网红KOC账号信息，找到其详细画像，对其进行合作评估；该操作能获得KOC画像和其内容列表两类数据',
       'notes_search: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表；',
       //'note_detail: 通过noteid获取单个笔记/帖子/note的详情',
@@ -861,11 +861,11 @@ export class ApiDb {
           "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
           "content-type": "application/json",
           "n-token": "35c430ef650b459ba2b9c1409148d929",
-          request_id: "a69f527e9750488a80ec35053f6ee3f7",
+          request_id: "0705b9f8a93a43dba51e0105bd963011",
           "sec-ch-ua": '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
           "sec-ch-ua-mobile": "?0",
           "sec-ch-ua-platform": '"Windows"',
-          Cookie: "sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22nr_51qcmvw2q%22%2C%22first_id%22%3A%2219584847d74e3-083464dad8bd598-26011a51-960000-19584847d751430%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_utm_source%22%3A%22baidu%22%2C%22%24latest_utm_medium%22%3A%22cpc%22%2C%22%24latest_utm_campaign%22%3A%22%E6%96%B0%E7%BA%A2SEM%22%2C%22%24latest_utm_term%22%3A%22%E6%96%B0%E7%BA%A2%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTk1ODQ4NDdkNzRlMy0wODM0NjRkYWQ4YmQ1OTgtMjYwMTFhNTEtOTYwMDAwLTE5NTg0ODQ3ZDc1MTQzMCIsIiRpZGVudGl0eV9sb2dpbl9pZCI6Im5yXzUxcWNtdncycSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%24identity_login_id%22%2C%22value%22%3A%22nr_51qcmvw2q%22%7D%2C%22%24device_id%22%3A%22196c2a9c80ad59-0b34bec0dc40558-26011f51-960000-196c2a9c80b1567%22%7D; tfstk=gdjjwkjHsjcj5D-tCE2rVraQ6Ex_T8rEhA9OKOnqBnKA5c6dQ-YNgOd15QBI0Z8wDR119sTN1O2DBCCO1C74zkWcnhxTT1ZUYt21i13GchhNenvaSAxf2kWcnYHj6J78YAZ-Y2tv61LvyQpHwcnA6Fh8FdpZMVnA68wWQppxDdnvybpMChdO6he5eQv9XKC9XAZsNLVXNtwq1ive1-wACQitXg97sBBXJLvlVhLX9GASXOsWhEOdHMMXeOvR4gTezAPW29bPMLtQcXvfy9tvCG2K5CT1m391rSgVOsvOeU14QVv55OIHmHMTDTtXGeI1wvn59T6O8UszpkxXDIQwmOkQgTsfgtj5QA3Jcn7WRitLxjdNz9s6CGVgV66OKNL5fjsyGDRBL50sFem6FBy7FV0gFByrqNzQqJ8vEL-UF8gHjEpkFBy7FV0MkLvoz8wS-hf..; token=ED3E49C60ABD45F5BDD8084F377C2158; Hm_lvt_a19fd7224d30e3c8a6558dcb38c4beed=1748232589,1748616498,1750370567,1750633396; acw_tc=1a0c399b17510231665212799e0071ce8392a600627de72adc94258c311970; auth_n=9kCvQOR0mS5PMn1Nms/ogCnua4rl1L0Pw17pPUxB8uJKEfiKhluZeLM/PSOpqsVU",
+          Cookie: "sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22nr_51qcmvw2q%22%2C%22first_id%22%3A%2219584847d74e3-083464dad8bd598-26011a51-960000-19584847d751430%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_utm_source%22%3A%22baidu%22%2C%22%24latest_utm_medium%22%3A%22cpc%22%2C%22%24latest_utm_campaign%22%3A%22%E6%96%B0%E7%BA%A2SEM%22%2C%22%24latest_utm_term%22%3A%22%E6%96%B0%E7%BA%A2%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTk1ODQ4NDdkNzRlMy0wODM0NjRkYWQ4YmQ1OTgtMjYwMTFhNTEtOTYwMDAwLTE5NTg0ODQ3ZDc1MTQzMCIsIiRpZGVudGl0eV9sb2dpbl9pZCI6Im5yXzUxcWNtdncycSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%24identity_login_id%22%2C%22value%22%3A%22nr_51qcmvw2q%22%7D%2C%22%24device_id%22%3A%22196c2a9c80ad59-0b34bec0dc40558-26011f51-960000-196c2a9c80b1567%22%7D; tfstk=gdjjwkjHsjcj5D-tCE2rVraQ6Ex_T8rEhA9OKOnqBnKA5c6dQ-YNgOd15QBI0Z8wDR119sTN1O2DBCCO1C74zkWcnhxTT1ZUYt21i13GchhNenvaSAxf2kWcnYHj6J78YAZ-Y2tv61LvyQpHwcnA6Fh8FdpZMVnA68wWQppxDdnvybpMChdO6he5eQv9XKC9XAZsNLVXNtwq1ive1-wACQitXg97sBBXJLvlVhLX9GASXOsWhEOdHMMXeOvR4gTezAPW29bPMLtQcXvfy9tvCG2K5CT1m391rSgVOsvOeU14QVv55OIHmHMTDTtXGeI1wvn59T6O8UszpkxXDIQwmOkQgTsfgtj5QA3Jcn7WRitLxjdNz9s6CGVgV66OKNL5fjsyGDRBL50sFem6FBy7FV0gFByrqNzQqJ8vEL-UF8gHjEpkFBy7FV0MkLvoz8wS-hf..; token=ED3E49C60ABD45F5BDD8084F377C2158; Hm_lvt_a19fd7224d30e3c8a6558dcb38c4beed=1748232589,1748616498,1750370567,1750633396; auth_n=gAYRkPLPqVNEdAlUCNsEP2z3q1lpAjBrfNhCfzCwGlbRrXfVMlO5j9ecqIjxdzle; acw_tc=ac11000117510767557453372e007cc0aa72c50c673c0c18469f742ef5eb37",
         },
         query_params: {},
         query_params_desc: {
@@ -924,11 +924,11 @@ export class ApiDb {
           "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
           "content-type": "application/json",
           "n-token": "35c430ef650b459ba2b9c1409148d929",
-          "request_id": "618ceb658b7a4d06857c78e15f5067c1",
+          "request_id": "4fb2ca2352f94cf2b20bf23a86a12860",
           "sec-ch-ua": '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
           "sec-ch-ua-mobile": "?0",
           "sec-ch-ua-platform": '"Windows"',
-          "Cookie": `sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22nr_51qcmvw2q%22%2C%22first_id%22%3A%2219584847d74e3-083464dad8bd598-26011a51-960000-19584847d751430%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_utm_source%22%3A%22baidu%22%2C%22%24latest_utm_medium%22%3A%22cpc%22%2C%22%24latest_utm_campaign%22%3A%22%E6%96%B0%E7%BA%A2SEM%22%2C%22%24latest_utm_term%22%3A%22%E6%96%B0%E7%BA%A2%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTk1ODQ4NDdkNzRlMy0wODM0NjRkYWQ4YmQ1OTgtMjYwMTFhNTEtOTYwMDAwLTE5NTg0ODQ3ZDc1MTQzMCIsIiRpZGVudGl0eV9sb2dpbl9pZCI6Im5yXzUxcWNtdncycSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%24identity_login_id%22%2C%22value%22%3A%22nr_51qcmvw2q%22%7D%2C%22%24device_id%22%3A%22196c2a9c80ad59-0b34bec0dc40558-26011f51-960000-196c2a9c80b1567%22%7D; tfstk=gdjjwkjHsjcj5D-tCE2rVraQ6Ex_T8rEhA9OKOnqBnKA5c6dQ-YNgOd15QBI0Z8wDR119sTN1O2DBCCO1C74zkWcnhxTT1ZUYt21i13GchhNenvaSAxf2kWcnYHj6J78YAZ-Y2tv61LvyQpHwcnA6Fh8FdpZMVnA68wWQppxDdnvybpMChdO6he5eQv9XKC9XAZsNLVXNtwq1ive1-wACQitXg97sBBXJLvlVhLX9GASXOsWhEOdHMMXeOvR4gTezAPW29bPMLtQcXvfy9tvCG2K5CT1m391rSgVOsvOeU14QVv55OIHmHMTDTtXGeI1wvn59T6O8UszpkxXDIQwmOkQgTsfgtj5QA3Jcn7WRitLxjdNz9s6CGVgV66OKNL5fjsyGDRBL50sFem6FBy7FV0gFByrqNzQqJ8vEL-UF8gHjEpkFBy7FV0MkLvoz8wS-hf..; token=ED3E49C60ABD45F5BDD8084F377C2158; Hm_lvt_a19fd7224d30e3c8a6558dcb38c4beed=1748232589,1748616498,1750370567,1750633396; acw_tc=0a47314717509101764217962e0082f92cc256acdfea91b77aa9cba53201d4; auth_n=9kCvQOR0mS5PMn1Nms/ogCnua4rl1L0Pw17pPUxB8uLD8eoU9E/+AlLiD+5BOHAo`,
+          "Cookie": `sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22nr_51qcmvw2q%22%2C%22first_id%22%3A%2219584847d74e3-083464dad8bd598-26011a51-960000-19584847d751430%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_utm_source%22%3A%22baidu%22%2C%22%24latest_utm_medium%22%3A%22cpc%22%2C%22%24latest_utm_campaign%22%3A%22%E6%96%B0%E7%BA%A2SEM%22%2C%22%24latest_utm_term%22%3A%22%E6%96%B0%E7%BA%A2%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTk1ODQ4NDdkNzRlMy0wODM0NjRkYWQ4YmQ1OTgtMjYwMTFhNTEtOTYwMDAwLTE5NTg0ODQ3ZDc1MTQzMCIsIiRpZGVudGl0eV9sb2dpbl9pZCI6Im5yXzUxcWNtdncycSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%24identity_login_id%22%2C%22value%22%3A%22nr_51qcmvw2q%22%7D%2C%22%24device_id%22%3A%22196c2a9c80ad59-0b34bec0dc40558-26011f51-960000-196c2a9c80b1567%22%7D; tfstk=gdjjwkjHsjcj5D-tCE2rVraQ6Ex_T8rEhA9OKOnqBnKA5c6dQ-YNgOd15QBI0Z8wDR119sTN1O2DBCCO1C74zkWcnhxTT1ZUYt21i13GchhNenvaSAxf2kWcnYHj6J78YAZ-Y2tv61LvyQpHwcnA6Fh8FdpZMVnA68wWQppxDdnvybpMChdO6he5eQv9XKC9XAZsNLVXNtwq1ive1-wACQitXg97sBBXJLvlVhLX9GASXOsWhEOdHMMXeOvR4gTezAPW29bPMLtQcXvfy9tvCG2K5CT1m391rSgVOsvOeU14QVv55OIHmHMTDTtXGeI1wvn59T6O8UszpkxXDIQwmOkQgTsfgtj5QA3Jcn7WRitLxjdNz9s6CGVgV66OKNL5fjsyGDRBL50sFem6FBy7FV0gFByrqNzQqJ8vEL-UF8gHjEpkFBy7FV0MkLvoz8wS-hf..; token=ED3E49C60ABD45F5BDD8084F377C2158; Hm_lvt_a19fd7224d30e3c8a6558dcb38c4beed=1748232589,1748616498,1750370567,1750633396; auth_n=gAYRkPLPqVNEdAlUCNsEP2z3q1lpAjBrfNhCfzCwGlbRrXfVMlO5j9ecqIjxdzle; acw_tc=ac11000117510767557453372e007cc0aa72c50c673c0c18469f742ef5eb37`,
         },
         query_params: {},
         query_params_desc: {
@@ -1215,6 +1215,226 @@ export class ApiDb {
         output: '',
         note: ''
       },
+      user_search_by_content: {
+        id: 'user_search_by_content',
+        backup: '',
+        priority: 0,
+        type: 'social-media',
+        platform: 'rednote',
+        description: '根据笔记/帖子中的内容进行关键字搜索，以找到相关红人/KOC/账号的基本信息，画像',
+        name: 'user_by_content',
+        url: 'https://gw.newrank.cn/api/xh/xdnphb/nr/app/xhs/red/user/searchUserByContent',
+        method: 'POST',
+        headers: {
+          "Accept": "*/*",
+          "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+          "Connection": "keep-alive",
+          "Origin": "https://xh.newrank.cn",
+          "Pragma": "no-cache",
+          "Referer": "https://xh.newrank.cn/",
+          "Sec-Fetch-Dest": "empty",
+          "Sec-Fetch-Mode": "cors",
+          "Sec-Fetch-Site": "same-site",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+          "content-type": "application/json",
+          "n-token": "35c430ef650b459ba2b9c1409148d929",
+          "request_id": "d2f4149f97694a6f9066685ba2e4c70a",
+          "sec-ch-ua": '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": '"Windows"',
+          "Cookie": `sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22nr_51qcmvw2q%22%2C%22first_id%22%3A%2219584847d74e3-083464dad8bd598-26011a51-960000-19584847d751430%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_utm_source%22%3A%22baidu%22%2C%22%24latest_utm_medium%22%3A%22cpc%22%2C%22%24latest_utm_campaign%22%3A%22%E6%96%B0%E7%BA%A2SEM%22%2C%22%24latest_utm_term%22%3A%22%E6%96%B0%E7%BA%A2%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTk1ODQ4NDdkNzRlMy0wODM0NjRkYWQ4YmQ1OTgtMjYwMTFhNTEtOTYwMDAwLTE5NTg0ODQ3ZDc1MTQzMCIsIiRpZGVudGl0eV9sb2dpbl9pZCI6Im5yXzUxcWNtdncycSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%24identity_login_id%22%2C%22value%22%3A%22nr_51qcmvw2q%22%7D%2C%22%24device_id%22%3A%22196c2a9c80ad59-0b34bec0dc40558-26011f51-960000-196c2a9c80b1567%22%7D; tfstk=gdjjwkjHsjcj5D-tCE2rVraQ6Ex_T8rEhA9OKOnqBnKA5c6dQ-YNgOd15QBI0Z8wDR119sTN1O2DBCCO1C74zkWcnhxTT1ZUYt21i13GchhNenvaSAxf2kWcnYHj6J78YAZ-Y2tv61LvyQpHwcnA6Fh8FdpZMVnA68wWQppxDdnvybpMChdO6he5eQv9XKC9XAZsNLVXNtwq1ive1-wACQitXg97sBBXJLvlVhLX9GASXOsWhEOdHMMXeOvR4gTezAPW29bPMLtQcXvfy9tvCG2K5CT1m391rSgVOsvOeU14QVv55OIHmHMTDTtXGeI1wvn59T6O8UszpkxXDIQwmOkQgTsfgtj5QA3Jcn7WRitLxjdNz9s6CGVgV66OKNL5fjsyGDRBL50sFem6FBy7FV0gFByrqNzQqJ8vEL-UF8gHjEpkFBy7FV0MkLvoz8wS-hf..; token=ED3E49C60ABD45F5BDD8084F377C2158; Hm_lvt_a19fd7224d30e3c8a6558dcb38c4beed=1748232589,1748616498,1750370567,1750633396; auth_n=gAYRkPLPqVNEdAlUCNsEP2z3q1lpAjBrfNhCfzCwGlbRrXfVMlO5j9ecqIjxdzle; acw_tc=ac11000117510767557453372e007cc0aa72c50c673c0c18469f742ef5eb37`,
+        },
+        query_params: {},
+        query_params_desc: {
+          baseReq: {
+            "isMCN": "",
+            "gender": "",
+            "redUserLevelName": "",
+            "userAttribute": [],
+            "mostType": "",
+            "identifySign": "",
+            "follow": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "areaSourceIpLocation": {
+              "areaType": "",
+              "areaV1": ""
+            },
+            "areaSourceTagsIp": {
+              "areaType": "",
+              "areaV1": "",
+              "areaV2": ""
+            }
+          },
+          batchId: "",
+          batchName: "",
+          contentTags: [],
+          custom: {must: [], should: [], mustNot: []},
+          cycle: "30d",
+          dataReq: {
+            "videoPrice": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "picturePrice": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "videoCpe": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "pictureCpe": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "fans": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "likeCollect": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "index": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "likeCollectPercent": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "boomPercent": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "avgLikeCountThirty": {
+              "customizeRange": ""
+            }
+          },
+          fansReq: {
+            distribute: "0, or 1, or empty",
+            province: "省级地域，如北京，须是北京，而不是北京市，只写一个",
+            hobby: `['家居家装', '宠物', '知识', '母婴', '摄影', '资讯', '星座命理', '萌娃', '减肥',
+              '运动健身', '科技数码', '体育赛事', '商业财经', '出行', '汽车', '搞笑', '美妆', '美食测评',
+              '文化', '教育', '兴趣爱好', '生活记录', '社科', '美食教程', '美食', '影视', '娱乐', '游戏',
+              '时尚', '健康', '婚嫁', '素材', '美女帅哥', '潮流', '情感']中的一个或多个`,
+            age: `['<18', '18-24', '25-34', '35-44', '>44']中的一个或多个`
+          },
+          keyword: "Search Keyword, 如红酒",
+          isBrand: "",
+          isContact: "",
+          isGood: "",
+          isLive: "",
+          isRecommend: "",
+          size: 20,
+          sort: "noteCount",
+          start: 1,
+          type: {first: "", second: []},
+          startTime: "",
+          endTime: ""
+        },
+        query_params_example: {
+          baseReq: {
+            "isMCN": "",
+            "gender": "",
+            "redUserLevelName": "",
+            "userAttribute": [],
+            "mostType": "",
+            "identifySign": "",
+            "follow": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "areaSourceIpLocation": {
+              "areaType": "",
+              "areaV1": ""
+            },
+            "areaSourceTagsIp": {
+              "areaType": "",
+              "areaV1": "",
+              "areaV2": ""
+            }
+          },
+          batchId: "",
+          batchName: "",
+          contentTags: [],
+          custom: {must: [], should: [], mustNot: []},
+          cycle: "30d",
+          dataReq: {
+            "videoPrice": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "picturePrice": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "videoCpe": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "pictureCpe": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "fans": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "likeCollect": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "index": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "likeCollectPercent": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "boomPercent": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "avgLikeCountThirty": {
+              "customizeRange": ""
+            }
+          },
+          fansReq: {
+            distribute: "",
+            province: "北京",
+            hobby: ['宠物', '知识'],
+            age: ['<18', '18-24']
+          },
+          keyword: "Search Keyword, 如红酒",
+          isBrand: "",
+          isContact: "",
+          isGood: "",
+          isLive: "",
+          isRecommend: "",
+          size: 20,
+          sort: "noteCount",
+          start: 1,
+          type: {first: "", second: []},
+          startTime: "",
+          endTime: ""
+        },
+        docs_link: '',
+        could_cached: true,
+        cached_expired: 3600000 * 24 * 7,
+        filter: false,
+        data_path: `$.data.data.list`,
+        flattener: ``,
+        limit: '',
+        price: '',
+        dev: '',
+        verification: '',
+        output: '',
+        note: ''
+      },
       industry_rank: {
         id: 'industry_rank',
         backup: '',
@@ -1346,14 +1566,16 @@ export class ApiDb {
         priority: 0,
         type: 'social-media',
         platform: 'rednote',
-        description: '优秀账号对标，根据我的产品、业务和背景等搜索到合适的对标网红KOC；该操作能获得KOC列表和其内容列表两类数据',
+        description: '优秀账号对标，根据我的产品、业务和背景等搜索到合适的对标网红KOC，及其热门笔记；该操作能获得KOC列表和其内容列表两类数据',
         name: 'KocAnalysis',
         // Excute Data Dependency
-        execute_depend: 'chain_loop', // ['chain', 'chain_loop']
+        execute_depend: 'chain_new_param', // ['chain', 'chain_loop']
         // The First Request
         request1: 'koc_search',
         // The Second Request
-        request2: 'get_note_list',
+        request2: 'user_search_by_content',
+        // The 3rd Request
+        request3: 'get_note_list',
       },
       koc_evaluate: {
         id: 'koc_evaluate',

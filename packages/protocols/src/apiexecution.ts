@@ -112,6 +112,67 @@ export class ApiExecution {
             excelfilename: [] };
       }
     }
+    else if (api && api.execute_depend && api.execute_depend === 'chain_new_param') {
+      const api1 = ApiDb.getApi(api.request1);
+      const api2 = ApiDb.getApi(api.request2);
+      let result1 = [];
+      let result2 = [];
+      let result3 = [];
+      const execParam1 = await this.getQueryParamByProfile(runtime, message, api1);
+      if (execParam1) {
+        api1.query_params = execParam1.query_params;
+        const execCount = execParam1.request_count <= 100 ? execParam1.request_count : 100;
+        result1 = await this.executeApi(runtime, message, api1, execCount);
+      }
+      const execParam2 = await this.getQueryParamByProfile(runtime, message, api2);
+      if (execParam2) {
+        api2.query_params = execParam2.query_params;
+        const execCount = execParam2.request_count <= 100 ? execParam2.request_count : 100;
+        result2 = await this.executeApi(runtime, message, api2, execCount);
+      }
+
+      const api3 = ApiDb.getApi(api.request3);
+      for (const item of [...result1, ...result2]) {
+        try {
+          const execJson = await this.getApiQueryParam(runtime, message, api2, item);
+          if (execJson) {
+            if (execJson.query_params) {
+              api3.query_params = execJson.query_params;
+              const execCount = execJson.request_count <= 100 ? execJson.request_count : 100;
+              await new Promise((resolve) => setTimeout(resolve, 100));
+              const api3Result = await this.executeApi(
+                runtime, message, api3, execCount
+              );
+              if (api3Result) {
+                result3.push(...api3Result);
+              }
+            }
+          }
+        }
+        catch (err) {
+          console.log(err);
+        }
+      }
+
+      try {
+        const taskId = message.content?.intention?.taskId;
+        const { firstUnExistsTxtFilename: txt1, firstUnExistsExcelFilename: excel1 }
+          = APIWrapperFactory.excelDataPersist(result1, taskId + api1.name);
+        const { firstUnExistsTxtFilename: txt2, firstUnExistsExcelFilename: excel2 }
+          = APIWrapperFactory.excelDataPersist(result2, taskId + api2.name);
+        const { firstUnExistsTxtFilename: txt3, firstUnExistsExcelFilename: excel3 }
+          = APIWrapperFactory.excelDataPersist(result3, taskId + api3.name);
+        return { result: `${JSON.stringify(result1)}\n${JSON.stringify(result2)}\n${JSON.stringify(result3)}`,
+            txtfilename: [txt1, txt2, txt3],
+            excelfilename: [excel1, excel2, excel3] };
+      }
+      catch (err) {
+        console.error(err);
+        return { result: `${JSON.stringify(result1)}\n${JSON.stringify(result2)}\n${JSON.stringify(result3)}`,
+            txtfilename: [],
+            excelfilename: [] };
+      }
+    }
     else {
       return await this.executeApiAndGetResult(runtime, message, api, totalCount);
     }
@@ -426,6 +487,46 @@ export class ApiExecution {
     }
     catch (err) {
       console.log(`getApiQueryParam ${api}`);
+      console.error(err);
+    }
+    return null;
+  }
+
+  static async getQueryParamByProfile(runtime: IAgentRuntime, message: Memory, api: any): Promise<any> {
+    console.log(`getQueryParamByProfile`);
+    const userInput = `${message.content.text}`;
+    const userProfile = await UserKnowledge.getUserKnowledge(runtime, message.userId);
+    const prompt = `
+      你是运营专员/运营数据处理工程师，请根据用户的相关背景PROFILE（如产品/产品类型/使用场景/目标群体/内容风格等），
+      结合对应的数据API：【${api.description}】，给出可以用来搜索的关键字；
+      比如是根据产品类型搜索网红账号，或根据目标群体相关内容搜索账号，或根据内容风格搜索账号等等；
+      从而找到合适的对标网红KOC。
+      根据这些输入，需要给出如下结果：
+        {
+          "query_params": {json of params},
+          "request_count": 20
+        }.
+      用户的输入请求为：${userInput}。
+      用户相关背景PROFILE为：${userProfile}。
+      API参数说明为：${JSON.stringify(api.query_params_desc)}。
+      API对应的query_params字段示例如下：【${JSON.stringify(api.query_params_example)}】。
+      -----------------------------
+    `;
+    try {
+      let response = await generateText({
+        runtime,
+        context: await UserKnowledge.composePrompt(runtime, prompt, message.userId),
+        modelClass: ModelClass.LARGE,
+      });
+      console.log(response);
+      let json = extractJson(response);
+      if (json) {
+        return json;
+      }
+      return response;
+    }
+    catch (err) {
+      console.log(`getQueryParamByProfile err ${err.message}`);
       console.error(err);
     }
     return null;
