@@ -455,7 +455,7 @@ export class ApiDb {
             "type": "",
             "createTime": "30d",
             "contentTags": [],
-            "noteType": "默认为空，无须填写"
+            "noteType": ""
           },
           custom: {must: [], should: [], mustNot: []},
           endTime: "",
@@ -500,7 +500,7 @@ export class ApiDb {
             "city": ""
           },
           input: {
-            "keyword": "String, keyword for query, 如三伏贴",
+            "keyword": "String, keyword for query, 如三伏贴；只需填写此项，其他项都不需要修改",
             "type": [
               "title",
               "topic",
