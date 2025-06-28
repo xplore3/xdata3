@@ -467,7 +467,7 @@ export class ApiExecution {
           "request_count": 取出的内容的数量，从用户的原输入和参考来源PARAM_SOURCE中提取，默认是20, 不要超过100
         }.
       关于query_params字段，需满足用户所有需求，且输出参数说明中的项，不能有参数说明之外的项；不是数组，仅仅是一个JSON对象。
-      如果query_params的keyword之类的取值不能明显地从用户输入里获取，则需要结合自己的knowledge和背景。
+      如果query_params的keyword之类的取值不能明显地从用户输入里获取，则需要结合用户的knowledge和背景。
       query_params中的关键字的取值需要严格从指定来源${JSON.stringify(source)}中获取，不能有之外的值，不能生成值。
       query_params须是一个JSON对象，不能是字符串等。
       query_params中的搜索关键词不能太长，一般为用户的产品，不需要带品牌名称，一般是一个词语，不能超过2个词语。
@@ -518,8 +518,11 @@ export class ApiExecution {
       API参数说明为：${JSON.stringify(api.query_params_desc)}。
       API对应的query_params字段示例如下：【${JSON.stringify(api.query_params_example)}】。
       query_params须是一个JSON对象，不能是字符串等。
-      query_params须严格遵守参数说明，不能额外加字段或值，如果参数说明对某个字段没有说明范围，则不要填写该字段，保持为空或原值。
+      关于query_params字段，需满足用户所有需求，且输出参数说明中的项，不能有参数说明之外的项；不是数组，仅仅是一个JSON对象。
+      如果query_params的keyword之类的取值不能明显地从用户输入里获取，则需要结合用户的knowledge和背景。
       query_params中的搜索关键词不能太长，一般为用户的产品，不需要带品牌名称，一般是一个词语，不能超过2个词语。
+      输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
+      query_params须严格遵守参数说明，不能额外加字段或值，如果参数说明对某个字段没有说明范围，则不要填写该字段，保持为空或原值。
       -----------------------------
     `;
     try {
