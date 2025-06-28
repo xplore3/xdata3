@@ -1294,10 +1294,6 @@ export class ApiDb {
               "fixedRange": "",
               "customizeRange": ""
             },
-            "likeCollect": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
             "index": {
               "fixedRange": "",
               "customizeRange": ""
@@ -1327,6 +1323,7 @@ export class ApiDb {
           size: 20,
           sort: "noteCount",
           start: 1,
+          time: "30d",
           type: {first: "", second: []},
           startTime: "",
           endTime: ""
@@ -1374,10 +1371,6 @@ export class ApiDb {
               "fixedRange": "",
               "customizeRange": ""
             },
-            "likeCollect": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
             "index": {
               "fixedRange": "",
               "customizeRange": ""
@@ -1407,6 +1400,7 @@ export class ApiDb {
           size: 20,
           sort: "noteCount",
           start: 1,
+          time: "30d",
           type: {first: "", second: []},
           startTime: "",
           endTime: ""
