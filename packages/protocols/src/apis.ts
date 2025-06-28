@@ -40,9 +40,9 @@ export class ApiDb {
 
   static getApi(api_desc: string) {
     const apiList = {
-      notes_search: {
-        id: 'notes_search',
-        backup: 'notes_search_1',
+      notes_search_1: {
+        id: 'notes_search_1',
+        backup: 'notes_search_2',
         priority: 0,
         type: 'social-media',
         platform: 'rednote',
@@ -420,9 +420,9 @@ export class ApiDb {
         output: '',
         note: ''
       },
-      notes_search_1: {
-        id: 'notes_search_1',
-        backup: 'notes_search_2',
+      notes_search: {
+        id: 'notes_search',
+        backup: 'notes_search_1',
         priority: 1,
         type: 'social-media',
         platform: 'rednote',
@@ -592,7 +592,7 @@ export class ApiDb {
           startTime: "",
           time: "30d"
         },
-        docs_link: 'https://docs.tikhub.io/310965843e0',
+        docs_link: '',
         could_cached: false,
         cached_expired: 3600000 * 24,
         filter: true,
@@ -601,17 +601,21 @@ export class ApiDb {
           {
             'id': $item.id,
             'author': $item.user.nickname,
+            'userid': $item.user.userid,
             'title': $item.title,
             'desc': $item.desc,
-            'url': $item.url,
-            'date': $item.createTime,
+            'url': [$item.url, 'https://www.xiaohongshu.com/explore/' + $item.id][0],
             'type': $item.type,
             'topics': $item.topics,
+            'cover': $item.cover,
+            'noteCounterTypeV1': $item.noteCounterTypeV1,
             'collected_count': $item.collectedCount,
             'shared_count': $item.sharedCount,
             'comments_count': $item.commentsCount,
             'liked_count': $item.likedCount,
-            'read_count': $item.readCount
+            'read_count': $item.readCount,
+            'predReadnum': $item.predReadnum,
+            'createTime': $item.createTime
           }
         })`,
         limit: '',

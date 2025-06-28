@@ -377,6 +377,7 @@ export class ApiExecution {
             catch (err) {
               console.log(err);
               //TODO: 重新生成filterPath/extractPath
+              tempResult = items;
             }
           }
           else {
