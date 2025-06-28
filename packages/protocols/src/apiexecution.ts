@@ -352,7 +352,10 @@ export class ApiExecution {
               tempResult = JSONPath({
                 path: filterPath,
                 json: items,
-                sandbox: { parseInt }
+                sandbox: {
+                  parseInt,
+                  parseDate: (dateStr) => new Date(dateStr).getTime() / 1000
+                }
               }) || [];
               console.log(tempResult.length);
               //tempResult = tempResult.map(item => {
@@ -430,7 +433,7 @@ export class ApiExecution {
         result = result?.slice(0, totalCount);
         console.log(`executeApi final length : ${result?.length}`);
         const taskId = message.content?.intention?.taskId;
-        await TaskHelper.setTaskStatus(runtime, taskId, `已获取【${api.name}】数据：${result?.length}/${totalCount}`);
+        await TaskHelper.setTaskStatus(runtime, taskId, `正在处理【${api.name}】数据`);
       }
       catch (err) {
         console.log(err);

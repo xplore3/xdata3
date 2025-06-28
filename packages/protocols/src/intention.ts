@@ -718,7 +718,7 @@ export class IntentionHandler {
     let timestamp = await IntentionHandler.getTimeStr(message.content.text);
 
     const filterPathExample = `$.[?(@.note && (@.note.collected_count || 0) >= 0 && (@.note.shared_count || 0) >= 0 && (@.note.comments_count || 0) >= 0 && (@.note.liked_count || 0) >= 1 && (@.note.timestamp || 2524579200) >= ${timestamp})]`;
-    const filterPathExample1 = `$.[?(@.note_card && (@.note_card.interact_info.liked_count && parseInt(@.note_card.interact_info.liked_count) > 1))]`;
+    const filterPathExample1 = `$.[?(@.note_card && (@.note_card.interact_info.liked_count && parseInt(@.note_card.interact_info.liked_count) > 1) && parseDate(@.note_card.createTime || 2524579200) > ${timestamp})]`;
 
     const prompt = `
         这是用户的问题，[USER_QUESTION:${message.content.text}]\r\n

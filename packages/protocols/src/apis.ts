@@ -609,11 +609,11 @@ export class ApiDb {
             'topics': $item.topics,
             'cover': $item.cover,
             'noteCounterTypeV1': $item.noteCounterTypeV1,
-            'collected_count': $item.collectedCount,
-            'shared_count': $item.sharedCount,
-            'comments_count': $item.commentsCount,
-            'liked_count': $item.likedCount,
-            'read_count': $item.readCount,
+            'collectedCount': $item.collectedCount,
+            'sharedCount': $item.sharedCount,
+            'commentsCount': $item.commentsCount,
+            'likedCount': $item.likedCount,
+            'readCount': $item.readCount,
             'predReadnum': $item.predReadnum,
             'createTime': $item.createTime
           }
@@ -757,10 +757,10 @@ export class ApiDb {
             'desc': $item.desc,
             'cover': $item.cover,
             'noteCounterTypeV1': $item.noteCounterTypeV1,
-            'collected_count': $item.collectedCount,
-            'shared_count': $item.sharedCount,
-            'comment_count': $item.commentsCount,
-            'liked_count': $item.likedCount,
+            'collectedCount': $item.collectedCount,
+            'sharedCount': $item.sharedCount,
+            'commentsCount': $item.commentsCount,
+            'likedCount': $item.likedCount,
             'predReadnum': $item.predReadnum,
             'createTime': $item.createTime
           }
