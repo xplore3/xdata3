@@ -510,6 +510,9 @@ export class ApiExecution {
       用户相关背景PROFILE为：${userProfile}。
       API参数说明为：${JSON.stringify(api.query_params_desc)}。
       API对应的query_params字段示例如下：【${JSON.stringify(api.query_params_example)}】。
+      query_params须是一个JSON对象，不能是字符串等。
+      query_params须严格遵守参数说明，不能额外加字段或值，如果参数说明对某个字段没有说明范围，则不要填写该字段，保持为空或原值。
+      query_params中的搜索关键词不能太长，一般为用户的产品，不需要带品牌名称，一般是一个词语，不能超过2个词语。
       -----------------------------
     `;
     try {

@@ -1267,101 +1267,6 @@ export class ApiDb {
               "areaV2": ""
             }
           },
-          batchId: "",
-          batchName: "",
-          contentTags: [],
-          custom: {must: [], should: [], mustNot: []},
-          cycle: "30d",
-          dataReq: {
-            "videoPrice": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "picturePrice": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "videoCpe": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "pictureCpe": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "fans": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "likeCollect": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "index": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "likeCollectPercent": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "boomPercent": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "avgLikeCountThirty": {
-              "customizeRange": ""
-            }
-          },
-          fansReq: {
-            distribute: "0, or 1, or empty",
-            province: "省级地域，如北京，须是北京，而不是北京市，只写一个",
-            hobby: `['家居家装', '宠物', '知识', '母婴', '摄影', '资讯', '星座命理', '萌娃', '减肥',
-              '运动健身', '科技数码', '体育赛事', '商业财经', '出行', '汽车', '搞笑', '美妆', '美食测评',
-              '文化', '教育', '兴趣爱好', '生活记录', '社科', '美食教程', '美食', '影视', '娱乐', '游戏',
-              '时尚', '健康', '婚嫁', '素材', '美女帅哥', '潮流', '情感']中的一个或多个`,
-            age: `['<18', '18-24', '25-34', '35-44', '>44']中的一个或多个`
-          },
-          keyword: "Search Keyword, 如红酒",
-          isBrand: "",
-          isContact: "",
-          isGood: "",
-          isLive: "",
-          isRecommend: "",
-          size: 20,
-          sort: "noteCount",
-          start: 1,
-          type: {first: "", second: []},
-          startTime: "",
-          endTime: ""
-        },
-        query_params_example: {
-          baseReq: {
-            "isMCN": "",
-            "gender": "",
-            "redUserLevelName": "",
-            "userAttribute": [],
-            "mostType": "",
-            "identifySign": "",
-            "follow": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "areaSourceIpLocation": {
-              "areaType": "",
-              "areaV1": ""
-            },
-            "areaSourceTagsIp": {
-              "areaType": "",
-              "areaV1": "",
-              "areaV2": ""
-            }
-          },
-          batchId: "",
-          batchName: "",
-          contentTags: [],
-          custom: {must: [], should: [], mustNot: []},
-          cycle: "30d",
           dataReq: {
             "videoPrice": {
               "fixedRange": "",
@@ -1405,11 +1310,89 @@ export class ApiDb {
           },
           fansReq: {
             distribute: "",
-            province: "北京",
-            hobby: ['宠物', '知识'],
-            age: ['<18', '18-24']
+            province: ""
           },
-          keyword: "Search Keyword, 如红酒",
+          keyword: "Search Keyword, 如红酒；只需填写此项，其他都暂不需要填写",
+          isBrand: "",
+          isContact: "",
+          isGood: "",
+          isLive: "",
+          isRecommend: "",
+          size: 20,
+          sort: "noteCount",
+          start: 1,
+          type: {first: "", second: []},
+          startTime: "",
+          endTime: ""
+        },
+        query_params_example: {
+          baseReq: {
+            "isMCN": "",
+            "gender": "",
+            "redUserLevelName": "",
+            "userAttribute": [],
+            "mostType": "",
+            "identifySign": "",
+            "follow": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "areaSourceIpLocation": {
+              "areaType": "",
+              "areaV1": ""
+            },
+            "areaSourceTagsIp": {
+              "areaType": "",
+              "areaV1": "",
+              "areaV2": ""
+            }
+          },
+          dataReq: {
+            "videoPrice": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "picturePrice": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "videoCpe": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "pictureCpe": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "fans": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "likeCollect": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "index": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "likeCollectPercent": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "boomPercent": {
+              "fixedRange": "",
+              "customizeRange": ""
+            },
+            "avgLikeCountThirty": {
+              "customizeRange": ""
+            }
+          },
+          fansReq: {
+            distribute: "",
+            province: ""
+          },
+          keyword: "Labubu",
           isBrand: "",
           isContact: "",
           isGood: "",
