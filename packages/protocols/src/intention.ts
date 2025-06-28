@@ -644,20 +644,45 @@ export class IntentionHandler {
     };
   }
 
-  static async genAIFilterPath(
-    runtime: IAgentRuntime,
-    message: Memory,
-    inputJson: JSON,
-    exception: string = ''
-  ) {
+  static async getTimeStr(question) {
     let timestamp = "1734566400";
+    const now = new Date();
+    const hundredDaysAgo = new Date(now.getTime() - 100 * 24 * 60 * 60 * 1000); // 100 days ago
+    timestamp ="" + Math.floor(hundredDaysAgo.getTime() / 1000);
+
+    const year = now.getFullYear();
+    const month = now.getMonth();
+
+    const strSpring = `${year}/02/03`;
+    const dateSpring = new Date(strSpring);
+    const timestampSpringInSec = Math.floor(dateSpring.getTime() / 1000);
+
+    const strSummer = `${year}/05/05`;
+    const dateSummer = new Date(strSummer);
+    const timestampSummerInSec = Math.floor(dateSummer.getTime() / 1000);
+
+    const strAutumn = `${year}/08/07`;
+    const dateAutumn = new Date(strAutumn);
+    const timestampAutumnInSec = Math.floor(dateAutumn.getTime() / 1000);
+
+    let yearWinter = year;
+    if(month <= 3) {
+        yearWinter = yearWinter - 1;
+    }
+    const strWinter = `${yearWinter}/11/07`;
+    const dateWinter = new Date(strWinter);
+    const timestampWinterInSec = Math.floor(dateWinter.getTime() / 1000);
+
+    const fourSeasonStr = `spring:${timestampSpringInSec}, summer:${timestampSummerInSec}, autumn:${timestampAutumnInSec}, winter:${timestampWinterInSec}`;
+    // console.log("fourSeasonStr: \n " + fourSeasonStr);
     const prompttime = `你当前的任务是从用户的问题中计算出合适的时间戳。
     注意，你当前要处理的工作只是计算时间戳，请你算的精准一下。
     如果用户的问题没有提及时间，请你直接返回：no_time。
-    如果用户的问题中提及时间，请你计算出开始的时间戳。比如：用户提及查询三周以内的数据，那么时间戳应该是三周前的时间。
-    你先根据当前的时间，减去三周的时间，得到三周前的时间。
+    如果用户的问题中提及时间，请你计算出开始的时间戳。
+    规则如下：规则1，用户提及查询三周以内的数据，那么时间戳应该是三周前的时间。你先根据当前的时间，减去三周的时间，得到三周前的时间。
+    规则2，​​如果用户没直接提到时间，而是提到了季节，季节对应时间如下：${fourSeasonStr}。
     今天的时间戳是（秒级）：[TODAY_TIMESTAMP: ${Math.floor(Date.now() / 1000)}]。
-    这是用户的问题，[USER_QUESTION:${message.content.text}]\r\n.
+    这是用户的问题，[USER_QUESTION:${question}]\r\n.
     请你计算好之后直接返回开始的时间戳，或者返回 no_time。
     请你按照思路来计算时间戳，不要直接返回时间戳。
     为了方便我提取时间戳，请你先输出思考过程，最后输出时间戳，时间戳使用[]包裹, 比如[1734566400]或者[no_time。]。
@@ -680,6 +705,17 @@ export class IntentionHandler {
     } catch (err) {
       console.log("timestamp error:", err.message);
     }
+    return timestamp;
+  }
+
+  static async genAIFilterPath(
+    runtime: IAgentRuntime,
+    message: Memory,
+    inputJson: JSON,
+    exception: string = ''
+  ) {
+
+    let timestamp = await IntentionHandler.getTimeStr(message.content.text);
 
     const filterPathExample = `$.[?(@.note && (@.note.collected_count || 0) >= 0 && (@.note.shared_count || 0) >= 0 && (@.note.comments_count || 0) >= 0 && (@.note.liked_count || 0) >= 1 && (@.note.timestamp || 2524579200) >= ${timestamp})]`;
     const filterPathExample1 = `$.[?(@.note_card && (@.note_card.interact_info.liked_count && parseInt(@.note_card.interact_info.liked_count) > 1))]`;
