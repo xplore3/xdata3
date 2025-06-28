@@ -58,7 +58,7 @@ export class IntentionHandler {
           "data_source": "rednote",
           "data_action": "notes_search",
           "keyword": "search key",
-          "request_count": 10, 不要超过100
+          "request_count": 20, 不要超过100
           "filter_desc": "the description of the data filter"
         },
         "data_result": "简短回答",
@@ -176,7 +176,7 @@ export class IntentionHandler {
         "intention_params": {
           "data_source": "rednote",
           "data_action": "notes_search",
-          "request_count": 10,
+          "request_count": 20,
           "filter_desc": "the description of the data filter"
         },
         "data_result": "简短任务描述，不是结果描述",

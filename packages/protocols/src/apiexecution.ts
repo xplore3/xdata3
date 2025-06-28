@@ -134,7 +134,7 @@ export class ApiExecution {
       const api3 = ApiDb.getApi(api.request3);
       for (const item of [...result1, ...result2]) {
         try {
-          const execJson = await this.getApiQueryParam(runtime, message, api2, item);
+          const execJson = await this.getApiQueryParam(runtime, message, api3, item);
           if (execJson) {
             if (execJson.query_params) {
               api3.query_params = execJson.query_params;
@@ -457,7 +457,7 @@ export class ApiExecution {
       根据这些输入，需要给出如下结果：
         {
           "query_params": {json of params},
-          "request_count": 取出的内容的数量，从用户的原输入和参考来源PARAM_SOURCE中提取，默认是10, 不要超过100
+          "request_count": 取出的内容的数量，从用户的原输入和参考来源PARAM_SOURCE中提取，默认是20, 不要超过100
         }.
       关于query_params字段，需满足用户所有需求，且输出参数说明中的项，不能有参数说明之外的项；不是数组，仅仅是一个JSON对象。
       如果query_params的keyword之类的取值不能明显地从用户输入里获取，则需要结合自己的knowledge和背景。

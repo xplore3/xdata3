@@ -313,9 +313,9 @@ export class ApiDb {
         // The Second Request
         request2: 'notes_comment_by_next_page',
       },
-      notes_search_1: {
-        id: 'notes_search_1',
-        backup: 'notes_search_2',
+      notes_search_3: {
+        id: 'notes_search_3',
+        backup: '',
         priority: 1,
         type: 'social-media',
         platform: 'rednote',
@@ -420,9 +420,9 @@ export class ApiDb {
         output: '',
         note: ''
       },
-      notes_search_3: {
-        id: 'notes_search_3',
-        backup: '',
+      notes_search_1: {
+        id: 'notes_search_1',
+        backup: 'notes_search_3',
         priority: 3,
         type: 'social-media',
         platform: 'rednote',
@@ -1102,7 +1102,7 @@ export class ApiDb {
               "customizeRange": ""
             },
             "picturePrice": {
-              "fixedRange": "",
+              "fixedRange": "根据用户输入确定，取值为【<1000，1000-3000，3000-10000，10000-100000，>100000】中的一个",
               "customizeRange": ""
             },
             "videoCpe": {
@@ -1279,7 +1279,7 @@ export class ApiDb {
               "customizeRange": ""
             },
             "picturePrice": {
-              "fixedRange": "",
+              "fixedRange": "根据用户输入确定，取值为【<1000，1000-3000，3000-10000，10000-100000，>100000】中的一个",
               "customizeRange": ""
             },
             "videoCpe": {
