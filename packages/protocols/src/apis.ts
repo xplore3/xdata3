@@ -687,7 +687,7 @@ export class ApiDb {
         description: '用以通过单个小红书账号ID获取该账号的笔记/帖子的列表',
         name: 'notes',
         url: 'https://gw.newrank.cn/api/xh/xdnphb/nr/app/xhs/red/user/detail/noteAna/list',
-        method: 'GET',
+        method: 'POST',
         headers: {
           "Accept": "*/*",
           "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
@@ -716,7 +716,7 @@ export class ApiDb {
           "featureType": "",
           "isHideDelete": "0",
           "isCooperate": "",
-          "title": "",
+          "title": "默认为空，无须填写",
           "size": 20,
           "start": 1,
           "time": "30d",
@@ -1192,7 +1192,7 @@ export class ApiDb {
               "customizeRange": ""
             },
             "picturePrice": {
-              "fixedRange": "根据用户输入确定，取值为【<1000，1000-3000，3000-10000，10000-100000，>100000】中的一个",
+              "fixedRange": "预算，根据用户输入确定，取值为【<1000，1000-3000，3000-10000，10000-100000，>100000】中的一个",
               "customizeRange": ""
             },
             "videoCpe": {
@@ -1369,7 +1369,7 @@ export class ApiDb {
               "customizeRange": ""
             },
             "picturePrice": {
-              "fixedRange": "根据用户输入确定，取值为【<1000，1000-3000，3000-10000，10000-100000，>100000】中的一个",
+              "fixedRange": "预算，根据用户输入确定，取值为【<1000，1000-3000，3000-10000，10000-100000，>100000】中的一个",
               "customizeRange": ""
             },
             "videoCpe": {
@@ -1404,7 +1404,7 @@ export class ApiDb {
             distribute: "",
             province: ""
           },
-          keyword: "Search Keyword, 如红酒；只需填写此项，其他都暂不需要填写",
+          keyword: "Search Keyword, 如红酒；",
           isBrand: "",
           isContact: "",
           isGood: "",
@@ -1446,7 +1446,7 @@ export class ApiDb {
               "customizeRange": ""
             },
             "picturePrice": {
-              "fixedRange": "",
+              "fixedRange": "1000-3000",
               "customizeRange": ""
             },
             "videoCpe": {
