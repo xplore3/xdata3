@@ -951,7 +951,13 @@ export class ApiDb {
           batchId: "",
           batchName: "",
           contentTags: [],
-          custom: {must: [], should: [], mustNot: []},
+          custom: {must: [
+            '//为空，不需要填写'
+          ], should: [
+            '//为空，不需要填写'
+          ], mustNot: [
+            '//为空，不需要填写'
+          ]},
           cycle: "30d",
           dataReq: {
             "videoPrice": {
