@@ -455,7 +455,7 @@ export class ApiDb {
             "type": "",
             "createTime": "30d",
             "contentTags": [],
-            "noteType": ""
+            "noteType": "默认为空，无须填写"
           },
           custom: {must: [], should: [], mustNot: []},
           endTime: "",
