@@ -607,7 +607,7 @@ export class ApiDb {
             'userid': $item.user.userid,
             'title': $item.title,
             'desc': $item.desc,
-            'url': [$item.url, 'https://www.xiaohongshu.com/explore/' + $item.id][0],
+            'url': [$item.url, 'https://www.xiaohongshu.com/explore/' & $item.id][0],
             'type': $item.type,
             'topics': $item.topics,
             'cover': $item.cover,
