@@ -730,8 +730,9 @@ export class IntentionHandler {
         这是用户的问题，[USER_QUESTION:${message.content.text}]\r\n
         需要将给定JSON结构体[DATA_SOURCE: ${JSON.stringify([inputJson])}]进行按照条件过滤 filter；
         filter能给'jsonpath-plus'库(https://github.com/JSONPath-Plus/JSONPath)使用的JSONPath。
-        生成这样表达式：[FILTER_EXAMPLE: ${filterPathExample}]或者[FILTER_EXAMPLE1: ${filterPathExample1}]或者[FILTER_EXAMPLE2: ${filterPathExample2}]
-        另外错误的表达式有：[${filterPathWrongExample}]或者[${filterPathWrongExample1}]或者[${filterPathWrongExample2}]
+        生成这样表达式：[FILTER_EXAMPLE: ${filterPathExample};针对二级结构中的数字]或者[FILTER_EXAMPLE1: ${filterPathExample1}；针对二级结构中的string及时间串]
+          或者[FILTER_EXAMPLE2: ${filterPathExample2}；针对一级结构中的string及时间串]。
+        另外错误的表达式有：[${filterPathWrongExample}；针对二级结构中的string]或者[${filterPathWrongExample1}；针对二级结构中的string]或者[${filterPathWrongExample2}；针对二级结构中的string]
         请认真分析这几个表达式，理解其含义，不同的表达式适用于不同的JSON结构体。
         根据指令要求，需要对collected_count/shared_count/comments_count/likes_count的数量进行过滤。
         用户要求的时间戳 [timestamp: ${timestamp}], 这是在之前的步骤中计算好的, 不需要再做转化，填入表达式中即可 。
