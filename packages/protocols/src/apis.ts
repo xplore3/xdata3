@@ -1150,7 +1150,7 @@ export class ApiDb {
           },
           fansReq: {
             distribute: "0, or 1, or empty",
-            province: "省级地域，如北京，须是北京，而不是北京市，只写一个",
+            province: "为空，不要填写",
             hobby: `['家居家装', '宠物', '知识', '母婴', '摄影', '资讯', '星座命理', '萌娃', '减肥',
               '运动健身', '科技数码', '体育赛事', '商业财经', '出行', '汽车', '搞笑', '美妆', '美食测评',
               '文化', '教育', '兴趣爱好', '生活记录', '社科', '美食教程', '美食', '影视', '娱乐', '游戏',
@@ -1290,7 +1290,7 @@ export class ApiDb {
           },
           fansReq: {
             distribute: "",
-            province: "北京",
+            province: "",
             hobby: ['宠物', '知识'],
             age: ['<18', '18-24']
           },
@@ -1415,7 +1415,7 @@ export class ApiDb {
           },
           fansReq: {
             distribute: "",
-            province: ""
+            province: "为空，不要填写"
           },
           keyword: "Search Keyword, 如红酒；",
           isBrand: "",
