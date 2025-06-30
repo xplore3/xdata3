@@ -459,55 +459,10 @@ export class ApiDb {
             "firstType": "根据用户的背景或输入确定，这个数组[美妆', '美容个护', '鞋包潮玩', '穿搭打扮', '美食', '母婴育儿', '旅游出行', '家居家装', '教育', '生活', '运动健身', '兴趣爱好', '影视综', '婚嫁', '摄影摄像', '萌宠', '情感星座', '科技互联网', '资讯', '健康养生', '科学科普', '职场', '交通工具', '其他']中的一项,或者空；不要有这些项之外的内容",
             "noteType": ""
           },
-          custom: {
-            must: [
-              '//为空，不需要填写'
-            ], should: [
-              '//为空，不需要填写'
-            ], mustNot: [
-              '//为空，不需要填写'
-            ]},
+          custom: {},
           endTime: "",
           filterIncomplete: 0,
-          high: {
-            "isMcn": "",
-            "authorGender": "",
-            "userAttribute": [],
-            "fan": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "likedCollectedCountRange": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "interactiveCountRange": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "likedCountRange": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "collectedCountRange": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "commentsCountRange": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "sharedCountRange": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "predReadnumRange": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "province": "保持为空，不要填写",
-            "city": "保持为空，不要填写"
-          },
+          high: {},
           input: {
             "keyword": "String, keyword for query, 如三伏贴；只需填写此项，其他项都不需要修改",
             "type": [
@@ -538,48 +493,10 @@ export class ApiDb {
             "firstType": "",
             "noteType": ""
           },
-          custom: {must: [], should: [], mustNot: []},
+          custom: {},
           endTime: "",
           filterIncomplete: 0,
-          high: {
-            "isMcn": "",
-            "authorGender": "",
-            "userAttribute": [],
-            "fan": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "likedCollectedCountRange": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "interactiveCountRange": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "likedCountRange": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "collectedCountRange": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "commentsCountRange": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "sharedCountRange": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "predReadnumRange": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "province": "",
-            "city": ""
-          },
+          high: {},
           input: {
             "keyword": "三伏贴",
             "type": [
@@ -1040,118 +957,15 @@ export class ApiDb {
         query_params: {},
         query_params_desc: {
           activeId: "B5F3D1C1BF084B508CEBED4543B5F3D1",
-          baseReq: {
-            "isMCN": "",
-            "gender": "",
-            "redUserLevelName": "",
-            "newShowCityInfo": "",
-            "newShowCityIpInfo": "",
-            "userAttribute": [],
-            "mostType": "",
-            "identifySign": "",
-            "follow": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "lastCreateTime": ""
-          },
+          baseReq: {},
           batchId: "",
           batchName: "",
           contentTags: "//为空，不需要填写；是一个数组[]，根据用户的背景或输入确定，取值范围为['合集', '教程', 'ootd', '测评', '探店', 'vlog', '沉浸式', '仿妆', '彩妆试色', 'plog', '开箱', '成分解析', '日系', '氛围感', '高级感', '校园风', '韩系', '复古', '中性风', '甜酷', '纯欲', '欧美风', '低脂低卡', '自律生活', '职场生活', '极简主义', '露营徒步', '痘痘肌', '黄皮', '敏感肌', '干皮', '白皮', '油皮', '瑕疵皮', '混合肌', '隔离防晒', '保湿补水', '抗老', '控油', '祛痘祛闭口', '祛黄', '眼部护理', '修复', '抗氧化', '美白', '抗炎', '去皱', '淡斑]中的0~5项；不要超过5个，一定不要有这些范围之外的内容。",
-          custom: {must: [
-            '//为空，不需要填写'
-          ], should: [
-            '//为空，不需要填写'
-          ], mustNot: [
-            '//为空，不需要填写'
-          ]},
+          custom: {},
           cycle: "30d",
           dataReq: {
-            "videoPrice": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
             "picturePrice": {
               "fixedRange": "预算，根据用户输入确定，取值为【<1000，1000-3000，3000-10000，10000-100000，>100000】中的一个",
-              "customizeRange": "为空，不要填写"
-            },
-            "videoCpe": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "pictureCpe": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "videoCpm": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "pictureCpm": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "fans": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "likeCollect": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "index": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "avgLikedCountSeven": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "avgLikedCountThirty": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "avgLikedCountSixty": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "avgLikedCountNinety": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "likeCollectPercent": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "boomPercent": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "avgOnlineCountAllThirty": {
-              "customizeRange": "为空，不要填写"
-            },
-            "avgOnlineCountMaxThirty": {
-              "customizeRange": "为空，不要填写"
-            },
-            "avgLikeCountThirty": {
-              "customizeRange": "为空，不要填写"
-            },
-            "avgUserFansAddThirty": {
-              "customizeRange": "为空，不要填写"
-            },
-            "avgSalesVolumeThirty": {
-              "customizeRange": "为空，不要填写"
-            },
-            "avgSalesMoneyThirty": {
-              "customizeRange": "为空，不要填写"
-            },
-            "avgGoodsCountThirty": {
-              "customizeRange": "为空，不要填写"
-            },
-            "avgGoodsPriceThirty": {
-              "customizeRange": "为空，不要填写"
-            },
-            "sumBusinessNotePriceThirty": {
               "customizeRange": "为空，不要填写"
             }
           },
@@ -1186,112 +1000,15 @@ export class ApiDb {
         },
         query_params_example: {
           activeId: "B5F3D1C1BF084B508CEBED4543B5F3D1",
-          baseReq: {
-            "isMCN": "",
-            "gender": "",
-            "redUserLevelName": "",
-            "newShowCityInfo": "",
-            "newShowCityIpInfo": "",
-            "userAttribute": [],
-            "mostType": "",
-            "identifySign": "",
-            "follow": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "lastCreateTime": ""
-          },
+          baseReq: {},
           batchId: "",
           batchName: "",
           contentTags: [],
-          custom: {must: [], should: [], mustNot: []},
+          custom: {},
           cycle: "30d",
           dataReq: {
-            "videoPrice": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
             "picturePrice": {
               "fixedRange": "1000-3000",
-              "customizeRange": ""
-            },
-            "videoCpe": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "pictureCpe": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "videoCpm": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "pictureCpm": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "fans": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "likeCollect": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "index": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "avgLikedCountSeven": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "avgLikedCountThirty": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "avgLikedCountSixty": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "avgLikedCountNinety": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "likeCollectPercent": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "boomPercent": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "avgOnlineCountAllThirty": {
-              "customizeRange": ""
-            },
-            "avgOnlineCountMaxThirty": {
-              "customizeRange": ""
-            },
-            "avgLikeCountThirty": {
-              "customizeRange": ""
-            },
-            "avgUserFansAddThirty": {
-              "customizeRange": ""
-            },
-            "avgSalesVolumeThirty": {
-              "customizeRange": ""
-            },
-            "avgSalesMoneyThirty": {
-              "customizeRange": ""
-            },
-            "avgGoodsCountThirty": {
-              "customizeRange": ""
-            },
-            "avgGoodsPriceThirty": {
-              "customizeRange": ""
-            },
-            "sumBusinessNotePriceThirty": {
               "customizeRange": ""
             }
           },
@@ -1362,62 +1079,11 @@ export class ApiDb {
         },
         query_params: {},
         query_params_desc: {
-          baseReq: {
-            "isMCN": "",
-            "gender": "",
-            "redUserLevelName": "",
-            "userAttribute": [],
-            "mostType": "",
-            "identifySign": "",
-            "follow": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "areaSourceIpLocation": {
-              "areaType": "",
-              "areaV1": ""
-            },
-            "areaSourceTagsIp": {
-              "areaType": "",
-              "areaV1": "",
-              "areaV2": ""
-            }
-          },
+          baseReq: {},
           dataReq: {
-            "videoPrice": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
             "picturePrice": {
               "fixedRange": "预算，根据用户输入确定，取值为【<1000，1000-3000，3000-10000，10000-100000，>100000】中的一个",
               "customizeRange": ""
-            },
-            "videoCpe": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "pictureCpe": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "fans": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "index": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "likeCollectPercent": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "boomPercent": {
-              "fixedRange": "",
-              "customizeRange": "为空，不要填写"
-            },
-            "avgLikeCountThirty": {
-              "customizeRange": "为空，不要填写"
             }
           },
           fansReq: {
@@ -1442,61 +1108,10 @@ export class ApiDb {
           endTime: ""
         },
         query_params_example: {
-          baseReq: {
-            "isMCN": "",
-            "gender": "",
-            "redUserLevelName": "",
-            "userAttribute": [],
-            "mostType": "",
-            "identifySign": "",
-            "follow": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "areaSourceIpLocation": {
-              "areaType": "",
-              "areaV1": ""
-            },
-            "areaSourceTagsIp": {
-              "areaType": "",
-              "areaV1": "",
-              "areaV2": ""
-            }
-          },
+          baseReq: {},
           dataReq: {
-            "videoPrice": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
             "picturePrice": {
               "fixedRange": "1000-3000",
-              "customizeRange": ""
-            },
-            "videoCpe": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "pictureCpe": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "fans": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "index": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "likeCollectPercent": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "boomPercent": {
-              "fixedRange": "",
-              "customizeRange": ""
-            },
-            "avgLikeCountThirty": {
               "customizeRange": ""
             }
           },
