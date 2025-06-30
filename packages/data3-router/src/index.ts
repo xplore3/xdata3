@@ -392,7 +392,7 @@ export class DirectClient {
                 let taskId = req.body.taskId;
                 const origin_input = await TaskHelper.getTaskOriginInput(runtime, taskId);
                 const messageId = stringToUuid(userId + Date.now().toString());
-                console.log(`DataProcess ${taskId}, ${originQuestingText} ${origin_input}`);
+                console.log(`DataProcess ${taskId}, Option: ${fromOptions}, ${originQuestingText}, ${origin_input}`);
 
                 const content: Content = {
                     text: originQuestingText,
