@@ -462,7 +462,24 @@ export class ApiDb {
           custom: {},
           endTime: "",
           filterIncomplete: 0,
-          high: {},
+          high: {
+            "likedCountRange": {
+              "fixedRange": "此项为空，不要填写",
+              "customizeRange": "数量范围，如'100-: 大于100', '100-200: 指100到200之间'"
+            },
+            "collectedCountRange": {
+              "fixedRange": "此项为空，不要填写",
+              "customizeRange": "数量范围，如'100-: 大于100', '100-200: 指100到200之间'"
+            },
+            "commentsCountRange": {
+              "fixedRange": "此项为空，不要填写",
+              "customizeRange": "数量范围，如'100-: 大于100', '100-200: 指100到200之间'"
+            },
+            "sharedCountRange": {
+              "fixedRange": "此项为空，不要填写",
+              "customizeRange": "数量范围，如'100-: 大于100', '100-200: 指100到200之间'"
+            }
+          },
           input: {
             "keyword": "String, keyword for query, 如三伏贴；只需填写此项，其他项都不需要修改",
             "type": [
@@ -496,7 +513,24 @@ export class ApiDb {
           custom: {},
           endTime: "",
           filterIncomplete: 0,
-          high: {},
+          high: {
+            "likedCountRange": {
+              "fixedRange": "",
+              "customizeRange": "100-"
+            },
+            "collectedCountRange": {
+              "fixedRange": "",
+              "customizeRange": "100-200"
+            },
+            "commentsCountRange": {
+              "fixedRange": "",
+              "customizeRange": "200-"
+            },
+            "sharedCountRange": {
+              "fixedRange": "",
+              "customizeRange": "10-300"
+            }
+          },
           input: {
             "keyword": "三伏贴",
             "type": [
