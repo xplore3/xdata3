@@ -1341,11 +1341,11 @@ export class ApiDb {
         execute_sequence: ['koc_image', 'get_note_list'],
       },
     };
-    const apiList1 = await this.getApiFromDb(api_key);
-    console.log('apiList1', apiList1);
-    const api = apiList1[api_key];
+    const api = await this.getApiFromDb(api_key);
+    console.log('api', api);
     if (api && api.execute_depend) {
-      return { ...apiList1[api.execute_sequence[0]], ...api };
+      const apiNext = await this.getApiFromDb(api.execute_sequence[0]);
+      return { ...apiNext, ...api };
     }
     return api;
   }
@@ -1353,7 +1353,7 @@ export class ApiDb {
   static async getAllPlatforms() {
     try {
       const config = {
-        url: `${process.env.API_DB_URL}/api/platforms`,
+        url: `${process.env.API_DB_URL}/api/xdata3/platforms`,
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -1366,7 +1366,7 @@ export class ApiDb {
         return "Error in response " + response.statusText;
       }
 
-      return response.data;
+      return response.data.data;
     } catch (err) {
       console.log(err);
     }
@@ -1376,7 +1376,7 @@ export class ApiDb {
   static async getApiDescByPlatform(platform: string) {
     try {
       const config = {
-        url: `${process.env.API_DB_URL}/api/key-descriptions-by-platform?platform=${platform}`,
+        url: `${process.env.API_DB_URL}/api/xdata3/key-descriptions-by-platform?platform=${platform}`,
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -1389,7 +1389,7 @@ export class ApiDb {
         return "Error in response " + response.statusText;
       }
 
-      return response.data;
+      return response.data.data;
     } catch (err) {
       console.log(err);
     }
@@ -1399,7 +1399,7 @@ export class ApiDb {
   static async getApiFromDb(api_key: string) {
     try {
       const config = {
-        url: `${process.env.API_DB_URL}/api/api-details-by-key?key=${api_key}`,
+        url: `${process.env.API_DB_URL}/api/xdata3/api-details-by-key?key=${api_key}`,
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -1413,11 +1413,12 @@ export class ApiDb {
       }
 
       try {
-        const json = JSON.parse(response.data);
+        const json = JSON.parse(response.data.data);
         return json;
       } catch (err) {
         console.log(err);
       }
+      return response.data.data
     } catch (err) {
       console.log(err);
     }
