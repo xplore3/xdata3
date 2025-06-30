@@ -738,6 +738,113 @@ export class DirectClient {
         );
 
         this.app.post(
+            "/:agentId/datahub",
+            async (req: express.Request, res: express.Response) => {
+                const agentId = req.params.agentId;
+                const username = req.body.userId ?? "user";
+                const taskWaitMode = req.body.taskWaitMode;
+                const userId = stringToUuid(username);
+                const roomId = stringToUuid("default-data-room-" + username);
+
+                let runtime = this.agents.get(agentId);
+
+                // if runtime is null, look for runtime with the same name
+                if (!runtime) {
+                    runtime = Array.from(this.agents.values()).find(
+                        (a) =>
+                            a.character.name.toLowerCase() ===
+                            agentId.toLowerCase()
+                    );
+                }
+
+                if (!runtime) {
+                    res.status(404).send("Agent not found");
+                    return;
+                }
+
+                await runtime.ensureConnection(
+                    userId,
+                    roomId,
+                    req.body.userName,
+                    req.body.name,
+                    "direct"
+                );
+
+                const originText = req.body.text;
+                const messageId = stringToUuid(userId + Date.now().toString());
+
+                const content: Content = {
+                    text: originText,
+                    intention: {},
+                    // attachments,
+                    attachments: [],
+                    source: "direct",
+                    inReplyTo: undefined,
+                };
+
+                const userMessage = {
+                    content,
+                    userId,
+                    roomId,
+                    agentId: runtime.agentId,
+                };
+
+                const memory: Memory = {
+                    id: messageId,
+                    ...userMessage,
+                    agentId: runtime.agentId,
+                    userId,
+                    roomId,
+                    content,
+                    createdAt: Date.now(),
+                };
+
+                await runtime.messageManager.createMemory(memory);
+
+                let state = await runtime.composeState(userMessage, {
+                    agentName: runtime.character.name,
+                });
+
+                let responseStr = await IntentionHandler.handleDataHub(runtime, memory);
+
+                const parsedContent: Content = {
+                    text: responseStr,
+                    // attachments,
+                    attachments: [],
+                    source: "direct",
+                    inReplyTo: messageId,
+                };
+
+                if (!parsedContent) {
+                    res.status(500).send(
+                        "No response from generateMessageResponse"
+                    );
+                    return;
+                }
+
+                // save response to memory
+                const responseMessage: Memory = {
+                    id: messageId,
+                    ...userMessage,
+                    userId: userId,
+                    content: parsedContent,
+                    embedding: getEmbeddingZeroVector(),
+                    createdAt: Date.now(),
+                };
+
+                await runtime.messageManager.createMemory(responseMessage);
+
+                state = await runtime.updateRecentMessageState(state);
+                res.json({
+                    user: "Data3",
+                    text: responseStr,
+                    action: "NONE",
+                });
+                return;
+            }
+        );
+
+        this.app.post(
             "/:agentId/download",
             // upload.single("file"),
             async (req: express.Request, res: express.Response) => {

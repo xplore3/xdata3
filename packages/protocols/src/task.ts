@@ -18,6 +18,7 @@ import { extractJson } from "./utils";
 const TASK_ORIGIN_INPUT_CACHE_KEY = "_task_cache_";
 const TASK_OPTION_CACHE_KEY = "_task_option_cache_";
 const TASK_STATUS_KEY = "_task_status_cache_";
+const TASK_PLATFORM_KEY = "_task_platform_cache_";
 
 export class TaskHelper {
   //userId: string = null;
@@ -120,6 +121,30 @@ export class TaskHelper {
     }
     catch (err) {
       console.log(`getTaskStatus ${taskId}`);
+      console.error(err);
+    }
+    return "";
+  }
+
+  static async setTaskPlatform(runtime: IAgentRuntime, taskId: string, text: string) {
+    try {
+      if (!taskId) {
+        return;
+      }
+      await this.setCachedData(runtime, TASK_PLATFORM_KEY + taskId, text);
+    }
+    catch (err) {
+      console.log(`setTaskPlatform ${taskId}`);
+      console.error(err);
+    }
+  }
+
+  static async getTaskPlatform(runtime: IAgentRuntime, taskId: string): Promise<string> {
+    try {
+      return await this.getCachedData(runtime, TASK_PLATFORM_KEY + taskId);
+    }
+    catch (err) {
+      console.log(`getTaskPlatform ${taskId}`);
       console.error(err);
     }
     return "";

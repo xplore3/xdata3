@@ -9,7 +9,6 @@ import {
   getDynamicTail,
   appendToChatCache,
 } from "./filehelper";
-import APIWrapperFactory from "./apiwrapper";
 import { ApiDb } from "./apis";
 import { extractJson } from "./utils"
 import { ApiExecution } from "./apiexecution";
@@ -29,117 +28,54 @@ export class IntentionHandler {
    * @param {string} 
    * @returns {Promise<string>[]} 
    */
-  static async handleDataCollect(
+  static async analysisDataPlatform(
     runtime: IAgentRuntime,
     message: Memory,
     existData: string = '',
-  ): Promise<string> {
-    const intention_examples = UserKnowledge.getUserIntentionExamples(message.userId);
-    console.log(intention_examples);
-    const my_data_platform = ApiDb.getUserDataPlatform(message.userId);
-    const my_data_source = ApiDb.getUserDataSource(message.userId);
-    const my_data_bucket = await ApiDb.getUserDataBucket(message.userId);
+  ): Promise<any> {
+    const my_data_platforms = await ApiDb.getUserDataPlatform(message.userId);
     const prompt = `
-      你是一个数据获取专家，进行数据API调用的程序员，能够基于用户的输入，找到合适的可调用的API，并将API的结果集根据用户的需求进行过滤、精简、排序等一系列的操作，从而输出给用户结构化的，满足用户要求的数据。
-      主要有如下一些情况：
-        (1). 如果用户的输入里，除了有进行数据获取的需求外，还有其他需求，则将这些需求以意图选项的形式输出出来。
-        (2). 如果用户的输入里，不包含数据获取的内容，则将这些内容进行拆解，找到其中的意图选项，输出出来。
-        (3). 如果用户的输入里，既不包含数据获取需求，也没有明确的数据处理意图，也无其他意图，则参考最近的消息，给出相关的意图选项。
-        (4). 如果用户的输入跟数据获取或数据处理都没有关系，则参考上下文给出简短回答，且不需要意图选项。
+      你是一个数据获取专家，能够基于用户的输入，获取到用户请求的数据平台是哪个。
       用户输入：${message.content.text}.
-      可用数据平台：${my_data_platform}。
-      可用数据获取API：${my_data_source}。
-      各个API的数据结果示例：${my_data_bucket}。
-      已有数据：${existData}。
+      可用数据平台：${my_data_platforms}。
       -----------------------------
-      你需要输出如下：
-      {
-        "intention_params": {
-          "data_source": "rednote",
-          "data_action": "notes_search",
-          "keyword": "search key",
-          "request_count": 20, 不要超过100
-          "filter_desc": "the description of the data filter"
-        },
-        "data_result": "简短回答",
-        "intention_options": ["使用数据的意图1", "使用数据的意图2", "......"],
+      输出格式如下：{
+        "platform": 'platform key',
+        "platform_count": "用户输入中的数据平台数量"
       }
       输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
-      intention_params的keyword如果不能明显地从用户输入里获取，则需要结合自己的knowledge和背景。
-      data_result不要包含API/接口字样，需要使用非开发人员能够理解的语言。
-      data_action的可选项是各个可用的API列表my_data_source中的关键字，如果不在这个列表里，输出为others。
-      intention_options是根据用户输入而得出的选项，以用户明确输入的选项为优先，
-          且结合用户自身的产品和背景（不要有‘搜索小红书笔记’这样的选项，需要是‘搜索小红书关于***的笔记’），
-          其数量约为5~10个，其可参考的示例如下：【${intention_examples}】；
+      主要有如下一些情况：
+        (1). 如果用户的输入里，只有一个数据平台，则输出：{
+          "platform": 'platform key',
+          "platform_count": 1
+        };
+        (2). 如果用户的输入里，有多个数据平台，则输出：{
+          "platform": 'the first platform key',
+          "platform_count": "用户输入中的数据平台数量"
+        };
+        (3). 如果用户的输入里，没有指定的这些数据平台，则输出：{
+          "platform": 'others',
+          "platform_count": 0
+        };
+      platform不要有指定数据平台范围外的数据。
+      输出示例如下：{
+        "platform": 'rednote',
+        "platform_count": 1
+      }
       -----------------------------
     `;
     try {
       let response = await generateText({
         runtime,
-        context: await UserKnowledge.composePrompt(runtime, prompt, message.userId),
+        context: prompt,
         modelClass: ModelClass.LARGE,
       });
       console.log(response);
-      //response = response.replace(/```json/g, "") .replace(/```/g, "");
       let execJson = extractJson(response);
-      const txtfilelist = [];
-      const excelfilelist = [];
-      const results = [];
-      const taskId = message.content.intention?.taskId || "";
-      if (execJson && execJson.intention_params) {
-        let execParam = execJson.intention_params;
-        {
-          if (execParam.data_action && execParam.data_action != 'others') {
-            const { result, txtfilename, excelfilename } = await APIWrapperFactory.executeRequest(
-              runtime, execParam, message);
-            if (result && result.length > 0) {
-              results.push(result);
-              const filename = taskId + TaskHelper.TASK_DATA_CACHE_FILE;
-              appendToChatCache(JSON.stringify(result), filename, (err) => {
-                console.error("Custom error handling:", err);
-              });
-            }
-            // console.log(`return after, len: ${result.length}, txt: ${txtfilename} , excel: ${excelfilename}`);  
-            if (txtfilename) {
-              if (Array.isArray(txtfilename)) {
-                for (const item of txtfilename) {
-                  if (item)
-                    txtfilelist.push(item);
-                }
-              } else {
-                txtfilelist.push(txtfilename);
-              }
-            }
-            if (excelfilename) {
-              if (Array.isArray(excelfilename)) {
-                for (const item of excelfilename) {
-                  if (item)
-                    excelfilelist.push(item);
-                }
-              } else {
-                excelfilelist.push(excelfilename);
-              }
-            }
-          }
-        }
-        // execJson.data_result = "";
-        // execJson.data_result += getDynamicTail(taskId);
-        if (results.length > 0 && txtfilelist.length > 0) {
-          execJson.data_result += getDynamicTail(txtfilelist, excelfilelist);
-        }
-        else {
-          execJson.data_result = "哎呀，这个数据源我暂时无法获取，你可以稍后重试，或回复【人工】联系工程师帮你添加支持~";
-          execJson.intention_options = [];
-        }
-        execJson.taskId = taskId;
+      if (execJson) {
+        return execJson;
       }
-      else if (execJson) {
-        execJson.taskId = taskId;
-      }
-      else {
-        execJson = response;
-      }
-      return execJson;
+      return response;
     } catch (err) {
       console.log(err);
     }
@@ -155,8 +91,28 @@ export class IntentionHandler {
     message: Memory,
     existData: string = '',
   ): Promise<string> {
-    const my_data_platform = ApiDb.getUserDataPlatform(message.userId);
-    const my_data_source = ApiDb.getUserDataSource(message.userId);
+    let my_data_platform = process.env.FIX_PLATFORM || '';
+    if (!my_data_platform || my_data_platform == '') {
+      const analysisJson = await this.analysisDataPlatform(runtime, message, existData);
+      if (analysisJson && analysisJson.platform && analysisJson.platform != 'others') {
+        my_data_platform = analysisJson.platform;
+      }
+      else if (analysisJson && analysisJson.platform == 'others') {
+        my_data_platform = '';
+      }
+    }
+    if (!my_data_platform || my_data_platform == '') {
+        const taskId = message.content.intention?.taskId || "";
+        const data_result = "哎呀，无法获知你要操作的数据平台，请明确说明，或回复【人工】获取支持~";
+        const analysisJson = {
+          data_result: data_result,
+          intention_options: [],
+        };
+        await TaskHelper.setTaskStatus(runtime, taskId, JSON.stringify(analysisJson), true);
+        return JSON.stringify(analysisJson);
+    }
+    //const my_data_platform = await ApiDb.getUserDataPlatform(message.userId);
+    const my_data_source = await ApiDb.getUserDataSource(my_data_platform, message.userId);
     const intention_examples = UserKnowledge.getUserIntentionExamples(message.userId);
     const prompt = `
       你是一个程序员兼产品经理，能根据用户的请求，提取出其数据获取需求，并根据可用API列表给出其需要调用的API。
@@ -165,7 +121,7 @@ export class IntentionHandler {
         (2). 如果用户的输入里，不包含数据获取的内容，则将这些内容进行拆解，找到其中的意图选项，输出出来。
         (3). 如果用户的输入里，既不包含数据获取需求，也没有明确的数据处理意图，也无其他意图，则参考最近的消息，给出相关的意图选项。
         (4). 如果用户的输入跟数据获取或数据处理都没有关系，则参考上下文给出简短回答，且不需要意图选项。
-        (5). 如果用户需要获取的数据在可用数据源${my_data_platform}及${my_data_source}里不存在，则data_result须提示用户不存在这些数据，稍后会提供，请用户耐心等待；intention_params和intention_options为空。
+        (5). 如果用户需要获取的数据在可用数据源${my_data_source}里不存在，则data_result须提示用户不存在这些数据，稍后会提供，请用户耐心等待；intention_params和intention_options为空。
       用户输入：${message.content.text}.
       可用数据平台：${my_data_platform}。
       可用数据源/数据获取API：${my_data_source}。
@@ -242,8 +198,7 @@ export class IntentionHandler {
     data_desc: string,
     api_desc: string
   ): Promise<string> {
-    const userInput = `${message.content.text}`;
-    const api = ApiDb.getApi(api_desc);
+    const api = await ApiDb.getApi(api_desc);
     try {
       const txtfilelist = [];
       const excelfilelist = [];
@@ -313,7 +268,8 @@ export class IntentionHandler {
   ): Promise<string> {
     const taskId = message.content?.intention?.taskId;
     const userInput = `根据已有数据，${message.content.text}`;
-    const my_data_source = ApiDb.getUserDataSource(message.userId);
+    const platform = await TaskHelper.getTaskPlatform(runtime, taskId);
+    const my_data_source = ApiDb.getUserDataSource(platform, message.userId);
     const attachment = TaskHelper.getTaskAttachment(taskId);
     const intention_examples = UserKnowledge.getUserIntentionExamples(message.userId);
     const userProfile = await UserKnowledge.getUserKnowledge(runtime, message.userId);
@@ -867,6 +823,86 @@ export class IntentionHandler {
       console.log(err);
     }
     return flatExample;
+  }
+
+  /**
+   * 
+   * @param {string} 
+   * @returns {Promise<string>[]} 
+   */
+  static async handleDataHub(
+    runtime: IAgentRuntime,
+    message: Memory
+  ): Promise<string> {
+    let data_platform = '';
+    const analysisJson = await this.analysisDataPlatform(runtime, message);
+    if (analysisJson && analysisJson.platform && analysisJson.platform != 'others') {
+      data_platform = analysisJson.platform;
+    }
+    else if (analysisJson && analysisJson.platform == 'others') {
+      data_platform = '';
+    }
+    if (!data_platform || data_platform == '') {
+        const data_result = "哎呀，无法获知你要操作的数据平台，请明确说明，或回复【人工】获取支持~";
+        const analysisJson = {
+          data_result: data_result,
+          intention_options: [],
+        };
+        return JSON.stringify(analysisJson);
+    }
+    const my_data_source = await ApiDb.getUserDataSource(data_platform, message.userId);
+    const prompt = `
+      你是一个程序员兼产品经理，能根据用户的请求，提取出其数据获取需求，并根据可用API列表给出其需要调用的API。
+      主要有如下一些情况：
+        (1). 如果用户的输入里，有进行数据获取的需求，则将这些需求以data_params的形式输出出来。
+        (2). 如果用户的输入里，不包含数据获取的内容，则参考上下文给出简短回答。
+        (5). 如果用户需要获取的数据在可用数据源${my_data_source}里不存在，则data_result须提示用户不存在这些数据，稍后会提供，请用户耐心等待；此时data_params为空。
+      用户输入：${message.content.text}。
+      可用数据源/数据获取API：${my_data_source}。
+      -----------------------------
+      你需要输出如下：
+      {
+        "data_params": {
+          "data_source": "rednote",
+          "data_action": "notes_search",
+        },
+        "data_result": "简短任务描述，不是结果描述"
+      }
+      输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
+      data_result不要包含API/接口字样，需要使用非开发人员能够理解的语言，只是任务描述，不是数据结果。
+      data_action的可选项是各个可用的API列表中的关键字，如果不在这个列表里，输出为others。
+      -----------------------------
+    `;
+    try {
+      let response = await generateText({
+        runtime,
+        context: await UserKnowledge.composePrompt(runtime, prompt, message.userId),
+        modelClass: ModelClass.LARGE,
+      });
+      console.log(response);
+      let execJson = extractJson(response);
+      const taskId = message.content.intention?.taskId || "";
+      if (execJson && execJson.data_params) {
+        let execParam = execJson.data_params;
+        if (execParam.data_action && execParam.data_action != 'others') {
+          const api = await ApiDb.getApi(execParam.data_action);
+          let json = await ApiExecution.getApiQueryParam(runtime, message, api, '');
+          if (json) {
+            execJson.data_result = await ApiExecution.executeApiRaw(runtime, message, api);
+          }
+        }
+        execJson.taskId = taskId;
+      }
+      else if (execJson) {
+        execJson.taskId = taskId;
+      }
+      else {
+        execJson = response;
+      }
+      return execJson;
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   static flattenJSON(obj: any,
