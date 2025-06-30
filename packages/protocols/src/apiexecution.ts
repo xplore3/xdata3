@@ -34,8 +34,8 @@ export class ApiExecution {
 
   static async executeApiChainLoop(runtime: IAgentRuntime, message: Memory, api: JSON | any, totalCount: number): Promise<any> {
     if (api && api.execute_depend && api.execute_depend === 'chain_loop') {
-      const api1 = ApiDb.getApi(api.request1);
-      const api2 = ApiDb.getApi(api.request2);
+      const api1 = ApiDb.getApi(api.execute_sequence[0]);
+      const api2 = ApiDb.getApi(api.execute_sequence[1]);
       api1.query_params = api.query_params;
       const result = await this.executeApi(runtime, message, api1, totalCount);
       const result2 = [];
@@ -82,8 +82,8 @@ export class ApiExecution {
       }
     }
     else if (api && api.execute_depend && api.execute_depend === 'chain') {
-      const api1 = ApiDb.getApi(api.request1);
-      const api2 = ApiDb.getApi(api.request2);
+      const api1 = ApiDb.getApi(api.execute_sequence[0]);
+      const api2 = ApiDb.getApi(api.execute_sequence[1]);
       api1.query_params = api.query_params;
       api2.query_params = api.query_params;
       const result = await this.executeApi(runtime, message, api1, totalCount);
@@ -113,8 +113,8 @@ export class ApiExecution {
       }
     }
     else if (api && api.execute_depend && api.execute_depend === 'chain_new_param') {
-      const api1 = ApiDb.getApi(api.request1);
-      const api2 = ApiDb.getApi(api.request2);
+      const api1 = ApiDb.getApi(api.execute_sequence[0]);
+      const api2 = ApiDb.getApi(api.execute_sequence[1]);
       let result1 = [];
       let result2 = [];
       let result3 = [];
@@ -131,7 +131,7 @@ export class ApiExecution {
         result2 = await this.executeApi(runtime, message, api2, execCount);
       }
 
-      const api3 = ApiDb.getApi(api.request3);
+      const api3 = ApiDb.getApi(api.execute_sequence[2]);
       for (const item of [...result1, ...result2]) {
         try {
           const execJson = await this.getApiQueryParam(runtime, message, api3, item);

@@ -294,10 +294,8 @@ export class ApiDb {
         name: 'notes_comments',
         // Excute Data Dependency
         execute_depend: 'chain_loop', // ['chain', 'chain_loop']
-        // The First Request
-        request1: 'notes_search',
-        // The Second Request
-        request2: 'notes_comment_by_next_page',
+        // The Request Sequence
+        execute_sequence: ['notes_search', 'notes_comment_by_next_page'],
       },
       fetch_notes_and_comments_by_keyword: {
         id: 'fetch_notes_and_comments_by_keyword',
@@ -309,10 +307,8 @@ export class ApiDb {
         name: 'notes_comments',
         // Excute Data Dependency
         execute_depend: 'chain_loop', // ['chain', 'chain_loop']
-        // The First Request
-        request1: 'notes_search',
-        // The Second Request
-        request2: 'notes_comment_by_next_page',
+        // The Request Sequence
+        execute_sequence: ['notes_search', 'notes_comment_by_next_page'],
       },
       notes_search_3: {
         id: 'notes_search_3',
@@ -1300,10 +1296,8 @@ export class ApiDb {
         name: 'toptrend',
         // Excute Data Dependency
         execute_depend: 'chain', // ['chain', 'chain_loop']
-        // The First Request
-        request1: 'hot_words',
-        // The Second Request
-        request2: 'topic_rank',
+        // The Request Sequence
+        execute_sequence: ['hot_words', 'topic_rank'],
       },
       koc_imitate: {
         id: 'koc_imitate',
@@ -1315,12 +1309,8 @@ export class ApiDb {
         name: 'KocAnalysis',
         // Excute Data Dependency
         execute_depend: 'chain_new_param', // ['chain', 'chain_loop']
-        // The First Request
-        request1: 'koc_search',
-        // The Second Request
-        request2: 'user_search_by_content',
-        // The 3rd Request
-        request3: 'get_note_list',
+        // The Request Sequence
+        execute_sequence: ['koc_search', 'user_search_by_content', 'get_note_list'],
       },
       koc_evaluate: {
         id: 'koc_evaluate',
@@ -1332,15 +1322,13 @@ export class ApiDb {
         name: 'KocEvaluate',
         // Excute Data Dependency
         execute_depend: 'chain_loop', // ['chain', 'chain_loop']
-        // The First Request
-        request1: 'koc_image',
-        // The Second Request
-        request2: 'get_note_list',
+        // The Request Sequence
+        execute_sequence: ['koc_image', 'get_note_list'],
       },
     };
     const api = apiList[api_desc];
     if (api && api.execute_depend) {
-      return { ...apiList[api.request1], ...api };
+      return { ...apiList[api.execute_sequence[0]], ...api };
     }
     return api;
   }
