@@ -139,20 +139,20 @@ export class MemoryManager implements IMemoryManager {
         opts: {
             match_threshold?: number;
             count?: number;
-            roomId: UUID;
+            userId: UUID;
             unique?: boolean;
         }
     ): Promise<Memory[]> {
         const {
             match_threshold = defaultMatchThreshold,
             count = defaultMatchCount,
-            roomId,
+            userId,
             unique,
         } = opts;
 
         const result = await this.runtime.databaseAdapter.searchMemories({
             tableName: this.tableName,
-            roomId,
+            userId,
             agentId: this.runtime.agentId,
             embedding: embedding,
             match_threshold: match_threshold,
@@ -194,6 +194,15 @@ export class MemoryManager implements IMemoryManager {
             tableName: this.tableName,
             agentId: this.runtime.agentId,
             roomIds: params.roomIds,
+            limit: params.limit
+        });
+    }
+
+    async getMemoriesByUserId(params: { userId: UUID, limit?: number; }): Promise<Memory[]> {
+        return await this.runtime.databaseAdapter.getMemoriesByUserId({
+            tableName: this.tableName,
+            agentId: this.runtime.agentId,
+            userId: params.userId,
             limit: params.limit
         });
     }

@@ -17,10 +17,16 @@ import {
     type Media,
     type Memory,
     type Plugin,
+    type UUID,
     generateText,
+    parseJSONObjectFromText,
 } from "@data3os/agentcontext";
 
+import { mdToPdf } from "md-to-pdf";
+
 import {
+    IntentionHandler,
+    TaskHelper,
     getProtocolArray,
     updateProtocolArray,
     handleProtocolsForPrompt,
@@ -41,8 +47,9 @@ import { z } from "zod";
 import { createApiRouter } from "./api.ts";
 import { createVerifiableLogApiRouter } from "./verifiable-log-api.ts";
 import { WechatHandler } from "./wechat.ts";
-import { PromptTemplates } from "./promts.ts";
+import { PromptController } from "./promts.ts";
 import { fileURLToPath } from "url";
+import { exceptionHandler, parseToken } from "./auth.ts";
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -129,6 +136,38 @@ Response format should be formatted in a JSON block like this:
 \`\`\`
 `;
 
+export const dataHandlerTemplate = `
+##
+Some additional information about the task:
+#####################################
+# Knowledge
+{{knowledge}}
+
+# Task: Generate dialog and actions for the character {{agentName}}.
+About {{agentName}}:
+{{bio}}
+{{lore}}
+
+{{providers}}
+
+{{attachments}}
+
+{{recentMessages}}
+#####################################
+`;
+// Note(Important) : The message list is too long and may be trimmed sometimes.
+// So put the messages({{recentMessages}}) at the end, trim some old ones and keep the new ones.
+// Prioritize removing messages over other fields.
+
+
+function stringToHash4(str) {
+    let hash = 0;
+    for (let char of str) {
+        const code = char.codePointAt(0);
+        hash = (hash * 31 + code) % 10000;
+    }
+    return hash.toString().padStart(4, "0");
+}
 export class DirectClient {
     public app: express.Application;
     public agents: Map<string, IAgentRuntime>; // container management
@@ -137,11 +176,57 @@ export class DirectClient {
     public loadCharacterTryPath: Function; // Store loadCharacterTryPath functor
     public jsonToCharacter: Function; // Store jsonToCharacter functor
     public concurrentNum: number;
+    private onlineUsers = new Map();
 
     constructor() {
         data3Logger.log("DirectClient constructor");
         this.concurrentNum = 0;
         this.app = express();
+        this.app.use(exceptionHandler);
+        const ONLINE_THRESHOLD = 24 * 60 * 60 * 1000;
+        this.app.use((req, res, next) => {
+            // const userIP = req.ip;
+            const userIP = req.headers["x-real-ip"];
+            if (userIP) {
+                const now = Date.now();
+                for (const [uIP, lastActiveTime] of this.onlineUsers) {
+                    if (now - lastActiveTime > ONLINE_THRESHOLD) {
+                        this.onlineUsers.delete(uIP);
+                    }
+                }
+                this.onlineUsers.set(userIP, now);
+                console.log(
+                    `APM time ${new Date(now).toLocaleString()}, current online users: ${this.onlineUsers.size} user ip ${userIP}`
+                );
+            }
+            next();
+        });
+        this.app.use((req, res, next) => {
+            const start = Date.now();
+            // TODO: verify token for security
+            // if (!this.validateToken(req)) {
+            //     res.status(401).json({
+            //         code: 401,
+            //         message: "Token is invalid or expired",
+            //     });
+            //     return;
+            // }
+            res.on("finish", () => {
+                const duration = Date.now() - start;
+                if (duration > 1000) {
+                    // this is not a error, but a highly warning
+                    console.error(
+                        `APM Method: ${req.method}, API: ${req.url} - time: ${duration} ms`
+                    );
+                } else {
+                    console.log(
+                        `APM Method: ${req.method}, API: ${req.url} - time: ${duration} ms`
+                    );
+                }
+            });
+            next();
+        });
+
         this.app.use(cors());
         this.app.use((req, res, next) => {
             // const userIP = req.ip;
@@ -165,6 +250,38 @@ export class DirectClient {
         this.app.use(
             "/media/uploads",
             express.static(path.join(process.cwd(), "/data/uploads"))
+        );
+        const aifilepath = path.join(process.cwd(), "/files");
+        this.app.use((req, res, next) => {
+            console.log("req.path:  " + req.path);
+            if(req.path.indexOf("/media/files") === -1) {
+                next();
+                return;
+            }
+            const fullPath = req.path;
+            const basePath = "/media/files";
+            const newPath = path.relative(basePath, fullPath);
+            const filePath = path.join(process.cwd(), "files", newPath);
+            console.log("fix path:  " + filePath);
+            if(fs.existsSync(filePath) === false) {
+                res.status(404).send("File not found");
+                return;
+            }
+
+            fs.stat(filePath, (err, stats) => {
+                if (err) return next(err);
+                const now = Date.now();
+                const fileAge = now - stats.mtimeMs;
+                if (fileAge > 3 * 24 * 3600000) {
+                    res.status(403).send("文件已过期");
+                } else {
+                    next();
+                }
+            });
+        });
+        this.app.use(
+            "/media/files",
+            express.static(aifilepath)
         );
         this.app.use(
             "/media/generated",
@@ -226,25 +343,25 @@ export class DirectClient {
         );
 
         this.app.post(
-            "/:agentId/message",
+            "/:agentId/data_process",
             upload.single("file"),
             async (req: express.Request, res: express.Response) => {
-                const maxNum = 1;
+                const maxNum = 10;
                 if (this.concurrentNum >= maxNum) {
                     res.json({
-                        user: "Data3",
-                        text: "sever is busy, try latter.",
+                        user: "agent",
+                        text: "系统正在处理，有些繁忙，请稍后再试~~",
                         taskId: "",
                         action: "NONE",
                     });
                     return;
                 }
-                this.concurrentNum ++;
                 const agentId = req.params.agentId;
-                const roomId = stringToUuid(
-                    req.body.roomId ?? "default-room-" + agentId
-                );
-                const userId = stringToUuid(req.body.userId ?? "user");
+                const username = req.body.userId ?? "user";
+                const userId = stringToUuid(username);
+                const roomId = stringToUuid("default-data-room-" + username);
+                const fromOptions = req.body.fromOptions;
+                const taskWaitMode = req.body.taskWaitMode;
 
                 let runtime = this.agents.get(agentId);
 
@@ -261,6 +378,193 @@ export class DirectClient {
                     res.status(404).send("Agent not found");
                     return;
                 }
+                this.concurrentNum++;
+
+                await runtime.ensureConnection(
+                    userId,
+                    roomId,
+                    req.body.userName,
+                    req.body.name,
+                    "direct"
+                );
+
+                const originQuestingText = req.body.text;
+                let taskId = req.body.taskId;
+                const origin_input = await TaskHelper.getTaskOriginInput(runtime, taskId);
+                const messageId = stringToUuid(userId + Date.now().toString());
+                console.log(`DataProcess ${taskId}, ${originQuestingText} ${origin_input}`);
+
+                const content: Content = {
+                    text: originQuestingText,
+                    intention: {
+                        taskId
+                    },
+                    // attachments,
+                    attachments: [],
+                    source: "direct",
+                    inReplyTo: undefined,
+                };
+
+                const userMessage = {
+                    content,
+                    userId,
+                    roomId,
+                    agentId: runtime.agentId,
+                };
+
+                const memory: Memory = {
+                    id: messageId,
+                    ...userMessage,
+                    agentId: runtime.agentId,
+                    userId,
+                    roomId,
+                    content,
+                    createdAt: Date.now(),
+                };
+
+                await runtime.messageManager.createMemory(memory);
+
+                let state = await runtime.composeState(userMessage, {
+                    agentName: runtime.character.name,
+                });
+
+                let newTask = false;
+                if (taskId && !fromOptions) {
+                    newTask = !(await TaskHelper.checkNewTask(runtime, memory, taskId));
+                }
+                else if (!taskId) {
+                    newTask = true;
+                }
+                let responseStr = null;
+                if (newTask) {
+                    taskId = await TaskHelper.generateTaskId();
+                    memory.content.intention.taskId = taskId;
+                    if (!taskWaitMode) {
+                        const quickJson = await TaskHelper.quickResponse(runtime, memory);
+                        if (quickJson && quickJson.quick) {
+                            responseStr = quickJson.response;
+                            await TaskHelper.setTaskStatus(runtime, taskId, '', true);
+                        }
+                        else {
+                            await TaskHelper.setTaskStatus(runtime, taskId, quickJson.response, false);
+                            setTimeout(async () => {
+                                try {
+                                    await IntentionHandler.handleDataCollectAPI(runtime, memory);
+                                } catch (err) {
+                                    console.error('Background error ', err);
+                                }
+                            }, 10);
+                            //responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
+                            responseStr = quickJson.response + `\r\n\r\n任务【${taskId}】已开始执行，预计需要几分钟，请耐心等待`;
+                        }
+                    }
+                    else {
+                        responseStr = await IntentionHandler.handleDataCollectAPI(runtime, memory);
+                    }
+                }
+                else {
+                    await TaskHelper.setTaskOriginInput(runtime, taskId, originQuestingText);
+                    if (!taskWaitMode) {
+                        const quickJson = await TaskHelper.quickResponse(runtime, memory);
+                        if (quickJson && quickJson.quick) {
+                            responseStr = quickJson.response;
+                            await TaskHelper.setTaskStatus(runtime, taskId, '', true);
+                        }
+                        else {
+                            await TaskHelper.setTaskStatus(runtime, taskId, quickJson.response, false);
+                            setTimeout(async () => {
+                                try {
+                                    await IntentionHandler.handleDataProcess(runtime, memory, origin_input);
+                                } catch (err) {
+                                    console.error('Background error ', err);
+                                }
+                            }, 10);
+                            //responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
+                            responseStr = quickJson.response + `\r\n\r\n任务【${taskId}】已开始执行，预计需要几分钟，请耐心等待`;
+                        }
+                    }
+                    else {
+                        responseStr = await IntentionHandler.handleDataProcess(runtime, memory, origin_input);
+                    }
+                }
+                this.concurrentNum--;
+
+                const parsedContent: Content = {
+                    text: responseStr,
+                    // attachments,
+                    attachments: [],
+                    source: "direct",
+                    inReplyTo: messageId,
+                };
+
+                if (!parsedContent) {
+                    res.status(500).send(
+                        "No response from generateMessageResponse"
+                    );
+                    return;
+                }
+
+                // save response to memory
+                const responseMessage: Memory = {
+                    id: messageId,
+                    ...userMessage,
+                    userId: userId,
+                    content: parsedContent,
+                    embedding: getEmbeddingZeroVector(),
+                    createdAt: Date.now(),
+                };
+
+                await runtime.messageManager.createMemory(responseMessage);
+
+                state = await runtime.updateRecentMessageState(state);
+                res.json({
+                    user: "Data3",
+                    text: responseStr,
+                    taskId,
+                    action: "NONE",
+                });
+            }
+        );
+
+        this.app.post(
+            "/:agentId/message",
+            upload.single("file"),
+            async (req: express.Request, res: express.Response) => {
+                const maxNum = 10;
+                if (this.concurrentNum >= maxNum) {
+                    res.json({
+                        user: "agent",
+                        text: "系统正在处理，有些繁忙，请稍后再试~~",
+                        taskId: "",
+                        action: "NONE",
+                    });
+                    return;
+                }
+                const agentId = req.params.agentId;
+                const username = req.body.userId ?? "user";
+                const taskWaitMode = req.body.taskWaitMode;
+                // const roomId = stringToUuid(
+                //    req.body.roomId ?? "default-room-" + agentId
+                // );
+                const userId = stringToUuid(username);
+                const roomId = stringToUuid("default-data-room-" + username);
+
+                let runtime = this.agents.get(agentId);
+
+                // if runtime is null, look for runtime with the same name
+                if (!runtime) {
+                    runtime = Array.from(this.agents.values()).find(
+                        (a) =>
+                            a.character.name.toLowerCase() ===
+                            agentId.toLowerCase()
+                    );
+                }
+
+                if (!runtime) {
+                    res.status(404).send("Agent not found");
+                    return;
+                }
+                this.concurrentNum++;
 
                 await runtime.ensureConnection(
                     userId,
@@ -274,28 +578,150 @@ export class DirectClient {
                 let taskId = req.body.taskId;
                 // TODO 1: Assign task ID based on load balancing.
                 // TODO 2: Verify the task ID.
-                function generateTaskId() {
+                /*function generateTaskId() {
                     const timestamp = Date.now().toString(36);
                     const seq = Math.floor(Math.random() * 1000)
                         .toString(36)
                         .padStart(4, "0");
                     return `TASK-${timestamp}-${seq}`;
-                }
+                }*/
                 let withPreContext = false;
 
                 if (!taskId) {
-                    taskId = generateTaskId();
+                    taskId = TaskHelper.generateTaskId();
+                    await TaskHelper.setTaskOriginInput(runtime, taskId, originQuestingText);
                 } else {
                     withPreContext = true;
                 }
+                const messageId = stringToUuid(userId + Date.now().toString());
 
-                const responseStr = await this.handleMessageWithAI(
-                    runtime,
-                    originQuestingText,
-                    taskId,
-                    withPreContext
-                );
-                this.concurrentNum --;
+                // const attachments: Media[] = [];
+                // if ((req as any).file) {
+                //     const filePath = path.join(
+                //         process.cwd(),
+                //         "data",
+                //         "uploads",
+                //         (req as any).file.filename
+                //     );
+                //     attachments.push({
+                //         id: Date.now().toString(),
+                //         url: filePath,
+                //         title: (req as any).file.originalname,
+                //         source: "direct",
+                //         description: `Uploaded file: ${
+                //             (req as any).file.originalname
+                //         }`,
+                //         text: "",
+                //         contentType: (req as any).file.mimetype,
+                //     });
+                // }
+
+                const content: Content = {
+                    text: originQuestingText,
+                    intention: {
+                        taskId
+                    },
+                    // attachments,
+                    attachments: [],
+                    source: "direct",
+                    inReplyTo: undefined,
+                };
+
+                const userMessage = {
+                    content,
+                    userId,
+                    roomId,
+                    agentId: runtime.agentId,
+                };
+
+                const memory: Memory = {
+                    id: messageId,
+                    ...userMessage,
+                    agentId: runtime.agentId,
+                    userId,
+                    roomId,
+                    content,
+                    createdAt: Date.now(),
+                };
+
+                //await runtime.messageManager.addEmbeddingToMemory(memory);
+                await runtime.messageManager.createMemory(memory);
+                // console.log("userMessage :", userMessage , username);
+
+                let state = await runtime.composeState(userMessage, {
+                    agentName: runtime.character.name,
+                });
+
+                // const context = composeContext({
+                //     state,
+                //     template: messageHandlerTemplate,
+                // });
+
+                //const responseStr = await this.handleMessageWithAI(
+                //    runtime,
+                //    withPreContext,
+                //    memory
+                //);
+                let responseStr = `收到啦，任务【${taskId}】已开始执行，预计需要几分钟，请耐心等待`;
+                if (!taskWaitMode) {
+                    const quickJson = await TaskHelper.quickResponse(runtime, memory);
+                    if (quickJson && quickJson.quick) {
+                        responseStr = quickJson.response;
+                        await TaskHelper.setTaskStatus(runtime, taskId, '', true);
+                    }
+                    else {
+                        await TaskHelper.setTaskStatus(runtime, taskId, quickJson.response, false);
+                        responseStr = quickJson.response + `\r\n\r\n任务【${taskId}】已开始执行，预计需要几分钟，请耐心等待`;
+                        setTimeout(async () => {
+                            try {
+                                await IntentionHandler.handleDataCollectAPI(runtime, memory);
+                            } catch (err) {
+                                console.error('Background error ', err);
+                            }
+                        }, 10);
+                    }
+                }
+                else {
+                    responseStr = await IntentionHandler.handleDataCollectAPI(runtime, memory);
+                }
+                this.concurrentNum--;
+
+                // const parsedContent = parseJSONObjectFromText(
+                //     responseStr
+                // ) as Content;
+                const parsedContent: Content = {
+                    text: responseStr,
+                    // attachments,
+                    attachments: [],
+                    source: "direct",
+                    inReplyTo: messageId,
+                };
+                // const response = await generateMessageResponse({
+                //     runtime: runtime,
+                //     context,
+                //     modelClass: ModelClass.LARGE,
+                // });
+
+                if (!parsedContent) {
+                    res.status(500).send(
+                        "No response from generateMessageResponse"
+                    );
+                    return;
+                }
+
+                // save response to memory
+                const responseMessage: Memory = {
+                    id: messageId,
+                    ...userMessage,
+                    userId: userId,
+                    content: parsedContent,
+                    embedding: getEmbeddingZeroVector(),
+                    createdAt: Date.now(),
+                };
+
+                await runtime.messageManager.createMemory(responseMessage);
+
+                state = await runtime.updateRecentMessageState(state);
                 //                 const finalAnswerStr = await handleProtocolsProcessing(
                 //     runtime,
                 //     originQuestingText,
@@ -315,7 +741,7 @@ export class DirectClient {
             "/:agentId/download",
             // upload.single("file"),
             async (req: express.Request, res: express.Response) => {
-                console.log("downloading: ", req.body);
+                console.log("downloading, body: ", req.body);
                 const agentId = req.params.agentId;
                 const roomId = stringToUuid(
                     req.body.roomId ?? "default-room-" + agentId
@@ -349,14 +775,7 @@ export class DirectClient {
                 const file_type = req.body.file_type;
                 const taskId = req.body.taskId;
                 const verify_code = req.body.verify_code;
-                function stringToHash4(str) {
-                    let hash = 0;
-                    for (let char of str) {
-                        const code = char.codePointAt(0);
-                        hash = (hash * 31 + code) % 10000;
-                    }
-                    return hash.toString().padStart(4, "0");
-                }
+
                 console.log("downloading: ", file_type, taskId, verify_code);
                 if (verify_code !== stringToHash4(taskId)) {
                     res.status(404).send("verify_code not match");
@@ -365,10 +784,13 @@ export class DirectClient {
 
                 // download the latest report.
                 let lastestExistsFilepath = "";
-                if ("report" === file_type) {
+                let pdfFilepath = "";
+
+                if ("report_pdf" === file_type) {
                     // There may be multiple reports, starting from 1 and growing naturally to 2, 3, 4, 5...,10;
                     for (let i = 1; i <= 10; i++) {
                         const filename = taskId + `_report${i}.txt`;
+                        const filePdfname = taskId + `_report${i}.pdf`;
                         // const filename = 'abc.pdf'; // Test: can also download pdf.
                         const filePath = path.join(
                             process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
@@ -377,17 +799,80 @@ export class DirectClient {
                         );
                         if (fs.existsSync(filePath)) {
                             lastestExistsFilepath = filePath;
+                            pdfFilepath = path.join(
+                                process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
+                                "data",
+                                filePdfname
+                            );
                         } else {
                             break;
                         }
                     }
 
                     if (fs.existsSync(lastestExistsFilepath)) {
-                        res.download(lastestExistsFilepath, () => {
-                            // auto delete file( if need)
-                            //   fs.unlinkSync(filePath);
-                        });
+                        if (!fs.existsSync(pdfFilepath)) {
+                            await convertMarkdownToPdf(
+                                lastestExistsFilepath,
+                                pdfFilepath
+                            );
+                        }
+                        if (fs.existsSync(pdfFilepath)) {
+                            res.download(pdfFilepath, () => {});
+                            console.log("downloading: " + pdfFilepath);
+                            return;
+                        }
+
+                        res.download(lastestExistsFilepath, () => {});
                         console.log("downloading: " + lastestExistsFilepath);
+                        return;
+                    } else {
+                        console.log(
+                            "not exist filePath: " + lastestExistsFilepath
+                        );
+                        res.status(404).send(
+                            "File not found filePath: " + lastestExistsFilepath
+                        );
+                    }
+                } else if ("report" === file_type) {
+                    // There may be multiple reports, starting from 1 and growing naturally to 2, 3, 4, 5...,10;
+                    for (let i = 1; i <= 10; i++) {
+                        const filename = taskId + `_report${i}.txt`;
+                        const filePdfname = taskId + `_report${i}.pdf`;
+                        // const filename = 'abc.pdf'; // Test: can also download pdf.
+                        const filePath = path.join(
+                            process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
+                            "data",
+                            filename
+                        );
+                        if (fs.existsSync(filePath)) {
+                            lastestExistsFilepath = filePath;
+                            pdfFilepath = path.join(
+                                process.cwd(), // /root/xdata3/data3-agent/data/111111_memory.txt
+                                "data",
+                                filePdfname
+                            );
+                        } else {
+                            break;
+                        }
+                    }
+
+                    if (fs.existsSync(lastestExistsFilepath)) {
+                        if (!fs.existsSync(pdfFilepath)) {
+                            // TODO: The function costs too much time.
+                            // await convertMarkdownToPdf(
+                            //     lastestExistsFilepath,
+                            //     pdfFilepath
+                            // );
+                        }
+                        if (fs.existsSync(pdfFilepath)) {
+                            res.download(pdfFilepath, () => {});
+                            console.log("downloading: " + pdfFilepath);
+                            return;
+                        }
+
+                        res.download(lastestExistsFilepath, () => {});
+                        console.log("downloading: " + lastestExistsFilepath);
+                        return;
                     } else {
                         console.log(
                             "not exist filePath: " + lastestExistsFilepath
@@ -467,10 +952,38 @@ export class DirectClient {
                     return;
                 }
 
+                const content: Content = {
+                    text: text,
+                    intention: {
+                        taskId: req.body.taskId || 'Task-Data3-Get'
+                    },
+                    // attachments,
+                    attachments: [],
+                    source: "direct",
+                    inReplyTo: undefined,
+                };
+
+                const userMessage = {
+                    content,
+                    userId,
+                    roomId,
+                    agentId: runtime.agentId,
+                };
+
+                const memory: Memory = {
+                    id: stringToUuid(userId + Date.now().toString()),
+                    ...userMessage,
+                    agentId: runtime.agentId,
+                    userId,
+                    roomId,
+                    content,
+                    createdAt: Date.now(),
+                };
+
                 handleProtocolsProcessing(
                     runtime,
-                    text,
-                    "xxx" /** taskID */
+                    " ",
+                    memory
                 ).then((resStr) => {
                     res.json({ res: resStr });
                 });
@@ -568,11 +1081,23 @@ export class DirectClient {
             }
         );
 
-        const templateHandler = new PromptTemplates(this);
+        const templateHandler = new PromptController(this);
         this.app.get(
             "/:agentId/prompt_templates",
             async (req: express.Request, res: express.Response) => {
                 await templateHandler.handlePromptTemplates(req, res);
+            }
+        );
+        this.app.post(
+            "/:agentId/add_knowledge",
+            async (req: express.Request, res: express.Response) => {
+                await templateHandler.handleAddKnowledge(req, res);
+            }
+        );
+        this.app.post(
+            "/:agentId/switch_model",
+            async (req: express.Request, res: express.Response) => {
+                await templateHandler.handleSwitchModelProvider(req, res);
             }
         );
 
@@ -614,10 +1139,17 @@ export class DirectClient {
                     return;
                 }
                 try {
-                    const status = await runtime.cacheManager.get(
-                        req.query.taskId + "_memory_by_step"
-                    );
-                    res.json({ task_status: status });
+                    //const status = await runtime.cacheManager.get(
+                    //    req.query.taskId + "_memory_by_step"
+                    //);
+                    const taskId = req.query.taskId;
+                    if (taskId) {
+                        const status = await TaskHelper.getTaskStatus(runtime, taskId as string);
+                        res.json({ task_status: status });
+                    }
+                    else {
+                        res.status(400).send("Params error.");
+                    }
                     return;
                 } catch (err) {
                     console.error(err);
@@ -1263,19 +1795,35 @@ export class DirectClient {
 
     public async handleMessageWithAI(
         runtime: IAgentRuntime,
-        originQuestingText: string,
-        taskId: string,
-        withPreContext: boolean
+        withPreContext: boolean,
+        message: Memory
     ): Promise<string> {
-        console.log("handleMessageWithAI originQuestingText:  ", originQuestingText);
+        const originQuestingText = message.content.text;
+        const taskId = message.content.intention?.taskId || "";
+        console.log(
+            "handleMessageWithAI originQuestingText:  ",
+            originQuestingText
+        );
         if (!originQuestingText) {
             return null;
         }
 
+        // context(chat history & background knowledge) length not exceed 20k
+        const baseUserInfo = await this.composePrompt(
+            runtime,
+            originQuestingText,
+            message.userId,
+        );
+        const promptInjectBaseUserInfo = baseUserInfo.slice(0, 20000);
+        console.log(`handleProtocolsForQuickResponce promptInjectBaseInfo:  
+        ============================begin===========================\n
+        ${promptInjectBaseUserInfo}
+        ===========================end============================\n`);
+
         // Get lastest memory // refresh taskQuestionObj
-        let taskQuestionObj = await runtime.cacheManager.get(
+        let taskQuestionObj = (await runtime.cacheManager.get(
             "XData_task_question_" + taskId
-        ) as TaskQuestionObj | undefined;
+        )) as TaskQuestionObj | undefined;
         if (!taskQuestionObj) {
             taskQuestionObj = {
                 questionText: "",
@@ -1299,10 +1847,13 @@ export class DirectClient {
                 JSON.stringify(taskQuestionObj)
         );
         if (!withPreContext) {
+            //console.log(originQuestingText);
+            //originQuestingText = await this.composePrompt(runtime, originQuestingText, userId);
+            //console.log("New: " + originQuestingText);
             const quickResponse = await handleProtocolsForQuickResponce(
                 runtime,
-                originQuestingText,
-                taskId
+                promptInjectBaseUserInfo,
+                message
             );
             if (quickResponse) {
                 // Priority use quick responce
@@ -1377,11 +1928,61 @@ export class DirectClient {
                         taskQuestionObj.prevQuestionText;
                 }
 
-                const obj = await handleProtocolsForPrompt(
-                    runtime,
-                    promptQuestion,
-                    taskId
-                );
+                // console.log(promptQuestion);
+                // promptQuestion = await this.composePrompt(
+                //     runtime,
+                //     promptQuestion,
+                //     userId
+                // );
+                // console.log("New: " + promptQuestion);
+                const regex1 = /输出.*简单/;
+                const regex2 = /输出.*简洁/;
+                const regex3 = /输出.*精炼/;
+                const regex4 = /输出.*丰富/;
+                const regex5 = /输出.*格式美观/;
+                const regex6 = /输出.*论证/;
+                const regex7 = /输出.*严谨/;
+                const regex8 = /报告.*丰富/;
+                const regex9 = /报告.*格式美观/;
+                const regex10 = /报告.*论证/;
+                const regex11 = /报告.*严谨/;
+                let obj = null;
+
+                if (
+                    regex1.test(promptQuestion) ||
+                    regex2.test(promptQuestion) ||
+                    regex3.test(promptQuestion) ||
+                    regex4.test(promptQuestion) ||
+                    regex5.test(promptQuestion) ||
+                    regex6.test(promptQuestion) ||
+                    regex7.test(promptQuestion) ||
+                    regex8.test(promptQuestion) ||
+                    regex9.test(promptQuestion) ||
+                    regex10.test(promptQuestion) ||
+                    regex11.test(promptQuestion)
+                ) {
+                    obj = {
+                        need_more: false,
+                        taskId,
+                    };
+                } else {
+                    obj = {
+                        need_more: true,
+                        question_description:
+                            "对于这个任务，您偏好的输出风格是什么?",
+                        available_options: [
+                            "输出内容简洁一些。",
+                            "输出的数据丰富、格式美观、论证严谨",
+                        ],
+                        taskId,
+                    };
+                }
+
+                // const obj = await handleProtocolsForPrompt(
+                //     runtime,
+                //     promptQuestion,
+                //     taskId
+                // );
                 taskQuestionObj.promptModifyNum += 1;
                 await runtime.cacheManager.set(
                     // Set the new taskQuestionObj to cache.
@@ -1410,15 +2011,25 @@ export class DirectClient {
          * key in cache: XData_task_question_{taskId}
          */
 
-        if(taskQuestionObj?.prevQuestionText) {
-            const refineQuestionPrompt = `Current-User-Question:${taskQuestionObj.questionText}.
-            Previous-User-Question:${taskQuestionObj.prevQuestionText}.
-            Please complete and refine the user's current problem based on the previous user's problem`;
-            
+        if (taskQuestionObj?.prevQuestionText) {
+            let refineQuestionPrompt = `
+            Please summarize the user's original question and additional information in one sentence. A one-sentence summary is sufficient, no explanation is needed.
+                    This sentence should not be a summary, but rather a statement from the user's perspective that a question or task has been raised to the AI Agent.
+            Current-User-Question:${taskQuestionObj.questionText}.
+            Previous-User-Question(No need to answer, just provide context): ${taskQuestionObj.prevQuestionText}.
+            `;
+
+            console.log(refineQuestionPrompt);
+            refineQuestionPrompt = await this.composePrompt(
+                runtime,
+                refineQuestionPrompt,
+                message.userId
+            );
+            console.log("New: " + refineQuestionPrompt);
             const refineQuestion = await generateText({
-                        runtime,
-                        context: refineQuestionPrompt,
-                        modelClass: ModelClass.MEDIUM,
+                runtime,
+                context: refineQuestionPrompt,
+                modelClass: ModelClass.MEDIUM,
             });
             console.log(
                 `[[Refine with Previous: Cur: ${taskQuestionObj.questionText} +++++  Pre: ${taskQuestionObj.prevQuestionText} ====>  ${refineQuestion} ]]`
@@ -1427,10 +2038,20 @@ export class DirectClient {
             taskQuestionObj.questionText = refineQuestion;
         }
 
+        let finalQuestion = taskQuestionObj.questionText;
+        console.log(finalQuestion);
+        finalQuestion = await this.composePrompt(
+            runtime,
+            finalQuestion,
+            message.userId
+        );
+        console.log("New: " + finalQuestion);
+        message.content.text = finalQuestion;
         const finalAnswerStr = await handleProtocolsProcessing(
             runtime,
-            taskQuestionObj.questionText,
-            taskId
+            promptInjectBaseUserInfo,
+            // finalQuestion,
+            message
         );
 
         taskQuestionObj = await runtime.cacheManager.get(
@@ -1628,19 +2249,32 @@ export class DirectClient {
         }
     }
 
-    private async composePrompt(runtime: IAgentRuntime, prompt: string, user: string): Promise<string> {
-        const roomId = stringToUuid("default-data-room-" + user);
+    async composePrompt(
+        runtime: IAgentRuntime,
+        prompt: string,
+        userId: UUID
+    ): Promise<string> {
+        const roomId = stringToUuid("default-data-room-" + userId);
         if (!runtime) {
             throw new Error("Agent not found");
         }
-        const userId = stringToUuid(user ?? "user");
-        return composeContext({
-            state: await runtime.composeState(
-                { content: { text: prompt }, userId, roomId, agentId: runtime.agentId },
-                { agentName: runtime.character.name }
-            ),
-            template: messageHandlerTemplate,
-        });
+        const userMessage = {
+            content: { text: prompt },
+            userId,
+            roomId,
+            agentId: runtime.agentId,
+        };
+        console.log("userMessage: ", userMessage, userId);
+
+        return (
+            prompt +
+            composeContext({
+                state: await runtime.composeState(userMessage, {
+                    agentName: runtime.character.name,
+                }),
+                template: dataHandlerTemplate,
+            })
+        );
     }
 }
 
@@ -1667,3 +2301,42 @@ const directPlugin: Plugin = {
     clients: [DirectClientInterface],
 };
 export default directPlugin;
+
+const convertMarkdownToPdf = async (inputFilePath, outputFilePath) => {
+    try {
+        const cssPath = path.join(process.cwd(), "github-markdown.css");
+        const cssContent = await fs.readFileSync(cssPath, "utf-8");
+        const config = {
+            css: cssContent,
+            launch_options: {
+                args: [
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-dev-shm-usage",
+                ],
+                headless: true,
+                executablePath: process.env.CHROMIUM_PATH,
+            },
+            pdf_options: {
+                format: "A4" as const,
+                margin: {
+                    top: "20mm",
+                    right: "15mm",
+                    bottom: "20mm",
+                    left: "15mm",
+                },
+                printBackground: true,
+            },
+            body: {
+                fontFamily:
+                    "'Source Han Sans CN', 'Microsoft YaHei', sans-serif",
+            },
+        };
+
+        const pdf = await mdToPdf({ path: inputFilePath }, config);
+        await fs.promises.writeFile(outputFilePath, pdf.content);
+        console.log("PDF generated successfully");
+    } catch (error) {
+        console.error("Conversion failed:", error.message);
+    }
+};

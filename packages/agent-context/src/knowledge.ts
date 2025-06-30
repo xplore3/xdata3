@@ -36,7 +36,7 @@ async function get(
     const fragments = await runtime.knowledgeManager.searchMemoriesByEmbedding(
         embedding,
         {
-            roomId: message.agentId,
+            userId: message.userId || message.agentId,
             count: 5,
             match_threshold: 0.1,
         }
@@ -61,7 +61,7 @@ async function get(
 
     return knowledgeDocuments
         .filter((memory) => memory !== null)
-        .map((memory) => ({ id: memory.id, content: memory.content }));
+        .map((memory) => ({ id: memory.id, userId: memory.userId, content: memory.content }));
 }
 
 async function set(
@@ -74,7 +74,7 @@ async function set(
         id: item.id,
         agentId: runtime.agentId,
         roomId: runtime.agentId,
-        userId: runtime.agentId,
+        userId: item.userId || runtime.agentId,
         createdAt: Date.now(),
         content: item.content,
         embedding: getEmbeddingZeroVector(),
@@ -89,7 +89,7 @@ async function set(
             id: stringToUuid(item.id + preprocessed),
             roomId: runtime.agentId,
             agentId: runtime.agentId,
-            userId: runtime.agentId,
+            userId: item.userId || runtime.agentId,
             createdAt: Date.now(),
             content: {
                 source: item.id,
@@ -110,7 +110,7 @@ async function set(
             id: stringToUuid(item.id + fragment),
             roomId: runtime.agentId,
             agentId: runtime.agentId,
-            userId: runtime.agentId,
+            userId: item.userId || runtime.agentId,
             createdAt: Date.now(),
             content: {
                 source: item.id,
@@ -160,7 +160,9 @@ export function preprocess(content: string): string {
             // Remove multiple newlines
             .replace(/\n{3,}/g, "\n\n")
             // Remove special characters except those common in URLs
-            .replace(/[^a-zA-Z0-9\s\-_./:?=&]/g, "")
+            //.replace(/[^a-zA-Z0-9\s\-_./:?=&]/g, "")
+            // Use Unicode property escapes for letters and numbers, keep Chinese
+            .replace(/[^\p{L}\p{N}\s\-_./:?=&]/gu, "")
             .trim()
             .toLowerCase()
     );

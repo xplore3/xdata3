@@ -183,8 +183,10 @@ export class RAGKnowledgeManager implements IRAGKnowledgeManager {
         conversationContext?: string;
         limit?: number;
         agentId?: UUID;
+        userId?: UUID;
     }): Promise<RAGKnowledgeItem[]> {
         const agentId = params.agentId || this.runtime.agentId;
+        const userId = params.userId || null;
 
         // If id is provided, do direct lookup first
         if (params.id) {
@@ -192,6 +194,7 @@ export class RAGKnowledgeManager implements IRAGKnowledgeManager {
                 await this.runtime.databaseAdapter.getKnowledge({
                     id: params.id,
                     agentId: agentId,
+                    userId: userId,
                 });
 
             if (directResults.length > 0) {
@@ -221,6 +224,7 @@ export class RAGKnowledgeManager implements IRAGKnowledgeManager {
                 const results =
                     await this.runtime.databaseAdapter.searchKnowledge({
                         agentId: this.runtime.agentId,
+                        userId: userId,
                         embedding: embedding,
                         match_threshold: this.defaultRAGMatchThreshold,
                         match_count:
@@ -306,6 +310,7 @@ export class RAGKnowledgeManager implements IRAGKnowledgeManager {
             await this.runtime.databaseAdapter.createKnowledge({
                 id: item.id,
                 agentId: this.runtime.agentId,
+                userId: item.userId,
                 content: {
                     text: item.content.text,
                     metadata: {
@@ -328,6 +333,7 @@ export class RAGKnowledgeManager implements IRAGKnowledgeManager {
                 await this.runtime.databaseAdapter.createKnowledge({
                     id: chunkId,
                     agentId: this.runtime.agentId,
+                    userId: item.userId,
                     content: {
                         text: chunk,
                         metadata: {
@@ -349,6 +355,7 @@ export class RAGKnowledgeManager implements IRAGKnowledgeManager {
 
     async searchKnowledge(params: {
         agentId: UUID;
+        userId: UUID;
         embedding: Float32Array | number[];
         match_threshold?: number;
         match_count?: number;
@@ -367,6 +374,7 @@ export class RAGKnowledgeManager implements IRAGKnowledgeManager {
 
         return await this.runtime.databaseAdapter.searchKnowledge({
             agentId: params.agentId || this.runtime.agentId,
+            userId: params.userId,
             embedding: float32Embedding,
             match_threshold,
             match_count,
@@ -548,6 +556,7 @@ export class RAGKnowledgeManager implements IRAGKnowledgeManager {
             await this.runtime.databaseAdapter.createKnowledge({
                 id: scopedId,
                 agentId: this.runtime.agentId,
+                userId: this.runtime.agentId,
                 content: {
                     text: content,
                     metadata: {
@@ -593,6 +602,7 @@ export class RAGKnowledgeManager implements IRAGKnowledgeManager {
                         await this.runtime.databaseAdapter.createKnowledge({
                             id: chunkId,
                             agentId: this.runtime.agentId,
+                            userId: this.runtime.agentId,
                             content: {
                                 text: batch[index],
                                 metadata: {

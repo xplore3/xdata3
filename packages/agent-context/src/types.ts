@@ -5,12 +5,50 @@ import type { Readable } from "stream";
  */
 export type UUID = `${string}-${string}-${string}-${string}-${string}`;
 
+/*
+ * Represents the intention of an agent to perform a specific action or retrieve data
+ */
+export interface Intention {
+    /** The task related to the intention */
+    taskId: string;
+
+    /** Summary of the Intention */
+    summary?: string;
+
+    /** Quick Mode or Reasoning Mode */
+    mode?: "quick" | "reasoning";
+
+    /** Data Retrieve Command */
+    command?: string;
+
+    /** Data Retrieve Source/URL/Host/API */
+    route?: string;
+
+    /** Data API Params */
+    params?: Record<string, any>;
+
+    /** Data Reqeust Count */
+    count?: number;
+
+    /** RawData from route */
+    rawData?: JSON | string;
+
+    /** Data Extract JsonPath */
+    extractPath?: JSON;
+
+    /** Procecced output */
+    output?: JSON;
+}
+
 /**
  * Represents the content of a message or communication
  */
 export interface Content {
     /** The main text content */
     text: string;
+
+    /** Optional intention for the content */
+    intention?: Intention;
 
     /** Optional action associated with the message */
     action?: string;
@@ -553,6 +591,12 @@ export interface Account {
     /** Username */
     username: string;
 
+    /** OpenID in Wechat */
+    openid: string;
+
+    /** User in Wechat Message */
+    external_userid: string;
+
     /** Optional additional details */
     details?: { [key: string]: any };
 
@@ -996,8 +1040,17 @@ export interface IDatabaseAdapter {
     /** Get account by ID */
     getAccountById(userId: UUID): Promise<Account | null>;
 
+    /** Get account by OpenID */
+    getAccountByOpenId(openid: string): Promise<Account | null>;
+
+    /** Get account by ExternalUserID */
+    getAccountByExternalUserId(external_userid: string): Promise<Account | null>;
+
     /** Create new account */
     createAccount(account: Account): Promise<boolean>;
+
+    /** Update a account */
+    updateAccount(account: Account): Promise<boolean>;
 
     /** Get memories matching criteria */
     getMemories(params: {
@@ -1018,6 +1071,13 @@ export interface IDatabaseAdapter {
         tableName: string;
         agentId: UUID;
         roomIds: UUID[];
+        limit?: number;
+    }): Promise<Memory[]>;
+
+    getMemoriesByUserId(params: {
+        tableName: string;
+        agentId: UUID;
+        userId: UUID;
         limit?: number;
     }): Promise<Memory[]>;
 
@@ -1042,7 +1102,7 @@ export interface IDatabaseAdapter {
     searchMemories(params: {
         tableName: string;
         agentId: UUID;
-        roomId: UUID;
+        userId: UUID;
         embedding: number[];
         match_threshold: number;
         match_count: number;
@@ -1059,7 +1119,7 @@ export interface IDatabaseAdapter {
         params: {
             match_threshold?: number;
             count?: number;
-            roomId?: UUID;
+            userId?: UUID;
             agentId?: UUID;
             unique?: boolean;
             tableName: string;
@@ -1139,6 +1199,7 @@ export interface IDatabaseAdapter {
     getKnowledge(params: {
         id?: UUID;
         agentId: UUID;
+        userId?: UUID;
         limit?: number;
         query?: string;
         conversationContext?: string;
@@ -1149,6 +1210,7 @@ export interface IDatabaseAdapter {
         embedding: Float32Array;
         match_threshold: number;
         match_count: number;
+        userId?: UUID;
         searchText?: string;
     }): Promise<RAGKnowledgeItem[]>;
 
@@ -1191,6 +1253,11 @@ export interface IMemoryManager {
         content: string,
     ): Promise<{ embedding: number[]; levenshtein_score: number }[]>;
 
+    getMemoriesByUserId(params: {
+        userId: UUID;
+        limit?: number;
+    }): Promise<Memory[]>;
+
     getMemoryById(id: UUID): Promise<Memory | null>;
     getMemoriesByRoomIds(params: {
         roomIds: UUID[];
@@ -1201,7 +1268,7 @@ export interface IMemoryManager {
         opts: {
             match_threshold?: number;
             count?: number;
-            roomId: UUID;
+            userId: UUID;
             unique?: boolean;
         },
     ): Promise<Memory[]>;
@@ -1225,6 +1292,7 @@ export interface IRAGKnowledgeManager {
         limit?: number;
         conversationContext?: string;
         agentId?: UUID;
+        userId?: UUID;
     }): Promise<RAGKnowledgeItem[]>;
     createKnowledge(item: RAGKnowledgeItem): Promise<void>;
     removeKnowledge(id: UUID): Promise<void>;
@@ -1233,6 +1301,7 @@ export interface IRAGKnowledgeManager {
         embedding: Float32Array | number[];
         match_threshold?: number;
         match_count?: number;
+        userId?: UUID;
         searchText?: string;
     }): Promise<RAGKnowledgeItem[]>;
     clearKnowledge(shared?: boolean): Promise<void>;
@@ -1550,12 +1619,14 @@ export enum LoggingLevel {
 
 export type KnowledgeItem = {
     id: UUID;
+    userId: UUID; // Add for Data3
     content: Content;
 };
 
 export interface RAGKnowledgeItem {
     id: UUID;
     agentId: UUID;
+    userId: UUID; // Add for Data3
     content: {
         text: string;
         metadata?: {

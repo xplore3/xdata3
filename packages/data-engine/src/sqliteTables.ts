@@ -10,7 +10,11 @@ CREATE TABLE IF NOT EXISTS "accounts" (
     "username" TEXT,
     "email" TEXT NOT NULL,
     "avatarUrl" TEXT,
-    "details" TEXT DEFAULT '{}' CHECK(json_valid("details")) -- Ensuring details is a valid JSON field
+    "openid" TEXT NOT NULL,
+    "external_userid" TEXT NOT NULL,
+    "details" TEXT DEFAULT '{}' CHECK(json_valid("details")), -- Ensuring details is a valid JSON field
+    UNIQUE (openid, external_userid),
+    UNIQUE (external_userid)
 );
 
 -- Table: memories
@@ -96,6 +100,7 @@ CREATE TABLE IF NOT EXISTS "cache" (
 CREATE TABLE IF NOT EXISTS "knowledge" (
     "id" TEXT PRIMARY KEY,
     "agentId" TEXT,
+    "userId" TEXT,
     "content" TEXT NOT NULL CHECK(json_valid("content")),
     "embedding" BLOB,
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -119,6 +124,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS "participants_id_key" ON "participants" ("id")
 
 -- Index: knowledge
 CREATE INDEX IF NOT EXISTS "knowledge_agent_key" ON "knowledge" ("agentId");
+CREATE INDEX IF NOT EXISTS "knowledge_user_key" ON "knowledge" ("userId");
 CREATE INDEX IF NOT EXISTS "knowledge_agent_main_key" ON "knowledge" ("agentId", "isMain");
 CREATE INDEX IF NOT EXISTS "knowledge_original_key" ON "knowledge" ("originalId");
 CREATE INDEX IF NOT EXISTS "knowledge_content_key" ON "knowledge"

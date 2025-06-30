@@ -26,7 +26,7 @@ const factsProvider: Provider = {
         const relevantFacts = await memoryManager.searchMemoriesByEmbedding(
             embedding,
             {
-                roomId: message.roomId,
+                userId: message.userId || message.agentId,
                 count: 10,
             }
         );

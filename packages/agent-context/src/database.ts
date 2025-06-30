@@ -72,11 +72,32 @@ export abstract class DatabaseAdapter<DB = any> implements IDatabaseAdapter {
     abstract getAccountById(userId: UUID): Promise<Account | null>;
 
     /**
+     * Retrieves an account by its openid.
+     * @param openid The openid of the user account from Wechat.
+     * @returns A Promise that resolves to the Account object or null if not found.
+     */
+    abstract getAccountByOpenId(openid: string): Promise<Account | null>;
+
+    /**
+     * Retrieves an account by its external_userid.
+     * @param external_userid The external_userid of the user account from Wechat.
+     * @returns A Promise that resolves to the Account object or null if not found.
+     */
+    abstract getAccountByExternalUserId(external_userid: string): Promise<Account | null>;
+
+    /**
      * Creates a new account in the database.
      * @param account The account object to create.
      * @returns A Promise that resolves when the account creation is complete.
      */
     abstract createAccount(account: Account): Promise<boolean>;
+
+    /**
+     * Update or Create the account in the database.
+     * @param account The account object to update/create.
+     * @returns A Promise that resolves when the account update/creation is complete.
+     */
+    abstract updateAccount(account: Account): Promise<boolean>;
 
     /**
      * Retrieves memories based on the specified parameters.
@@ -94,6 +115,12 @@ export abstract class DatabaseAdapter<DB = any> implements IDatabaseAdapter {
     abstract getMemoriesByRoomIds(params: {
         agentId: UUID;
         roomIds: UUID[];
+        tableName: string;
+        limit?: number;
+    }): Promise<Memory[]>;
+
+    abstract getMemoriesByUserId(params: {
+        userId: UUID;
         tableName: string;
         limit?: number;
     }): Promise<Memory[]>;
@@ -164,7 +191,7 @@ export abstract class DatabaseAdapter<DB = any> implements IDatabaseAdapter {
     abstract searchMemories(params: {
         tableName: string;
         agentId: UUID;
-        roomId: UUID;
+        userId: UUID;
         embedding: number[];
         match_threshold: number;
         match_count: number;
@@ -192,7 +219,7 @@ export abstract class DatabaseAdapter<DB = any> implements IDatabaseAdapter {
         params: {
             match_threshold?: number;
             count?: number;
-            roomId?: UUID;
+            userId?: UUID;
             agentId?: UUID;
             unique?: boolean;
             tableName: string;
@@ -401,6 +428,7 @@ export abstract class DatabaseAdapter<DB = any> implements IDatabaseAdapter {
     abstract getKnowledge(params: {
         id?: UUID;
         agentId: UUID;
+        userId?: UUID;
         limit?: number;
         query?: string;
         conversationContext?: string;
@@ -408,6 +436,7 @@ export abstract class DatabaseAdapter<DB = any> implements IDatabaseAdapter {
 
     abstract searchKnowledge(params: {
         agentId: UUID;
+        userId: UUID;
         embedding: Float32Array;
         match_threshold: number;
         match_count: number;

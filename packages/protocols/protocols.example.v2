@@ -6,9 +6,9 @@
             "APIs": [
                 {
                     "type": "Data3 Wrapper API",
-                    "description": "This is the API for querying user's infomation(profile) on 小红书(RedNote).",
+                    "description": "This is the API for querying user's personal infomation(profile/资料) on 小红书(RedNote).",
                     "input": "userId: Target user ID.",
-                    "output": "user's infomation(profile), (desc,fans,follows,gender,id,ip_location,location,nickname,notes,tags)",
+                    "output": "user's personal infomation(profile/资料), (desc,fans,follows,gender,id,ip_location,location,nickname,notes,tags)",
                     "route": "get_user",
                     "params": "{userId: id}",
                     "additional": ""
@@ -24,38 +24,56 @@
                 },
                 {
                     "type": "Data3 Wrapper API",
-                    "description": "This is the API for searching notes on 小红书(RedNote).",
-                    "input": "Parameters: keyword (search term), page (The page number ranges from 1 to 10, and the maximum page number is 10.)",
-                    "output": "notes array(note.user.nickname,note.user.red_official_verified,note.collected_count,note.liked_count,note.comments_count,note.id,note?.title,note.desc,note?.abstract_show,note.timestamp)",
-                    "route": "notes_search",
-                    "params": "{keyword: keyword, page:num}",
+                    "description": "The API is querying user's personal infomation(profile/资料) list on 小红书(RedNote).",
+                    "input": "Parameters: keyword (search user's name). This 'totalItemCount' field indicates how many data items the user wants to obtain.",
+                   "output": "user's personal infomation(profile/资料) array list, (user_id,user_name,user_desc,official_verified,user_sub_title,user_avatar,live_room_id,live_has_goods,)",
+                    "route": "users_search",
+                    "params": "{'keyword': 'keyword', totalItemCount: 10}",
                     "additional": ""
                 },
                 {
                     "type": "Data3 Wrapper API",
-                    "description": "This is the API for querying top-level(level-1) comments on 小红书(RedNote) notes.",
-                    "input": "noteId: Target note ID.",
-                    "output": "comment array(content,id,note_id,sub_comments,ip_location)",
+                    "description": "This is the API for searching notes on 小红书(RedNote).",
+                    "input": "Parameters: keyword (search term), sort (popularity_descending or time_descending). This 'totalItemCount' field indicates how many data items the user wants to obtain.",
+                    "output": "notes array, This only contains the content of the note, not the text of the comment.(note.user.nickname,note.user.red_official_verified,note.collected_count,note.liked_count,note.comments_count,note.id,note?.title,note.desc,note?.abstract_show,note.timestamp)",
+                    "route": "notes_search",
+                    "params": "{'keyword': 'keyword', 'sort': 'popularity_descending', totalItemCount: 10}",
+                    "additional": "如果是分析评论的问题，需要先查找笔记，并保留笔记ID到上下文中，再通过笔记ID查询评论。"
+                },
+                {
+                    "type": "Data3 Wrapper API",
+                    "description": "This is the API for searching  comments on 小红书(RedNote).",
+                    "input": "Parameters: keyword (search term), sort (popularity_descending or time_descending). This 'totalItemCount' field indicates how many data items the user wants to obtain.",
+                    "output": "comment array,(content,id,note_id,sub_comments,ip_location)",
+                    "route": "fetch_comments_by_keyword",
+                    "params": "{'keyword': 'keyword', 'sort': 'popularity_descending', totalItemCount: 10}",
+                    "additional": ""
+                },
+                {
+                    "type": "Data3 Wrapper API",
+                    "description": "Get comments by nodeId on 小红书(RedNote) notes. If the user's question text does not contain a note ID, you need to first query the note content(by route 'notes_search') based on the keyword, obtain the note ID in it, and then query the comment text based on the note ID.",
+                    "input": "noteId: Target note ID. This 'totalItemCount' field indicates how many data items the user wants to obtain.",
+                    "output": "comment array,(content,id,note_id,sub_comments,ip_location)",
                     "route": "notes_comment_by_next_page",
-                    "params": "{noteId: id}",
-                    "additional": "This is an automatic page turning API. Each call returns a different content and the last page is empty."
+                    "params": "{noteId: id, totalItemCount: 10}",
+                    "additional": ""
                 },
                 {
                     "type": "Data3 Wrapper API",
                     "description": "This API retrieves the ranking of 小红书(RedNote) topics based on interaction count",
-                    "input": "The params 1 means the page 1, Page numbers range from 1 to 10. There are 20 items per page",
+                    "input": "'totalItemCount', This 'totalItemCount' field indicates how many data items the user wants to obtain.",
                     "output": "Hot topic list array containing: [ topicName, interactiveCount, noteNum, topicType, topicSecondType.]",
                     "route": "hot_topics",
-                    "params": "{page: 1}",
+                    "params": "{totalItemCount: 10}",
                     "additional": ""
                 },
                 {
                     "type": "Data3 Wrapper API",
                     "description": "This API retrieves the ranking of 小红书(RedNote) hot words",
-                    "input": "The params 1 means the page 1, Page numbers range from 1 to 10. There are 20 items per page",
+                    "input": "'totalItemCount', This 'totalItemCount' field indicates how many data items the user wants to obtain.",
                     "output": "Hot words list array containing: [ hotWord, noteCount, noteLabel]",
                     "route": "hot_words",
-                    "params": "{page: 1}",
+                    "params": "{totalItemCount: 10}",
                     "additional": ""
                 }
             ]

@@ -624,6 +624,7 @@ export class AgentRuntime implements IAgentRuntime {
 
             await knowledge.set(this, {
                 id: knowledgeId,
+                userId: this.agentId,
                 content: {
                     text: item,
                 },
@@ -808,6 +809,7 @@ export class AgentRuntime implements IAgentRuntime {
                     await this.ragKnowledgeManager.createKnowledge({
                         id: knowledgeId,
                         agentId: this.agentId,
+                        userId: this.agentId,
                         content: {
                             text: contentItem,
                             metadata: {
@@ -1191,6 +1193,8 @@ export class AgentRuntime implements IAgentRuntime {
                 username: userName || this.character.username || "Unknown",
                 // TODO: We might not need these account pieces
                 email: email || this.character.email || userId,
+                openid: userId,
+                external_userid: userId,
                 // When invoke ensureUserExists and saving account.details
                 // Performing a complete JSON.stringify on character will cause a TypeError: Converting circular structure to JSON error in some more complex plugins.
                 details: this.character ? Object.assign({}, this.character, {
@@ -1500,6 +1504,7 @@ Text: ${attachment.text}
                 query: message.content.text,
                 conversationContext: recentContext,
                 limit: 8,
+                userId: userId,
             });
 
             formattedKnowledge = formatKnowledge(knowledgeData);
@@ -1796,12 +1801,15 @@ const formatKnowledge = (knowledge: KnowledgeItem[]) => {
     return knowledge.map(item => {
         // Get the main content text
         const text = item.content.text;
+    
+        // Get the intention, if available
+        const intention = item.content.intention ? `\nIntention: ${item.content.intention}` : '';
         
         // Clean up formatting but maintain natural text flow
         const cleanedText = text
             .trim()
             .replace(/\n{3,}/g, '\n\n'); // Replace excessive newlines
             
-        return cleanedText;
+        return cleanedText + intention;
     }).join('\n\n'); // Separate distinct pieces with double newlines
 };

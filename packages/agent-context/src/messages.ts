@@ -65,7 +65,7 @@ export const formatMessages = ({
     actors: Actor[];
 }) => {
     const messageStrings = messages
-        .reverse()
+//        .reverse()   // To facilitate the control of context length, remove messages that are too long. Put messages that are too old at the end.
         .filter((message: Memory) => message.userId)
         .map((message: Memory) => {
             const messageContent = (message.content as Content).text;
