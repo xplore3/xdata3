@@ -392,7 +392,7 @@ export class DirectClient {
                 let taskId = req.body.taskId;
                 const origin_input = await TaskHelper.getTaskOriginInput(runtime, taskId);
                 const messageId = stringToUuid(userId + Date.now().toString());
-                console.log(`DataProcess ${taskId}, ${originQuestingText} ${origin_input}`);
+                console.log(`DataProcess ${taskId}, Option: ${fromOptions}, ${originQuestingText}, ${origin_input}`);
 
                 const content: Content = {
                     text: originQuestingText,
@@ -465,13 +465,12 @@ export class DirectClient {
                 else {
                     await TaskHelper.setTaskOriginInput(runtime, taskId, originQuestingText);
                     if (!taskWaitMode) {
-                        const quickJson = await TaskHelper.quickResponse(runtime, memory);
+                        /*const quickJson = await TaskHelper.quickResponse(runtime, memory);
                         if (quickJson && quickJson.quick) {
                             responseStr = quickJson.response;
                             await TaskHelper.setTaskStatus(runtime, taskId, '', true);
                         }
-                        else {
-                            await TaskHelper.setTaskStatus(runtime, taskId, quickJson.response, false);
+                        else */{
                             setTimeout(async () => {
                                 try {
                                     await IntentionHandler.handleDataProcess(runtime, memory, origin_input);
@@ -480,7 +479,8 @@ export class DirectClient {
                                 }
                             }, 10);
                             //responseStr = `收到啦，任务${taskId}已开始执行，请耐心等待`;
-                            responseStr = quickJson.response + `\r\n\r\n任务【${taskId}】已开始执行，预计需要几分钟，请耐心等待`;
+                            responseStr = `任务【${taskId}】已开始执行，预计需要几分钟，请耐心等待`;
+                            await TaskHelper.setTaskStatus(runtime, taskId, responseStr, false);
                         }
                     }
                     else {
