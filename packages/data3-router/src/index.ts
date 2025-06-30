@@ -775,7 +775,9 @@ export class DirectClient {
 
                 const content: Content = {
                     text: originText,
-                    intention: {},
+                    intention: {
+                        taskId: await TaskHelper.generateTaskId(),
+                    },
                     // attachments,
                     attachments: [],
                     source: "direct",

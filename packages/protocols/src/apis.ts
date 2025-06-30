@@ -26,7 +26,7 @@ export class ApiDb {
     const platforms1 = await ApiDb.getAllPlatforms();
     const platformDesc = ApiDb.getPlatformDesc(platforms1);
     console.log(platformDesc)
-    return platforms;
+    return platformDesc;
   }
 
   static async getUserDataSource(platform: string, userId: UUID) {
@@ -50,7 +50,7 @@ export class ApiDb {
     ];
     const sources1 = await ApiDb.getApiDescByPlatform(platform);
     console.log(sources1);
-    return sources;
+    return sources1;
   }
 
   static async getApi(api_key: string) {
@@ -1343,9 +1343,9 @@ export class ApiDb {
     };
     const apiList1 = await this.getApiFromDb(api_key);
     console.log('apiList1', apiList1);
-    const api = apiList[api_key];
+    const api = apiList1[api_key];
     if (api && api.execute_depend) {
-      return { ...apiList[api.execute_sequence[0]], ...api };
+      return { ...apiList1[api.execute_sequence[0]], ...api };
     }
     return api;
   }
