@@ -459,7 +459,14 @@ export class ApiDb {
             "firstType": "根据用户的背景或输入确定，这个数组[美妆', '美容个护', '鞋包潮玩', '穿搭打扮', '美食', '母婴育儿', '旅游出行', '家居家装', '教育', '生活', '运动健身', '兴趣爱好', '影视综', '婚嫁', '摄影摄像', '萌宠', '情感星座', '科技互联网', '资讯', '健康养生', '科学科普', '职场', '交通工具', '其他']中的一项,或者空；不要有这些项之外的内容",
             "noteType": ""
           },
-          custom: {must: [], should: [], mustNot: []},
+          custom: {
+            must: [
+              '//为空，不需要填写'
+            ], should: [
+              '//为空，不需要填写'
+            ], mustNot: [
+              '//为空，不需要填写'
+            ]},
           endTime: "",
           filterIncomplete: 0,
           high: {
@@ -1065,7 +1072,7 @@ export class ApiDb {
               "customizeRange": ""
             },
             "picturePrice": {
-              "fixedRange": "",
+              "fixedRange": "预算，根据用户输入确定，取值为【<1000，1000-3000，3000-10000，10000-100000，>100000】中的一个",
               "customizeRange": ""
             },
             "videoCpe": {
@@ -1205,7 +1212,7 @@ export class ApiDb {
               "customizeRange": ""
             },
             "picturePrice": {
-              "fixedRange": "预算，根据用户输入确定，取值为【<1000，1000-3000，3000-10000，10000-100000，>100000】中的一个",
+              "fixedRange": "1000-3000",
               "customizeRange": ""
             },
             "videoCpe": {
