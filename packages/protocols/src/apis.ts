@@ -30,7 +30,7 @@ export class ApiDb {
       //'note_detail: 通过noteid获取单个笔记/帖子/note的详情',
       //'users_search: 用以通过关键字搜索小红书账号，获得账号列表',
       'get_user: 用以通过单个小红书账号ID获取该账号的详情',
-      'notes_comment_by_next_page: 用以通过单个笔记/帖子的ID获取其评论列表',
+      'note_comments_list: 用以通过单个笔记/帖子的ID获取其评论列表',
       'fetch_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note id列表，然后再获得这些笔记的评论列表；该操作能获得评论这一种数据；如果用户没有明确要求取出评论，则不要选此选项。',
       'fetch_notes_and_comments_by_keyword: 用以通过关键字搜索小红书笔记/帖子/note，获得note列表，然后再获得这些笔记的评论列表；该操作能获得笔记和评论两种数据；如果用户没有明确要求取出评论，则不要选此选项。',
       'get_note_list: 用以通过单个小红书账号ID获取该账号的笔记/帖子的列表'
@@ -177,9 +177,9 @@ export class ApiDb {
         output: '',
         note: ''
       },
-      notes_comment_by_next_page: {
-        id: 'notes_comment_by_next_page',
-        backup: 'notes_comment_by_next_page_1',
+      note_comments_list_1: {
+        id: 'note_comments_list_1',
+        backup: 'note_comments_list_2',
         priority: 0,
         type: 'social-media',
         platform: 'rednote',
@@ -297,7 +297,7 @@ export class ApiDb {
         // Excute Data Dependency
         execute_depend: 'chain_loop', // ['chain', 'chain_loop']
         // The Request Sequence
-        execute_sequence: ['notes_search', 'notes_comment_by_next_page'],
+        execute_sequence: ['notes_search', 'note_comments_list'],
       },
       fetch_notes_and_comments_by_keyword: {
         id: 'fetch_notes_and_comments_by_keyword',
@@ -310,7 +310,7 @@ export class ApiDb {
         // Excute Data Dependency
         execute_depend: 'chain_loop', // ['chain', 'chain_loop']
         // The Request Sequence
-        execute_sequence: ['notes_search', 'notes_comment_by_next_page'],
+        execute_sequence: ['notes_search', 'note_comments_list'],
       },
       notes_search_3: {
         id: 'notes_search_3',
@@ -586,8 +586,8 @@ export class ApiDb {
         output: '',
         note: ''
       },
-      notes_comment_by_next_page_1: {
-        id: 'notes_comment_by_next_page_1',
+      note_comments_list_2: {
+        id: 'note_comments_list_2',
         backup: '',
         priority: 1,
         type: 'social-media',
@@ -821,6 +821,92 @@ export class ApiDb {
             'shared_count': $item.interact_info.shared_count,
             'comment_count': $item.interact_info.comment_count,
             'liked_count': $item.interact_info.liked_count
+          }
+        })`,
+        limit: '',
+        price: '',
+        dev: '',
+        verification: '',
+        output: '',
+        note: ''
+      },
+      note_comments_list: {
+        id: 'note_comments_list',
+        backup: 'note_comments_list_1',
+        priority: 0,
+        type: 'social-media',
+        platform: 'rednote',
+        description: '通过单个笔记/帖子的ID获取其评论列表',
+        name: 'notes',
+        url: 'https://gw.newrank.cn/api/xh/xdnphb/nr/app/xhs/note/comment/list',
+        method: 'POST',
+        headers: {
+          "Accept": "*/*",
+          "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+          "Connection": "keep-alive",
+          "Origin": "https://xh.newrank.cn",
+          "Pragma": "no-cache",
+          "Referer": "https://xh.newrank.cn/",
+          "Sec-Fetch-Dest": "empty",
+          "Sec-Fetch-Mode": "cors",
+          "Sec-Fetch-Site": "same-site",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+          "content-type": "application/json",
+          "n-token": "35c430ef650b459ba2b9c1409148d929",
+          "request_id": "99a1d8da7eda48088bc683777a24d628",
+          "sec-ch-ua": '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
+          "sec-ch-ua-mobile": "?0",
+          "sec-ch-ua-platform": '"Windows"',
+          "Cookie": `sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%22nr_51qcmvw2q%22%2C%22first_id%22%3A%2219584847d74e3-083464dad8bd598-26011a51-960000-19584847d751430%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%2C%22%24latest_utm_source%22%3A%22baidu%22%2C%22%24latest_utm_medium%22%3A%22cpc%22%2C%22%24latest_utm_campaign%22%3A%22%E6%96%B0%E7%BA%A2SEM%22%2C%22%24latest_utm_term%22%3A%22%E6%96%B0%E7%BA%A2%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTk1ODQ4NDdkNzRlMy0wODM0NjRkYWQ4YmQ1OTgtMjYwMTFhNTEtOTYwMDAwLTE5NTg0ODQ3ZDc1MTQzMCIsIiRpZGVudGl0eV9sb2dpbl9pZCI6Im5yXzUxcWNtdncycSJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%24identity_login_id%22%2C%22value%22%3A%22nr_51qcmvw2q%22%7D%2C%22%24device_id%22%3A%22196c2a9c80ad59-0b34bec0dc40558-26011f51-960000-196c2a9c80b1567%22%7D; tfstk=gdjjwkjHsjcj5D-tCE2rVraQ6Ex_T8rEhA9OKOnqBnKA5c6dQ-YNgOd15QBI0Z8wDR119sTN1O2DBCCO1C74zkWcnhxTT1ZUYt21i13GchhNenvaSAxf2kWcnYHj6J78YAZ-Y2tv61LvyQpHwcnA6Fh8FdpZMVnA68wWQppxDdnvybpMChdO6he5eQv9XKC9XAZsNLVXNtwq1ive1-wACQitXg97sBBXJLvlVhLX9GASXOsWhEOdHMMXeOvR4gTezAPW29bPMLtQcXvfy9tvCG2K5CT1m391rSgVOsvOeU14QVv55OIHmHMTDTtXGeI1wvn59T6O8UszpkxXDIQwmOkQgTsfgtj5QA3Jcn7WRitLxjdNz9s6CGVgV66OKNL5fjsyGDRBL50sFem6FBy7FV0gFByrqNzQqJ8vEL-UF8gHjEpkFBy7FV0MkLvoz8wS-hf..; Hm_lvt_a19fd7224d30e3c8a6558dcb38c4beed=1748232589,1748616498,1750370567,1750633396; token=58D4F4AD3492456EBF70C2BC6BA90124; auth_n=9kCvQOR0mS5PMn1Nms/ogCnua4rl1L0Pw17pPUxB8uL77nkL8Q3sQJyy4gU5UYV1; acw_tc=0a47314717513544036613456e007218aa21e7f62fba1e820dd76b234910fc`,
+        },
+        query_params: {},
+        query_params_desc: {
+          "isNoteAuthor":  0,
+          "isPicComment": 0,
+          "keyword": "",
+          "nid": "String, Note ID for query; 格式需参考query_params_example中的格式，不是输入的关键字",
+          "sentimentType": "",
+          "size": 20,
+          "sort": "time",
+          "start": 1
+        },
+        query_params_example: {
+          "isNoteAuthor":  0,
+          "isPicComment": 0,
+          "keyword": "",
+          "nid": "685d0593000000002201e8ed",
+          "sentimentType": "",
+          "size": 20,
+          "sort": "time",
+          "start": 1
+        },
+        docs_link: '',
+        could_cached: false,
+        cached_expired: 3600000 * 24,
+        filter: false,
+        data_path: `$.data.data.list`,
+        flattener: `$map($, function($item) {
+          {
+            'id': $item.id,
+            'noteId': $item.noteId,
+            'userid': $item.user.userid,
+            'username': $item.user.nickname,
+            'content': $item.content,
+            'likeCount': $item.likeCount,
+            'sentiment': $item.sentiment,
+            'isNoteAuthor': $item.isNoteAuthor,
+            'time': $item.time,
+            'sub_comment_count': $item.sub_comment_count,
+            'sub_comments': [$map($item.sub_comments, function($sc) {
+              {
+                'id': $sc.id,
+                'content': $sc.content,
+                'likeCount': $sc.likeCount,
+                'username': $sc.user.nickname,
+                'userid': $sc.user.userid,
+                'time': $sc.time
+              }
+            }), 'empty'][0]
           }
         })`,
         limit: '',
