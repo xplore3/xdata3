@@ -88,7 +88,7 @@ export class ApiExecution {
       api2.query_params = api.query_params;
       const result = await this.executeApi(runtime, message, api1, totalCount);
       let result2 = [];
-      const execJson = await this.getApiQueryParam(runtime, message, api2, api.query_params);
+      const execJson = await this.getApiQueryParam(runtime, message, api2, '');
       if (execJson) {
         api2.query_params = execJson.query_params;
         const execCount = execJson.request_count <= 100 ? execJson.request_count : 100;
