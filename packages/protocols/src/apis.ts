@@ -588,8 +588,55 @@ export class ApiDb {
       },
       note_comments_list_2: {
         id: 'note_comments_list_2',
+        backup: 'note_comments_list_3',
+        priority: 2,
+        type: 'social-media',
+        platform: 'rednote',
+        description: '用以通过单个笔记/帖子的ID获取其评论列表',
+        name: 'note_comments',
+        url: 'https://api.tikhub.io/api/v1/xiaohongshu/app/get_note_comments',
+        method: 'GET',
+        headers: {
+          "Authorization": `Bearer ${process.env.TIKHUB_API_KEY}`,
+        },
+        query_params: {},
+        query_params_desc: {
+          note_id: 'String, Note ID for query; 格式需参考query_params_example中的格式，不是输入的关键字',
+          sort_strategy: '排序策略：1: 默认排序（默认值）; 2: 按最新评论排序',
+          start: '(optional)String, Paging parameters, enter previous page datas last comment ID(first page do not need enter).'
+        },
+        query_params_example: {
+          note_id: '6683b283000000001f0052bf',
+          sort_strategy: '1'
+        },
+        docs_link: 'https://docs.tikhub.io/310965840e0',
+        could_cached: false,
+        cached_expired: 3600000 * 24,
+        filter: false,
+        data_path: `$.data.data.comments`,
+        flattener: `$map($, function($item) {
+          {
+            'id': $item.id,
+            'note_id': $item.note_id,
+            'userid': $item.user_info.userid,
+            'username': $item.user_info.nickname,
+            'content': $item.content,
+            'liked_count': $item.interact_info.liked_count,
+            'sub_comment_count': $item.sub_comment_count,
+            'create_time': $item.create_time
+          }
+        })`,
+        limit: '',
+        price: '',
+        dev: '',
+        verification: '',
+        output: '',
+        note: ''
+      },
+      note_comments_list_3: {
+        id: 'note_comments_list_3',
         backup: '',
-        priority: 1,
+        priority: 3,
         type: 'social-media',
         platform: 'rednote',
         description: '用以通过单个笔记/帖子的ID获取其评论列表',
@@ -837,7 +884,7 @@ export class ApiDb {
         type: 'social-media',
         platform: 'rednote',
         description: '通过单个笔记/帖子的ID获取其评论列表',
-        name: 'notes',
+        name: 'note-comments',
         url: 'https://gw.newrank.cn/api/xh/xdnphb/nr/app/xhs/note/comment/list',
         method: 'POST',
         headers: {
