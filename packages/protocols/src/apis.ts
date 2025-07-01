@@ -910,7 +910,7 @@ export class ApiDb {
         query_params_desc: {
           "isNoteAuthor":  0,
           "isPicComment": 0,
-          "keyword": "",
+          //"keyword": "",
           "nid": "String, Note ID for query; 格式需参考query_params_example中的格式，不是输入的关键字",
           "sentimentType": "",
           "size": 20,
@@ -920,7 +920,7 @@ export class ApiDb {
         query_params_example: {
           "isNoteAuthor":  0,
           "isPicComment": 0,
-          "keyword": "",
+          //"keyword": "",
           "nid": "685d0593000000002201e8ed",
           "sentimentType": "",
           "size": 20,
