@@ -36,29 +36,34 @@ export class ApiExecution {
     if (api && api.execute_depend && api.execute_depend === 'chain_loop') {
       const api1 = await ApiDb.getApi(api.execute_sequence[0]);
       const api2 = await ApiDb.getApi(api.execute_sequence[1]);
-      api1.query_params = api.query_params;
-      const result = await this.executeApi(runtime, message, api1, totalCount);
+      let result = [];
       const result2 = [];
-      for (const item of result) {
-        try {
-          api2.query_params = api1.query_params;
-          const execJson = await this.getApiQueryParam(runtime, message, api2, item);
-          if (execJson) {
-            if (execJson.query_params) {
-              api2.query_params = execJson.query_params;
-              const execCount = execJson.request_count <= 100 ? execJson.request_count : 100;
-              await new Promise((resolve) => setTimeout(resolve, 100));
-              const api2Result = await this.executeApi(
-                runtime, message, api2, execCount
-              );
-              if (api2Result) {
-                result2.push(...api2Result);
+      const execJson1 = await this.getApiQueryParam(runtime, message, api1, '');
+      if (execJson1) {
+        api1.query_params = execJson1.query_params;
+        const execCount = execJson1.request_count <= 100 ? execJson1.request_count : 100;
+        result = await this.executeApi(runtime, message, api1, execCount);
+        for (const item of result) {
+          try {
+            api2.query_params = api1.query_params;
+            const execJson = await this.getApiQueryParam(runtime, message, api2, item);
+            if (execJson) {
+              if (execJson.query_params) {
+                api2.query_params = execJson.query_params;
+                const execCount = execJson.request_count <= 100 ? execJson.request_count : 100;
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                const api2Result = await this.executeApi(
+                  runtime, message, api2, execCount
+                );
+                if (api2Result) {
+                  result2.push(...api2Result);
+                }
               }
             }
           }
-        }
-        catch (err) {
-          console.log(err);
+          catch (err) {
+            console.log(err);
+          }
         }
       }
       try {
@@ -84,10 +89,14 @@ export class ApiExecution {
     else if (api && api.execute_depend && api.execute_depend === 'chain') {
       const api1 = await ApiDb.getApi(api.execute_sequence[0]);
       const api2 = await ApiDb.getApi(api.execute_sequence[1]);
-      api1.query_params = api.query_params;
-      api2.query_params = api.query_params;
-      const result = await this.executeApi(runtime, message, api1, totalCount);
+      let result = [];
       let result2 = [];
+      const execJson1 = await this.getApiQueryParam(runtime, message, api1, '');
+      if (execJson1) {
+        api1.query_params = execJson1.query_params;
+        const execCount = execJson1.request_count <= 100 ? execJson1.request_count : 100;
+        result = await this.executeApi(runtime, message, api1, execCount);
+      }
       const execJson = await this.getApiQueryParam(runtime, message, api2, '');
       if (execJson) {
         api2.query_params = execJson.query_params;

@@ -1346,7 +1346,7 @@ export class ApiDb {
       },
     };
     const api = await this.getApiFromDb(api_key);
-    console.log('api', api);
+    //console.log('api', api);
     if (api && api.execute_depend) {
       const apiNext = await this.getApiFromDb(api.execute_sequence[0]);
       return { ...apiNext, ...api };
@@ -1411,7 +1411,7 @@ export class ApiDb {
       };
 
       const response = await axios(config);
-      console.log(response.data);
+      //console.log(response.data);
       if (response.status != 200) {
         return "Error in response " + response.statusText;
       }
