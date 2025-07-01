@@ -681,6 +681,7 @@ export class IntentionHandler {
     const filterPathWrongExample = `$[?(parseInt(@.collectedCount || 0) >= 0 && parseInt(@.sharedCount || 0) >= 0 && parseInt(@.commentsCount || 0) >= 0 && parseInt(@.likedCount || 0) >= 1)]`;
     const filterPathWrongExample1 = `$[?((@.collectedCount || 0) >= 0 && (@.sharedCount || 0) >= 0 && (@.commentsCount || 0) >= 0 && (@.likedCount || 0) >= 1 && parseDate(@.createTime || 2524579200) >=  ${timestamp})]`;
     const filterPathWrongExample2 = `$.[?((@.likedCount && parseInt(@.likedCount) > 1) && (@.collectedCount && parseInt(@.collectedCount) >= 0) && (@.sharedCount && parseInt(@.sharedCount) >= 0) && (@.commentsCount && parseInt(@.commentsCount) >= 0) && (@.createTime && parseDate(@.createTime) > ${timestamp}))]`;
+    const filterPathWrongExample3 = `$[?((@.commentsCount && parseInt(@.commentsCount) > 800) && (@.topics && @.topics[?(@.name.match(/泡泡玛特/))]))]`;
 
     const prompt = `
         这是用户的问题，[USER_QUESTION:${message.content.text}]\r\n
@@ -688,7 +689,8 @@ export class IntentionHandler {
         filter能给'jsonpath-plus'库(https://github.com/JSONPath-Plus/JSONPath)使用的JSONPath。
         生成这样表达式：[FILTER_EXAMPLE: ${filterPathExample};针对二级结构中的数字]或者[FILTER_EXAMPLE1: ${filterPathExample1}；针对二级结构中的string及时间串]
           或者[FILTER_EXAMPLE2: ${filterPathExample2}；针对一级结构中的string及时间串]。
-        另外错误的表达式有：[${filterPathWrongExample}；针对二级结构中的string]或者[${filterPathWrongExample1}；针对二级结构中的string]或者[${filterPathWrongExample2}；针对二级结构中的string]
+        另外错误的表达式有：[${filterPathWrongExample}；针对二级结构中的string]或者[${filterPathWrongExample1}；针对二级结构中的string]
+          或者[${filterPathWrongExample2}；针对二级结构中的string]或者[${filterPathWrongExample3}；不要对文字进行比较或匹配]
         请认真分析这几个表达式，理解其含义，不同的表达式适用于不同的JSON结构体。
         根据指令要求，需要对collected_count/shared_count/comments_count/likes_count的数量进行过滤。
         用户要求的时间戳 [timestamp: ${timestamp}], 这是在之前的步骤中计算好的, 不需要再做转化，填入表达式中即可 。
