@@ -115,7 +115,8 @@ export class WechatHandler {
             const resp = await axios.post(`https://qyapi.weixin.qq.com/cgi-bin/kf/send_msg?access_token=${token}`, msg);
             console.log("sendMessage " + resp.data.errmsg);
             if (resp.data.errcode !== 0) {
-                throw new Error(`sendMessage failed: ${resp.data.errmsg}`);
+                //throw new Error(`sendMessage failed: ${resp.data.errmsg}`);
+                return null;
             }
             return resp.data;
         }
@@ -139,7 +140,8 @@ export class WechatHandler {
             //console.log(resp);
             //console.log("syncMessage " + resp.data.errmsg);
             if (resp.data.errcode !== 0) {
-                throw new Error(`syncMessage failed: ${resp.data.errmsg}`);
+                //throw new Error(`syncMessage failed: ${resp.data.errmsg}`);
+                return null;
             }
             if (resp.data.next_cursor) {
                 this.cursor = resp.data.next_cursor
@@ -158,7 +160,8 @@ export class WechatHandler {
             const resp = await axios.get(`https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token=${token}&code=${code}`);
             console.log("getExternalUserBase " + resp.data.errmsg);
             if (resp.data.errcode !== 0) {
-                throw new Error(`getExternalUserBase failed: ${resp.data.errmsg}`);
+                //throw new Error(`getExternalUserBase failed: ${resp.data.errmsg}`);
+                return null;
             }
             console.log(resp.data);
             const userId = resp.data.openid || resp.data.userid || resp.data.UserId; // Wecom UserID
@@ -201,7 +204,8 @@ export class WechatHandler {
             //console.log(resp);
             console.log("getExternalUserDetail " + resp.data.errmsg);
             if (resp.data.errcode !== 0) {
-                throw new Error(`getExternalUserDetail failed: ${resp.data.errmsg}`);
+                //throw new Error(`getExternalUserDetail failed: ${resp.data.errmsg}`);
+                return null;
             }
             return resp.data;
         }
@@ -218,7 +222,8 @@ export class WechatHandler {
             //console.log(resp);
             console.log("getExternalContract " + resp.data.errmsg);
             if (resp.data.errcode !== 0) {
-                throw new Error(`getExternalContract failed: ${resp.data.errmsg}`);
+                //throw new Error(`getExternalContract failed: ${resp.data.errmsg}`);
+                return null;
             }
             return resp.data;
         }
@@ -744,7 +749,10 @@ export class WechatHandler {
     }
     
     private getRandomElements<T>(array: T[], min: number, max: number): T[] {
-        if (min < 0 || max < min) throw new Error("Invalid range");
+        if (min < 0 || max < min) {
+            //throw new Error("Invalid range");
+            return [];
+        }
         if (array.length === 0) return [];
 
         const effectiveMin = Math.min(min, array.length);
