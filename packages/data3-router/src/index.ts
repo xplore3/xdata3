@@ -459,6 +459,7 @@ export class DirectClient {
                         }
                     }
                     else {
+                        await TaskHelper.setWechatTaskId(runtime, userId, taskId);
                         responseStr = await IntentionHandler.handleDataCollectAPI(runtime, memory);
                     }
                 }
