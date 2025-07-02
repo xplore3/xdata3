@@ -1515,8 +1515,8 @@ export class ApiDb {
     const api = await this.getApiFromDb(api_key);
     //console.log('api', api);
     if (api && api.execute_depend) {
-      const apiNext = await this.getApiFromDb(api.execute_sequence[0]);
-      return { ...apiNext, ...api };
+      //const apiNext = await this.getApiFromDb(api.execute_sequence[0]);
+      //return { ...apiNext, ...api };
     }
     return api;
   }

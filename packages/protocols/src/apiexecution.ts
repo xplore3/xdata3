@@ -585,7 +585,7 @@ export class ApiExecution {
   }
 
   static async getApiQueryParam(runtime: IAgentRuntime, message: Memory, api: JSON | any, source: any): Promise<any> {
-    console.log(`getApiQueryParam`);
+    console.log(`getApiQueryParam ${api.key}`);
     const userInput = `${message.content.text}`;
     const userProfile = await UserKnowledge.getUserKnowledge(runtime, message.userId);
     const prompt = `
