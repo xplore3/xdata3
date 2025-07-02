@@ -400,13 +400,21 @@ export class ApiExecution {
                 if (items && items.length == 1) {
                   console.log(tempResult);
                 }
-                tempResult = tempResult.map(item => {
-                  if (item.sub_comments) {
-                    item.sub_comments = JSON.stringify(item.sub_comments);
+                if (tempResult) {
+                  if (!Array.isArray(tempResult)) {
+                    tempResult = [tempResult];
                   }
-                  //console.log(item);
-                  return item;
-                })
+                  tempResult = tempResult.map(item => {
+                    if (item.sub_comments) {
+                      item.sub_comments = JSON.stringify(item.sub_comments);
+                    }
+                    //console.log(item);
+                    return item;
+                  })
+                }
+                else {
+                  tempResult = items;
+                }
               }
               else {
                 tempResult = items;
@@ -424,7 +432,7 @@ export class ApiExecution {
             }
             catch (err) {
               console.log(err);
-              tempResult = [JSON.stringify(items)];
+              tempResult = items;
               //TODO: 重新生成extractPath
             }
           }
