@@ -453,7 +453,7 @@ export class WechatHandler {
                         const json = JSON.parse(status.task_status);
                         if (json) {
                             status = json.text;
-                            newTaskId = json.taskId;
+                            newTaskId = status.taskId;
                             if (newTaskId) {
                                 await this.setTaskId(runtime, userId, newTaskId);
                             }
@@ -465,7 +465,7 @@ export class WechatHandler {
                             await this.setTaskId(runtime, userId, newTaskId);
                         }
                     }
-                    if (checkCount % 20 == 10 && checkCount < 40) {
+                    if (checkCount % 20 == 10 && checkCount > 20 && checkCount < 60) {
                         await this.sendMessage(userId, openKfId, status);
                     }
                 }
