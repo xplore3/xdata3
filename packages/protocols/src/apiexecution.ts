@@ -263,7 +263,7 @@ export class ApiExecution {
               }
             }
             if (api.could_cached) {
-              let cache = await DataCache.getApiCacheData(runtime, api.id);
+              let cache = await DataCache.getApiCacheData(runtime, api.key);
               try {
                 cache = await JSON.parse(cache);
                 if (cache) {
@@ -296,7 +296,7 @@ export class ApiExecution {
             }
             // TODO: The response items should be compatible
             // TODP: Use of api.data_path
-            if (api.data_path != '') {
+            if (api.data_path && api.data_path != '') {
               try {
                 console.log(`JSONPath ${api.data_path}`);
                 items = JSONPath({
@@ -326,7 +326,7 @@ export class ApiExecution {
             if (api.could_cached) {
               // WORKAROUND
               if (items.length > 3) {
-                await DataCache.setApiCacheData(runtime, api.id, JSON.stringify(items));
+                await DataCache.setApiCacheData(runtime, api.key, JSON.stringify(items));
               }
             }
           }
@@ -334,8 +334,8 @@ export class ApiExecution {
             console.log(`Response items: ${items.length || items}`);
             //console.log(items);
             // WORKAROUND
-            if ((api.id === 'hot_words' || api.id === 'topic_rank') && items.length <= 3) {
-              let cache = await DataCache.getApiCacheData(runtime, api.id);
+            if ((api.key === 'hot_words' || api.key === 'topic_rank') && items.length <= 3) {
+              let cache = await DataCache.getApiCacheData(runtime, api.key);
               try {
                 if (typeof cache === 'object' && cache !== null) {
                   items = [...cache];
@@ -377,7 +377,7 @@ export class ApiExecution {
               //tempResult = tempResult.map((item) =>
               //    extractFunc(item)
               //);
-              if (api.flattener != '') {
+              if (api.flattener && api.flattener != '') {
                 const expression = jsonata(api.flattener);
                 tempResult = await expression.evaluate(tempResult) || [];
               }
@@ -394,7 +394,7 @@ export class ApiExecution {
           }
           else {
             try {
-              if (api.flattener != '') {
+              if (api.flattener && api.flattener != '') {
                 const expression = jsonata(api.flattener);
                 tempResult = await expression.evaluate(items) || [];
                 if (items && items.length == 1) {
@@ -527,7 +527,7 @@ export class ApiExecution {
           }
           // TODO: The response items should be compatible
           // TODP: Use of api.data_path
-          if (api.data_path != '') {
+          if (api.data_path && api.data_path != '') {
             try {
               console.log(`JSONPath ${api.data_path}`);
               items = JSONPath({
