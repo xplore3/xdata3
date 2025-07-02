@@ -116,7 +116,7 @@ export class WechatHandler {
             if (!content || content.length < 1) {
                 return;
             }
-            content = this.truncateString(content, 450, 450);
+            content = this.truncateString(content, 420, 420);
             const token = await this.getAccessToken();
             const msg = {
                 touser: external_userid,
