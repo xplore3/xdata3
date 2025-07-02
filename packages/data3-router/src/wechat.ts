@@ -450,7 +450,7 @@ export class WechatHandler {
                         //const match = status.match(/current_step:\s*(\d+)/);
                         //const step = match ? parseInt(match[1], 10) : null;
                         //status = `Step ${step} ...`;
-                        const json = JSON.parse(status.task_status);
+                        const json = JSON.parse(status);
                         if (json) {
                             status = json.text;
                             newTaskId = status.taskId;
@@ -459,7 +459,7 @@ export class WechatHandler {
                             }
                         }
                     } catch (error) {
-                        status = status.task_status;
+                        status = status.text;
                         newTaskId = status.taskId;
                         if (newTaskId) {
                             await this.setTaskId(runtime, userId, newTaskId);
