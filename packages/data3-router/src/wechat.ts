@@ -24,6 +24,7 @@ import { PromptController } from "./promts";
 const ORIGIN_INPUT_POST = "_origin_input";
 const TASK_OPTIONS = "_task_options_";
 const TASK_BK_OPTIONS = "_task_backup_options_";
+const TASK_ID_KEY = "_wechat_task_id_";
 
 export class WechatHandler {
     constructor(private client: DirectClient) {}
@@ -66,6 +67,27 @@ export class WechatHandler {
         await this.writeToCache(runtime, cacheKey, data);
     }
 
+    async setTaskId(runtime: IAgentRuntime, userId: string, taskId: string) {
+      try {
+        await this.setCachedData(runtime, TASK_ID_KEY + userId, taskId);
+      }
+      catch (err) {
+        console.log(`setTaskId ${taskId}`);
+        console.error(err);
+      }
+    }
+
+    async getTaskId(runtime: IAgentRuntime, userId: string): Promise<string> {
+      try {
+        return await this.getCachedData(runtime, TASK_ID_KEY + userId);
+      }
+      catch (err) {
+        console.log(`getTaskId ${userId}`);
+        console.error(err);
+      }
+      return "";
+    }
+
     async getAccessToken() {
         const now = Date.now();
         if (this.cachedToken && this.tokenExpire > now) {
@@ -94,7 +116,7 @@ export class WechatHandler {
             if (!content || content.length < 1) {
                 return;
             }
-            content = this.truncateString(content, 450, 450);
+            content = this.truncateString(content, 420, 420);
             const token = await this.getAccessToken();
             const msg = {
                 touser: external_userid,
@@ -305,18 +327,19 @@ export class WechatHandler {
 
                         // checkResp
                         let checkCount = 0;
-                        const job = cron.schedule("*/3 * * * *", async () => {
+                        const job = cron.schedule("*/10 * * * * *", async () => {
                             console.log(`Wechat check at ${new Date().toISOString()}`);
-                            if (checkCount++ > 1) {
-                                job.stop();
-                                return;
+                            if (checkCount++ > 100) {
+                                //job.stop();
+                                //return;
                             }
-                            await this.checkTaskStatus(runtime, userId, decryptedXml.xml.OpenKfId);
+                            await this.checkTaskStatus(runtime, userId, decryptedXml.xml.OpenKfId, checkCount);
                         });
 
                         try {
                             let fromOptions = false;
-                            const taskId = await this.getCachedData<string>(runtime, userId);
+                            //const taskId = await this.getCachedData<string>(runtime, userId);
+                            const taskId = await this.getTaskId(runtime, userId);
                             if (taskId && taskId != '') {
                                 let immResp = "";
                                 const SINGLE_DIGIT_REGEX = /^[0-9]$/;
@@ -399,7 +422,7 @@ export class WechatHandler {
         return false;
     }
 
-    async checkTaskStatus(runtime: IAgentRuntime, userId: string, openKfId: string) {
+    async checkTaskStatus(runtime: IAgentRuntime, userId: string, openKfId: string, checkCount: number) {
         try {
             /*const config = {
                 url: 'http://localhost:3333/91edd400-9c4a-0eb5-80ce-9d32973f2c49/task_status?taskId=' + taskId,
@@ -416,23 +439,35 @@ export class WechatHandler {
             }
             return response.data.task_status;*/
             if (userId && openKfId) {
-                const taskId = await this.getCachedData<string>(runtime, userId);
+                //const taskId = await this.getCachedData<string>(runtime, userId);
+                const taskId = await this.getTaskId(runtime, userId);
                 if (taskId) {
                     //let status = await runtime.cacheManager.get(taskId + "_memory_by_step");
                     let status = await TaskHelper.getTaskStatus(runtime, taskId);
                     console.log(taskId + ", " + status);
+                    let newTaskId = '';
                     try {
                         //const match = status.match(/current_step:\s*(\d+)/);
                         //const step = match ? parseInt(match[1], 10) : null;
                         //status = `Step ${step} ...`;
-                        const json = JSON.parse(status.task_status);
+                        const json = JSON.parse(status);
                         if (json) {
                             status = json.text;
+                            newTaskId = status.taskId;
+                            if (newTaskId) {
+                                await this.setTaskId(runtime, userId, newTaskId);
+                            }
                         }
                     } catch (error) {
-                        status = status.task_status;
+                        status = status.text;
+                        newTaskId = status.taskId;
+                        if (newTaskId) {
+                            await this.setTaskId(runtime, userId, newTaskId);
+                        }
                     }
-                    await this.sendMessage(userId, openKfId, status);
+                    if (checkCount % 20 == 10 && checkCount > 20 && checkCount < 60) {
+                        await this.sendMessage(userId, openKfId, status);
+                    }
                 }
             }
         }
@@ -442,12 +477,13 @@ export class WechatHandler {
     }
 
     async getRealOption(runtime: IAgentRuntime, userId: string, optionIndex: string) {
-       const taskId = await this.getCachedData<string>(runtime, userId);
-       const options = await this.getCachedData<string[]>(runtime, taskId + TASK_OPTIONS);
-       const bkOptions = await this.getCachedData<string[]>(runtime, taskId + TASK_BK_OPTIONS);
-       console.log(options);
-       console.log(bkOptions);
-       try {
+        //const taskId = await this.getCachedData<string>(runtime, userId);
+        const taskId = await this.getTaskId(runtime, userId);
+        const options = await this.getCachedData<string[]>(runtime, taskId + TASK_OPTIONS);
+        const bkOptions = await this.getCachedData<string[]>(runtime, taskId + TASK_BK_OPTIONS);
+        console.log(options);
+        console.log(bkOptions);
+        try {
             if (optionIndex == '0') {
                 const newOptions = this.getRandomElements<string>(bkOptions, 3, 5);
                 await this.setCachedData(runtime, taskId + TASK_OPTIONS, newOptions);
@@ -484,7 +520,8 @@ export class WechatHandler {
             //     return resp.json();
             // }
 
-            const taskId = await this.getCachedData<string>(runtime, userId);
+            //const taskId = await this.getCachedData<string>(runtime, userId);
+            const taskId = await this.getTaskId(runtime, userId);
             if (taskId && taskId != '') {
                 //const origin_input = await this.getCachedData<string>(runtime, userId + ORIGIN_INPUT_POST);
                 const config = {
@@ -525,7 +562,8 @@ export class WechatHandler {
                 // End of the DataProcess
                 let text = output;
                 if (!options || options.length < 1) {
-                    await this.setCachedData(runtime, userId, '');
+                    //await this.setCachedData(runtime, userId, '');
+                    await this.setTaskId(runtime, userId, '');
                     //await this.setCachedData(runtime, userId + ORIGIN_INPUT_POST, '');
                 }
                 else {
@@ -564,7 +602,8 @@ export class WechatHandler {
                 const json = JSON.parse(response.data?.text);
                 if (json) {
                     newTaskId = json.taskId;
-                    await this.setCachedData(runtime, userId, json.taskId);
+                    //await this.setCachedData(runtime, userId, json.taskId);
+                    await this.setTaskId(runtime, userId, json.taskId);
                     options = json.intention_options || json.available_options;
                     output = (json.process_result + json.option_description) || json.data_result || json.question_description;
                 }
@@ -572,7 +611,8 @@ export class WechatHandler {
                 console.log(err);
                 const json = response.data?.text;
                 newTaskId = json.taskId;
-                await this.setCachedData(runtime, userId, json.taskId);
+                //await this.setCachedData(runtime, userId, json.taskId);
+                await this.setTaskId(runtime, userId, json.taskId);
                 options = json.intention_options || json.available_options;
                 output = (json.process_result + json.option_description) || json.data_result || json.question_description || json;
             }
