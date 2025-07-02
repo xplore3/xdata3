@@ -327,13 +327,13 @@ export class WechatHandler {
 
                         // checkResp
                         let checkCount = 0;
-                        const job = cron.schedule("*/3 * * * *", async () => {
+                        const job = cron.schedule("*/10 * * * * *", async () => {
                             console.log(`Wechat check at ${new Date().toISOString()}`);
-                            if (checkCount++ > 1) {
-                                job.stop();
-                                return;
+                            if (checkCount++ > 100) {
+                                //job.stop();
+                                //return;
                             }
-                            await this.checkTaskStatus(runtime, userId, decryptedXml.xml.OpenKfId);
+                            await this.checkTaskStatus(runtime, userId, decryptedXml.xml.OpenKfId, checkCount);
                         });
 
                         try {
@@ -422,7 +422,7 @@ export class WechatHandler {
         return false;
     }
 
-    async checkTaskStatus(runtime: IAgentRuntime, userId: string, openKfId: string) {
+    async checkTaskStatus(runtime: IAgentRuntime, userId: string, openKfId: string, checkCount: number) {
         try {
             /*const config = {
                 url: 'http://localhost:3333/91edd400-9c4a-0eb5-80ce-9d32973f2c49/task_status?taskId=' + taskId,
@@ -465,7 +465,9 @@ export class WechatHandler {
                             await this.setTaskId(runtime, userId, newTaskId);
                         }
                     }
-                    await this.sendMessage(userId, openKfId, status);
+                    if (checkCount % 20 == 10 && checkCount < 40) {
+                        await this.sendMessage(userId, openKfId, status);
+                    }
                 }
             }
         }
