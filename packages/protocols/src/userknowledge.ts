@@ -170,7 +170,7 @@ export class UserKnowledge {
       roomId,
       agentId: runtime.agentId,
     };
-    console.debug("userMessage: ", userMessage, userId);
+    //console.debug("userMessage: ", userMessage, userId);
 
     return (
       prompt +
