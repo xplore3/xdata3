@@ -331,6 +331,7 @@ export class IntentionHandler {
           message.content.text = origin_input + "\r\n" + message.content.text;
           //Gen new TaskId
           message.content.intention.taskId = TaskHelper.generateTaskId();
+          await TaskHelper.setWechatTaskId(runtime, message.userId, taskId);
           await TaskHelper.setTaskOriginInput(runtime, taskId, message.content.text);
           await TaskHelper.setTaskStatus(runtime, taskId, JSON.stringify({taskId: message.content.intention.taskId}));
           return await IntentionHandler.handleDataCollectAPI(

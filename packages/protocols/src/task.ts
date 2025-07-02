@@ -18,6 +18,7 @@ import { extractJson } from "./utils";
 const TASK_ORIGIN_INPUT_CACHE_KEY = "_task_cache_";
 const TASK_OPTION_CACHE_KEY = "_task_option_cache_";
 const TASK_STATUS_KEY = "_task_status_cache_";
+const WECHAT_TASK_ID_KEY = "_wechat_task_id_";
 const TASK_PLATFORM_KEY = "_task_platform_cache_";
 
 export class TaskHelper {
@@ -124,6 +125,15 @@ export class TaskHelper {
       console.error(err);
     }
     return "";
+  }
+
+  static async setWechatTaskId(runtime: IAgentRuntime, userId: string, taskId: string) {
+    try {
+      await this.setCachedData(runtime, WECHAT_TASK_ID_KEY + userId, taskId);
+    }
+    catch (err) {
+      console.log(`setWechatTaskId ${taskId}`);
+    }
   }
 
   static async setTaskPlatform(runtime: IAgentRuntime, taskId: string, text: string) {
