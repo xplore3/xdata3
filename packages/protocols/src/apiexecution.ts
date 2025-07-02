@@ -34,31 +34,36 @@ export class ApiExecution {
 
   static async executeApiChainLoop(runtime: IAgentRuntime, message: Memory, api: JSON | any, totalCount: number): Promise<any> {
     if (api && api.execute_depend && api.execute_depend === 'chain_loop') {
-      const api1 = ApiDb.getApi(api.execute_sequence[0]);
-      const api2 = ApiDb.getApi(api.execute_sequence[1]);
-      api1.query_params = api.query_params;
-      const result = await this.executeApi(runtime, message, api1, totalCount);
+      const api1 = await ApiDb.getApi(api.execute_sequence[0]);
+      const api2 = await ApiDb.getApi(api.execute_sequence[1]);
+      let result = [];
       const result2 = [];
-      for (const item of result) {
-        try {
-          api2.query_params = api1.query_params;
-          const execJson = await this.getApiQueryParam(runtime, message, api2, item);
-          if (execJson) {
-            if (execJson.query_params) {
-              api2.query_params = execJson.query_params;
-              const execCount = execJson.request_count <= 100 ? execJson.request_count : 100;
-              await new Promise((resolve) => setTimeout(resolve, 100));
-              const api2Result = await this.executeApi(
-                runtime, message, api2, execCount
-              );
-              if (api2Result) {
-                result2.push(...api2Result);
+      const execJson1 = await this.getApiQueryParam(runtime, message, api1, '');
+      if (execJson1) {
+        api1.query_params = execJson1.query_params;
+        const execCount = execJson1.request_count <= 100 ? execJson1.request_count : 100;
+        result = await this.executeApi(runtime, message, api1, execCount);
+        for (const item of result) {
+          try {
+            api2.query_params = api1.query_params;
+            const execJson = await this.getApiQueryParam(runtime, message, api2, item);
+            if (execJson) {
+              if (execJson.query_params) {
+                api2.query_params = execJson.query_params;
+                const execCount = execJson.request_count <= 100 ? execJson.request_count : 100;
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                const api2Result = await this.executeApi(
+                  runtime, message, api2, execCount
+                );
+                if (api2Result) {
+                  result2.push(...api2Result);
+                }
               }
             }
           }
-        }
-        catch (err) {
-          console.log(err);
+          catch (err) {
+            console.log(err);
+          }
         }
       }
       try {
@@ -82,12 +87,16 @@ export class ApiExecution {
       }
     }
     else if (api && api.execute_depend && api.execute_depend === 'chain') {
-      const api1 = ApiDb.getApi(api.execute_sequence[0]);
-      const api2 = ApiDb.getApi(api.execute_sequence[1]);
-      api1.query_params = api.query_params;
-      api2.query_params = api.query_params;
-      const result = await this.executeApi(runtime, message, api1, totalCount);
+      const api1 = await ApiDb.getApi(api.execute_sequence[0]);
+      const api2 = await ApiDb.getApi(api.execute_sequence[1]);
+      let result = [];
       let result2 = [];
+      const execJson1 = await this.getApiQueryParam(runtime, message, api1, '');
+      if (execJson1) {
+        api1.query_params = execJson1.query_params;
+        const execCount = execJson1.request_count <= 100 ? execJson1.request_count : 100;
+        result = await this.executeApi(runtime, message, api1, execCount);
+      }
       const execJson = await this.getApiQueryParam(runtime, message, api2, '');
       if (execJson) {
         api2.query_params = execJson.query_params;
@@ -113,8 +122,8 @@ export class ApiExecution {
       }
     }
     else if (api && api.execute_depend && api.execute_depend === 'chain_new_param') {
-      const api1 = ApiDb.getApi(api.execute_sequence[0]);
-      const api2 = ApiDb.getApi(api.execute_sequence[1]);
+      const api1 = await ApiDb.getApi(api.execute_sequence[0]);
+      const api2 = await ApiDb.getApi(api.execute_sequence[1]);
       let result1 = [];
       let result2 = [];
       let result3 = [];
@@ -131,7 +140,7 @@ export class ApiExecution {
         result2 = await this.executeApi(runtime, message, api2, execCount);
       }
 
-      const api3 = ApiDb.getApi(api.execute_sequence[2]);
+      const api3 = await ApiDb.getApi(api.execute_sequence[2]);
       for (const item of [...result1, ...result2]) {
         try {
           const execJson = await this.getApiQueryParam(runtime, message, api3, item);
@@ -241,7 +250,7 @@ export class ApiExecution {
               break;
             }
             if ((err.status == 503 || err.status == 400 || err.status == 429) && api.backup && api.backup != "") {
-              const apiBackup = ApiDb.getApi(api.backup);
+              const apiBackup = await ApiDb.getApi(api.backup);
               apiBackup.query_params = api.query_params;
               const newParams = await this.getApiQueryParam(runtime, message, apiBackup, api.query_params);
               if (newParams) {
@@ -437,6 +446,132 @@ export class ApiExecution {
         console.log(`executeApi final length : ${result?.length}`);
         const taskId = message.content?.intention?.taskId;
         await TaskHelper.setTaskStatus(runtime, taskId, `正在处理【${api.name}】数据`);
+      }
+      catch (err) {
+        console.log(err);
+      }
+    }
+    catch (err) {
+      console.log(`executeApi ${api}`);
+      console.error(err);
+    }
+    return result;
+  }
+
+  static async executeApiRaw(runtime: IAgentRuntime, message: Memory, api: JSON | any): Promise<any> {
+    let result = [];
+    console.log(`executeApiRaw`);
+    try {
+      const options = {
+        method: api.method,
+        url: api.url,
+        data: api.query_params,
+        //body: JSON.stringify(api.query_params),
+        headers: api.headers,
+        httpAgent: gProxyAgent,
+        httpsAgent: gProxyAgent
+      }
+      if (api.method === 'GET' || api.method === 'get') {
+        options.params = api.query_params;
+      }
+      let response = null;
+      try {
+        const MAX_TRY_COUNT = 10;
+        const MAX_FAILED_COUNT = 10;
+        let execCount = 0;
+        let failedCount = 0;
+        for (let page = 1; page <= 1; page++) {
+          if (execCount++ > MAX_TRY_COUNT) { break; }
+          let items = [];
+
+          try {
+            // TODO: WORKAROUND of page
+            if (options.params?.page) {
+              options.params.page = page;
+            }
+            console.log(options.url);
+            console.log(options.params);
+            response = await axios.request(options);
+            console.log(response.data);
+          }
+          catch (err) {
+            console.log(`axios.request ${err.status} error ${err.message}`);
+            if (failedCount++ > MAX_FAILED_COUNT) {
+              break;
+            }
+            if ((err.status == 503 || err.status == 400 || err.status == 429) && api.backup && api.backup != "") {
+              const apiBackup = await ApiDb.getApi(api.backup);
+              apiBackup.query_params = api.query_params;
+              const newParams = await this.getApiQueryParam(runtime, message, apiBackup, api.query_params);
+              if (newParams) {
+                apiBackup.query_params = newParams.query_params;
+                const bkResult = await this.executeApiRaw(runtime, message, apiBackup);
+                console.log(`executeApi bkResult: ${bkResult.length}`);
+                result = result.concat(bkResult);
+                console.log(`executeApi add bk: ${result.length}`);
+                break;
+              }
+            }
+            await new Promise((resolve) => setTimeout(resolve, 1000 + 1000 * execCount));
+            continue;
+          }
+
+          // TODO: The response check should be compatible
+          if (response.status != 200) {
+            console.log(response);
+            if (failedCount++ > MAX_FAILED_COUNT) {
+              break;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 1000 + 1000 * execCount));
+            continue;
+          }
+          // TODO: The response items should be compatible
+          // TODP: Use of api.data_path
+          if (api.data_path != '') {
+            try {
+              console.log(`JSONPath ${api.data_path}`);
+              items = JSONPath({
+                path: api.data_path,
+                json: response
+              });
+              items = items[0];
+              //console.log(`JSONPath ${items}`);
+            }
+            catch (err) {
+              console.log(err);
+              items = response;
+            }
+          }
+          else {
+            items = response.data?.data?.items
+              || response.data?.data?.data?.items
+              || response.data?.data?.comments
+              || response.data?.data?.users
+              || response.data?.data?.notes
+              || response.data?.data?.list
+              || response.data?.data
+              || response.data
+              || response
+              || [];
+          }
+          if (items) {
+            console.log(`Response items: ${items.length || items}`);
+            //console.log(items);
+          }
+          //console.log(`${JSON.stringify(tempResult)}
+          //  \n------------------------jsonata---------------------\n`);
+          result = result.concat(items);
+          console.log(`executeApi result: ${result.length}`);
+
+          if (!(options.params?.page)) {
+            break; // no loop for un-pages
+          }
+          
+          await new Promise((resolve) =>
+            setTimeout(resolve, 100)
+          );
+        }
+        console.log(`executeApi final length : ${result?.length}`);
       }
       catch (err) {
         console.log(err);
