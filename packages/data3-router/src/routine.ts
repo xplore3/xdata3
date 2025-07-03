@@ -58,7 +58,7 @@ export class RoutineController {
         const runtime = this.getAgentId(req, res);
         if (runtime) {
             try {
-                const option = req.query.option;
+                const option = req.body.option;
                 if (!option) {
                     res.status(400).json({ error: "Missing option parameter" });
                     return;

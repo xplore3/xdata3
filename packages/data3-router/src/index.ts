@@ -1212,7 +1212,7 @@ export class DirectClient {
         );
 
         const routineController = new RoutineController(this);
-        this.app.get(
+        this.app.post(
             "/:agentId/routine",
             async (req: express.Request, res: express.Response) => {
                 await routineController.handleRoutine(req, res);
