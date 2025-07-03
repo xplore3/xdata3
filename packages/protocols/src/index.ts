@@ -14,6 +14,7 @@ import APIWrapperFactory from "./apiwrapper";
 import { PdfHelper } from "./pdfhelper";
 import { KeyWordGenerator } from "./keywords";
 import { IntentionHandler } from "./intention";
+import { RountineHandler } from "./routine";
 import { TaskHelper } from "./task";
 import { UserKnowledge } from "./userknowledge";
 import { extractJson } from "./utils"
@@ -1238,4 +1239,4 @@ function getDynamicTail(taskId: string) {
     return "获取数据源失败，请稍后再尝试";
 }
 
-export { IntentionHandler, TaskHelper, UserKnowledge, extractJson };
+export { IntentionHandler, RountineHandler, TaskHelper, UserKnowledge, extractJson };

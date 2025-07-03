@@ -50,6 +50,7 @@ import { WechatHandler } from "./wechat.ts";
 import { PromptController } from "./promts.ts";
 import { fileURLToPath } from "url";
 import { exceptionHandler, parseToken } from "./auth.ts";
+import { RoutineController } from "./routine.ts";
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -1208,6 +1209,14 @@ export class DirectClient {
             "/:agentId/switch_model",
             async (req: express.Request, res: express.Response) => {
                 await templateHandler.handleSwitchModelProvider(req, res);
+            }
+        );
+
+        const routineController = new RoutineController(this);
+        this.app.get(
+            "/:agentId/routine",
+            async (req: express.Request, res: express.Response) => {
+                await routineController.handleRoutine(req, res);
             }
         );
 
