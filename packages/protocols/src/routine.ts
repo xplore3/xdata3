@@ -6,6 +6,7 @@ import {
   type IAgentRuntime,
 } from "@data3os/agentcontext";
 import { extractJson } from "./utils"
+import { TaskHelper } from "./task";
 
 
 export class RountineHandler {
@@ -34,6 +35,8 @@ export class RountineHandler {
       });
       console.log(response);
       let execJson = extractJson(response);
+      const taskId = message.content.intention?.taskId || "";
+      await TaskHelper.setTaskStatus(runtime, taskId, execJson || response, true);
       if (execJson) {
         return execJson;
       }
@@ -63,6 +66,8 @@ export class RountineHandler {
       });
       console.log(response);
       let execJson = extractJson(response);
+      const taskId = message.content.intention?.taskId || "";
+      await TaskHelper.setTaskStatus(runtime, taskId, execJson || response, true);
       if (execJson) {
         return execJson;
       }
@@ -92,6 +97,8 @@ export class RountineHandler {
       });
       console.log(response);
       let execJson = extractJson(response);
+      const taskId = message.content.intention?.taskId || "";
+      await TaskHelper.setTaskStatus(runtime, taskId, execJson || response, true);
       if (execJson) {
         return execJson;
       }
@@ -121,6 +128,8 @@ export class RountineHandler {
       });
       console.log(response);
       let execJson = extractJson(response);
+      const taskId = message.content.intention?.taskId || "";
+      await TaskHelper.setTaskStatus(runtime, taskId, execJson || response, true);
       if (execJson) {
         return execJson;
       }
