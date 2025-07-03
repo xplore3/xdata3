@@ -48,7 +48,7 @@ export class ApiExecution {
             api2.query_params = api1.query_params;
             const execJson = await this.getApiQueryParam(runtime, message, api2, item);
             if (execJson) {
-              if (execJson.query_params) {
+              {
                 api2.query_params = execJson.query_params;
                 const execCount = execJson.request_count <= 100 ? execJson.request_count : 100;
                 await new Promise((resolve) => setTimeout(resolve, 100));
@@ -145,7 +145,7 @@ export class ApiExecution {
         try {
           const execJson = await this.getApiQueryParam(runtime, message, api3, item);
           if (execJson) {
-            if (execJson.query_params) {
+            {
               api3.query_params = execJson.query_params;
               const execCount = execJson.request_count <= 100 ? execJson.request_count : 100;
               await new Promise((resolve) => setTimeout(resolve, 100));
