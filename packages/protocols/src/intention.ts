@@ -113,7 +113,7 @@ export class IntentionHandler {
     }
     //const my_data_platform = await ApiDb.getUserDataPlatform(message.userId);
     const my_data_source = await ApiDb.getUserDataSource(my_data_platform, message.userId);
-    const intention_examples = UserKnowledge.getUserIntentionExamples(message.userId);
+    const intention_examples = UserKnowledge.getGenerateIntention(message.userId);
     const prompt = `
       你是一个程序员兼产品经理，能根据用户的请求，提取出其数据获取需求，并根据可用API列表给出其需要调用的API。
       主要有如下一些情况：
@@ -275,7 +275,7 @@ export class IntentionHandler {
     const platform = await TaskHelper.getTaskPlatform(runtime, taskId);
     const my_data_source = ApiDb.getUserDataSource(platform, message.userId);
     const attachment = TaskHelper.getTaskAttachment(taskId);
-    const intention_examples = UserKnowledge.getUserIntentionExamples(message.userId);
+    const intention_examples = UserKnowledge.getAnalysisIntention(message.userId);
     const userProfile = await UserKnowledge.getUserKnowledge(runtime, message.userId);
     const prompt = `
       你是一个严肃的线上运营专员/数据处理工程师/数据分析师/十年小红书平台达人合作投放的营销专家/内容策略分析专家，

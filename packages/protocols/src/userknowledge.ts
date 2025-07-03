@@ -90,6 +90,44 @@ export class UserKnowledge {
     return "";
   }
 
+  // Get The First Level User Intentions By UserId
+  static getGenerateIntention(userId: UUID) {
+    const intentions = [
+      '1. 依据我的产品调性生成更多笔记',
+      '2. 仿照热门低粉爆款介绍我的产品功能',
+      '3. 结合最近的热点生成笔记',
+      '4. 以KOC的角度生成种草笔记',
+      '5. 结合我的产品生成针对【】类笔记的评论',
+      '6. 在我的笔记里加入【****】元素重新生成',
+      '7. 将我的产品与【****】热点融合起来生成文案',
+      '8. 结合我的笔记，推演如何比他们发的内容点赞高'
+    ];
+    return `[${intentions.join(", ")}]`;
+  }
+
+  // Get The Second Level User Intentions By UserId
+  static getAnalysisIntention(userId: UUID) {
+    const intentions = [
+      '1. 剖析这些爆文是怎样的结构',
+      '2. 剖析这些爆文的标题是怎么写的',
+      '3. 推演预测下周可能会火的内容方向',
+      '4. 洞察这些帖子/笔记中哪类标题格式获得了较高的互动',
+      '5. 给出可交叉组合的话题/元素',
+      '6. 总结可模仿的内容（如：标题模板、内容场景、内容文案、标签组合、发布时间），溯源说明原因',
+      '7. 推演内容未覆盖的机会点（如缺乏情绪向内容/缺少新品对比测评），并阐释原因',
+      '8. 剖析这些帖子的评论是怎么布局的',
+      '9. 透视这篇帖子的评论主要话题是什么',
+      '10. 推演这些评论里是否有购买咨询或相关意图',
+      '11. 剖析用户发帖是否存在特定时间节点与活动节奏',
+      '12. 透视图文风格（是否注重视觉 / 使用滤镜统一 / 有生活感等等）',
+      '13. 洞察账号的灵感库',
+      '14. 根据达人内容和互动质量，推演评估达人的合作优先级',
+      '15. 根据我的产品生成打招呼的内容，口吻自然、轻松、不带强推感',
+      '16. 剖析评论区的主要互动方式是什么'
+    ];
+    return `[${intentions.join(", ")}]`;
+  }
+
   // Get User Intentions By UserId
   static getUserIntentionExamples(userId: UUID) {
     const intentionNote = [
