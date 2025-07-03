@@ -206,7 +206,11 @@ export class IntentionHandler {
       const taskId = message.content.intention?.taskId || "";
       let execJson = await ApiExecution.getApiQueryParam(runtime, message, api, '');
       if (execJson) {
-        if (execJson.query_params) {
+        if (!execJson.query_params) {
+          console.log("No query_params found for API:", api_desc);
+          execJson.query_params = {};
+        }
+        {
           api.query_params = execJson.query_params;
           const execCount = execJson.request_count <= 100 ? execJson.request_count : 100;
           const { result, txtfilename, excelfilename } = await ApiExecution.executeApiChainLoop(
