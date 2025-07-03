@@ -5,16 +5,7 @@ import {
   generateText,
   type IAgentRuntime,
 } from "@data3os/agentcontext";
-import {
-  getDynamicTail,
-  appendToChatCache,
-} from "./filehelper";
-import { ApiDb } from "./apis";
 import { extractJson } from "./utils"
-import { ApiExecution } from "./apiexecution";
-import { TaskHelper } from "./task";
-import { UserKnowledge } from "./userknowledge";
-import { chatWithDeepSeek } from "./aibydeepseek";
 
 
 export class RountineHandler {
@@ -32,7 +23,7 @@ export class RountineHandler {
     runtime: IAgentRuntime,
     message: Memory,
   ): Promise<any> {
-    const prompt = `
+    const prompt = `根据用户输入${message.content.text}，生成仿写笔记。
       -----------------------------
     `;
     try {
@@ -61,7 +52,65 @@ export class RountineHandler {
     runtime: IAgentRuntime,
     message: Memory,
   ): Promise<any> {
-    const prompt = `
+    const prompt = `根据我的产品背景，找到对标热文，或通过KOC找到热帖，进行分析和仿写。
+      -----------------------------
+    `;
+    try {
+      let response = await generateText({
+        runtime,
+        context: prompt,
+        modelClass: ModelClass.LARGE,
+      });
+      console.log(response);
+      let execJson = extractJson(response);
+      if (execJson) {
+        return execJson;
+      }
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  /**
+   * 
+   * @param {string} 
+   * @returns {Promise<string>[]} 
+   */
+  static async handleSearchKoc(
+    runtime: IAgentRuntime,
+    message: Memory,
+  ): Promise<any> {
+    const prompt = `根据用户背景，查找KOC，并对其进行合作评估。
+      -----------------------------
+    `;
+    try {
+      let response = await generateText({
+        runtime,
+        context: prompt,
+        modelClass: ModelClass.LARGE,
+      });
+      console.log(response);
+      let execJson = extractJson(response);
+      if (execJson) {
+        return execJson;
+      }
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  /**
+   * 
+   * @param {string} 
+   * @returns {Promise<string>[]} 
+   */
+  static async handleTrendPrediction(
+    runtime: IAgentRuntime,
+    message: Memory,
+  ): Promise<any> {
+    const prompt = `根据最新热点、爆文、新闻事件等，预测下周热点事件。
       -----------------------------
     `;
     try {

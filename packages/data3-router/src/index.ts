@@ -744,7 +744,6 @@ export class DirectClient {
             async (req: express.Request, res: express.Response) => {
                 const agentId = req.params.agentId;
                 const username = req.body.userId ?? "user";
-                const taskWaitMode = req.body.taskWaitMode;
                 const userId = stringToUuid(username);
                 const roomId = stringToUuid("default-data-room-" + username);
 

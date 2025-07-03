@@ -2,6 +2,10 @@
 import express from "express";
 import { DirectClient } from "./index";
 import {
+    Memory,
+    stringToUuid,
+    getEmbeddingZeroVector,
+    type Content,
     type IAgentRuntime,
 } from "@data3os/agentcontext";
 import {
@@ -54,9 +58,108 @@ export class RoutineController {
         const runtime = this.getAgentId(req, res);
         if (runtime) {
             try {
-                //await RountineHandler.handleRoutine(runtime, message);
-                const output: string = '\n\n';
-                res.send(output);
+                const option = req.query.option;
+                if (!option) {
+                    res.status(400).json({ error: "Missing option parameter" });
+                    return;
+                }
+                if (typeof option !== 'string') {
+                    res.status(400).json({ error: "Option parameter must be a string" });
+                    return;
+                }
+                const agentId = req.params.agentId;
+                const username = req.body.userId ?? "user";
+                const userId = stringToUuid(username);
+                const roomId = stringToUuid("default-data-room-" + username);
+                const originText = req.body.text;
+                const messageId = stringToUuid(userId + Date.now().toString());
+
+                const content: Content = {
+                    text: originText,
+                    intention: {
+                        taskId: await TaskHelper.generateTaskId(),
+                    },
+                    // attachments,
+                    attachments: [],
+                    source: "direct",
+                    inReplyTo: undefined,
+                };
+
+                const userMessage = {
+                    content,
+                    userId,
+                    roomId,
+                    agentId: runtime.agentId,
+                };
+
+                const memory: Memory = {
+                    id: messageId,
+                    ...userMessage,
+                    agentId: runtime.agentId,
+                    userId,
+                    roomId,
+                    content,
+                    createdAt: Date.now(),
+                };
+
+                await runtime.messageManager.createMemory(memory);
+
+                let state = await runtime.composeState(userMessage, {
+                    agentName: runtime.character.name,
+                });
+
+                let responseStr = null;
+                if (option === 'today_posts') {
+                    responseStr = await RountineHandler.handleTodayPosts(runtime, memory);
+                }
+                else if (option === 'hot_posts') {
+                    responseStr = await RountineHandler.handleHotPosts(runtime, memory);
+                }
+                else if (option === 'search_koc') {
+                    responseStr = await IntentionHandler.handleSearchKoc(runtime, memory);
+                }
+                else if (option === 'trend_prediction') {
+                    responseStr = await IntentionHandler.handleTrendPrediction(runtime,memory);
+                }
+                else {
+                    res.status(400).json({ error: "Invalid option parameter" });
+                    return;
+                }
+
+                const parsedContent: Content = {
+                    text: responseStr,
+                    // attachments,
+                    attachments: [],
+                    source: "direct",
+                    inReplyTo: messageId,
+                };
+
+                if (!parsedContent) {
+                    res.status(500).send(
+                        "No response from generateMessageResponse"
+                    );
+                    return;
+                }
+
+                // save response to memory
+                const responseMessage: Memory = {
+                    id: messageId,
+                    ...userMessage,
+                    userId: userId,
+                    content: parsedContent,
+                    embedding: getEmbeddingZeroVector(),
+                    createdAt: Date.now(),
+                };
+
+                await runtime.messageManager.createMemory(responseMessage);
+
+                state = await runtime.updateRecentMessageState(state);
+                res.json({
+                    user: "Data3",
+                    text: responseStr,
+                    action: "NONE",
+                });
+                //res.send(responseStr);
             } catch (err) {
                 console.error('[RoutineController] Error handling routine:', err)
                 res.send('fail')
