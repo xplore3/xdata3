@@ -66,15 +66,13 @@ export class RountineHandler {
       if (execParam) {
         api1.query_params = execParam.query_params;
         const execCount = 10;
-        const { result, txtfilename, excelfilename } = await ApiExecution.executeApi(
-          runtime, message, api1, execCount
-        );
-        await TaskHelper.setTaskStatus(runtime, taskId, `获取热文${result.length}条`);
+        const result = await ApiExecution.executeApi(runtime, message, api1, execCount);
+        await TaskHelper.setTaskStatus(runtime, taskId, `获取热文${result.length}篇`);
 
         const userProfile = await UserKnowledge.getUserKnowledge(runtime, message.userId);
         const intention_examples = UserKnowledge.getGenerateIntention(message.userId);
         const prompt = `根据我的产品背景：${userProfile}，
-          结合找到热帖：${result}，以表格的形式对这些帖子进行呈现。
+          结合找到热帖：${JSON.stringify(result)}，以表格的形式对这些帖子进行呈现。
           结合一下帖子生成/改写的选项${intention_examples}，给出按照帖子ID进行的仿写/改写选项。
           选项个数为5~10个，如下示例：[
             ‘仿写【帖子ID1】’，
