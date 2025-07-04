@@ -202,7 +202,7 @@ export class IntentionHandler {
     try {
       const txtfilelist = [];
       const excelfilelist = [];
-      const results = [];
+      let results = [];
       const taskId = message.content.intention?.taskId || "";
       let execJson = await ApiExecution.getApiQueryParam(runtime, message, api, '');
       if (execJson) {
@@ -227,7 +227,7 @@ export class IntentionHandler {
                 runtime, message, api, synCount
               );
               if (resultSyn && resultSyn.length > 0) {
-                results.push(resultSyn);
+                results.push(...resultSyn);
               }
               if (txtfilenameSyn) {
                 if (Array.isArray(txtfilenameSyn)) {
@@ -252,7 +252,10 @@ export class IntentionHandler {
             }*/
           }
           if (result && result.length > 0) {
-            results.push(result);
+            results.push(...result);
+            // Make sure results are unique
+            results = Array.from(new Set(results.map(item => JSON.stringify(item))))
+                .map(item => JSON.parse(item));
             const filename = taskId + TaskHelper.TASK_DATA_CACHE_FILE;
             appendToChatCache(JSON.stringify(results), filename, (err) => {
               console.error("Custom error handling:", err);
