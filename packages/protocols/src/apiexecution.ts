@@ -597,7 +597,7 @@ export class ApiExecution {
     const userInput = `${message.content.text}`;
     const userProfile = await UserKnowledge.getUserKnowledge(runtime, message.userId);
     const prompt = `
-      你是一个Nodejs程序员，能根据用户的请求，可用的API，API文档，生成调用API的URL的调用参数。
+      你是一个Nodejs程序员，能根据用户的请求，用户的背景，API文档，生成调用API的URL的调用参数。
       用户的原输入为：${userInput}。
       可用的API参数说明为：${JSON.stringify(api.query_params_desc)}。
       调用参数的取值参考来源为PARAM_SOURCE：${JSON.stringify(source)}。
@@ -638,6 +638,55 @@ export class ApiExecution {
     }
     catch (err) {
       console.log(`getApiQueryParam ${api}`);
+      console.error(err);
+    }
+    return null;
+  }
+
+  static async getApiSynonymQueryParam(runtime: IAgentRuntime, message: Memory, api: JSON | any, source: any): Promise<any> {
+    console.log(`getApiSynonymQueryParam ${api.key}`);
+    const userInput = `${message.content.text}`;
+    const userProfile = await UserKnowledge.getUserKnowledge(runtime, message.userId);
+    const prompt = `
+      你是一个Nodejs程序员，能根据用户的请求，用户背景，API文档，以及现有调用参数，生成调用API的URL的新的同义近义调用参数。
+      用户的原输入为：${userInput}。
+      现有的调用参数为：${JSON.stringify(api.query_params)}；新的参数的搜索值不能跟现有参数一样。
+      可用的API参数说明为：${JSON.stringify(api.query_params_desc)}。
+      调用参数的取值参考来源为PARAM_SOURCE：${JSON.stringify(source)}。
+      可用的API的文档地址为：${api.docs_link}。
+      用户相关的产品、业务及背景为：${userProfile}。
+      API能力说明：${api.description}。
+      根据这些输入，需要给出如下结果：
+        {
+          "query_params": {json of params},
+          "request_count": 取出的内容的数量，从用户的原输入和参考来源PARAM_SOURCE中提取，默认是20, 不要超过100
+        }.
+      关于query_params字段，需满足用户所有需求，且输出参数说明中的项，不能有参数说明之外的项；不是数组，仅仅是一个JSON对象。
+      query_params字段的取值需要严格遵守参数说明，如果参数说明对某个字段没有说明，则不要填写该字段，保持为空或原值。只有进行了说明的字段才需要填写。
+      如果query_params的keyword之类的取值不能明显地从用户输入里获取，则需要结合用户的knowledge和背景。
+      query_params中的关键字的取值需要严格从指定来源${JSON.stringify(source)}中获取，不能有之外的值，不能生成值。
+      query_params须是一个JSON对象，不能是字符串等。
+      query_params中的搜索关键词不能太长，一般为用户的产品，不需要带品牌名称，一般是一个词语，不能超过2个词语。
+      query_params字段示例如下：【${JSON.stringify(api.query_params_example)}】。
+      输出须是一个标准的JSON格式，能够使用JSON.parse()进行解析。
+      这里的request_count的值取决于用户的原输入和PARAM_SOURCE中的说明，比如如果comments_count有10个，则对应的comment接口结果数量就是10个。
+      -----------------------------
+    `;
+    try {
+      let response = await generateText({
+        runtime,
+        context: await UserKnowledge.composePrompt(runtime, prompt, message.userId),
+        modelClass: ModelClass.LARGE,
+      });
+      console.log(response);
+      let execJson = extractJson(response);
+      if (execJson) {
+        return execJson
+      }
+      return response;
+    }
+    catch (err) {
+      console.log(`getApiSynonymQueryParam ${api}`);
       console.error(err);
     }
     return null;

@@ -216,10 +216,45 @@ export class IntentionHandler {
           const { result, txtfilename, excelfilename } = await ApiExecution.executeApiChainLoop(
             runtime, message, api, execCount
           );
+          if (!result || result.length < execCount) {
+            console.log(`API execution returned less results than requested: ${result.length} < ${execCount}`);
+            const synParams = await ApiExecution.getApiSynonymQueryParam(runtime, message, api, '');
+            console.log(`Synonym query params: ${JSON.stringify(synParams)}`);
+            /*if (synParams) {
+              api.query_params = synParams.query_params;
+              const synCount = synParams.request_count <= 100 ? synParams.request_count : 100;
+              const { resultSyn, txtfilenameSyn, excelfilenameSyn } = await ApiExecution.executeApiChainLoop(
+                runtime, message, api, synCount
+              );
+              if (resultSyn && resultSyn.length > 0) {
+                results.push(resultSyn);
+              }
+              if (txtfilenameSyn) {
+                if (Array.isArray(txtfilenameSyn)) {
+                  for (const item of txtfilenameSyn) {
+                    if (item)
+                      txtfilelist.push(item);
+                  }
+                } else {
+                  txtfilelist.push(txtfilenameSyn);
+                }
+              }
+              if (excelfilenameSyn) {
+                if (Array.isArray(excelfilenameSyn)) {
+                  for (const item of excelfilenameSyn) {
+                    if (item)
+                      excelfilelist.push(item);
+                  }
+                } else {
+                  excelfilelist.push(excelfilenameSyn);
+                }
+              }
+            }*/
+          }
           if (result && result.length > 0) {
             results.push(result);
             const filename = taskId + TaskHelper.TASK_DATA_CACHE_FILE;
-            appendToChatCache(JSON.stringify(result), filename, (err) => {
+            appendToChatCache(JSON.stringify(results), filename, (err) => {
               console.error("Custom error handling:", err);
             });
           }

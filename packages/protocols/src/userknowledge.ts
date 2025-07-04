@@ -90,6 +90,27 @@ export class UserKnowledge {
     return "";
   }
 
+  static async setUserRoutineCache(runtime: IAgentRuntime, key: string, data: string) {
+    try {
+      await this.setCachedData(runtime, key, data);
+    }
+    catch (err) {
+      console.log(`setUserRoutineCache ${key}`);
+      console.error(err);
+    }
+  }
+
+  static async getUserRoutineCache(runtime: IAgentRuntime, key: string): Promise<string> {
+    try {
+      return await this.getCachedData(runtime, key);
+    }
+    catch (err) {
+      console.log(`getUserRoutineCache ${key}`);
+      console.error(err);
+    }
+    return "";
+  }
+
   // Get The First Level User Intentions By UserId
   static getGenerateIntention(userId: UUID) {
     const intentions = [

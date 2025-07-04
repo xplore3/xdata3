@@ -12,7 +12,13 @@ import {
     IntentionHandler,
     TaskHelper,
     RountineHandler,
+    UserKnowledge,
 } from "data3-protocols";
+
+const ROUNTINE_OPTION_TODAY_POST = 'today_posts';
+const ROUNTINE_OPTION_HOT_POST = 'hot_posts';
+const ROUNTINE_OPTION_SEARCH_KOC = 'search_koc';
+const ROUNTINE_OPTION_TREND_PRIDICTION = 'trend_prediction';
 
 export class RoutineController {
     constructor(private client: DirectClient) {}
@@ -109,17 +115,73 @@ export class RoutineController {
                 });
 
                 let responseStr = null;
-                if (option === 'today_posts') {
-                    responseStr = await RountineHandler.handleTodayPosts(runtime, memory);
+                if (option === ROUNTINE_OPTION_TODAY_POST) {
+                    responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_TODAY_POST + userId);
+                    if (!responseStr) {
+                        responseStr = await RountineHandler.handleTodayPosts(runtime, memory);
+                        await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_TODAY_POST + userId, responseStr);
+                    }
+                    else {
+                        setTimeout(async () => {
+                            try {
+                                responseStr = await RountineHandler.handleTodayPosts(runtime, memory);
+                                await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_TODAY_POST + userId, responseStr);
+                            } catch (err) {
+                                console.error('Background error ', err);
+                            }
+                        }, 10);
+                    }
                 }
-                else if (option === 'hot_posts') {
-                    responseStr = await RountineHandler.handleHotPosts(runtime, memory);
+                else if (option === ROUNTINE_OPTION_HOT_POST) {
+                    responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_HOT_POST + userId);
+                    if (!responseStr) {
+                        responseStr = await RountineHandler.handleHotPosts(runtime, memory);
+                        await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_HOT_POST + userId, responseStr);
+                    }
+                    else {
+                        setTimeout(async () => {
+                            try {
+                                responseStr = await RountineHandler.handleHotPosts(runtime, memory);
+                                await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_HOT_POST + userId, responseStr);
+                            } catch (err) {
+                                console.error('Background error ', err);
+                            }
+                        }, 10);
+                    }
                 }
-                else if (option === 'search_koc') {
-                    responseStr = await IntentionHandler.handleSearchKoc(runtime, memory);
+                else if (option === ROUNTINE_OPTION_SEARCH_KOC) {
+                    responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_SEARCH_KOC + userId);
+                    if (!responseStr) {
+                        responseStr = await RountineHandler.handleSearchKoc(runtime, memory);
+                        await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_SEARCH_KOC + userId, responseStr);
+                    }
+                    else {
+                        setTimeout(async () => {
+                            try {
+                                responseStr = await RountineHandler.handleSearchKoc(runtime, memory);
+                                await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_SEARCH_KOC + userId, responseStr);
+                            } catch (err) {
+                                console.error('Background error ', err);
+                            }
+                        }, 10);
+                    }
                 }
-                else if (option === 'trend_prediction') {
-                    responseStr = await IntentionHandler.handleTrendPrediction(runtime,memory);
+                else if (option === ROUNTINE_OPTION_TREND_PRIDICTION) {
+                    responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_TREND_PRIDICTION + userId);
+                    if (!responseStr) {
+                        responseStr = await RountineHandler.handleTrendPrediction(runtime, memory);
+                        await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_TREND_PRIDICTION + userId, responseStr);
+                    }
+                    else {
+                        setTimeout(async () => {
+                            try {
+                                responseStr = await RountineHandler.handleTrendPrediction(runtime, memory);
+                                await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_TREND_PRIDICTION + userId, responseStr);
+                            } catch (err) {
+                                console.error('Background error ', err);
+                            }
+                        }, 10);
+                    }
                 }
                 else {
                     res.status(400).json({ error: "Invalid option parameter" });
