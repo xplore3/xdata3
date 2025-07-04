@@ -27,23 +27,69 @@ export class RountineHandler {
     runtime: IAgentRuntime,
     message: Memory,
   ): Promise<any> {
-    const prompt = `根据用户输入${message.content.text}，生成仿写笔记。
-      -----------------------------
-    `;
-    try {
-      let response = await generateText({
-        runtime,
-        context: prompt,
-        modelClass: ModelClass.LARGE,
-      });
-      console.log(response);
-      let execJson = extractJson(response);
+     try {
       const taskId = message.content.intention?.taskId || "";
-      await TaskHelper.setTaskStatus(runtime, taskId, execJson || response, true);
-      if (execJson) {
-        return execJson;
+      const api1 = await ApiDb.getApi('notes_search');
+      message.content.text = '找到10篇与我的产品相关的热帖，按照热度排序。';
+      let execParam = await ApiExecution.getApiQueryParam(runtime, message, api1, '');
+      if (execParam) {
+        api1.query_params = execParam.query_params;
+        const notesCount = 10;
+        const notesResult = await ApiExecution.executeApi(runtime, message, api1, notesCount);
+        await TaskHelper.setTaskStatus(runtime, taskId, `获取热文${notesResult.length}篇`);
+
+        const api2 = await ApiDb.getApi('top_trend');
+        message.content.text = '找到热门话题、热搜词等。';
+        execParam = await ApiExecution.getApiQueryParam(runtime, message, api2, '');
+        if(!execParam) {
+            return "";
+        }
+        api2.query_params = execParam.query_params;
+        const hotsCount = 30;
+        const hotsResult = await ApiExecution.executeApi(runtime, message, api2, hotsCount);
+        await TaskHelper.setTaskStatus(runtime, taskId, `获取热门信息${hotsResult.length}篇`);
+
+        const userProfile = await UserKnowledge.getUserKnowledge(runtime, message.userId);
+        const intention_examples = UserKnowledge.getGenerateIntention(message.userId);
+        const prompt = `根据我的产品背景：${userProfile}，
+          结合找到热帖：${JSON.stringify(notesResult)}， 同时结合热点事件（热搜词和热门话题）${JSON.stringify(hotsResult)}。
+          结合一下帖子生成/改写的选项${intention_examples}，给出仿写选项。
+          选项个数为5~10个，如下示例：[
+            ‘重新仿写’，
+            ‘依据我的品牌调性改写’，
+          ].
+          -----------------------------
+          输出格式如下：
+          {
+            "process_result": "仿写的帖子，标题、摘要、内容等信息",
+            "option_description": "简要分析和描述",
+            "intention_options": ["重新仿写今日热门", "依据我的品牌调性改写", "......"],
+            "taskId": "${taskId}"
+          }
+        `;
+        try {
+          let response = await generateText({
+            runtime,
+            context: await UserKnowledge.composePrompt(runtime, prompt, message.userId),
+            modelClass: ModelClass.LARGE,
+          });
+          console.log(response);
+          let execJson = extractJson(response);
+          if (execJson) {
+            if (execJson.intention_options) {
+              await TaskHelper.setTaskOption(runtime, taskId, execJson.intention_options);
+            }
+            if (execJson.process_result) {
+              await TaskHelper.setTaskStatus(runtime, taskId, JSON.stringify(execJson), true);
+              return JSON.stringify(execJson);
+            }
+          }
+          await TaskHelper.setTaskStatus(runtime, taskId, response, true);
+          return response;
+        } catch (err) {
+          console.log(err);
+        }
       }
-      return response;
     } catch (err) {
       console.log(err);
     }
