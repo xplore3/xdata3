@@ -291,6 +291,7 @@ export class WechatHandler {
         }
 
         console.log("getWeixinUserInfo " + res.data);
+        return res.data;
     }
 
     async handleWecomAuth(req: express.Request, res: express.Response) {
@@ -299,7 +300,7 @@ export class WechatHandler {
         try {
             const { code, state } = req.query;
             //console.log(state)
-            let response = 'Auth Failed';
+            let response = null;
             if (code) {
                 const runtime = this.getAgentId(req, res);
                 if (runtime) {
@@ -307,37 +308,7 @@ export class WechatHandler {
                     const { accessToken, openid } = await this.getWeixinAccessToken(code as string);
                     const userInfo = await this.getWeixinUserInfo(accessToken, openid);
                     console.log(userInfo);
-                    response = `
-                    <!DOCTYPE html>
-                    <html lang="en">
-                      <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <title>Auth</title>
-                      </head>
-                      <body>
-                        <div style="text-align: center; font-size: 20px; font-weight: bold;">
-                          <br>Auth Success! Redirecting...<br>
-                          <script type="text/javascript">
-                            function closeWindow() {
-                              console.log('closeWindow');
-                              try {
-                                localStorage.setItem('auth_success', 'true');
-                                localStorage.setItem('unionid', ${userInfo.unionid});
-                              } catch(e) {
-                                console.log(e);
-                              }
-                              window.location.href = '${process.env.SERVER_URL}/user';
-                            }
-                            closeWindow();
-                          </script>
-                          <button style="text-align: center; width: 40%; height: 40px; font-size: 20px; background-color:rgb(69, 90, 212); color: #ffffff; margin: 20px; border: none; border-radius: 10px;"
-                            onclick="closeWindow()">
-                            Click to Close</button>
-                          <br>
-                        </div>
-                      </body>
-                    </html>`
+                    response = { userInfo: userInfo };
                 }
             }
             res.send(response || 'Auth Failed');
