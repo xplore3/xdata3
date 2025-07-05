@@ -358,10 +358,11 @@ export class WechatHandler {
                         let firstText = firstMsg.text.content;
                         const userId = firstMsg.external_userid;
                         // Test for external_userid
-                        let userInfo = await this.getExternalUserDetail(userId);
+                        //let userInfo = await this.getExternalUserDetail(userId);
+                        //console.log(userInfo);
+                        let userInfo = await this.getExternalContract(userId);
                         console.log(userInfo);
-                        userInfo = await this.getExternalContract(userId);
-                        console.log(userInfo);
+                        const unionid = userInfo?.external_contact?.unionid || userInfo?.external_contact?.UnionId;
 
                         // Check If Menu
                         if (await this.checkCommandMenu(firstText, userId, decryptedXml.xml.OpenKfId)) {
@@ -412,7 +413,7 @@ export class WechatHandler {
                                     decryptedXml.xml.OpenKfId, immResp);
                             }
                             const questionAfter = await this.generateResponseByData3(
-                                runtime, userId, firstText, fromOptions);
+                                runtime, userId, unionid, firstText, fromOptions);
                             await this.sendMessage(userId,
                                 decryptedXml.xml.OpenKfId, questionAfter);
                         }
@@ -541,7 +542,7 @@ export class WechatHandler {
         return optionIndex;
     }
 
-    async generateResponseByData3(runtime: IAgentRuntime, userId: string, input: string, fromOptions: boolean) {
+    async generateResponseByData3(runtime: IAgentRuntime, userId: string, unionid: string, input: string, fromOptions: boolean) {
         try {
             /*await handleProtocols(runtime, firstMsg.text.content).then(async (resStr) => {
                 console.log(resStr);
@@ -576,7 +577,7 @@ export class WechatHandler {
                     },
                     data: {
                         taskId,
-                        userId,
+                        userId: unionid,
                         text: input,
                         taskWaitMode: true,
                         fromOptions
@@ -628,7 +629,7 @@ export class WechatHandler {
                 },
                 data: {
                     taskId,
-                    userId,
+                    userId: unionid,
                     text: input,
                     taskWaitMode: true,
                 }
@@ -676,7 +677,7 @@ export class WechatHandler {
         try {
             return await generateText({
                 runtime,
-                context: await this.client.composePrompt(runtime, input, stringToUuid(userId)),
+                context: await this.client.composePrompt(runtime, input, stringToUuid(unionid)),
                 modelClass: ModelClass.SMALL,
             });
         }
