@@ -121,6 +121,7 @@ export class RoutineController {
                 const taskId = content.intention?.taskId || "";
                 const response = {
                     process_result: ROUNTINE_QUICK_RESPONSE,
+                    option_description: '',
                     taskId: taskId,
                 }
                 if (option === ROUNTINE_OPTION_POSITIONING_ANALYSIS) {
