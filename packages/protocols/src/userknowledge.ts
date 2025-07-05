@@ -149,6 +149,21 @@ export class UserKnowledge {
     return `[${intentions.join(", ")}]`;
   }
 
+  // Get The Second Level User Intentions By UserId
+  static getEvaluationIntention(userId: UUID) {
+    const intentions = [
+      '1. 根据达人内容和互动质量，推演评估达人的合作优先级',
+      '2. 剖析达人近10条内容类型分布（种草/教程/测评/生活Vlog）',
+      '3. 阐释标题关键词与话题倾向（情绪型？功能型？口语化？）',
+      '4. 透视图文风格（是否注重视觉 / 使用滤镜统一 / 有生活感等等）',
+      '5. 分析是否推广过与我的产品相似的品牌/内容',
+      '6. 剖析达人是否存在“点赞高评论低”的刷赞嫌疑',
+      '7. 根据我的产品生成打招呼的内容，口吻自然、轻松、不带强推感',
+      '8. 根据我的产品和预算情况【****】生成打招呼的内容'
+    ];
+    return `[${intentions.join(", ")}]`;
+  }
+
   // Get User Intentions By UserId
   static getUserIntentionExamples(userId: UUID) {
     const intentionNote = [

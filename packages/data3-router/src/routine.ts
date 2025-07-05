@@ -15,6 +15,7 @@ import {
     UserKnowledge,
 } from "data3-protocols";
 
+const ROUNTINE_OPTION_POSITIONING_ANALYSIS = 'positioning_analysis';
 const ROUNTINE_OPTION_TODAY_POST = 'today_posts';
 const ROUNTINE_OPTION_HOT_POST = 'hot_posts';
 const ROUNTINE_OPTION_SEARCH_KOC = 'search_koc';
@@ -115,7 +116,24 @@ export class RoutineController {
                 });
 
                 let responseStr = null;
-                if (option === ROUNTINE_OPTION_TODAY_POST) {
+                if (option === ROUNTINE_OPTION_POSITIONING_ANALYSIS) {
+                    responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_POSITIONING_ANALYSIS + userId);
+                    if (!responseStr) {
+                        responseStr = await RountineHandler.handlePositioningAnalysis(runtime, memory);
+                        await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_POSITIONING_ANALYSIS + userId, responseStr);
+                    }
+                    else {
+                        setTimeout(async () => {
+                            try {
+                                responseStr = await RountineHandler.handlePositioningAnalysis(runtime, memory);
+                                await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_POSITIONING_ANALYSIS + userId, responseStr);
+                            } catch (err) {
+                                console.error('Background error ', err);
+                            }
+                        }, 10);
+                    }
+                }
+                else if (option === ROUNTINE_OPTION_TODAY_POST) {
                     responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_TODAY_POST + userId);
                     if (!responseStr) {
                         responseStr = await RountineHandler.handleTodayPosts(runtime, memory);
