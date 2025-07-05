@@ -116,7 +116,7 @@ export class RountineHandler {
         }
         api2.query_params = execParam.query_params;
         const hotsCount = 30;
-        const hotsResult = await ApiExecution.executeApi(runtime, message, api2, hotsCount);
+        const hotsResult = await ApiExecution.executeApiChainLoop(runtime, message, api2, hotsCount);
         await TaskHelper.setTaskStatus(runtime, taskId, `获取热门信息${hotsResult.length}篇`);
 
         const userProfile = await UserKnowledge.getUserKnowledge(runtime, message.userId);
