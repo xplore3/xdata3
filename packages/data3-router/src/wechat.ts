@@ -34,6 +34,9 @@ export class WechatHandler {
     cursor: string = null;
     userId: string = null;
 
+    weixinAccessToken: string = null;
+    openid: string = null;
+
     private async readFromCache<T>(runtime: IAgentRuntime, key: string): Promise<T | null> {
         const cached = await runtime.cacheManager.get<T>(key);
         return cached;
@@ -254,6 +257,40 @@ export class WechatHandler {
         }
     }
 
+    async getWeixinAccessToken(code: string) {
+        const res = await axios.get('https://api.weixin.qq.com/sns/oauth2/access_token', {
+          params: {
+            appid: process.env.WECHAT_APP_ID,
+            secret: process.env.WECHAT_APP_SECRET,
+            code: code,
+            grant_type: 'authorization_code'
+          }
+        })
+
+        if (res.data.errcode !== 0) {
+          throw new Error(`Token get failed: ${res.data.errmsg}`);
+        }
+
+        this.weixinAccessToken = res.data.access_token;
+        this.openid = res.data.openid;
+        return this.weixinAccessToken;
+    }
+
+    async getWeixinUserInfo(accessToken: string, openid: string) {
+        const res = await axios.get('https://api.weixin.qq.com/sns/userinfo', {
+          params: {
+            access_token: accessToken,
+            openid: openid
+          }
+        })
+
+        if (res.data.errcode !== 0) {
+          throw new Error(`Token get failed: ${res.data.errmsg}`);
+        }
+
+        console.log("getWeixinUserInfo " + res.data);
+    }
+
     async handleWecomAuth(req: express.Request, res: express.Response) {
         console.log("handleWecomAuth");
         console.log(req.query);
@@ -263,7 +300,9 @@ export class WechatHandler {
             if (code) {
                 const runtime = this.getAgentId(req, res);
                 if (runtime) {
-                    const userInfo = await this.getExternalUserBase(runtime, code as string);
+                    //const userInfo = await this.getExternalUserBase(runtime, code as string);
+                    const accessToken = await this.getWeixinAccessToken(code as string);
+                    const userInfo = await this.getWeixinUserInfo(accessToken, this.openid);
                     console.log(userInfo);
                 }
             }
