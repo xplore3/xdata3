@@ -116,6 +116,7 @@ export class RoutineController {
                 });
 
                 let responseStr = null;
+                const taskId = content.intention?.taskId || "";
                 if (option === ROUNTINE_OPTION_POSITIONING_ANALYSIS) {
                     responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_POSITIONING_ANALYSIS + userId);
                     if (!responseStr) {
@@ -123,8 +124,11 @@ export class RoutineController {
                         await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_POSITIONING_ANALYSIS + userId, responseStr);
                     }
                     else {
+                        await TaskHelper.setTaskStatus(runtime, taskId, responseStr, true);
+                        await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_POSITIONING_ANALYSIS + userId, '');
                         setTimeout(async () => {
                             try {
+                                memory.content.intention.taskId = TaskHelper.generateTaskId();
                                 responseStr = await RountineHandler.handlePositioningAnalysis(runtime, memory);
                                 await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_POSITIONING_ANALYSIS + userId, responseStr);
                             } catch (err) {
@@ -140,8 +144,11 @@ export class RoutineController {
                         await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_TODAY_POST + userId, responseStr);
                     }
                     else {
+                        await TaskHelper.setTaskStatus(runtime, taskId, responseStr, true);
+                        await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_TODAY_POST + userId, '');
                         setTimeout(async () => {
                             try {
+                                memory.content.intention.taskId = TaskHelper.generateTaskId();
                                 responseStr = await RountineHandler.handleTodayPosts(runtime, memory);
                                 await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_TODAY_POST + userId, responseStr);
                             } catch (err) {
@@ -157,8 +164,11 @@ export class RoutineController {
                         await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_HOT_POST + userId, responseStr);
                     }
                     else {
+                        await TaskHelper.setTaskStatus(runtime, taskId, responseStr, true);
+                        await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_HOT_POST + userId, '');
                         setTimeout(async () => {
                             try {
+                                memory.content.intention.taskId = TaskHelper.generateTaskId();
                                 responseStr = await RountineHandler.handleHotPosts(runtime, memory);
                                 await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_HOT_POST + userId, responseStr);
                             } catch (err) {
@@ -174,8 +184,11 @@ export class RoutineController {
                         await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_SEARCH_KOC + userId, responseStr);
                     }
                     else {
+                        await TaskHelper.setTaskStatus(runtime, taskId, responseStr, true);
+                        await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_SEARCH_KOC + userId, '');
                         setTimeout(async () => {
                             try {
+                                memory.content.intention.taskId = TaskHelper.generateTaskId();
                                 responseStr = await RountineHandler.handleSearchKoc(runtime, memory);
                                 await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_SEARCH_KOC + userId, responseStr);
                             } catch (err) {
@@ -191,8 +204,11 @@ export class RoutineController {
                         await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_TREND_PRIDICTION + userId, responseStr);
                     }
                     else {
+                        await TaskHelper.setTaskStatus(runtime, taskId, responseStr, true);
+                        await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_TREND_PRIDICTION + userId, '');
                         setTimeout(async () => {
                             try {
+                                memory.content.intention.taskId = TaskHelper.generateTaskId();
                                 responseStr = await RountineHandler.handleTrendPrediction(runtime, memory);
                                 await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_TREND_PRIDICTION + userId, responseStr);
                             } catch (err) {
