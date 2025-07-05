@@ -69,7 +69,7 @@ export class PromptController {
         const runtime = this.getAgentId(req, res);
         if (runtime) {
             try {
-                const userId = stringToUuid(req.body.userId ?? "user");
+                const userId = UserKnowledge.getUserIdFromRequest(req.body?.userId);
                 await UserKnowledge.setUserKnowledge(runtime, userId, req.body.knowledges);
                 /*for (const item of req.body.knowledges) {
                     await knowledge.set(runtime, {
@@ -83,6 +83,22 @@ export class PromptController {
                 res.send('success');
             } catch (err) {
                 console.error('[PromptController] Error handling addknowledge:', err)
+                res.send('fail')
+            }
+        }
+    }
+
+    async handleReadKnowledge(req: express.Request, res: express.Response) {
+        console.log("handleReadKnowledge");
+        console.log(req.query);
+        const runtime = this.getAgentId(req, res);
+        if (runtime) {
+            try {
+                const userId = UserKnowledge.getUserIdFromRequest(req.body?.userId);
+                const knowledges = await UserKnowledge.getUserKnowledge(runtime, userId);
+                res.send(JSON.stringify(knowledges));
+            } catch (err) {
+                console.error('[PromptController] Error handling readknowledge:', err)
                 res.send('fail')
             }
         }

@@ -111,6 +111,10 @@ export class UserKnowledge {
     return "";
   }
 
+  static getUserIdFromRequest(userId: string): UUID {
+    return stringToUuid(userId ?? "user");
+  }
+
   // Get The First Level User Intentions By UserId
   static getGenerateIntention(userId: UUID) {
     const intentions = [

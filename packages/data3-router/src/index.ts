@@ -27,6 +27,7 @@ import { mdToPdf } from "md-to-pdf";
 import {
     IntentionHandler,
     TaskHelper,
+    UserKnowledge,
     getProtocolArray,
     updateProtocolArray,
     handleProtocolsForPrompt,
@@ -359,7 +360,7 @@ export class DirectClient {
                 }
                 const agentId = req.params.agentId;
                 const username = req.body.userId ?? "user";
-                const userId = stringToUuid(username);
+                const userId = UserKnowledge.getUserIdFromRequest(req.body?.userId);;
                 const roomId = stringToUuid("default-data-room-" + username);
                 const fromOptions = req.body.fromOptions;
                 const taskWaitMode = req.body.taskWaitMode;
@@ -548,7 +549,7 @@ export class DirectClient {
                 // const roomId = stringToUuid(
                 //    req.body.roomId ?? "default-room-" + agentId
                 // );
-                const userId = stringToUuid(username);
+                const userId = UserKnowledge.getUserIdFromRequest(username);
                 const roomId = stringToUuid("default-data-room-" + username);
 
                 let runtime = this.agents.get(agentId);
@@ -744,7 +745,7 @@ export class DirectClient {
             async (req: express.Request, res: express.Response) => {
                 const agentId = req.params.agentId;
                 const username = req.body.userId ?? "user";
-                const userId = stringToUuid(username);
+                const userId = UserKnowledge.getUserIdFromRequest(req.body?.userId);;
                 const roomId = stringToUuid("default-data-room-" + username);
 
                 let runtime = this.agents.get(agentId);
@@ -1202,6 +1203,12 @@ export class DirectClient {
             "/:agentId/add_knowledge",
             async (req: express.Request, res: express.Response) => {
                 await templateHandler.handleAddKnowledge(req, res);
+            }
+        );
+        this.app.get(
+            "/:agentId/read_knowledge",
+            async (req: express.Request, res: express.Response) => {
+                await templateHandler.handleReadKnowledge(req, res);
             }
         );
         this.app.post(
