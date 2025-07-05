@@ -265,10 +265,11 @@ export class WechatHandler {
             code: code,
             grant_type: 'authorization_code'
           }
-        })
+        });
+        //console.log(res);
 
-        if (res.data.errcode !== 0) {
-          throw new Error(`Token get failed: ${res.data.errmsg}`);
+        if (res.status !== 0) {
+          throw new Error(`Token get failed: ${res.statusText}`);
         }
 
         this.weixinAccessToken = res.data.access_token;
@@ -283,9 +284,10 @@ export class WechatHandler {
             openid: openid
           }
         })
+        //console.log(res);
 
-        if (res.data.errcode !== 0) {
-          throw new Error(`Token get failed: ${res.data.errmsg}`);
+        if (res.status !== 0) {
+          throw new Error(`UserInfo get failed: ${res.statusText}`);
         }
 
         console.log("getWeixinUserInfo " + res.data);
