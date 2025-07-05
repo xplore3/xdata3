@@ -268,7 +268,7 @@ export class WechatHandler {
         });
         //console.log(res);
 
-        if (res.status !== 0) {
+        if (res.status !== 200) {
           throw new Error(`Token get failed: ${res.statusText}`);
         }
 
@@ -286,7 +286,7 @@ export class WechatHandler {
         })
         //console.log(res);
 
-        if (res.status !== 0) {
+        if (res.status !== 200) {
           throw new Error(`UserInfo get failed: ${res.statusText}`);
         }
 
