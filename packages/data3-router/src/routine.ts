@@ -21,7 +21,7 @@ const ROUNTINE_OPTION_HOT_POST = 'hot_posts';
 const ROUNTINE_OPTION_SEARCH_KOC = 'search_koc';
 const ROUNTINE_OPTION_TREND_PRIDICTION = 'trend_prediction';
 
-const ROUNTINE_QUICK_RESPONSE = '收到啦，任务已开始执行，预计很快就会有结果，请稍等。';
+const ROUNTINE_QUICK_RESPONSE = '收到啦，任务已开始执行，预计很快就会有结果，请稍等~';
 
 export class RoutineController {
     constructor(private client: DirectClient) {}
@@ -122,7 +122,11 @@ export class RoutineController {
                 if (option === ROUNTINE_OPTION_POSITIONING_ANALYSIS) {
                     responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_POSITIONING_ANALYSIS + userId);
                     if (!responseStr) {
-                        await TaskHelper.setTaskStatus(runtime, taskId, ROUNTINE_QUICK_RESPONSE);
+                        const response = {
+                            process_result: ROUNTINE_QUICK_RESPONSE,
+                            taskId: taskId,
+                        }
+                        await TaskHelper.setTaskStatus(runtime, taskId, JSON.stringify(response));
                         responseStr = await RountineHandler.handlePositioningAnalysis(runtime, memory);
                         await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_POSITIONING_ANALYSIS + userId, responseStr);
                     }
@@ -144,7 +148,11 @@ export class RoutineController {
                 else if (option === ROUNTINE_OPTION_TODAY_POST) {
                     responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_TODAY_POST + userId);
                     if (!responseStr) {
-                        await TaskHelper.setTaskStatus(runtime, taskId, ROUNTINE_QUICK_RESPONSE);
+                        const response = {
+                            process_result: ROUNTINE_QUICK_RESPONSE,
+                            taskId: taskId,
+                        }
+                        await TaskHelper.setTaskStatus(runtime, taskId, JSON.stringify(response));
                         responseStr = await RountineHandler.handleTodayPosts(runtime, memory);
                         await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_TODAY_POST + userId, responseStr);
                     }
@@ -166,7 +174,11 @@ export class RoutineController {
                 else if (option === ROUNTINE_OPTION_HOT_POST) {
                     responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_HOT_POST + userId);
                     if (!responseStr) {
-                        await TaskHelper.setTaskStatus(runtime, taskId, ROUNTINE_QUICK_RESPONSE);
+                        const response = {
+                            process_result: ROUNTINE_QUICK_RESPONSE,
+                            taskId: taskId,
+                        }
+                        await TaskHelper.setTaskStatus(runtime, taskId, JSON.stringify(response));
                         responseStr = await RountineHandler.handleHotPosts(runtime, memory);
                         await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_HOT_POST + userId, responseStr);
                     }
@@ -188,7 +200,11 @@ export class RoutineController {
                 else if (option === ROUNTINE_OPTION_SEARCH_KOC) {
                     responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_SEARCH_KOC + userId);
                     if (!responseStr) {
-                        await TaskHelper.setTaskStatus(runtime, taskId, ROUNTINE_QUICK_RESPONSE);
+                        const response = {
+                            process_result: ROUNTINE_QUICK_RESPONSE,
+                            taskId: taskId,
+                        }
+                        await TaskHelper.setTaskStatus(runtime, taskId, JSON.stringify(response));
                         responseStr = await RountineHandler.handleSearchKoc(runtime, memory);
                         await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_SEARCH_KOC + userId, responseStr);
                     }
@@ -210,7 +226,11 @@ export class RoutineController {
                 else if (option === ROUNTINE_OPTION_TREND_PRIDICTION) {
                     responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_TREND_PRIDICTION + userId);
                     if (!responseStr) {
-                        await TaskHelper.setTaskStatus(runtime, taskId, ROUNTINE_QUICK_RESPONSE);
+                        const response = {
+                            process_result: ROUNTINE_QUICK_RESPONSE,
+                            taskId: taskId,
+                        }
+                        await TaskHelper.setTaskStatus(runtime, taskId, JSON.stringify(response));
                         responseStr = await RountineHandler.handleTrendPrediction(runtime, memory);
                         await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_TREND_PRIDICTION + userId, responseStr);
                     }
