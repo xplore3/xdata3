@@ -119,13 +119,13 @@ export class RoutineController {
 
                 let responseStr = null;
                 const taskId = content.intention?.taskId || "";
+                const response = {
+                    process_result: ROUNTINE_QUICK_RESPONSE,
+                    taskId: taskId,
+                }
                 if (option === ROUNTINE_OPTION_POSITIONING_ANALYSIS) {
                     responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_POSITIONING_ANALYSIS + userId);
                     if (!responseStr) {
-                        const response = {
-                            process_result: ROUNTINE_QUICK_RESPONSE,
-                            taskId: taskId,
-                        }
                         await TaskHelper.setTaskStatus(runtime, taskId, JSON.stringify(response));
                         responseStr = await RountineHandler.handlePositioningAnalysis(runtime, memory);
                         await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_POSITIONING_ANALYSIS + userId, responseStr);
@@ -142,16 +142,12 @@ export class RoutineController {
                                 console.error('Background error ', err);
                             }
                         }, 10);
-                        responseStr = ROUNTINE_QUICK_RESPONSE;
+                        responseStr = JSON.stringify(response);
                     }
                 }
                 else if (option === ROUNTINE_OPTION_TODAY_POST) {
                     responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_TODAY_POST + userId);
                     if (!responseStr) {
-                        const response = {
-                            process_result: ROUNTINE_QUICK_RESPONSE,
-                            taskId: taskId,
-                        }
                         await TaskHelper.setTaskStatus(runtime, taskId, JSON.stringify(response));
                         responseStr = await RountineHandler.handleTodayPosts(runtime, memory);
                         await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_TODAY_POST + userId, responseStr);
@@ -168,16 +164,12 @@ export class RoutineController {
                                 console.error('Background error ', err);
                             }
                         }, 10);
-                        responseStr = ROUNTINE_QUICK_RESPONSE;
+                        responseStr = JSON.stringify(response);
                     }
                 }
                 else if (option === ROUNTINE_OPTION_HOT_POST) {
                     responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_HOT_POST + userId);
                     if (!responseStr) {
-                        const response = {
-                            process_result: ROUNTINE_QUICK_RESPONSE,
-                            taskId: taskId,
-                        }
                         await TaskHelper.setTaskStatus(runtime, taskId, JSON.stringify(response));
                         responseStr = await RountineHandler.handleHotPosts(runtime, memory);
                         await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_HOT_POST + userId, responseStr);
@@ -194,16 +186,12 @@ export class RoutineController {
                                 console.error('Background error ', err);
                             }
                         }, 10);
-                        responseStr = ROUNTINE_QUICK_RESPONSE;
+                        responseStr = JSON.stringify(response);
                     }
                 }
                 else if (option === ROUNTINE_OPTION_SEARCH_KOC) {
                     responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_SEARCH_KOC + userId);
                     if (!responseStr) {
-                        const response = {
-                            process_result: ROUNTINE_QUICK_RESPONSE,
-                            taskId: taskId,
-                        }
                         await TaskHelper.setTaskStatus(runtime, taskId, JSON.stringify(response));
                         responseStr = await RountineHandler.handleSearchKoc(runtime, memory);
                         await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_SEARCH_KOC + userId, responseStr);
@@ -220,16 +208,12 @@ export class RoutineController {
                                 console.error('Background error ', err);
                             }
                         }, 10);
-                        responseStr = ROUNTINE_QUICK_RESPONSE;
+                        responseStr = JSON.stringify(response);
                     }
                 }
                 else if (option === ROUNTINE_OPTION_TREND_PRIDICTION) {
                     responseStr = await UserKnowledge.getUserRoutineCache(runtime, ROUNTINE_OPTION_TREND_PRIDICTION + userId);
                     if (!responseStr) {
-                        const response = {
-                            process_result: ROUNTINE_QUICK_RESPONSE,
-                            taskId: taskId,
-                        }
                         await TaskHelper.setTaskStatus(runtime, taskId, JSON.stringify(response));
                         responseStr = await RountineHandler.handleTrendPrediction(runtime, memory);
                         await UserKnowledge.setUserRoutineCache(runtime, ROUNTINE_OPTION_TREND_PRIDICTION + userId, responseStr);
@@ -246,7 +230,7 @@ export class RoutineController {
                                 console.error('Background error ', err);
                             }
                         }, 10);
-                        responseStr = ROUNTINE_QUICK_RESPONSE;
+                        responseStr = JSON.stringify(response);
                     }
                 }
                 else {
